@@ -72,6 +72,7 @@
     <Compile Include="Harmony\AssemblyInfo.cs" />
     <Compile Include="Harmony\Init.cs" />
     <Compile Include="Harmony\Patches.cs" />
+    <Compile Include="CaveGenerator\FastNoiseLite.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
