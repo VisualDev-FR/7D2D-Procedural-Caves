@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xml>
+	<Name value="ProceduralCaves" />
+	<DisplayName value="Procedural Caves Generator"/>
+	<Description value="Awesome caves generator!" />
+	<Author value="VisualDev-FR" />
+	<Version value="0.0.1" />
+	<Website value="" />
+</xml>
