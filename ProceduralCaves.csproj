@@ -70,14 +70,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Harmony\AssemblyInfo.cs" />
+    <Compile Include="Harmony\Init.cs" />
     <Compile Include="Harmony\Patches.cs" />
   </ItemGroup>
   <ItemGroup />
-  <ItemGroup>
-    <Content Include="Config\blocks.xml" />
-    <Content Include="ModInfo.xml" />
-    <Content Include="Readme.txt" />
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
