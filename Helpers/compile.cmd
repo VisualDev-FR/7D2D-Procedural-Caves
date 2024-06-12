@@ -13,7 +13,9 @@ if exist ".\%NAME%" rmdir ".\%NAME%" /s /q
 MKDIR .\%NAME%
 
 xcopy *.dll %NAME%\ > nul
-xcopy *.md %NAME%\ > nul
+xcopy README.md %NAME%\ > nul
+xcopy Caves\Stamps %NAME%\Caves\Stamps\ > nul
+xcopy Config %NAME%\Config\ > nul
 xcopy ModInfo.xml %NAME%\ > nul
 
 7z.exe a "%NAME%.zip" %NAME% > nul

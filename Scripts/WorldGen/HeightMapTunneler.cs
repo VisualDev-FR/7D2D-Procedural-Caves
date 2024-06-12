@@ -291,10 +291,10 @@ public static class HeightMapTunneler
         // {
         //     for (var chunkZ = 0; chunkZ < 16; chunkZ++)
         //     {
-        //         
+        //
         //         var height = chunk.GetTerrainHeight(chunkX, chunkZ);
         //         var targetBlock = chunk.GetBlock(chunkX, height, chunkZ);
-        //         
+        //
         //         // if ( height > highestPoint )
         //         //     highestPoint = height;
         //     }

@@ -138,9 +138,7 @@ public static class SphereCache
                     caveEntrances.Add(new Vector3i(entranceX, 1, entranceZ));
                     display = "Cave Spawn Area: " + randomChunkPosition + " Entrance: " + new Vector3i(entranceX, 0, entranceZ);
                     AdvLogging.DisplayLog(AdvFeatureClass, display);
-
-
-
+                    Log.Out(display);
                 }
 
                 for (var cX = 0; cX < caveRadius; cX++)

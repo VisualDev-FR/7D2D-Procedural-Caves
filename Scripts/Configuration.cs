@@ -35,6 +35,7 @@ public static class Configuration
 
         return true;
     }
+
     public static bool CheckFeatureStatus(string strClass, string strFeature)
     {
         var ConfigurationFeatureBlock = Block.GetBlockValue("ConfigFeatureBlock");

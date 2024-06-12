@@ -9,17 +9,17 @@ public static class LegacyCaveSystem
     private static FastNoise fastNoise;
 
     // Special air that has stability
-    private static BlockValue caveAir = new BlockValue((uint) Block.GetBlockByName("air").blockID);
-    private static BlockValue pillarBlock = new BlockValue((uint) Block.GetBlockByName("terrDesertGround").blockID);
+    private static BlockValue caveAir = new BlockValue((uint)Block.GetBlockByName("air").blockID);
+    private static BlockValue pillarBlock = new BlockValue((uint)Block.GetBlockByName("terrDesertGround").blockID);
 
-    private static readonly BlockValue bottomCaveDecoration = new BlockValue((uint) Block.GetBlockByName("cntCaveFloorRandomLootHelper").blockID);
+    private static readonly BlockValue bottomCaveDecoration = new BlockValue((uint)Block.GetBlockByName("caveBlock02").blockID);
 
-    private static readonly BlockValue bottomDeepCaveDecoration = new BlockValue((uint) Block.GetBlockByName("cntDeepCaveFloorRandomLootHelper").blockID);
+    private static readonly BlockValue bottomDeepCaveDecoration = new BlockValue((uint)Block.GetBlockByName("caveBlock02").blockID);
 
-    private static readonly BlockValue topCaveDecoration = new BlockValue((uint) Block.GetBlockByName("cntCaveCeilingRandomLootHelper").blockID);
+    private static readonly BlockValue topCaveDecoration = new BlockValue((uint)Block.GetBlockByName("caveBlock02").blockID);
     private static int _deepCaveThreshold = 30;
 
-    private static List<int> _skipRanges = new List<int>() {7, 8};
+    private static List<int> _skipRanges = new List<int>() { 7, 8 };
 
     public static void AddCaveToChunk(Chunk chunk)
     {
@@ -33,12 +33,12 @@ public static class LegacyCaveSystem
         var maxLevels = int.Parse(Configuration.GetPropertyValue(AdvFeatureClass, "MaxCaveLevels"));
         _deepCaveThreshold = int.Parse(Configuration.GetPropertyValue(AdvFeatureClass, "DeepCaveThreshold"));
         var startCaveThreshold = int.Parse(Configuration.GetPropertyValue(AdvFeatureClass, "StartCaveThreshold"));
-        
+
         // Don't generate a cave system if the threshold is higher than the terrain height.
         var minStartCaveThreshold = int.Parse(Configuration.GetPropertyValue(AdvFeatureClass, "MinStartCaveThreshold"));
         if (minStartCaveThreshold != -1)
         {
-            if ( minStartCaveThreshold > tHeight)
+            if (minStartCaveThreshold > tHeight)
                 return;
         }
 
@@ -83,7 +83,7 @@ public static class LegacyCaveSystem
         var depthFromTerrain = startCaveThreshold;
         var currentLevel = 0;
 
-        while (depthFromTerrain < tHeight )
+        while (depthFromTerrain < tHeight)
         {
             AddLevel(chunk, fastNoise, depthFromTerrain);
             depthFromTerrain += 10;
@@ -190,7 +190,7 @@ public static class LegacyCaveSystem
         }
     }
 
-// Changes the blocks. This works better when doing the cave openings, vs the prefab
+    // Changes the blocks. This works better when doing the cave openings, vs the prefab
     private static void PlaceAround(Chunk chunk, Vector3i position, bool isPillar = false)
     {
         PlaceBlock(chunk, position, isPillar);
@@ -206,7 +206,7 @@ public static class LegacyCaveSystem
         PlaceBlock(chunk, position + Vector3i.back + Vector3i.left, isPillar);
     }
 
-// Builds a cave area section
+    // Builds a cave area section
     private static void AddLevel(Chunk chunk, FastNoise fastNoise, int DepthFromTerrain = 10)
     {
         var chunkPos = chunk.GetWorldPos();
@@ -261,7 +261,7 @@ public static class LegacyCaveSystem
                               " Terrain Heigth: " + tHeight + " Depth From Terrain: " + DepthFromTerrain;
                 AdvLogging.DisplayLog(AdvFeatureClass, display);
                 if (!(Math.Abs(noise) < caveThresholdXZ)) continue;
-                
+
                 // Drop a level
                 if (Math.Abs(noise2) < caveThresholdY)
                     DepthFromTerrain++;
@@ -281,7 +281,7 @@ public static class LegacyCaveSystem
         }
     }
 
-// Helper method is check the prefab decorator first to see if its there, then create it if it does not exist.
+    // Helper method is check the prefab decorator first to see if its there, then create it if it does not exist.
     public static Prefab FindOrCreatePrefab(string strPOIname)
     {
         // Check if the prefab already exists.
@@ -303,6 +303,9 @@ public static class LegacyCaveSystem
 
     public static void AddDecorationsToCave(Chunk chunk)
     {
+        if ("a,".Split(",")[0] == "a")
+            return;
+
         if (chunk == null)
             return;
 
@@ -412,7 +415,7 @@ public static class LegacyCaveSystem
             // Grab a random range slightly smaller than the chunk. This is to help pad them away from each other.
             var x = GameManager.Instance.World.GetGameRandom().RandomRange(0, 16);
             var z = GameManager.Instance.World.GetGameRandom().RandomRange(0, 16);
-            var height = (int) chunk.GetHeight(x, z);
+            var height = (int)chunk.GetHeight(x, z);
             if (height < 20)
                 // Chunk is too shallow here.
                 continue;

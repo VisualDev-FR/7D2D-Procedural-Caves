@@ -81,7 +81,7 @@
     <Compile Include="Harmony\Patches.cs" />
 
     <!-- WorldGen/Utils -->
-    <Compile Include="Scripts\WorldGen\Utilities\FastNoiseLite.cs" />
+    <!-- <Compile Include="Scripts\WorldGen\Utilities\FastNoiseLite.cs" /> -->
     <Compile Include="Scripts\WorldGen\Utilities\FastNoise.cs" />
     <Compile Include="Scripts\WorldGen\Utilities\FastNoiseSIMD.cs" />
     <Compile Include="Scripts\WorldGen\Utilities\MapGenerator.cs" />
@@ -92,6 +92,7 @@
     <Compile Include="Scripts\SphereCache.cs" />
     <Compile Include="Scripts\AdvLogging.cs" />
     <Compile Include="Scripts\WorldGen\HeightMapTunneler.cs" />
+    <Compile Include="Scripts\WorldGen\SCoreTunneler.cs" />
     <Compile Include="Scripts\WorldGen\LegacyCaveTunneler.cs" />
     <Compile Include="Scripts\WorldGen\SebastianCaveTunneler.cs" />
     <Compile Include="Scripts\WorldGen\WinterProjectPrefab.cs" />
