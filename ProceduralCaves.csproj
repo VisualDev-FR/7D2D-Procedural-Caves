@@ -67,12 +67,36 @@
       <HintPath>$(PATH_7D2D)\7DaysToDie_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>$(PATH_7D2D)\7DaysToDie_Data\Managed\mscorlib.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Harmony\AssemblyInfo.cs" />
+    <!-- Assembly info -->
+    <Compile Include="Properties\AssemblyInfo.cs" />
+
+    <!-- Harmony -->
     <Compile Include="Harmony\Init.cs" />
     <Compile Include="Harmony\Patches.cs" />
-    <Compile Include="CaveGenerator\FastNoiseLite.cs" />
+
+    <!-- WorldGen/Utils -->
+    <Compile Include="Scripts\WorldGen\Utilities\FastNoiseLite.cs" />
+    <Compile Include="Scripts\WorldGen\Utilities\FastNoise.cs" />
+    <Compile Include="Scripts\WorldGen\Utilities\FastNoiseSIMD.cs" />
+    <Compile Include="Scripts\WorldGen\Utilities\MapGenerator.cs" />
+    <Compile Include="Scripts\WorldGen\Utilities\PathingWormTunneler.cs" />
+
+    <!-- WorldGen -->
+    <Compile Include="Scripts\Configuration.cs" />
+    <Compile Include="Scripts\SphereCache.cs" />
+    <Compile Include="Scripts\AdvLogging.cs" />
+    <Compile Include="Scripts\WorldGen\HeightMapTunneler.cs" />
+    <Compile Include="Scripts\WorldGen\LegacyCaveTunneler.cs" />
+    <Compile Include="Scripts\WorldGen\SebastianCaveTunneler.cs" />
+    <Compile Include="Scripts\WorldGen\WinterProjectPrefab.cs" />
+
+
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
