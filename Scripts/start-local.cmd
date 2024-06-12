@@ -16,6 +16,6 @@ cd %MOD_PATH%\..
 
 taskkill /IM 7DaysToDie.exe /F >nul 2>&1
 
-start steam://rungameid/251570
+@REM start steam://rungameid/251570
 
 exit /b 0
