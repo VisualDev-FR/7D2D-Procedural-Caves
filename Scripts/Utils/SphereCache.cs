@@ -1,31 +1,34 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
-using WorldGenerationEngineFinal;
 using Random = System.Random;
 
 public static class SphereCache
 {
     public static Dictionary<int, List<Vector3>> PathingCache = new Dictionary<int, List<Vector3>>();
+
     public static Dictionary<int, Vector3i> DoorCache = new Dictionary<int, Vector3i>();
-    public static Dictionary<int, Vector3> LastBlock = new Dictionary<int, Vector3>();
 
     public static Random random = new Random(DateTime.Now.GetHashCode());
 
     public static List<Vector3i> caveChunks = new List<Vector3i>(); //static list somewhere
+
     public static List<Vector3i> caveEntrances = new List<Vector3i>();
 
     public static FastNoise fastNoise;
+
     public static List<string> POIs = new List<string>();
+
     public static List<string> DeepCavePrefabs = new List<string>();
 
     public static List<Vector3i> spawnPoints = new List<Vector3i>(); //static list somewhere
 
     public static HashSet<Vector2> caveMap = new HashSet<Vector2>();
+
     public static Dictionary<int, Entity> LeaderCache = new Dictionary<int, Entity>();
 
     public static Dictionary<int, Vector3i> BreakingBlockCache = new Dictionary<int, Vector3i>();
+
     public static Vector3i[] FindRandomPoints(int count)
     {
         Vector3i _minSize;
@@ -181,7 +184,6 @@ public static class SphereCache
             DoorCache.Remove(EntityID);
     }
 
-
     #region PathingCache
 
     public static bool blDisplayLog = false;
@@ -259,4 +261,5 @@ public static class SphereCache
     }
 
     #endregion
+
 }

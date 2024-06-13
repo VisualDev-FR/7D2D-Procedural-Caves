@@ -44,7 +44,7 @@
 
 				<!-- Determines what level of a noise threshold to drop a cave Block -->
 				<!-- Higher numbers will result in more open caves horizontally -->
-				<property name="CaveThresholdXZ" value="0.20"/>
+				<property name="CaveThresholdXZ" value="0.50"/>
 
 				<!-- Determines what level of a noise threshold to drop down a level on the Y axis, making deeper caves. -->
 				<!-- higher numbers will result in more vertical drops. A lower number, less so. -->
@@ -69,7 +69,7 @@
 				<property name="Octaves" value="1"/>
 				<property name="Lacunarity" value="1"/>
 				<property name="Gain" value="0.5"/>
-				<property name="Frequency" value="0.09"/>
+				<property name="Frequency" value="0.00045"/>
 				<property name="CavePOIs" value="Chiko_SCcave_01,Chiko_SCcave_02,Chiko_SCcave_03,Chiko_SCcave_04,Chiko_SCcave_05,Chiko_SCcave_06,Chiko_SCcave_07" />
 				<property name="DeepCavePrefabs" value="Chiko_SCcave_08,Chiko_SCcave_09,Chiko_SCcave_11,Chiko_SCcave_12,Chiko_SCcave_13,Chiko_SCcave_14" />
 				<!-- removed chiko 10 for investigation -->

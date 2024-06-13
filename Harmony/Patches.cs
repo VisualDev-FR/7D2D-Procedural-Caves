@@ -11,6 +11,7 @@ namespace Harmony
     public class SCoreCaveProject
     {
         private static readonly string AdvFeatureClass = "CaveConfiguration";
+
         private static readonly string Feature = "CaveEnabled";
 
         private static readonly float depth = 30;

@@ -20,4 +20,6 @@ cd "%PATH_7D2D%"
 
 start "" "%PATH_7D2D%\7DaysToDie" -force-d3d11 -disablenativeinput -nogs -noeac
 
+del /Q "%APPDATA%\7DaysToDie\Saves\Navezgane\Caves\Region"
+
 exit /b 0
