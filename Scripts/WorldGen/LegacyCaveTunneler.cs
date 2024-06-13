@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
-using Random = UnityEngine.Random;
 
 public static class LegacyCaveSystem
 {
     private static readonly string AdvFeatureClass = "CaveConfiguration";
+
     private static FastNoise fastNoise;
 
-    // Special air that has stability
     private static BlockValue caveAir = new BlockValue((uint)Block.GetBlockByName("air").blockID);
+
     private static BlockValue pillarBlock = new BlockValue((uint)Block.GetBlockByName("terrDesertGround").blockID);
 
     private static readonly BlockValue bottomCaveDecoration = new BlockValue((uint)Block.GetBlockByName("caveBlock02").blockID);
@@ -17,9 +17,10 @@ public static class LegacyCaveSystem
     private static readonly BlockValue bottomDeepCaveDecoration = new BlockValue((uint)Block.GetBlockByName("caveBlock02").blockID);
 
     private static readonly BlockValue topCaveDecoration = new BlockValue((uint)Block.GetBlockByName("caveBlock02").blockID);
+
     private static int _deepCaveThreshold = 30;
 
-    private static List<int> _skipRanges = new List<int>() { 7, 8 };
+    private static readonly List<int> _skipRanges = new List<int>() { 7, 8 };
 
     public static void AddCaveToChunk(Chunk chunk)
     {
