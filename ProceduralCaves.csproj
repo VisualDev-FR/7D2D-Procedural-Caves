@@ -80,18 +80,16 @@
     <Compile Include="Harmony\Init.cs" />
     <Compile Include="Harmony\Patches.cs" />
 
-    <!-- WorldGen/Utils -->
-    <Compile Include="Scripts\WorldGen\Utilities\FastNoiseLite.cs" />
-    <Compile Include="Scripts\WorldGen\Utilities\FastNoise.cs" />
-    <Compile Include="Scripts\WorldGen\Utilities\FastNoiseSIMD.cs" />
-
     <!-- WorldGen -->
-    <Compile Include="Scripts\Configuration.cs" />
-    <Compile Include="Scripts\SphereCache.cs" />
-    <Compile Include="Scripts\AdvLogging.cs" />
+    <Compile Include="Scripts\WorldGen\FastNoiseLite.cs" />
+    <Compile Include="Scripts\WorldGen\FastNoise.cs" />
     <Compile Include="Scripts\WorldGen\HeightMapTunneler.cs" />
     <Compile Include="Scripts\WorldGen\LegacyCaveTunneler.cs" />
 
+    <!-- Utils -->
+    <Compile Include="Scripts\Utils\Configuration.cs" />
+    <Compile Include="Scripts\Utils\SphereCache.cs" />
+    <Compile Include="Scripts\Utils\AdvLogging.cs" />
 
   </ItemGroup>
   <ItemGroup />
