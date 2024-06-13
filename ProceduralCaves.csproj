@@ -82,7 +82,6 @@
 
     <!-- WorldGen -->
     <Compile Include="Scripts\WorldGen\FastNoiseLite.cs" />
-    <Compile Include="Scripts\WorldGen\FastNoise.cs" />
     <Compile Include="Scripts\WorldGen\HeightMapTunneler.cs" />
     <Compile Include="Scripts\WorldGen\LegacyCaveTunneler.cs" />
 

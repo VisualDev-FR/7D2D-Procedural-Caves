@@ -10,7 +10,7 @@ public static class HeightMapTunneler
     // private static readonly string CavePath = "CavePath";
     // private static readonly string Feature = "CaveEnabled";
 
-    private static FastNoise fastNoise;
+    private static FastNoiseLite fastNoise;
 
     // Special air that has stability
     private static BlockValue caveAir = new BlockValue((uint)Block.GetBlockByName("air").blockID);
@@ -280,7 +280,7 @@ public static class HeightMapTunneler
     }
 
     // Builds a cave area section
-    public static void AddLevel(Chunk chunk, FastNoise fastNoise)
+    public static void AddLevel(Chunk chunk, FastNoiseLite fastNoise)
     {
         var chunkPos = chunk.GetWorldPos();
 

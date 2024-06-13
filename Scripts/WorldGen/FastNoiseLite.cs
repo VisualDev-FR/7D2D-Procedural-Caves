@@ -1824,6 +1824,12 @@ public class FastNoiseLite
 
     // Perlin Noise
 
+    public float SinglePerlin(FNLfloat x, FNLfloat y)
+    {
+        TransformNoiseCoordinate(ref x, ref y);
+        return SinglePerlin(mSeed, x, y);
+    }
+
     private float SinglePerlin(int seed, FNLfloat x, FNLfloat y)
     {
         int x0 = FastFloor(x);

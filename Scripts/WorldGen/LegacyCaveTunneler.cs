@@ -6,7 +6,7 @@ public static class LegacyCaveSystem
 {
     private static readonly string AdvFeatureClass = "CaveConfiguration";
 
-    private static FastNoise fastNoise;
+    private static FastNoiseLite fastNoise;
 
     private static BlockValue caveAir = new BlockValue((uint)Block.GetBlockByName("air").blockID);
 
@@ -26,6 +26,7 @@ public static class LegacyCaveSystem
     {
         if (chunk == null)
             return;
+
         var chunkPos = chunk.GetWorldPos();
 
         // Find middle of chunk for its height
@@ -33,6 +34,7 @@ public static class LegacyCaveSystem
 
         var maxLevels = int.Parse(Configuration.GetPropertyValue(AdvFeatureClass, "MaxCaveLevels"));
         _deepCaveThreshold = int.Parse(Configuration.GetPropertyValue(AdvFeatureClass, "DeepCaveThreshold"));
+
         var startCaveThreshold = int.Parse(Configuration.GetPropertyValue(AdvFeatureClass, "StartCaveThreshold"));
 
         // Don't generate a cave system if the threshold is higher than the terrain height.
@@ -207,8 +209,13 @@ public static class LegacyCaveSystem
         PlaceBlock(chunk, position + Vector3i.back + Vector3i.left, isPillar);
     }
 
+    private static void Logging(string proc_name, string message)
+    {
+        AdvLogging.DisplayLog("LegacyTunneler", proc_name, message);
+    }
+
     // Builds a cave area section
-    private static void AddLevel(Chunk chunk, FastNoise fastNoise, int DepthFromTerrain = 10)
+    private static void AddLevel(Chunk chunk, FastNoiseLite fastNoise, int DepthFromTerrain = 10)
     {
         var chunkPos = chunk.GetWorldPos();
 
@@ -220,8 +227,9 @@ public static class LegacyCaveSystem
         {
             for (var chunkZ = 0; chunkZ < 16; chunkZ++)
             {
-                if (_skipRanges.Contains(chunkX)) continue;
-                if (_skipRanges.Contains(chunkZ)) continue;
+                if (_skipRanges.Contains(chunkX) || _skipRanges.Contains(chunkZ))
+                    continue;
+
                 var worldX = chunkPos.x + chunkX;
                 var worldZ = chunkPos.z + chunkZ;
 
@@ -252,15 +260,17 @@ public static class LegacyCaveSystem
                     continue;
 
                 // used for x and z block checks
-                var noise = fastNoise.GetNoise(chunkX, chunkZ);
+                var noise = 1 - fastNoise.GetNoise(chunkX, chunkZ);
 
                 // used for depth
-                var noise2 = fastNoise.GetPerlin(targetDepth, chunkZ);
+                var noise2 = fastNoise.SinglePerlin(targetDepth, chunkZ);
 
                 var display = "Noise: " + Math.Abs(noise) + " noise2: " + Math.Abs(noise2) + " Chunk Position: " +
                               chunkX + "." + targetDepth + "." + chunkZ + " World Pos: " + worldX + "." + worldZ +
                               " Terrain Heigth: " + tHeight + " Depth From Terrain: " + DepthFromTerrain;
-                AdvLogging.DisplayLog(AdvFeatureClass, display);
+
+                Logging("AddLevel", display);
+
                 if (!(Math.Abs(noise) < caveThresholdXZ)) continue;
 
                 // Drop a level

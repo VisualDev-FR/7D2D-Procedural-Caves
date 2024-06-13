@@ -12,7 +12,7 @@
 					Download FastNoise Preview to get a feel for the map they are generating.
 					https://github.com/Auburns/FastNoise/releases
 				-->
-				<property name="Logging" value="false"/>
+				<property name="Logging" value="true"/>
 				<property name="CaveEnabled" value="true"/>
 				<property name="CavePath" value="@modfolder:/Caves/Stamps/testLegit.png" />
 				<property name="CavePrefab" value="Large" />
@@ -36,11 +36,11 @@
 
 				<!-- RigidMulti, Billow, or FBM-->
 				<!-- Default is RigidMulti-->
-				<property name="FractalType" value="FBM" />
+				<property name="FractalType" value="Ridged" />
 
 				<!-- Cellular, Cubic, CubicFractal, Perlin, PerlinFractal, Simplex, SimplexFractal, Value, ValueFractal, WhiteNoise -->
 				<!-- Default is a SimplexFractal -->
-				<property name="NoiseType" value="SimplexFractal" />
+				<property name="NoiseType" value="OpenSimplex2" />
 
 				<!-- Determines what level of a noise threshold to drop a cave Block -->
 				<!-- Higher numbers will result in more open caves horizontally -->

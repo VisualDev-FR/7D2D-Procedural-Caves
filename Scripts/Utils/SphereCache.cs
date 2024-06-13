@@ -15,7 +15,7 @@ public static class SphereCache
 
     public static List<Vector3i> caveEntrances = new List<Vector3i>();
 
-    public static FastNoise fastNoise;
+    public static FastNoiseLite fastNoise;
 
     public static List<string> POIs = new List<string>();
 
@@ -51,7 +51,61 @@ public static class SphereCache
         return positions;
     }
 
-    public static FastNoise GetFastNoise(Chunk chunk)
+    public static FastNoiseLite.FractalType ParseFractalType(string typeName)
+    {
+        switch (typeName)
+        {
+            case "DomainWarpIndependent":
+                return FastNoiseLite.FractalType.DomainWarpIndependent;
+
+            case "DomainWarpProgressive":
+                return FastNoiseLite.FractalType.DomainWarpProgressive;
+
+            case "FBm":
+                return FastNoiseLite.FractalType.FBm;
+
+            case "PingPong":
+                return FastNoiseLite.FractalType.PingPong;
+
+            case "Ridged":
+                return FastNoiseLite.FractalType.Ridged;
+
+            default:
+                break;
+        }
+        return FastNoiseLite.FractalType.None;
+    }
+
+    public static FastNoiseLite.NoiseType ParseNoiseType(string noiseName)
+    {
+        switch (noiseName)
+        {
+            case "Cellular":
+                return FastNoiseLite.NoiseType.Cellular;
+
+            case "OpenSimplex2":
+                return FastNoiseLite.NoiseType.OpenSimplex2;
+
+            case "OpenSimplex2S":
+                return FastNoiseLite.NoiseType.OpenSimplex2S;
+
+            case "Perlin":
+                return FastNoiseLite.NoiseType.Perlin;
+
+            case "Value":
+                return FastNoiseLite.NoiseType.Value;
+
+            case "ValueCubic":
+                return FastNoiseLite.NoiseType.ValueCubic;
+
+            default:
+                break;
+        }
+
+        throw new Exception($"Invalid Noise type: '{noiseName}'");
+    }
+
+    public static FastNoiseLite GetFastNoise(Chunk chunk)
     {
         var AdvFeatureClass = "CaveConfiguration";
 
@@ -65,8 +119,7 @@ public static class SphereCache
             return fastNoise;
         }
 
-
-        fastNoise = new FastNoise();
+        fastNoise = new FastNoiseLite();
 
         // Read in the available POIs
         foreach (var poi in Configuration.GetPropertyValue(AdvFeatureClass, "CavePOIs").Split(','))
@@ -75,13 +128,13 @@ public static class SphereCache
         foreach (var poi in Configuration.GetPropertyValue(AdvFeatureClass, "DeepCavePrefabs").Split(','))
             DeepCavePrefabs.Add(poi);
 
+        var fractalType = ParseFractalType(Configuration.GetPropertyValue(AdvFeatureClass, "FractalType"));
+        var noiseType = ParseNoiseType(Configuration.GetPropertyValue(AdvFeatureClass, "NoiseType"));
+
         var Octaves = int.Parse(Configuration.GetPropertyValue(AdvFeatureClass, "Octaves"));
         var Lacunarity = float.Parse(Configuration.GetPropertyValue(AdvFeatureClass, "Lacunarity"));
         var Gain = float.Parse(Configuration.GetPropertyValue(AdvFeatureClass, "Gain"));
         var Frequency = float.Parse(Configuration.GetPropertyValue(AdvFeatureClass, "Frequency"));
-
-        var fractalType = EnumUtils.Parse<FastNoise.FractalType>(Configuration.GetPropertyValue(AdvFeatureClass, "FractalType"));
-        var noiseType = EnumUtils.Parse<FastNoise.NoiseType>(Configuration.GetPropertyValue(AdvFeatureClass, "NoiseType"));
 
         fastNoise.SetFractalType(fractalType);
         fastNoise.SetNoiseType(noiseType);
@@ -137,7 +190,6 @@ public static class SphereCache
                     caveEntrances.Add(new Vector3i(entranceX, 1, entranceZ));
                     display = "Cave Spawn Area: " + randomChunkPosition + " Entrance: " + new Vector3i(entranceX, 0, entranceZ);
                     AdvLogging.DisplayLog(AdvFeatureClass, display);
-                    Log.Out(display);
                 }
 
                 for (var cX = 0; cX < caveRadius; cX++)
@@ -183,6 +235,7 @@ public static class SphereCache
         if (DoorCache.ContainsKey(EntityID))
             DoorCache.Remove(EntityID);
     }
+
 
     #region PathingCache
 
