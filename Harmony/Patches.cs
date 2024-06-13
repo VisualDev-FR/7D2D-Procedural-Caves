@@ -305,9 +305,6 @@ namespace Harmony
                     case "HeightMap":
                         HeightMapTunneler.AddCaveToChunk(_chunk);
                         break;
-                    case "PathingWorm":
-                        PathingWormTunneler.AddCaveToChunk(_chunk);
-                        break;
                     default:
                         break;
                 }

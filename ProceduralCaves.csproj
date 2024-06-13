@@ -84,7 +84,6 @@
     <Compile Include="Scripts\WorldGen\Utilities\FastNoiseLite.cs" />
     <Compile Include="Scripts\WorldGen\Utilities\FastNoise.cs" />
     <Compile Include="Scripts\WorldGen\Utilities\FastNoiseSIMD.cs" />
-    <Compile Include="Scripts\WorldGen\Utilities\PathingWormTunneler.cs" />
 
     <!-- WorldGen -->
     <Compile Include="Scripts\Configuration.cs" />
