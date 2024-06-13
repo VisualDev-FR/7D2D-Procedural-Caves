@@ -92,7 +92,6 @@
     <Compile Include="Scripts\AdvLogging.cs" />
     <Compile Include="Scripts\WorldGen\HeightMapTunneler.cs" />
     <Compile Include="Scripts\WorldGen\LegacyCaveTunneler.cs" />
-    <Compile Include="Scripts\WorldGen\WinterProjectPrefab.cs" />
 
 
   </ItemGroup>
