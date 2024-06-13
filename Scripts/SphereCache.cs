@@ -107,10 +107,6 @@ public static class SphereCache
                 case "Legacy":
                     break;
 
-                case "Sebastian":
-                    caveChunks.Add(new Vector3i(0, 0, 0));
-                    return;
-
                 case "HeightMap":
                     break;
 

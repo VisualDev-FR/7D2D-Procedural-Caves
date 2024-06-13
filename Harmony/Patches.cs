@@ -301,24 +301,13 @@ namespace Harmony
                 {
                     case "Legacy":
                         LegacyCaveSystem.AddCaveToChunk(_chunk);
-                        //CaveSystemV2.AddCaveToChunk(_chunk);
                         break;
-                    case "Sebastian":
-                        Sebastian.AddCaveToChunk(_chunk);
-                        break;
-
                     case "HeightMap":
                         HeightMapTunneler.AddCaveToChunk(_chunk);
                         break;
                     case "PathingWorm":
                         PathingWormTunneler.AddCaveToChunk(_chunk);
                         break;
-                    //case "FastNosieSIMD":
-                    //    TerrainGeneratorSIMD_Caves.GenerateChunk(_chunk);
-                    //    break;
-                    //case "SIMDCaveTunnler":
-                    //    SIMDCaveTunnler.AddCaveToChunk(_chunk);
-                    //    break;
                     default:
                         break;
                 }
@@ -343,51 +332,11 @@ namespace Harmony
                     case "Legacy":
                         LegacyCaveSystem.AddDecorationsToCave(_chunk);
                         break;
-                    case "Sebastian":
-                        Sebastian.AddDecorationsToCave(_chunk);
-                        break;
-                    case "HeightMap":
-                        HeightMapTunneler.AddDecorationsToCave(_chunk);
-                        break;
                     default:
                         break;
                 }
             }
         }
-
-
-        [HarmonyPatch(typeof(EntityPlayerLocal))]
-        [HarmonyPatch("Init")]
-        public class EntityPlayerLocalInit
-        {
-            private static void Postfix(EntityPlayerLocal __instance)
-            {
-                if (!Configuration.CheckFeatureStatus(AdvFeatureClass, Feature))
-                    return;
-
-                var configurationType = Configuration.GetPropertyValue(AdvFeatureClass, "GenerationType");
-                if (configurationType != "Sebastian") return;
-
-                Log.Out("Initializing Sebastian Cave System...");
-                var counter = 0;
-                var prefabs = GameManager.Instance.GetDynamicPrefabDecorator().allPrefabs;
-                // garage_02,remnant_oldwest_06,cemetery_01,abandoned_house_01,house_burnt_06,vacant_lot_01,mp_waste_bldg_05_grey,oldwest_coal_factory,diner_03
-                var prefabFilter = Configuration.GetPropertyValue(AdvFeatureClass, "PrefabSister").Split(',').ToList();
-                foreach (var sister in prefabFilter)
-                {
-                    foreach (var individualInstance in prefabs.FindAll(instance => instance.name.Contains(sister)))
-                    {
-                        var pos = individualInstance.boundingBoxPosition;
-                        var size = 400;
-                        counter++;
-                        Log.Out($"Generating Cave at {pos} of size {size}...");
-                        Sebastian.GenerateCave(pos, size, size);
-                    }
-                }
-                Log.Out($"Cave System Generation Complete: {counter} Caves Generated.");
-            }
-        }
-
     }
 
     public class SCoreheightMapCaveSystem
@@ -432,18 +381,18 @@ namespace Harmony
                 Texture2D texture2D = TextureUtils.LoadTexture(path, FilterMode.Point, false, false, null);
                 Log.Out($"Generating Texture from {path}: {texture2D.width} {texture2D.height}");
 
-                // HeightMapTunneler.caveMapColor = new Color[texture2D.width, texture2D.height];
-                // for (int y = 0; y < texture2D.height; y++)
-                // {
-                //     for (int x = 0; x < texture2D.width; x++)
-                //     {
-                //         var pixel = texture2D.GetPixel(x, y);
-                //         if (pixel.r > 0.9)
-                //             SphereCache.caveEntrances.Add(new Vector3i(x, 1, y));
+                HeightMapTunneler.caveMapColor = new Color[texture2D.width, texture2D.height];
+                for (int y = 0; y < texture2D.height; y++)
+                {
+                    for (int x = 0; x < texture2D.width; x++)
+                    {
+                        var pixel = texture2D.GetPixel(x, y);
+                        if (pixel.r > 0.9)
+                            SphereCache.caveEntrances.Add(new Vector3i(x, 1, y));
 
-                //         HeightMapTunneler.caveMapColor[x, y] = pixel;
-                //     }
-                // }
+                        HeightMapTunneler.caveMapColor[x, y] = pixel;
+                    }
+                }
             }
         }
     }

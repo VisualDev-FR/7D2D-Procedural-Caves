@@ -335,7 +335,6 @@ public static class HeightMapTunneler
                 // Chunk position
                 var position = new Vector3i(chunkX, targetDepth, chunkZ);
 
-                Log.Out("Adding Prefab...");
                 if (cavePrefab == "Large")
                 {
                     CreateEmptyPrefab(chunk, _blockPos);

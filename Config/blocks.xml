@@ -2,12 +2,7 @@
 	<append xpath="/blocks">
 		<block name="ConfigFeatureBlock">
 			<property name="Extends" value="terrDesertGround"/>
-			<property class="AdvancedWorldGen">
-				<property name="Logging" value="false"/>
-				<!--property name="DisableSplatMap" value="false" /-->
-				<!-- Disable the splat map: Also disables distant terrain -->
-				<!-- Mod moved to SphereII Legacy Distant Terrain -->
-			</property>
+
 			<property class="CaveConfiguration" >
 				<!--
 				FastNoise Implementation : https://github.com/Auburns/FastNoise_CSharp
@@ -22,8 +17,8 @@
 				<property name="CavePath" value="@modfolder:/Caves/Stamps/testLegit.png" />
 				<property name="CavePrefab" value="Large" />
 
-				<!-- Legacy is the original style.  Sebastian is an alternative, FastNosieSIMD -->
-				<property name="GenerationType" value="Legacy" />
+				<!-- Legacy, HeightMap, PathingWorm -->
+				<property name="GenerationType" value="PathingWorm" />
 
 				<!-- Generate cave system only in mountains (above terrain height 100, or random through the map. All for every chunk has a cave system ) -->
 				<!-- Deep Mountains will produce up to 100 levels, or until it reaches bedrock. This could cause lag during generation and an FPS drop. -->
