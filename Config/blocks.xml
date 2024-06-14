@@ -3,31 +3,30 @@
 		<block name="ConfigFeatureBlock">
 			<property name="Extends" value="terrDesertGround"/>
 			<property class="CaveConfiguration" >
-				<!--
-				FastNoise Implementation : https://github.com/Auburns/FastNoise_CSharp
-
-					Dynamically generates a FastNosie-based tunnelling system.
-
-					Download FastNoise Preview to get a feel for the map they are generating.
-					https://github.com/Auburns/FastNoise/releases
-				-->
+				<!-- General cave parameters -->
 				<property name="Logging" value="true"/>
 				<property name="invert" value="true"/>
-
-				<property name="FractalType" value="Ridged" />
-				<property name="NoiseType" value="OpenSimplex2" />
-				<property name="CaveThreshold" value="0.50"/>
-				<property name="Octaves" value="1"/>
-				<property name="Lacunarity" value="1"/>
-				<property name="Gain" value="0.5"/>
-				<property name="Frequency" value="0.02"/>
+				<property name="CaveThreshold" value="0.20"/>
+				<!-- 2D noise -->
+				<property name="FractalTypeZX" value="Ridged" />
+				<property name="NoiseTypeZX" value="OpenSimplex2" />
+				<property name="OctavesZX" value="1"/>
+				<property name="LacunarityZX" value="1"/>
+				<property name="GainZX" value="0.5"/>
+				<property name="FrequencyZX" value="0.02"/>
+				<!-- Heightmap noise -->
+				<property name="FractalTypeY" value="Ridged" />
+				<property name="NoiseTypeY" value="OpenSimplex2" />
+				<property name="OctavesY" value="1"/>
+				<property name="LacunarityY" value="1"/>
+				<property name="GainY" value="0.5"/>
+				<property name="FrequencyY" value="0.02"/>
 			</property>
 		</block>
 		<!-- Cave air block -->
 		<block name="caveBlock02">
 			<property name="Extends" value="air"/>
 			<property name="StabilityFull" value="true"/>
-			<property name="Material" value="Mconcrete" />
 		</block>
 		<block name="cntCaveFloorRandomLootHelper">
 			<property name="Extends" value="cntWastelandRandomLootHelper"/>

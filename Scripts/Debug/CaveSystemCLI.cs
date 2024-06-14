@@ -29,15 +29,23 @@ public class ConsoleCmdCaves : ConsoleCmdAbstract
             $"loggingEnabled {CaveConfig.loggingEnabled}",
             $"invert {CaveConfig.invert}",
             $"isSolid {CaveConfig.isSolid}",
-            $"fractalType {CaveConfig.fractalType}",
-            $"noiseType {CaveConfig.noiseType}",
             $"caveHeight2D {CaveConfig.caveHeight2D}",
             $"cavePos2D {CaveConfig.cavePos2D}",
             $"NoiseThreeshold {CaveConfig.NoiseThreeshold}",
-            $"Octaves {CaveConfig.Octaves}",
-            $"Lacunarity {CaveConfig.Lacunarity}",
-            $"Gain {CaveConfig.Gain}",
-            $"Frequency {CaveConfig.Frequency}",
+            $"--------------------------",
+            $"ZX fractalType {CaveConfig.noiseZX.fractalType}",
+            $"ZX noiseType {CaveConfig.noiseZX.noiseType}",
+            $"ZX Octaves {CaveConfig.noiseZX.octaves}",
+            $"ZX Lacunarity {CaveConfig.noiseZX.lacunarity}",
+            $"ZX Gain {CaveConfig.noiseZX.gain}",
+            $"ZX Frequency {CaveConfig.noiseZX.frequency}",
+            $"--------------------------",
+            $"Y fractalType {CaveConfig.noiseY.fractalType}",
+            $"Y noiseType {CaveConfig.noiseY.noiseType}",
+            $"Y Octaves {CaveConfig.noiseY.octaves}",
+            $"Y Lacunarity {CaveConfig.noiseY.lacunarity}",
+            $"Y Gain {CaveConfig.noiseY.gain}",
+            $"Y Frequency {CaveConfig.noiseY.frequency}",
             $"---------------------------------------------------",
         };
 
@@ -57,9 +65,14 @@ public class ConsoleCmdCaves : ConsoleCmdAbstract
 
         switch (paramName.ToLower())
         {
-            case "frequency":
-            case "freq":
-                CaveConfig.Frequency = float.Parse(paramValue);
+            case "seed":
+                CaveConfig.noiseZX.seed = int.Parse(paramValue);
+                CaveConfig.noiseY.seed = int.Parse(paramValue);
+                break;
+
+            case "zxfrequency":
+            case "zxfreq":
+                CaveConfig.noiseZX.frequency = float.Parse(paramValue);
                 break;
 
             case "threeshold":
@@ -72,11 +85,11 @@ public class ConsoleCmdCaves : ConsoleCmdAbstract
                 CaveConfig.invert = !CaveConfig.invert;
                 break;
 
-            case "pos":
+            case "2dpos":
                 CaveConfig.cavePos2D = int.Parse(paramValue);
                 break;
 
-            case "height":
+            case "2dheight":
                 CaveConfig.caveHeight2D = int.Parse(paramName);
                 break;
 

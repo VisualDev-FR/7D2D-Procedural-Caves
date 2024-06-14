@@ -276,6 +276,7 @@ namespace Harmony
             public static void Postfix(Chunk _chunk)
             {
                 LegacyCaveSystem.AddCaveToChunk(_chunk);
+                // LegacyCaveSystem.Add3DCaveToChunk(_chunk);
             }
         }
     }

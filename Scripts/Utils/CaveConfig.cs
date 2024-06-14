@@ -1,22 +1,109 @@
 ﻿using System;
 
+[Serializable]
+public class NoiseConfig
+{
+    public FastNoiseLite.FractalType fractalType;
+
+    public FastNoiseLite.NoiseType noiseType;
+
+    public int seed;
+
+    public int octaves;
+
+    public float lacunarity;
+
+    public float gain;
+
+    public float frequency;
+
+    public void SetFractalType(string typeName)
+    {
+        switch (typeName)
+        {
+            case "DomainWarpIndependent":
+                fractalType = FastNoiseLite.FractalType.DomainWarpIndependent;
+                return;
+
+            case "DomainWarpProgressive":
+                fractalType = FastNoiseLite.FractalType.DomainWarpProgressive;
+                return;
+
+            case "FBm":
+                fractalType = FastNoiseLite.FractalType.FBm;
+                return;
+
+            case "PingPong":
+                fractalType = FastNoiseLite.FractalType.PingPong;
+                return;
+
+            case "Ridged":
+                fractalType = FastNoiseLite.FractalType.Ridged;
+                return;
+
+            default:
+                break;
+        }
+
+        throw new Exception($"Invalid Fractal type: '{typeName}'");
+    }
+
+    public void SetNoiseType(string noiseName)
+    {
+        switch (noiseName)
+        {
+            case "Cellular":
+                noiseType = FastNoiseLite.NoiseType.Cellular;
+                return;
+
+            case "OpenSimplex2":
+                noiseType = FastNoiseLite.NoiseType.OpenSimplex2;
+                return;
+
+            case "OpenSimplex2S":
+                noiseType = FastNoiseLite.NoiseType.OpenSimplex2S;
+                return;
+
+            case "Perlin":
+                noiseType = FastNoiseLite.NoiseType.Perlin;
+                return;
+
+            case "Value":
+                noiseType = FastNoiseLite.NoiseType.Value;
+                return;
+
+            case "ValueCubic":
+                noiseType = FastNoiseLite.NoiseType.ValueCubic;
+                return;
+
+            default:
+                break;
+        }
+
+        throw new Exception($"Invalid Noise type: '{noiseName}'");
+    }
+
+    public FastNoiseLite GetNoise()
+    {
+        var fastNoise = new FastNoiseLite(seed);
+
+        fastNoise.SetFractalType(fractalType);
+        fastNoise.SetNoiseType(noiseType);
+        fastNoise.SetFractalOctaves(octaves);
+        fastNoise.SetFractalLacunarity(lacunarity);
+        fastNoise.SetFractalGain(gain);
+        fastNoise.SetFrequency(frequency);
+
+        return fastNoise;
+    }
+}
+
+
 public static class CaveConfig
 {
-    public static FastNoiseLite fastNoise;
+    public static NoiseConfig noiseZX;
 
-    public static FastNoiseLite.FractalType fractalType;
-
-    public static FastNoiseLite.NoiseType noiseType;
-
-    public static int seed;
-
-    public static int Octaves;
-
-    public static float Lacunarity;
-
-    public static float Gain;
-
-    public static float Frequency;
+    public static NoiseConfig noiseY;
 
     public static float NoiseThreeshold = float.Parse(GetPropertyValue("CaveConfiguration", "CaveThreshold"));
 
@@ -30,91 +117,59 @@ public static class CaveConfig
 
     public static bool isSolid = false;
 
-    public static FastNoiseLite.FractalType ParseFractalType(string typeName)
-    {
-        switch (typeName)
-        {
-            case "DomainWarpIndependent":
-                return FastNoiseLite.FractalType.DomainWarpIndependent;
 
-            case "DomainWarpProgressive":
-                return FastNoiseLite.FractalType.DomainWarpProgressive;
-
-            case "FBm":
-                return FastNoiseLite.FractalType.FBm;
-
-            case "PingPong":
-                return FastNoiseLite.FractalType.PingPong;
-
-            case "Ridged":
-                return FastNoiseLite.FractalType.Ridged;
-
-            default:
-                break;
-        }
-        return FastNoiseLite.FractalType.None;
-    }
-
-    public static FastNoiseLite.NoiseType ParseNoiseType(string noiseName)
-    {
-        switch (noiseName)
-        {
-            case "Cellular":
-                return FastNoiseLite.NoiseType.Cellular;
-
-            case "OpenSimplex2":
-                return FastNoiseLite.NoiseType.OpenSimplex2;
-
-            case "OpenSimplex2S":
-                return FastNoiseLite.NoiseType.OpenSimplex2S;
-
-            case "Perlin":
-                return FastNoiseLite.NoiseType.Perlin;
-
-            case "Value":
-                return FastNoiseLite.NoiseType.Value;
-
-            case "ValueCubic":
-                return FastNoiseLite.NoiseType.ValueCubic;
-
-            default:
-                break;
-        }
-
-        throw new Exception($"Invalid Noise type: '{noiseName}'");
-    }
-
-    private static FastNoiseLite InitFastNoise()
+    private static NoiseConfig InitFastNoiseZX()
     {
         var AdvFeatureClass = "CaveConfiguration";
 
-        fastNoise = new FastNoiseLite();
+        noiseZX = new NoiseConfig()
+        {
+            octaves = int.Parse(GetPropertyValue(AdvFeatureClass, "OctavesZX")),
+            gain = float.Parse(GetPropertyValue(AdvFeatureClass, "GainZX")),
+            frequency = float.Parse(GetPropertyValue(AdvFeatureClass, "FrequencyZX")),
+            lacunarity = float.Parse(GetPropertyValue(AdvFeatureClass, "LacunarityZX")),
+        };
 
-        fractalType = ParseFractalType(CaveConfig.GetPropertyValue(AdvFeatureClass, "FractalType"));
-        noiseType = ParseNoiseType(CaveConfig.GetPropertyValue(AdvFeatureClass, "NoiseType"));
+        noiseZX.SetFractalType(GetPropertyValue(AdvFeatureClass, "FractalTypeZX"));
+        noiseZX.SetNoiseType(GetPropertyValue(AdvFeatureClass, "NoiseTypeZX"));
 
-        Octaves = int.Parse(CaveConfig.GetPropertyValue(AdvFeatureClass, "Octaves"));
-        Lacunarity = float.Parse(CaveConfig.GetPropertyValue(AdvFeatureClass, "Lacunarity"));
-        Gain = float.Parse(CaveConfig.GetPropertyValue(AdvFeatureClass, "Gain"));
-        Frequency = float.Parse(CaveConfig.GetPropertyValue(AdvFeatureClass, "Frequency"));
-
-        return fastNoise;
+        return noiseZX;
     }
 
-    public static FastNoiseLite GetFastNoise(Chunk chunk)
+    private static NoiseConfig InitFastNoiseY()
+    {
+        var AdvFeatureClass = "CaveConfiguration";
+
+        noiseY = new NoiseConfig()
+        {
+            octaves = int.Parse(GetPropertyValue(AdvFeatureClass, "OctavesY")),
+            gain = float.Parse(GetPropertyValue(AdvFeatureClass, "GainY")),
+            frequency = float.Parse(GetPropertyValue(AdvFeatureClass, "FrequencyY")),
+            lacunarity = float.Parse(GetPropertyValue(AdvFeatureClass, "LacunarityY")),
+        };
+
+        noiseY.SetFractalType(GetPropertyValue(AdvFeatureClass, "FractalTypeY"));
+        noiseY.SetNoiseType(GetPropertyValue(AdvFeatureClass, "NoiseTypeY"));
+
+        return noiseY;
+    }
+
+    public static FastNoiseLite GetFastNoiseZX()
     {
 
-        if (fastNoise == null) fastNoise = InitFastNoise();
+        if (noiseZX == null)
+            noiseZX = InitFastNoiseZX();
 
-        fastNoise.SetSeed(seed);
-        fastNoise.SetFractalType(fractalType);
-        fastNoise.SetNoiseType(noiseType);
-        fastNoise.SetFractalOctaves(Octaves);
-        fastNoise.SetFractalLacunarity(Lacunarity);
-        fastNoise.SetFractalGain(Gain);
-        fastNoise.SetFrequency(Frequency);
+        return noiseZX.GetNoise();
+    }
 
-        return fastNoise;
+    public static FastNoiseLite GetFastNoiseY()
+    {
+
+        if (noiseY == null)
+            noiseY = InitFastNoiseY();
+
+        return noiseY.GetNoise();
     }
 
     public static bool CheckFeatureStatus(string strFeature)
