@@ -32,6 +32,7 @@ public class ConsoleCmdCaves : ConsoleCmdAbstract
             $"caveHeight2D {CaveConfig.caveHeight2D}",
             $"cavePos2D {CaveConfig.cavePos2D}",
             $"NoiseThreeshold {CaveConfig.NoiseThreeshold}",
+            $"seed {CaveConfig.seed}",
             $"--------------------------",
             $"ZX fractalType {CaveConfig.noiseZX.fractalType}",
             $"ZX noiseType {CaveConfig.noiseZX.noiseType}",
@@ -66,8 +67,7 @@ public class ConsoleCmdCaves : ConsoleCmdAbstract
         switch (paramName.ToLower())
         {
             case "seed":
-                CaveConfig.noiseZX.seed = int.Parse(paramValue);
-                CaveConfig.noiseY.seed = int.Parse(paramValue);
+                CaveConfig.seed = int.Parse(paramValue);
                 break;
 
             case "zxfrequency":

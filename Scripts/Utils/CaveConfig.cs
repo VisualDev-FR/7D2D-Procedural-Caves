@@ -7,8 +7,6 @@ public class NoiseConfig
 
     public FastNoiseLite.NoiseType noiseType;
 
-    public int seed;
-
     public int octaves;
 
     public float lacunarity;
@@ -83,7 +81,7 @@ public class NoiseConfig
         throw new Exception($"Invalid Noise type: '{noiseName}'");
     }
 
-    public FastNoiseLite GetNoise()
+    public FastNoiseLite GetNoise(int seed)
     {
         var fastNoise = new FastNoiseLite(seed);
 
@@ -116,6 +114,8 @@ public static class CaveConfig
     public static int cavePos2D = 5;
 
     public static bool isSolid = false;
+
+    public static int seed = int.Parse(GetPropertyValue("CaveConfiguration", "seed"));
 
 
     private static NoiseConfig InitFastNoiseZX()
@@ -160,7 +160,7 @@ public static class CaveConfig
         if (noiseZX == null)
             noiseZX = InitFastNoiseZX();
 
-        return noiseZX.GetNoise();
+        return noiseZX.GetNoise(seed);
     }
 
     public static FastNoiseLite GetFastNoiseY()
@@ -169,7 +169,7 @@ public static class CaveConfig
         if (noiseY == null)
             noiseY = InitFastNoiseY();
 
-        return noiseY.GetNoise();
+        return noiseY.GetNoise(seed);
     }
 
     public static bool CheckFeatureStatus(string strFeature)

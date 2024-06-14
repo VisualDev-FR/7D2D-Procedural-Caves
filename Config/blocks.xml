@@ -7,6 +7,7 @@
 				<property name="Logging" value="true"/>
 				<property name="invert" value="true"/>
 				<property name="CaveThreshold" value="0.20"/>
+				<property name="seed" value="0"/>
 				<!-- 2D noise -->
 				<property name="FractalTypeZX" value="Ridged" />
 				<property name="NoiseTypeZX" value="OpenSimplex2" />
