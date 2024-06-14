@@ -293,46 +293,8 @@ namespace Harmony
         {
             public static void Postfix(Chunk _chunk)
             {
-                if (!Configuration.CheckFeatureStatus(AdvFeatureClass, Feature))
-                    return;
-
-                SphereCache.GenerateCaveChunks();
-                var configurationType = Configuration.GetPropertyValue(AdvFeatureClass, "GenerationType");
-                switch (configurationType)
-                {
-                    case "Legacy":
-                        LegacyCaveSystem.AddCaveToChunk(_chunk);
-                        break;
-                    case "HeightMap":
-                        HeightMapTunneler.AddCaveToChunk(_chunk);
-                        break;
-                    default:
-                        break;
-                }
-            }
-        }
-
-
-        [HarmonyPatch(typeof(DynamicPrefabDecorator))]
-        [HarmonyPatch("DecorateChunk")]
-        [HarmonyPatch(new[] { typeof(World), typeof(Chunk), typeof(bool) })]
-        public class CaveProjectDynamicPrefabDecorator
-        {
-            public static void Postfix(Chunk _chunk)
-            {
-                if (!Configuration.CheckFeatureStatus(AdvFeatureClass, Feature))
-                    return;
-
-                SphereCache.GenerateCaveChunks();
-                var configurationType = Configuration.GetPropertyValue(AdvFeatureClass, "GenerationType");
-                switch (configurationType)
-                {
-                    case "Legacy":
-                        LegacyCaveSystem.AddDecorationsToCave(_chunk);
-                        break;
-                    default:
-                        break;
-                }
+                // SphereCache.GenerateCaveChunks();
+                LegacyCaveSystem.AddCaveToChunk(_chunk);
             }
         }
     }

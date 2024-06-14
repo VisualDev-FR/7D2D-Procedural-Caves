@@ -157,19 +157,6 @@ public static class SphereCache
 
         if (caveChunks.Count == 0)
         {
-            var configurationType = Configuration.GetPropertyValue(AdvFeatureClass, "GenerationType");
-            switch (configurationType)
-            {
-                case "Legacy":
-                    break;
-
-                case "HeightMap":
-                    break;
-
-                default:
-                    break;
-            }
-
             var MaxCount = int.Parse(Configuration.GetPropertyValue(AdvFeatureClass, "CaveCluster"));
             var ClusterSize = int.Parse(Configuration.GetPropertyValue(AdvFeatureClass, "CavesClusterSize"));
 

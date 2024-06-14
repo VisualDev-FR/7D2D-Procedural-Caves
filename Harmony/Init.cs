@@ -8,6 +8,8 @@ namespace Harmony
         {
             var harmony = new HarmonyLib.Harmony(_modInstance.Name);
             harmony.PatchAll(Assembly.GetExecutingAssembly());
+
+            GameManager.Instance.waitForTargetFPS.TargetFPS = 60;
         }
     }
 }
