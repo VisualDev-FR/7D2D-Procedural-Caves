@@ -4,9 +4,9 @@ using UnityEngine;
 
 public static class LegacyCaveSystem
 {
-    private static FastNoiseLite noise2D;
+    private static FastNoiseLite fastNoiseZX;
 
-    private static FastNoiseLite noise3D;
+    private static FastNoiseLite fastNoiseY;
 
     private static BlockValue caveAir = new BlockValue((uint)Block.GetBlockByName("air").blockID);
 
@@ -24,8 +24,8 @@ public static class LegacyCaveSystem
         ? new BlockValue((uint)Block.GetBlockByName("concreteShapes:cube").blockID)
         : caveAir;
 
-        noise2D = CaveConfig.GetFastNoiseZX();
-        noise3D = CaveConfig.GetFastNoiseY();
+        fastNoiseZX = CaveConfig.GetFastNoiseZX();
+        fastNoiseY = CaveConfig.GetFastNoiseY();
 
         var chunkPos = chunk.GetWorldPos();
 
@@ -38,7 +38,7 @@ public static class LegacyCaveSystem
 
                 var terrainHeight = chunk.GetTerrainHeight(chunkX, chunkZ) - 10;
 
-                float noise = (1 + noise2D.GetNoise(worldX, worldZ)) / 2;
+                float noise = (1 + fastNoiseZX.GetNoise(worldX, worldZ)) / 2;
 
                 if (CaveConfig.invert)
                     noise = 1 - noise;
@@ -70,8 +70,8 @@ public static class LegacyCaveSystem
         ? new BlockValue((uint)Block.GetBlockByName("concreteShapes:cube").blockID)
         : caveAir;
 
-        noise2D = CaveConfig.GetFastNoiseZX();
-        noise3D = CaveConfig.GetFastNoiseY();
+        fastNoiseZX = CaveConfig.GetFastNoiseZX();
+        fastNoiseY = CaveConfig.GetFastNoiseY();
 
         var chunkPos = chunk.GetWorldPos();
 
@@ -82,21 +82,25 @@ public static class LegacyCaveSystem
                 var worldX = chunkPos.x + chunkX;
                 var worldZ = chunkPos.z + chunkZ;
 
-                var terrainHeight = chunk.GetTerrainHeight(chunkX, chunkZ) - 10;
 
-                for (int chunkY = CaveConfig.cavePos2D; chunkY < terrainHeight - 30; chunkY++)
+                float noiseZX = 0.5f * (1 + fastNoiseZX.GetNoise(worldX, worldZ));
+
+                if (CaveConfig.invert)
+                    noiseZX = 1 - noiseZX;
+
+                if (noiseZX < 0 || noiseZX > 1)
+                    Log.Error($"noise = {noiseZX}");
+
+                if (noiseZX > CaveConfig.NoiseThreeshold)
+                    continue;
+
+                float noiseY = 0.5f * (1 + fastNoiseY.GetNoise(worldX, worldZ));
+
+                int terrainHeight = chunk.GetTerrainHeight(chunkX, chunkZ) - 10;
+                int caveBottom = Utils.Fastfloor(terrainHeight * noiseY);
+
+                for (int chunkY = caveBottom; chunkY < caveBottom + CaveConfig.caveHeight2D; chunkY++)
                 {
-                    float noise = (1 + noise2D.GetNoise(worldX, chunkY, worldZ)) / 2;
-
-                    if (CaveConfig.invert)
-                        noise = 1 - noise;
-
-                    if (noise < 0 || noise > 1)
-                        Log.Error($"noise = {noise}");
-
-                    if (noise > CaveConfig.NoiseThreeshold)
-                        continue;
-
                     chunk.SetBlockRaw(chunkX, chunkY, chunkZ, caveBlock);
                     chunk.SetDensity(chunkX, chunkY, chunkZ, MarchingCubes.DensityAir);
                 }

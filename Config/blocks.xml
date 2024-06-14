@@ -16,10 +16,10 @@
 				<property name="GainZX" value="0.5"/>
 				<property name="FrequencyZX" value="0.02"/>
 				<!-- Heightmap noise -->
-				<property name="FractalTypeY" value="Ridged" />
-				<property name="NoiseTypeY" value="OpenSimplex2" />
-				<property name="OctavesY" value="1"/>
-				<property name="LacunarityY" value="1"/>
+				<property name="FractalTypeY" value="FBm" />
+				<property name="NoiseTypeY" value="Perlin" />
+				<property name="OctavesY" value="2"/>
+				<property name="LacunarityY" value="0.5"/>
 				<property name="GainY" value="0.5"/>
 				<property name="FrequencyY" value="0.02"/>
 			</property>
