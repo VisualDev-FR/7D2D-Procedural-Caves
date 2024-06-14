@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System;
-using System.Runtime.CompilerServices;
 
 public class ConsoleCmdCaves : ConsoleCmdAbstract
 {
@@ -127,4 +126,30 @@ public class ConsoleCmdCaves : ConsoleCmdAbstract
                 break;
         }
     }
+
+    public void ForceRegionReset()
+    {
+        World world = GameManager.Instance.World;
+
+        ChunkCluster chunkCache = world.ChunkCache;
+        ChunkProviderGenerateWorld chunkProviderGenerateWorld = chunkCache.ChunkProvider as ChunkProviderGenerateWorld;
+
+        HashSetLong hashSetLong = chunkProviderGenerateWorld.ResetAllChunks(new HashSetLong());
+
+        if (chunkProviderGenerateWorld == null)
+        {
+            Log.Error("Failed to reset regions: ChunkProviderGenerateWorld could not be found for current world instance.");
+            return;
+        }
+
+        SingletonMonoBehaviour<SdtdConsole>.Instance.Output($"Regenerating {hashSetLong.Count} synced chunks.");
+        foreach (long item3 in hashSetLong)
+        {
+            chunkProviderGenerateWorld.GenerateSingleChunk(chunkCache, item3, _forceRebuild: true);
+        }
+
+        SingletonMonoBehaviour<SdtdConsole>.Instance.Output("Regeneration complete.");
+        SingletonMonoBehaviour<SdtdConsole>.Instance.Output("Region reset complete.");
+    }
+
 }
