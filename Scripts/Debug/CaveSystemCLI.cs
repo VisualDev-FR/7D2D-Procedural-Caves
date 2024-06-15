@@ -106,23 +106,22 @@ public class ConsoleCmdCaves : ConsoleCmdAbstract
     {
         if (_params.Count == 0)
         {
-            StdOut("No sub command given.");
+            XUiC_CavesConfig.Open();
             return;
         }
 
         switch (_params[0].ToLower())
         {
-            case "getconfig":
+            case "get":
                 ExecuteGetConfig();
                 break;
 
-            case "setconfig":
+            case "set":
                 ExecuteSetConfig(_params);
                 new ConsoleCmdRegionReset().Execute(new List<string>(), _senderInfo);
                 break;
 
             default:
-                StdOut("");
                 break;
         }
     }

@@ -82,7 +82,6 @@ public static class LegacyCaveSystem
                 var worldX = chunkPos.x + chunkX;
                 var worldZ = chunkPos.z + chunkZ;
 
-
                 float noiseZX = 0.5f * (1 + fastNoiseZX.GetNoise(worldX, worldZ));
 
                 if (CaveConfig.invert)
@@ -97,10 +96,18 @@ public static class LegacyCaveSystem
                 float noiseY = 0.5f * (1 + fastNoiseY.GetNoise(worldX, worldZ));
 
                 int terrainHeight = chunk.GetTerrainHeight(chunkX, chunkZ) - 10;
-                int caveBottom = Utils.Fastfloor(terrainHeight * noiseY);
+                int caveBottom = (int)(1.5 * noiseY * terrainHeight);
+                int caveTop = caveBottom + CaveConfig.caveHeight2D;
 
-                for (int chunkY = caveBottom; chunkY < caveBottom + CaveConfig.caveHeight2D; chunkY++)
+                for (int chunkY = caveBottom; chunkY < caveTop; chunkY++)
                 {
+
+                    if (chunkY > terrainHeight + 10)
+                    {
+                        Log.Out($"Cave entrance at [{chunkX}, {chunkY}, {chunkZ}]");
+                        break;
+                    }
+
                     chunk.SetBlockRaw(chunkX, chunkY, chunkZ, caveBlock);
                     chunk.SetDensity(chunkX, chunkY, chunkZ, MarchingCubes.DensityAir);
                 }

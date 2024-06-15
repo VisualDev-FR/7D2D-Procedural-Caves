@@ -1,9 +1,9 @@
-<?xml version="1.0" encoding="utf-8" ?>
-
 <configs>
-	<append xpath="//ruleset">
-		<window_group name="caveConfigWindowGroup" controller="XUiC_CaveConfig, ProceduralCaves">
+	<append xpath="/xui/ruleset[@name='default']" controller="XUiC_CaveConfig, ProceduralCaves">
+
+		<window_group name="caveConfigWindowGroup">
 			<window name="caveConfigWindow" />
 		</window_group>
+
 	</append>
 </configs>

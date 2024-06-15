@@ -90,6 +90,7 @@
 
     <!-- Debug -->
     <Compile Include="Scripts\Debug\CaveSystemCLI.cs" />
+    <Compile Include="Scripts\Debug\XUiC_CavesConfig.cs" />
 
   </ItemGroup>
   <ItemGroup />
