@@ -14,12 +14,12 @@ cd %MOD_PATH%\..
 
 7z.exe x "%~dp0..\%NAME%.zip" > nul
 
-@REM taskkill /IM 7DaysToDie.exe /F >nul 2>&1
+taskkill /IM 7DaysToDie.exe /F >nul 2>&1
 
-@REM cd "%PATH_7D2D%"
+cd "%PATH_7D2D%"
 
-@REM start "" "%PATH_7D2D%\7DaysToDie" -force-d3d11 -disablenativeinput -nogs -noeac
+start "" "%PATH_7D2D%\7DaysToDie" -force-d3d11 -disablenativeinput -nogs -noeac
 
-@REM del /Q "%APPDATA%\7DaysToDie\Saves\Navezgane\Caves\Region"
+del /Q "%APPDATA%\7DaysToDie\Saves\Navezgane\Caves\Region"
 
 exit /b 0

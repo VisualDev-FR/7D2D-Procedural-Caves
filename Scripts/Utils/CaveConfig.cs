@@ -103,9 +103,9 @@ public static class CaveConfig
 
     public static NoiseConfig noiseY;
 
-    public static float NoiseThreeshold = float.Parse(GetPropertyValue("CaveConfiguration", "CaveThreshold"));
-
     public static bool loggingEnabled;
+
+    public static float NoiseThreeshold = float.Parse(GetPropertyValue("CaveConfiguration", "CaveThreshold"));
 
     public static bool invert = bool.Parse(GetPropertyValue("CaveConfiguration", "invert"));
 

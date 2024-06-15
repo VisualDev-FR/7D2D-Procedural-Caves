@@ -1,5 +1,5 @@
 <configs>
-	<append xpath="/xui/ruleset[@name='default']" controller="XUiC_CaveConfig, ProceduralCaves">
+	<append xpath="/xui/ruleset[@name='default']">
 
 		<window_group name="caveConfigWindowGroup">
 			<window name="caveConfigWindow" />
