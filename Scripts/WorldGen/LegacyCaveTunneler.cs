@@ -11,7 +11,7 @@ public static class LegacyCaveSystem
 
     private static GameRandom random => GameManager.Instance.World.GetGameRandom();
 
-    public static void AddCaveToChunk(Chunk chunk)
+    public static void Add2DCaveToChunk(Chunk chunk)
     {
         if (chunk == null)
         {
@@ -53,6 +53,8 @@ public static class LegacyCaveSystem
                 }
             }
         }
+
+        // AddDecorationsToCave(chunk);
     }
 
     public static void Add3DCaveToChunk(Chunk chunk)

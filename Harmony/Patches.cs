@@ -222,8 +222,20 @@ namespace Harmony
         {
             public static void Postfix(Chunk _chunk)
             {
-                LegacyCaveSystem.AddCaveToChunk(_chunk);
+                LegacyCaveSystem.Add2DCaveToChunk(_chunk);
                 // LegacyCaveSystem.Add3DCaveToChunk(_chunk);
+            }
+        }
+
+
+        [HarmonyPatch(typeof(DynamicPrefabDecorator))]
+        [HarmonyPatch("DecorateChunk")]
+        [HarmonyPatch(new[] { typeof(World), typeof(Chunk), typeof(bool) })]
+        public class CaveProjectDynamicPrefabDecorator
+        {
+            public static void Postfix(Chunk _chunk)
+            {
+                LegacyCaveSystem.AddDecorationsToCave(_chunk);
             }
         }
     }
