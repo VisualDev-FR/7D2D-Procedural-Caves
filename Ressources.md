@@ -8,6 +8,7 @@
 # Youtube
 
 * [Reinventing Minecraft world generation by Henrik Kniberg](https://www.youtube.com/watch?v=ob3VwY4JyzE)
+* [Math for Game Programmers Part 4 Digging with Perlin Worms](https://www.youtube.com/watch?v=Z8mAN378kIw)
 
 # Nexus-mods
 

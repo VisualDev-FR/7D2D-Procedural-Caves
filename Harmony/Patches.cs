@@ -112,10 +112,10 @@ namespace Harmony
                     return;
                 }
 
-                var vector = new Vector3(x, y, z);
+                var spawnPosition = new Vector3(x, y, z);
 
                 // Mob is above terrain; ignore.
-                if (vector.y > terrainHeight)
+                if (spawnPosition.y > terrainHeight)
                     return;
 
                 var biome = GameManager.Instance.World.Biomes.GetBiome(_chunkBiomeSpawnData.biomeId);
@@ -125,7 +125,7 @@ namespace Harmony
                 }
 
                 // Customize which spawning.xml entry to we want to use for spawns.
-                var caveType = vector.y < deepCaveThreshold ? "DeepCave" : "Cave";
+                var caveType = spawnPosition.y < deepCaveThreshold ? "DeepCave" : "Cave";
 
                 // Search for the biome_Cave spawn group. If not found, load the generic Cave one.
                 var biomeSpawnEntityGroupList = BiomeSpawningClass.list[biome.m_sBiomeName + "_" + caveType];
@@ -182,7 +182,7 @@ namespace Harmony
                 if (index < 0)
                     return;
 
-                var bb = new Bounds(vector, new Vector3(4f, 2.5f, 4f));
+                var bb = new Bounds(spawnPosition, new Vector3(4f, 2.5f, 4f));
                 GameManager.Instance.World.GetEntitiesInBounds(typeof(Entity), bb, spawnNearList);
                 var count = spawnNearList.Count;
                 spawnNearList.Clear();
@@ -192,20 +192,25 @@ namespace Harmony
 
                 var biomeSpawnEntityGroupData3 = biomeSpawnEntityGroupList.list[index];
                 var randomFromGroup = EntityGroups.GetRandomFromGroup(biomeSpawnEntityGroupData3.entityGroupRefName, ref lastClassId);
-                var spawnDeadChance = biomeSpawnEntityGroupData3.spawnDeadChance;
                 _chunkBiomeSpawnData.IncEntitiesSpawned(entityGroupName);
-                var entity = EntityFactory.CreateEntity(randomFromGroup, vector);
-                entity.SetSpawnerSource(EnumSpawnerSource.Dynamic, _chunkBiomeSpawnData.chunk.Key, entityGroupName);
-                var myEntity = entity as EntityAlive;
 
+                for (int i = 0; i < 10; i++)
+                {
+                    SpawnEntity(randomFromGroup, spawnPosition, _chunkBiomeSpawnData, entityGroupName);
+                }
+            }
+
+            private static void SpawnEntity(int id, Vector3 spawnPosition, ChunkAreaBiomeSpawnData _chunkBiomeSpawnData, string entityGroupName)
+            {
+                var entity = EntityFactory.CreateEntity(id, spawnPosition);
+                entity.SetSpawnerSource(EnumSpawnerSource.Dynamic, _chunkBiomeSpawnData.chunk.Key, entityGroupName);
+
+                var myEntity = entity as EntityAlive;
                 if (myEntity)
                     myEntity.SetSleeper();
 
-                Log.Out($"[Caves] Spawning: {myEntity.entityId} at {vector}");
+                Log.Out($"[Caves] Spawning: {myEntity.entityId} at {spawnPosition}");
                 GameManager.Instance.World.SpawnEntityInWorld(entity);
-
-                if (spawnDeadChance > 0f && gameRandom.RandomFloat < spawnDeadChance) entity.Kill(DamageResponse.New(true));
-
                 GameManager.Instance.World.DebugAddSpawnedEntity(entity);
             }
         }
