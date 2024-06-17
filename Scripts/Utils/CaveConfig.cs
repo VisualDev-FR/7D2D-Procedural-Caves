@@ -115,8 +115,13 @@ public static class CaveConfig
 
     public static bool isSolid = false;
 
+    public static int deepCaveThreshold = 30;
+
     public static int seed = int.Parse(GetPropertyValue("CaveConfiguration", "seed"));
 
+    public static string[] DeepCavePrefabs => GetPropertyValue("CaveConfiguration", "DeepCavePrefabs").Split(',');
+
+    public static string[] CavePOIs => GetPropertyValue("CaveConfiguration", "CavePOIs").Split(',');
 
     private static NoiseConfig InitFastNoiseZX()
     {
