@@ -16,6 +16,7 @@ xcopy *.dll %NAME%\ > nul
 xcopy README.md %NAME%\ > nul
 xcopy Caves %NAME%\Caves\ /s > nul
 xcopy Config %NAME%\Config\ /s > nul
+xcopy Prefabs %NAME%\Prefabs\ /s > nul
 xcopy ModInfo.xml %NAME%\ > nul
 
 7z.exe a "%NAME%.zip" %NAME% > nul

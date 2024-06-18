@@ -251,25 +251,24 @@ public static class LegacyCaveSystem
             return;
         }
 
-        var prefab = newPrefab.Clone();
-        prefab.RotateY(true, random.RandomRange(4));
+        newPrefab.RotateY(true, random.RandomRange(4));
 
         try
         {
             // Winter Project counter-sinks all prefabs -8 into the ground. However, for underground spawning, we want to avoid this, as they are already deep enough
             // Instead, temporarily replace the tag with a custom one, so that the Harmony patch for the CopyIntoLocal of the winter project won't execute.
-            var temp = prefab.Tags;
-            prefab.Tags = POITags.Parse("SKIP_HARMONY_COPY_INTO_LOCAL");
-            prefab.yOffset = 0;
-            prefab.CopyBlocksIntoChunkNoEntities(GameManager.Instance.World, chunk, prefabDestination,
+            var temp = newPrefab.Tags;
+            newPrefab.Tags = POITags.Parse("SKIP_HARMONY_COPY_INTO_LOCAL");
+            newPrefab.yOffset = 0;
+            newPrefab.CopyBlocksIntoChunkNoEntities(GameManager.Instance.World, chunk, prefabDestination,
                 true);
             var entityInstanceIds = new List<int>();
-            prefab.CopyEntitiesIntoChunkStub(chunk, prefabDestination, entityInstanceIds, true);
+            newPrefab.CopyEntitiesIntoChunkStub(chunk, prefabDestination, entityInstanceIds, true);
 
             // Trying to track a crash in something.
             //prefab.CopyIntoLocal(GameManager.Instance.World.ChunkClusters[0], destination, true, true);
             // Restore any of the tags that might have existed before.
-            prefab.Tags = temp;
+            newPrefab.Tags = temp;
             //  prefab.SnapTerrainToArea(GameManager.Instance.World.ChunkClusters[0], destination);
         }
         catch (Exception ex)
