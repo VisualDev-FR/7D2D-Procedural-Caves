@@ -194,10 +194,7 @@ namespace Harmony
                 var randomFromGroup = EntityGroups.GetRandomFromGroup(biomeSpawnEntityGroupData3.entityGroupRefName, ref lastClassId);
                 _chunkBiomeSpawnData.IncEntitiesSpawned(entityGroupName);
 
-                for (int i = 0; i < 10; i++)
-                {
-                    SpawnEntity(randomFromGroup, spawnPosition, _chunkBiomeSpawnData, entityGroupName);
-                }
+                SpawnEntity(randomFromGroup, spawnPosition, _chunkBiomeSpawnData, entityGroupName);
             }
 
             private static void SpawnEntity(int id, Vector3 spawnPosition, ChunkAreaBiomeSpawnData _chunkBiomeSpawnData, string entityGroupName)

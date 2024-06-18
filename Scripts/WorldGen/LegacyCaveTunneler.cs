@@ -5,9 +5,9 @@ public static class LegacyCaveSystem
 {
     private static BlockValue caveAir = new BlockValue((uint)Block.GetBlockByName("air").blockID);
 
-    private static BlockValue bottomCaveDecoration = new BlockValue((uint)Block.GetBlockByName("concreteShapes:cube").blockID);
+    private static BlockValue bottomCaveDecoration = new BlockValue((uint)Block.GetBlockByName("cntCaveFloorRandomLootHelper").blockID);
 
-    private static BlockValue topCaveDecoration = new BlockValue((uint)Block.GetBlockByName("concreteShapes:cube").blockID);
+    private static BlockValue topCaveDecoration = new BlockValue((uint)Block.GetBlockByName("cntCaveCeilingRandomLootHelper").blockID);
 
     private static GameRandom random => GameManager.Instance.World.GetGameRandom();
 
@@ -124,7 +124,7 @@ public static class LegacyCaveSystem
         // PlaceCaveEntrance(chunk);
         GeneratePrefabs(chunk);
 
-        /* // Decorate decorate the cave spots with blocks. Shrink the chunk loop by 1 on its edges so we can safely check surrounding blocks.
+        // Decorate decorate the cave spots with blocks. Shrink the chunk loop by 1 on its edges so we can safely check surrounding blocks.
         for (var chunkX = 1; chunkX < 15; chunkX++)
         {
             for (var chunkZ = 1; chunkZ < 15; chunkZ++)
@@ -172,7 +172,7 @@ public static class LegacyCaveSystem
                     chunk.SetBlock(GameManager.Instance.World, chunkX, chunkY, chunkZ, bottomBlock);
                 }
             }
-        } */
+        }
 
     }
 
@@ -208,10 +208,7 @@ public static class LegacyCaveSystem
         if (maxHeight < 1)
             maxHeight = 20;
 
-        var y = random.RandomRange(0, maxHeight);
-
-        if (y < 10)
-            y = 5;
+        var y = 0;
 
         var deepCaveThreshold = CaveConfig.deepCaveThreshold;
         var prefabDestination = Vector3i.zero;

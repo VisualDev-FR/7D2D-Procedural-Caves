@@ -111,7 +111,7 @@ public static class CaveConfig
 
     public static int caveHeight2D = 5;
 
-    public static int cavePos2D = 5;
+    public static int cavePos2D = 15;
 
     public static bool isSolid = false;
 
