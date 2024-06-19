@@ -176,74 +176,41 @@ public static class LegacyCaveSystem
 
     }
 
-    private static string SelectRandomPOI(int caveDeep, int deepCaveThreshold)
+    private static string SelectRandomPOI()
     {
-        if (caveDeep < deepCaveThreshold)
-        {
-            return CaveConfig.DeepCavePrefabs[random.RandomRange(0, CaveConfig.DeepCavePrefabs.Length)];
-        }
-        else
-        {
-            return CaveConfig.CavePOIs[random.RandomRange(0, CaveConfig.CavePOIs.Length)];
-        }
+        return CaveConfig.CavePOIs[random.RandomRange(0, CaveConfig.CavePOIs.Length)];
     }
 
     private static void GeneratePrefabs(Chunk chunk)
     {
-        var random = GameManager.Instance.World.GetGameRandom();
+        GameRandom random = GameManager.Instance.World.GetGameRandom();
+        string caveAirName = caveAir.Block.GetBlockName();
 
         // Random chance to place a prefab to try to sparse them out.
         if (random.RandomRange(0, 10) > 3)
             return;
 
-        // Grab a random range slightly smaller than the chunk. This is to help pad them away from each other.
-        var x = GameManager.Instance.World.GetGameRandom().RandomRange(0, 16);
-        var z = GameManager.Instance.World.GetGameRandom().RandomRange(0, 16);
+        Vector3i prefabDestination = Vector3i.zero;
 
-        var height = (int)chunk.GetHeight(x, z);
-        if (height < 20)
-            return;
+        int chunkX = GameManager.Instance.World.GetGameRandom().RandomRange(0, 16);
+        int chunkZ = GameManager.Instance.World.GetGameRandom().RandomRange(0, 16);
 
-        var maxHeight = height - 30;
-        if (maxHeight < 1)
-            maxHeight = 20;
-
-        var y = 0;
-
-        var deepCaveThreshold = CaveConfig.deepCaveThreshold;
-        var prefabDestination = Vector3i.zero;
-
-        for (var checkLocation = 0; checkLocation < 10; checkLocation++)
+        for (int chunkY = 0; chunkY < chunk.GetHeight(chunkX, chunkZ); chunkY++)
         {
-            var checkX = GameManager.Instance.World.GetGameRandom().RandomRange(0, 16);
-            var checkZ = GameManager.Instance.World.GetGameRandom().RandomRange(0, 16);
+            BlockValue upperBlock = chunk.GetBlock(chunkX, chunkY + 1, chunkZ);
 
-            if (maxHeight <= deepCaveThreshold)
-                continue;
-
-            var checkY = GameManager.Instance.World.GetGameRandom().RandomRange(deepCaveThreshold, maxHeight);
-            if (y < deepCaveThreshold)
-                checkY = GameManager.Instance.World.GetGameRandom().RandomRange(2, deepCaveThreshold);
-
-            var b = chunk.GetBlock(checkX, checkY, checkZ);
-
-            if (!b.isair) continue;
-
-            prefabDestination = chunk.ToWorldPos(new Vector3i(checkX, checkY, checkZ));
-            y = checkY;
-            break;
+            if (upperBlock.Block.GetBlockName() == caveAirName)
+            {
+                prefabDestination = chunk.ToWorldPos(new Vector3i(chunkX, chunkY, chunkZ));
+                break;
+            }
         }
 
         // Decide what kind of prefab to spawn in.
-        string strPOI = SelectRandomPOI(y, deepCaveThreshold);
+        string poiName = SelectRandomPOI();
+        Prefab newPrefab = FindOrCreatePrefab(poiName);
 
-        var newPrefab = FindOrCreatePrefab(strPOI);
-        if (newPrefab == null)
-        {
-            return;
-        }
-
-        if (prefabDestination == Vector3i.zero)
+        if (newPrefab == null || prefabDestination == Vector3i.zero)
         {
             return;
         }
@@ -254,23 +221,18 @@ public static class LegacyCaveSystem
         {
             // Winter Project counter-sinks all prefabs -8 into the ground. However, for underground spawning, we want to avoid this, as they are already deep enough
             // Instead, temporarily replace the tag with a custom one, so that the Harmony patch for the CopyIntoLocal of the winter project won't execute.
-            var temp = newPrefab.Tags;
+            var prefabTags = newPrefab.Tags;
             newPrefab.Tags = POITags.Parse("SKIP_HARMONY_COPY_INTO_LOCAL");
             newPrefab.yOffset = 0;
-            newPrefab.CopyBlocksIntoChunkNoEntities(GameManager.Instance.World, chunk, prefabDestination,
-                true);
+            newPrefab.CopyBlocksIntoChunkNoEntities(GameManager.Instance.World, chunk, prefabDestination, true);
+
             var entityInstanceIds = new List<int>();
             newPrefab.CopyEntitiesIntoChunkStub(chunk, prefabDestination, entityInstanceIds, true);
-
-            // Trying to track a crash in something.
-            //prefab.CopyIntoLocal(GameManager.Instance.World.ChunkClusters[0], destination, true, true);
-            // Restore any of the tags that might have existed before.
-            newPrefab.Tags = temp;
-            //  prefab.SnapTerrainToArea(GameManager.Instance.World.ChunkClusters[0], destination);
+            newPrefab.Tags = prefabTags;
         }
         catch (Exception ex)
         {
-            Debug.Log("Warning: Could not copy over prefab: " + strPOI + " " + ex);
+            Debug.Log("Warning: Could not copy over prefab: " + poiName + " " + ex);
         }
 
     }
