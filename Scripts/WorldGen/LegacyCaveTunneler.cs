@@ -218,18 +218,11 @@ public static class LegacyCaveSystem
         if (prefab == null || prefabWorldPosition == Vector3i.zero)
             return;
 
-        printChunkNeighbors(chunk);
-
         try
         {
-            // prefab.CopyIntoLocal(GameManager.Instance.World.ChunkCache, prefabWorldPos, true, true, new FastTags());
-            // prefab.RotateY(true, random.RandomRange(4));
+            // PrefabInstance.CopyIntoChunk
             var prefabTags = prefab.Tags;
             prefab.CopyBlocksIntoChunkNoEntities(GameManager.Instance.World, chunk, prefabWorldPosition, true);
-
-            // TODO: try this...
-            // prefab.SnapTerrainToArea
-
             bool bSpawnEnemies = GameManager.Instance.World.IsEditor() || GameStats.GetBool(EnumGameStats.IsSpawnEnemies);
             var entityInstanceIds = new List<int>();
             prefab.CopyEntitiesIntoChunkStub(chunk, prefabWorldPosition, entityInstanceIds, true);
@@ -252,8 +245,8 @@ public static class LegacyCaveSystem
             new Vector3i(chunkPos.x, chunkPos.y, chunkPos.z - 1),
         };
 
-        Log.Out($"[Caves] chunkID={chunk.GetHashCode()}");
-        Log.Out($"[Caves] chunkPos={chunk.ChunkPos}");
+        // Log.Out($"[Caves] chunkID={chunk.GetHashCode()}");
+        // Log.Out($"[Caves] chunkPos={chunk.ChunkPos}");
 
         var neighbors = new List<Chunk>();
 

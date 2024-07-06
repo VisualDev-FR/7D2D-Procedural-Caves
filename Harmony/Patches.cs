@@ -1,7 +1,10 @@
 using HarmonyLib;
 using UnityEngine;
 using System.Collections.Generic;
-
+using System;
+using System.IO;
+using System.Linq;
+using System.Xml.Linq;
 
 namespace Harmony
 {
@@ -230,10 +233,82 @@ namespace Harmony
         [HarmonyPatch(new[] { typeof(World), typeof(Chunk), typeof(bool) })]
         public class CaveProjectDynamicPrefabDecorator
         {
-            public static void Postfix(Chunk _chunk)
+            public static void Postfix(DynamicPrefabDecorator __instance, Chunk _chunk)
             {
-                // Log.Out("[Caves] " + StackTraceUtility.ExtractStackTrace());
-                LegacyCaveSystem.AddDecorationsToCave(_chunk);
+                // LegacyCaveSystem.AddDecorationsToCave(_chunk);
+            }
+        }
+
+        [HarmonyPatch(typeof(DynamicPrefabDecorator))]
+        [HarmonyPatch("Load")]
+        public class DynamicPrefabDecorator_Load
+        {
+            public static void Postfix(DynamicPrefabDecorator __instance, string _path)
+            {
+                if (!SdFile.Exists(_path + "/cavePrefabs.xml"))
+                {
+                    Log.Out($"[Caves] cavePrefabs.xml not found in '{_path}'");
+                    return;
+                }
+                XmlFile xmlFile;
+                try
+                {
+                    __instance.id = 0;
+                    xmlFile = new XmlFile(_path, "cavePrefabs.xml");
+                }
+                catch (Exception ex)
+                {
+                    Log.Error("Loading prefabs xml file for level '" + Path.GetFileName(_path) + "': " + ex.Message);
+                    Log.Exception(ex);
+                    return;
+                }
+                int i = 0;
+                int totalPrefabs = xmlFile.XmlDoc.Root.Elements("decoration").Count();
+                LocalPlayerUI ui = LocalPlayerUI.primaryUI;
+                bool progressWindowOpen = (bool)ui && ui.windowManager.IsWindowOpen(XUiC_ProgressWindow.ID);
+                foreach (XElement item in xmlFile.XmlDoc.Root.Elements("decoration"))
+                {
+                    try
+                    {
+                        i++;
+                        if (item.HasAttribute("name"))
+                        {
+                            string attribute = item.GetAttribute("name");
+                            Vector3i vector3i = Vector3i.Parse(item.GetAttribute("position"));
+                            StringParsers.TryParseBool(item.GetAttribute("y_is_groundlevel"), out var y_is_groundlevel);
+                            byte rotation = 0;
+                            if (item.HasAttribute("rotation"))
+                            {
+                                rotation = byte.Parse(item.GetAttribute("rotation"));
+                            }
+                            Prefab prefabRotated = __instance.GetPrefabRotated(attribute, rotation);
+                            if (prefabRotated == null)
+                            {
+                                Log.Warning("Could not load prefab '" + attribute + "'. Skipping it");
+                                continue;
+                            }
+                            if (y_is_groundlevel)
+                            {
+                                vector3i.y += prefabRotated.yOffset;
+                            }
+                            if (prefabRotated.bTraderArea)
+                            {
+                                __instance.AddTrader(new TraderArea(vector3i, prefabRotated.size, prefabRotated.TraderAreaProtect, prefabRotated.TeleportVolumes));
+                            }
+                            PrefabInstance prefabInstance = new PrefabInstance(__instance.id++, prefabRotated.location, vector3i, rotation, prefabRotated, 0);
+                            __instance.AddPrefab(prefabInstance, prefabInstance.prefab.HasQuestTag());
+                        }
+                    }
+                    catch (Exception ex2)
+                    {
+                        Log.Error("Loading prefabs xml file for level '" + Path.GetFileName(_path) + "': " + ex2.Message);
+                        Log.Exception(ex2);
+                    }
+                }
+                __instance.SortPrefabs();
+
+                Log.Out($"[Caves] success loading of cavePrefabs");
+                return;
             }
         }
     }
