@@ -18,7 +18,7 @@ taskkill /IM 7DaysToDie.exe /F >nul 2>&1
 
 cd "%PATH_7D2D%"
 
-start "" "%PATH_7D2D%\7DaysToDie" -force-d3d11 -disablenativeinput -nogs -noeac
+start "" "%PATH_7D2D%\7DaysToDie" -noeac
 
 del /Q "%APPDATA%\7DaysToDie\Saves\Navezgane\Caves\Region"
 
