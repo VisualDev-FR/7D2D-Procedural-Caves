@@ -23,8 +23,9 @@
 				<property name="GainY" value="0.5"/>
 				<property name="FrequencyY" value="0.02"/>
 
-				<property name="CavePOIs" value="Chiko_SCcave_01,Chiko_SCcave_02,Chiko_SCcave_03,Chiko_SCcave_04,Chiko_SCcave_05,Chiko_SCcave_06,Chiko_SCcave_07" />
-				<property name="DeepCavePrefabs" value="Chiko_SCcave_08,Chiko_SCcave_09,Chiko_SCcave_11,Chiko_SCcave_12,Chiko_SCcave_13,Chiko_SCcave_14" />
+				<!-- <property name="DeepCavePrefabs" value="Chiko_SCcave_08,Chiko_SCcave_09,Chiko_SCcave_11,Chiko_SCcave_12,Chiko_SCcave_13,Chiko_SCcave_14" /> -->
+				<!-- <property name="CavePOIs" value="myPrefab,Chiko_SCcave_01,Chiko_SCcave_02,Chiko_SCcave_03,Chiko_SCcave_04,Chiko_SCcave_05,Chiko_SCcave_06,Chiko_SCcave_07,Chiko_SCcave_08,Chiko_SCcave_09,Chiko_SCcave_11,Chiko_SCcave_12,Chiko_SCcave_13,Chiko_SCcave_14" /> -->
+				<property name="CavePOIs" value="CaveBunker_01,Chiko_SCcave_01" />
 
 			</property>
 		</block>

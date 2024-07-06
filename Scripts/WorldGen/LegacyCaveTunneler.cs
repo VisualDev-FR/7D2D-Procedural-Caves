@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
+using HarmonyLib;
 using UnityEngine;
 public static class LegacyCaveSystem
 {
@@ -190,7 +192,8 @@ public static class LegacyCaveSystem
         if (random.RandomRange(0, 10) > 3)
             return;
 
-        Vector3i prefabDestination = Vector3i.zero;
+        Vector3i prefabWorldPos = Vector3i.zero;
+        Vector3i prefabChunkPos = Vector3i.zero;
 
         int chunkX = GameManager.Instance.World.GetGameRandom().RandomRange(0, 16);
         int chunkZ = GameManager.Instance.World.GetGameRandom().RandomRange(0, 16);
@@ -201,40 +204,91 @@ public static class LegacyCaveSystem
 
             if (upperBlock.Block.GetBlockName() == caveAirName)
             {
-                prefabDestination = chunk.ToWorldPos(new Vector3i(chunkX, chunkY, chunkZ));
+                prefabChunkPos = new Vector3i(chunkX, chunkY, chunkZ);
+                prefabWorldPos = chunk.ToWorldPos(prefabChunkPos);
                 break;
             }
         }
 
         // Decide what kind of prefab to spawn in.
         string poiName = SelectRandomPOI();
-        Prefab newPrefab = FindOrCreatePrefab(poiName);
+        Prefab prefab = FindOrCreatePrefab(poiName);
 
-        if (newPrefab == null || prefabDestination == Vector3i.zero)
-        {
+        if (prefab == null || prefabWorldPos == Vector3i.zero)
             return;
-        }
 
-        newPrefab.RotateY(true, random.RandomRange(4));
 
         try
         {
-            // Winter Project counter-sinks all prefabs -8 into the ground. However, for underground spawning, we want to avoid this, as they are already deep enough
-            // Instead, temporarily replace the tag with a custom one, so that the Harmony patch for the CopyIntoLocal of the winter project won't execute.
-            var prefabTags = newPrefab.Tags;
-            newPrefab.Tags = POITags.Parse("SKIP_HARMONY_COPY_INTO_LOCAL");
-            newPrefab.yOffset = 0;
-            newPrefab.CopyBlocksIntoChunkNoEntities(GameManager.Instance.World, chunk, prefabDestination, true);
+            prefab.CopyIntoLocal(GameManager.Instance.World.ChunkClusters[0], prefabWorldPos, true, true, new FastTags());
+            // // prefab.RotateY(true, random.RandomRange(4));
+            // var prefabTags = prefab.Tags;
+            // prefab.CopyBlocksIntoChunkNoEntities(GameManager.Instance.World, chunk, prefabWorldPos, true);
 
-            var entityInstanceIds = new List<int>();
-            newPrefab.CopyEntitiesIntoChunkStub(chunk, prefabDestination, entityInstanceIds, true);
-            newPrefab.Tags = prefabTags;
+            // var entityInstanceIds = new List<int>();
+            // prefab.CopyEntitiesIntoChunkStub(chunk, prefabWorldPos, entityInstanceIds, true);
+            // prefab.Tags = prefabTags;
         }
         catch (Exception ex)
         {
             Debug.Log("Warning: Could not copy over prefab: " + poiName + " " + ex);
         }
+    }
 
+    private static List<Chunk> GetChunkNeighbors(Chunk chunk)
+    {
+        Vector3i chunkPos = chunk.ToWorldPos();
+        World world = GameManager.Instance.World;
+
+        Vector3i[] positions = new Vector3i[4]{
+            new Vector3i(chunkPos.x + 16, chunkPos.y, chunkPos.z),
+            new Vector3i(chunkPos.x - 1, chunkPos.y, chunkPos.z),
+            new Vector3i(chunkPos.x, chunkPos.y, chunkPos.z + 16),
+            new Vector3i(chunkPos.x, chunkPos.y, chunkPos.z - 1),
+        };
+
+        Log.Out($"[Caves] chunkID={chunk.GetHashCode()}");
+        Log.Out($"[Caves] chunkPos={chunk.ChunkPos}");
+
+        var neighbors = new List<Chunk>();
+
+        for (int i = 0; i < 4; i++)
+        {
+            if (world.GetChunkFromWorldPos(positions[i]) is Chunk neighbor)
+            {
+                neighbors.Add(neighbor);
+            }
+        }
+
+        return neighbors;
+    }
+
+    private static void printChunkNeighbors(Chunk chunk)
+    {
+        Vector3i chunkPos = chunk.ToWorldPos();
+        World world = GameManager.Instance.World;
+
+        Vector3i[] neighbors = new Vector3i[4]{
+            new Vector3i(chunkPos.x + 16, chunkPos.y, chunkPos.z),
+            new Vector3i(chunkPos.x - 1, chunkPos.y, chunkPos.z),
+            new Vector3i(chunkPos.x, chunkPos.y, chunkPos.z + 16),
+            new Vector3i(chunkPos.x, chunkPos.y, chunkPos.z - 1),
+        };
+
+        Log.Out($"[Caves] chunkID={chunk.GetHashCode()}");
+        Log.Out($"[Caves] chunkPos={chunk.ChunkPos}");
+
+        for (int i = 0; i < 4; i++)
+        {
+            if (!(world.GetChunkFromWorldPos(neighbors[i]) is Chunk neighbor))
+            {
+                Log.Out($"[Caves] neighbors[{i}]=null");
+            }
+            else
+            {
+                Log.Out($"[Caves] neighbors[{i}]={neighbor.GetHashCode()}");
+            }
+        }
     }
 
     public static Prefab FindOrCreatePrefab(string strPOIname)

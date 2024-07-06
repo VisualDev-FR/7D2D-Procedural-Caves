@@ -119,7 +119,7 @@ public static class CaveConfig
 
     public static int seed = int.Parse(GetPropertyValue("CaveConfiguration", "seed"));
 
-    public static string[] DeepCavePrefabs => GetPropertyValue("CaveConfiguration", "DeepCavePrefabs").Split(',');
+    // public static string[] DeepCavePrefabs => GetPropertyValue("CaveConfiguration", "DeepCavePrefabs").Split(',');
 
     public static string[] CavePOIs => GetPropertyValue("CaveConfiguration", "CavePOIs").Split(',');
 
