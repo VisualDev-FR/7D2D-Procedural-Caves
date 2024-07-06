@@ -4,12 +4,12 @@ using System;
 public class ConsoleCmdCaves : ConsoleCmdAbstract
 {
 
-    protected override string[] getCommands()
+    public override string[] getCommands()
     {
         return new string[1] { "caves" };
     }
 
-    protected override string getDescription()
+    public override string getDescription()
     {
         return "Cave system commands";
     }
@@ -133,7 +133,7 @@ public class ConsoleCmdCaves : ConsoleCmdAbstract
         ChunkCluster chunkCache = world.ChunkCache;
         ChunkProviderGenerateWorld chunkProviderGenerateWorld = chunkCache.ChunkProvider as ChunkProviderGenerateWorld;
 
-        HashSetLong hashSetLong = chunkProviderGenerateWorld.ResetAllChunks(new HashSetLong());
+        HashSetLong hashSetLong = chunkProviderGenerateWorld.ResetAllChunks(ChunkProtectionLevel.None);
 
         if (chunkProviderGenerateWorld == null)
         {

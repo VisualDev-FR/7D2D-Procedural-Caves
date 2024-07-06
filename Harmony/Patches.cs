@@ -232,6 +232,7 @@ namespace Harmony
         {
             public static void Postfix(Chunk _chunk)
             {
+                // Log.Out("[Caves] " + StackTraceUtility.ExtractStackTrace());
                 LegacyCaveSystem.AddDecorationsToCave(_chunk);
             }
         }

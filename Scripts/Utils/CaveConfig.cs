@@ -222,7 +222,7 @@ public static class CaveConfig
         if (ConfigurationFeatureBlock.Block.Properties.Classes.ContainsKey(strClass))
         {
             var dynamicProperties3 = ConfigurationFeatureBlock.Block.Properties.Classes[strClass];
-            foreach (var keyValuePair in dynamicProperties3.Values.Dict.Dict)
+            foreach (var keyValuePair in dynamicProperties3.Values.Dict)
                 if (string.Equals(keyValuePair.Key, strFeature, StringComparison.CurrentCultureIgnoreCase))
                     result = StringParsers.ParseBool(dynamicProperties3.Values[keyValuePair.Key]);
         }
@@ -245,7 +245,7 @@ public static class CaveConfig
         if (ConfigurationFeatureBlock.Block.Properties.Classes.ContainsKey(strClass))
         {
             var dynamicProperties3 = ConfigurationFeatureBlock.Block.Properties.Classes[strClass];
-            foreach (var keyValuePair in dynamicProperties3.Values.Dict.Dict)
+            foreach (var keyValuePair in dynamicProperties3.Values.Dict)
                 if (keyValuePair.Key == strFeature)
                     return keyValuePair.Value.ToString();
         }

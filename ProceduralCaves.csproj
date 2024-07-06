@@ -32,7 +32,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="0Harmony">
-      <HintPath>$(PATH_7D2D)\7DaysToDie_Data\Managed\0Harmony.dll</HintPath>
+      <HintPath>$(PATH_7D2D)\Mods\0_TFP_Harmony\0Harmony.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Assembly-CSharp">

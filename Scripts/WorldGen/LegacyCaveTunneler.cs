@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography.X509Certificates;
 using HarmonyLib;
 using UnityEngine;
 public static class LegacyCaveSystem
@@ -11,7 +12,7 @@ public static class LegacyCaveSystem
 
     private static BlockValue topCaveDecoration = new BlockValue((uint)Block.GetBlockByName("cntCaveCeilingRandomLootHelper").blockID);
 
-    private static GameRandom random => GameManager.Instance.World.GetGameRandom();
+    // private static GameRandom random => GameManager.Instance.World.GetGameRandom();
 
     public static void Add2DCaveToChunk(Chunk chunk)
     {
@@ -123,8 +124,10 @@ public static class LegacyCaveSystem
 
         var chunkPos = chunk.GetWorldPos();
 
+        GameRandom random = Utils.RandomFromSeedOnPos(chunk.ChunkPos.x, chunk.ChunkPos.z, GameManager.Instance.World.Seed);
+
         // PlaceCaveEntrance(chunk);
-        GeneratePrefabs(chunk);
+        GeneratePrefabs(chunk, random);
 
         // Decorate decorate the cave spots with blocks. Shrink the chunk loop by 1 on its edges so we can safely check surrounding blocks.
         for (var chunkX = 1; chunkX < 15; chunkX++)
@@ -175,24 +178,22 @@ public static class LegacyCaveSystem
                 }
             }
         }
-
     }
 
-    private static string SelectRandomPOI()
+    private static string SelectRandomPOI(GameRandom random)
     {
         return CaveConfig.CavePOIs[random.RandomRange(0, CaveConfig.CavePOIs.Length)];
     }
 
-    private static void GeneratePrefabs(Chunk chunk)
+    private static void GeneratePrefabs(Chunk chunk, GameRandom random)
     {
-        GameRandom random = GameManager.Instance.World.GetGameRandom();
         string caveAirName = caveAir.Block.GetBlockName();
 
         // Random chance to place a prefab to try to sparse them out.
         if (random.RandomRange(0, 10) > 3)
             return;
 
-        Vector3i prefabWorldPos = Vector3i.zero;
+        Vector3i prefabWorldPosition = Vector3i.zero;
         Vector3i prefabChunkPos = Vector3i.zero;
 
         int chunkX = GameManager.Instance.World.GetGameRandom().RandomRange(0, 16);
@@ -205,29 +206,33 @@ public static class LegacyCaveSystem
             if (upperBlock.Block.GetBlockName() == caveAirName)
             {
                 prefabChunkPos = new Vector3i(chunkX, chunkY, chunkZ);
-                prefabWorldPos = chunk.ToWorldPos(prefabChunkPos);
+                prefabWorldPosition = chunk.ToWorldPos(prefabChunkPos);
                 break;
             }
         }
 
         // Decide what kind of prefab to spawn in.
-        string poiName = SelectRandomPOI();
+        string poiName = SelectRandomPOI(random);
         Prefab prefab = FindOrCreatePrefab(poiName);
 
-        if (prefab == null || prefabWorldPos == Vector3i.zero)
+        if (prefab == null || prefabWorldPosition == Vector3i.zero)
             return;
 
+        printChunkNeighbors(chunk);
 
         try
         {
-            prefab.CopyIntoLocal(GameManager.Instance.World.ChunkClusters[0], prefabWorldPos, true, true, new FastTags());
-            // // prefab.RotateY(true, random.RandomRange(4));
-            // var prefabTags = prefab.Tags;
-            // prefab.CopyBlocksIntoChunkNoEntities(GameManager.Instance.World, chunk, prefabWorldPos, true);
+            // prefab.CopyIntoLocal(GameManager.Instance.World.ChunkCache, prefabWorldPos, true, true, new FastTags());
+            // prefab.RotateY(true, random.RandomRange(4));
+            var prefabTags = prefab.Tags;
+            prefab.CopyBlocksIntoChunkNoEntities(GameManager.Instance.World, chunk, prefabWorldPosition, true);
 
-            // var entityInstanceIds = new List<int>();
-            // prefab.CopyEntitiesIntoChunkStub(chunk, prefabWorldPos, entityInstanceIds, true);
-            // prefab.Tags = prefabTags;
+            // TODO: try this...
+            // prefab.SnapTerrainToArea
+
+            bool bSpawnEnemies = GameManager.Instance.World.IsEditor() || GameStats.GetBool(EnumGameStats.IsSpawnEnemies);
+            var entityInstanceIds = new List<int>();
+            prefab.CopyEntitiesIntoChunkStub(chunk, prefabWorldPosition, entityInstanceIds, true);
         }
         catch (Exception ex)
         {
@@ -305,7 +310,8 @@ public static class LegacyCaveSystem
         prefab.LoadXMLData(location);
 
         if (string.IsNullOrEmpty(prefab.PrefabName))
-            prefab.PrefabName = strPOIname;
+            // prefab.PrefabName = strPOIname;
+            return null;
 
         return prefab;
     }
