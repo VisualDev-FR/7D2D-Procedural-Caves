@@ -246,6 +246,8 @@ namespace Harmony
 
             private static XmlFile ReadCavePrefabsDatas(string _path)
             {
+                Log.Out($"[caves] try calling c++ dll");
+                Log.Out($"[caves] addtion cpp 660 + 6 = {Builder.Ajouter(660, 6)}");
                 if (!SdFile.Exists(_path + "/cavePrefabs.xml"))
                 {
                     Log.Out($"[Caves] cavePrefabs.xml not found in '{_path}'");
