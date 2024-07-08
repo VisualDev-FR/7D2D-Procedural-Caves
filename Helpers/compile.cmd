@@ -2,8 +2,6 @@
 
 set NAME=ProceduralCaves
 
-g++ -shared -o lib.dll cpp\lib.cpp -m64
-
 dotnet build --no-incremental .\%NAME%.csproj
 
 if ERRORLEVEL 1 exit /b 1
@@ -14,7 +12,6 @@ if exist ".\%NAME%" rmdir ".\%NAME%" /s /q
 
 MKDIR .\%NAME%
 
-xcopy lib.dll %NAME%\Plugins\x86_64\ > nul
 xcopy ProceduralCaves.dll %NAME%\ > nul
 xcopy README.md %NAME%\ > nul
 xcopy Caves %NAME%\Caves\ /s > nul

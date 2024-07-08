@@ -202,7 +202,7 @@ public static class CaveBuilder
             }
         }
 
-        Console.WriteLine($"{i + 1} iterations done.");
+        // Console.WriteLine($"{i + 1} iterations done.");
 
         return !rect.OverLaps2D(others, MAP_SIZE, MAP_OFFSET);
     }
