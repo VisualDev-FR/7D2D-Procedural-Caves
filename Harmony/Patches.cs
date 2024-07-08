@@ -243,61 +243,71 @@ namespace Harmony
         [HarmonyPatch("Load")]
         public class DynamicPrefabDecorator_Load
         {
-            public static void Postfix(DynamicPrefabDecorator __instance, string _path)
+
+            private static XmlFile ReadCavePrefabsDatas(string _path)
             {
                 if (!SdFile.Exists(_path + "/cavePrefabs.xml"))
                 {
                     Log.Out($"[Caves] cavePrefabs.xml not found in '{_path}'");
-                    return;
+                    return null;
                 }
                 XmlFile xmlFile;
                 try
                 {
-                    __instance.id = 0;
                     xmlFile = new XmlFile(_path, "cavePrefabs.xml");
                 }
                 catch (Exception ex)
                 {
-                    Log.Error("Loading prefabs xml file for level '" + Path.GetFileName(_path) + "': " + ex.Message);
+                    Log.Error("[Caves] Loading cavePrefabs.xml file for level '" + Path.GetFileName(_path) + "': " + ex.Message);
                     Log.Exception(ex);
+                    return null;
+                }
+
+                return xmlFile;
+            }
+
+            private static void LoadCavePrefab(DynamicPrefabDecorator __instance, XElement prefabEntry)
+            {
+                if (!prefabEntry.HasAttribute("name"))
+                    return;
+
+                Vector3i prefabPosition = Vector3i.Parse(prefabEntry.GetAttribute("position"));
+                string prefabName = prefabEntry.GetAttribute("name");
+                byte prefabRotation = 0;
+
+                if (prefabEntry.HasAttribute("rotation"))
+                    prefabRotation = byte.Parse(prefabEntry.GetAttribute("rotation"));
+
+                Prefab prefabRotated = __instance.GetPrefabRotated(prefabName, prefabRotation);
+
+                if (prefabRotated == null)
+                {
+                    Log.Warning("Could not load prefab '" + prefabName + "'. Skipping it");
                     return;
                 }
+
+                if (prefabRotated.bTraderArea)
+                    __instance.AddTrader(new TraderArea(prefabPosition, prefabRotated.size, prefabRotated.TraderAreaProtect, prefabRotated.TeleportVolumes));
+
+                PrefabInstance prefabInstance = new PrefabInstance(__instance.id++, prefabRotated.location, prefabPosition, prefabRotation, prefabRotated, 0);
+                __instance.AddPrefab(prefabInstance, prefabInstance.prefab.HasQuestTag());
+            }
+
+            public static void Postfix(DynamicPrefabDecorator __instance, string _path)
+            {
+                XmlFile xmlFile = ReadCavePrefabsDatas(_path);
+
+                if (xmlFile == null)
+                    return;
+
                 int i = 0;
-                int totalPrefabs = xmlFile.XmlDoc.Root.Elements("decoration").Count();
-                LocalPlayerUI ui = LocalPlayerUI.primaryUI;
-                bool progressWindowOpen = (bool)ui && ui.windowManager.IsWindowOpen(XUiC_ProgressWindow.ID);
-                foreach (XElement item in xmlFile.XmlDoc.Root.Elements("decoration"))
+
+                foreach (XElement prefabEntry in xmlFile.XmlDoc.Root.Elements("decoration"))
                 {
                     try
                     {
                         i++;
-                        if (item.HasAttribute("name"))
-                        {
-                            string attribute = item.GetAttribute("name");
-                            Vector3i vector3i = Vector3i.Parse(item.GetAttribute("position"));
-                            StringParsers.TryParseBool(item.GetAttribute("y_is_groundlevel"), out var y_is_groundlevel);
-                            byte rotation = 0;
-                            if (item.HasAttribute("rotation"))
-                            {
-                                rotation = byte.Parse(item.GetAttribute("rotation"));
-                            }
-                            Prefab prefabRotated = __instance.GetPrefabRotated(attribute, rotation);
-                            if (prefabRotated == null)
-                            {
-                                Log.Warning("Could not load prefab '" + attribute + "'. Skipping it");
-                                continue;
-                            }
-                            if (y_is_groundlevel)
-                            {
-                                vector3i.y += prefabRotated.yOffset;
-                            }
-                            if (prefabRotated.bTraderArea)
-                            {
-                                __instance.AddTrader(new TraderArea(vector3i, prefabRotated.size, prefabRotated.TraderAreaProtect, prefabRotated.TeleportVolumes));
-                            }
-                            PrefabInstance prefabInstance = new PrefabInstance(__instance.id++, prefabRotated.location, vector3i, rotation, prefabRotated, 0);
-                            __instance.AddPrefab(prefabInstance, prefabInstance.prefab.HasQuestTag());
-                        }
+                        LoadCavePrefab(__instance, prefabEntry);
                     }
                     catch (Exception ex2)
                     {
