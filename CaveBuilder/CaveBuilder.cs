@@ -1,27 +1,72 @@
-using System;
+﻿using System;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Runtime.Versioning;
 using System.Collections.Generic;
 
 
-public class Point
+public class Rectangle
 {
+    public const int OVERLAP_MARGIN = 50;
+
     public int x;
 
     public int y;
 
-    public Point(int x, int y)
+    public int z;
+
+    public int sizeX = 50;
+
+    public int sizeY = 50;
+
+    public int sizeZ = 50;
+
+    public int rotation = 1;
+
+    public bool OverLaps2D(Rectangle other, int map_size, int map_offset)
     {
-        this.x = x;
-        this.y = y;
+        // is under left border
+        if (x < map_offset)
+            return true;
+
+        // is under top border
+        if (z < map_offset)
+            return true;
+
+        // is over right border
+        if (x + sizeX >= map_size - map_offset)
+            return true;
+
+        // is over bottom border
+        if (z + sizeZ >= map_size - map_offset)
+            return true;
+
+        if (x + sizeX + OVERLAP_MARGIN < other.x || other.x + other.sizeX + OVERLAP_MARGIN < x)
+            return false;
+
+        if (z + sizeZ + OVERLAP_MARGIN < other.z || other.z + other.sizeZ + OVERLAP_MARGIN < z)
+            return false;
+
+        return true;
+    }
+
+    public bool OverLaps2D(List<Rectangle> others, int map_size, int map_offset)
+    {
+        foreach (var point in others)
+        {
+            if (OverLaps2D(point, map_size, map_offset))
+                return true;
+        }
+
+        return false;
     }
 
     public PointF ToPointF()
     {
-        return new PointF(x, y);
+        return new PointF(x, z);
     }
 }
+
 
 public class Edge : IComparable<Edge>
 {
@@ -31,19 +76,21 @@ public class Edge : IComparable<Edge>
 
     public float Weight { get; set; }
 
-    public Point StartPoint { get; }
+    public Rectangle StartPoint { get; }
 
-    public Point EndPoint { get; }
+    public Rectangle EndPoint { get; }
 
     private float GetWeight()
     {
-        return MathF.Sqrt(
+        float euclidianDist = MathF.Sqrt(
               MathF.Pow(StartPoint.x - EndPoint.x, 2)
-            + MathF.Pow(StartPoint.y - EndPoint.y, 2)
+            + MathF.Pow(StartPoint.z - EndPoint.z, 2)
         );
+
+        return euclidianDist; // MathF.Abs(StartPoint.sizeX * StartPoint.sizeZ - EndPoint.sizeX * EndPoint.sizeZ);
     }
 
-    public Edge(int _start, int _end, Point _startPoint, Point _endPoint)
+    public Edge(int _start, int _end, Rectangle _startPoint, Rectangle _endPoint)
     {
         Start = _start;
         End = _end;
@@ -110,23 +157,25 @@ public class UnionFind
 
 
 [SupportedOSPlatform("windows")]
-public static class Program
+public static class CaveBuilder
 {
     static readonly int SEED = new Random().Next();
 
-    const int SIZE = 200;
+    const int MAP_SIZE = 6144;
 
-    const float POINT_WIDTH = SIZE / 200;
+    const int MAP_OFFSET = 200;
 
-    const float EDGE_WIDTH = SIZE / 2000;
+    const float POINT_WIDTH = 5;
 
-    const int POINTS_COUNT = SIZE / 5;
+    const float EDGE_WIDTH = MAP_SIZE / 2000;
+
+    const int POINTS_COUNT = MAP_SIZE / 5;
 
     static readonly Random rand = new Random(SEED);
 
-    static readonly Color POINT_COLOR = Color.Red;
+    static readonly Color POINT_COLOR = Color.Green;
 
-    static readonly Color EDGE_COLOR = Color.Black;
+    static readonly Color EDGE_COLOR = Color.DarkGray;
 
     private static FastNoiseLite GetNoise()
     {
@@ -135,25 +184,52 @@ public static class Program
         return noise;
     }
 
-    private static List<Point> GetPoints(int count)
+    private static bool checkOverlaps(Rectangle rect, List<Rectangle> others)
     {
-        var points = new List<Point>();
+        for (int i = 0; i < 100; i++)
+        {
+            if (rect.OverLaps2D(others, MAP_SIZE, MAP_OFFSET))
+            {
+                rect.x = rand.Next(0, MAP_SIZE);
+                rect.z = rand.Next(0, MAP_SIZE);
+                rect.z = rand.Next(0, MAP_SIZE);
+            }
+        }
+
+        return !rect.OverLaps2D(others, MAP_SIZE, MAP_OFFSET);
+    }
+
+    private static List<Rectangle> GetRectangles(int count)
+    {
+        var points = new List<Rectangle>();
 
         for (int i = 0; i < count; i++)
         {
-            points.Add(new Point(rand.Next(0, SIZE), rand.Next(0, SIZE)));
+            var point = new Rectangle()
+            {
+                x = rand.Next(0, MAP_SIZE),
+                y = rand.Next(0, MAP_SIZE),
+                z = rand.Next(0, MAP_SIZE),
+                sizeX = rand.Next(8, 100),
+                sizeZ = rand.Next(8, 100)
+            };
+
+            if (!point.OverLaps2D(points, MAP_SIZE, MAP_OFFSET))
+                points.Add(point);
         }
+
+        Console.WriteLine($"{points.Count} points added");
 
         return points;
     }
 
-    public static void DrawPoints(Graphics graph, List<Point> points)
+    public static void DrawPoints(Graphics graph, List<Rectangle> points)
     {
         using Pen pen = new Pen(POINT_COLOR, POINT_WIDTH);
 
         foreach (var point in points)
         {
-            graph.DrawEllipse(pen, point.x, point.y, 1, 1);
+            graph.DrawRectangle(pen, point.x, point.z, point.sizeX, point.sizeZ);
         }
     }
 
@@ -170,7 +246,7 @@ public static class Program
         }
     }
 
-    public static List<Edge> KruskalMST(List<Point> points)
+    public static List<Edge> KruskalMST(List<Rectangle> points)
     {
         List<Edge> edges = new List<Edge>();
 
@@ -205,15 +281,15 @@ public static class Program
     {
         int pointCounts = args.Length > 1 ? int.Parse(args[1]) : POINTS_COUNT;
 
-        var points = GetPoints(pointCounts);
+        var points = GetRectangles(pointCounts);
 
         List<Edge> edges = KruskalMST(points);
 
-        using Bitmap b = new Bitmap(SIZE, SIZE);
+        using Bitmap b = new Bitmap(MAP_SIZE, MAP_SIZE);
 
         using (Graphics g = Graphics.FromImage(b))
         {
-            g.Clear(Color.White);
+            g.Clear(Color.Black);
             DrawEdges(g, edges);
             DrawPoints(g, points);
         }
@@ -221,7 +297,7 @@ public static class Program
         b.Save(@"graph.png", ImageFormat.Png);
     }
 
-    private static List<Edge> WormPathing(Point startPoint, Point endPoint)
+    private static List<Edge> WormPathing(Rectangle startPoint, Rectangle endPoint)
     {
         var edges = new List<Edge>
         {
@@ -235,12 +311,17 @@ public static class Program
         for (int i = 0; i < n; i++)
         {
             int xi = startPoint.x + (endPoint.x - startPoint.x) * i / n;
-            int yi = startPoint.y + (endPoint.y - startPoint.y) * i / n;
+            int zi = startPoint.z + (endPoint.z - startPoint.z) * i / n;
 
             xi += rand.Next(amplitude);
-            yi += rand.Next(amplitude);
+            zi += rand.Next(amplitude);
 
-            var interPoint = new Point(xi, yi);
+            var interPoint = new Rectangle()
+            {
+                x = xi,
+                y = 0,
+                z = zi,
+            };
 
             edges.Add(new Edge(0, 0, lastPoint, interPoint));
 
@@ -254,14 +335,14 @@ public static class Program
 
     private static void DrawPath(string[] args)
     {
-        List<Point> points = new List<Point>{
-            new Point(10, 10),
-            new Point(SIZE - 10, SIZE - 10),
-        };
+        Rectangle p1 = new Rectangle() { x = 10, y = 0, z = 10 };
+        Rectangle p2 = new Rectangle() { x = MAP_SIZE - 10, y = 0, z = MAP_SIZE - 10 };
 
-        List<Edge> edges = WormPathing(points[0], points[1]);
+        List<Rectangle> points = new List<Rectangle> { p1, p2 };
 
-        using Bitmap b = new Bitmap(SIZE, SIZE);
+        List<Edge> edges = WormPathing(p1, p2);
+
+        using Bitmap b = new Bitmap(MAP_SIZE, MAP_SIZE);
 
         using (Graphics g = Graphics.FromImage(b))
         {
@@ -277,21 +358,19 @@ public static class Program
     {
         Console.WriteLine($"Seed = {SEED}");
 
-        DrawPath(args);
+        switch (args[0])
+        {
+            case "graph":
+                DrawGraph(args);
+                break;
 
-        // switch (args[0])
-        // {
-        //     case "graph":
-        //         DrawGraph(args);
-        //         break;
+            case "path":
+                DrawPath(args);
+                break;
 
-        //     case "path":
-        //         DrawPath(args);
-        //         break;
-
-        //     default:
-        //         Console.WriteLine($"Invalid command: {args[0]}");
-        //         break;
-        // }
+            default:
+                Console.WriteLine($"Invalid command: {args[0]}");
+                break;
+        }
     }
 }
