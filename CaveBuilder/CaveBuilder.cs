@@ -186,7 +186,9 @@ public static class CaveBuilder
 
     private static bool checkOverlaps(Rectangle rect, List<Rectangle> others)
     {
-        for (int i = 0; i < 100; i++)
+        int i;
+
+        for (i = 0; i < 100; i++)
         {
             if (rect.OverLaps2D(others, MAP_SIZE, MAP_OFFSET))
             {
@@ -194,7 +196,13 @@ public static class CaveBuilder
                 rect.z = rand.Next(0, MAP_SIZE);
                 rect.z = rand.Next(0, MAP_SIZE);
             }
+            else
+            {
+                break;
+            }
         }
+
+        Console.WriteLine($"{i + 1} iterations done.");
 
         return !rect.OverLaps2D(others, MAP_SIZE, MAP_OFFSET);
     }
@@ -214,7 +222,7 @@ public static class CaveBuilder
                 sizeZ = rand.Next(8, 100)
             };
 
-            if (!point.OverLaps2D(points, MAP_SIZE, MAP_OFFSET))
+            if (checkOverlaps(point, points))
                 points.Add(point);
         }
 
@@ -223,7 +231,7 @@ public static class CaveBuilder
         return points;
     }
 
-    public static void DrawPoints(Graphics graph, List<Rectangle> points)
+    public static void DrawPrefabs(Graphics graph, List<Rectangle> points)
     {
         using Pen pen = new Pen(POINT_COLOR, POINT_WIDTH);
 
@@ -291,7 +299,7 @@ public static class CaveBuilder
         {
             g.Clear(Color.Black);
             DrawEdges(g, edges);
-            DrawPoints(g, points);
+            DrawPrefabs(g, points);
         }
 
         b.Save(@"graph.png", ImageFormat.Png);
@@ -348,7 +356,7 @@ public static class CaveBuilder
         {
             g.Clear(Color.White);
             DrawEdges(g, edges);
-            DrawPoints(g, points);
+            DrawPrefabs(g, points);
         }
 
         b.Save(@"pathing.png", ImageFormat.Png);

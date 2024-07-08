@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configs>
+    <append xpath="">
+        <!-- <property name=9,Chiko_SCcave_11,Chiko_SCcave_12,Chiko_SCcave_13,Chiko_SCcave_14" /> -->
+        <property class="CavePrefavs">
+
+            <!-- filler prefabs -->
+            <property name="Chiko_SCcave_01" type="filler" />
+            <property name="Chiko_SCcave_02" type="filler" />
+            <property name="Chiko_SCcave_03" type="filler" />
+            <property name="Chiko_SCcave_04" type="filler" />
+            <property name="Chiko_SCcave_05" type="filler" />
+            <property name="Chiko_SCcave_06" type="filler" />
+            <property name="Chiko_SCcave_07" type="filler" />
+            <property name="Chiko_SCcave_08" type="filler" />
+            <property name="Chiko_SCcave_09" type="filler" />
+            <property name="Chiko_SCcave_11" type="filler" />
+            <property name="Chiko_SCcave_12" type="filler" />
+            <property name="Chiko_SCcave_13" type="filler" />
+            <property name="Chiko_SCcave_14" type="filler" />
+
+            <!-- poi prefabs -->
+            <property name="CaveBunker_01" type="poi" />
+
+            <!-- entrance prefabs -->
+            <property name="CaveEntrance_01" type="entrance" />
+          </property>
+    </append>
+</configs>
