@@ -5,6 +5,24 @@ using System.Runtime.Versioning;
 using System.Collections.Generic;
 
 
+public class Point
+{
+    public int x;
+
+    public int y;
+
+    public Point(int x, int y)
+    {
+        this.x = x;
+        this.y = y;
+    }
+
+    public PointF ToPointF()
+    {
+        return new PointF(x, y);
+    }
+}
+
 public class Edge : IComparable<Edge>
 {
     public int Start { get; set; }
@@ -20,8 +38,8 @@ public class Edge : IComparable<Edge>
     private float GetWeight()
     {
         return MathF.Sqrt(
-              MathF.Pow(StartPoint.X - EndPoint.X, 2)
-            + MathF.Pow(StartPoint.Y - EndPoint.Y, 2)
+              MathF.Pow(StartPoint.x - EndPoint.x, 2)
+            + MathF.Pow(StartPoint.y - EndPoint.y, 2)
         );
     }
 
@@ -135,7 +153,7 @@ public static class Program
 
         foreach (var point in points)
         {
-            graph.DrawEllipse(pen, point.X, point.Y, 1, 1);
+            graph.DrawEllipse(pen, point.x, point.y, 1, 1);
         }
     }
 
@@ -146,8 +164,8 @@ public static class Program
         foreach (var edge in edges)
         {
             graph.DrawCurve(pen, new PointF[2]{
-                edge.StartPoint,
-                edge.EndPoint,
+                edge.StartPoint.ToPointF(),
+                edge.EndPoint.ToPointF(),
             });
         }
     }
@@ -216,8 +234,8 @@ public static class Program
 
         for (int i = 0; i < n; i++)
         {
-            int xi = startPoint.X + (endPoint.X - startPoint.X) * i / n;
-            int yi = startPoint.Y + (endPoint.Y - startPoint.Y) * i / n;
+            int xi = startPoint.x + (endPoint.x - startPoint.x) * i / n;
+            int yi = startPoint.y + (endPoint.y - startPoint.y) * i / n;
 
             xi += rand.Next(amplitude);
             yi += rand.Next(amplitude);
