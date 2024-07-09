@@ -466,7 +466,7 @@ public static class CaveBuilder
 
     public static void DrawPrefabs(Graphics graph, List<Prefab> prefabs)
     {
-        using Pen pen = new Pen(PrefabBoundsColor, POINT_WIDTH);
+        using Pen pen = new Pen(PrefabBoundsColor, 2);
 
         foreach (var prefab in prefabs)
         {
@@ -474,16 +474,11 @@ public static class CaveBuilder
         }
     }
 
-    public static void DrawPath(Bitmap bitmap, HashSet<Vector3i> points)
+    public static void DrawPoints(Bitmap bitmap, HashSet<Vector3i> points, Color color)
     {
         foreach (var point in points)
         {
-            // Debug.Assert(point.x >= 0);
-            // Debug.Assert(point.z >= 0);
-            // Debug.Assert(point.z < MAP_SIZE);
-            // Debug.Assert(point.z < MAP_SIZE);
-
-            bitmap.SetPixel(point.x, point.z, TunnelsColor);
+            bitmap.SetPixel(point.x, point.z, color);
         }
     }
 
@@ -648,7 +643,7 @@ public static class CaveBuilder
         {
             g.Clear(BackgroundColor);
             DrawNoise(b, noise);
-            DrawPath(b, path);
+            DrawPoints(b, path, TunnelsColor);
 
             b.SetPixel(p1.position.x, p1.position.z, NodeColor);
             b.SetPixel(p2.position.x, p2.position.z, NodeColor);
@@ -678,10 +673,23 @@ public static class CaveBuilder
 
         var prefabs = GetRandomPrefabs(prefabCounts);
         var caveMap = new HashSet<Vector3i>();
+        var nodes = new HashSet<Vector3i>();
 
         List<Edge> edges = KruskalMST(prefabs);
 
         FastNoiseLite noise = ParsePerlinNoise();
+
+        foreach (Edge edge in edges)
+        {
+
+            Vector3i p1 = edge.StartPoint.position;
+            Vector3i p2 = edge.EndPoint.position;
+
+            caveMap.UnionWith(PerlinRoute(p1, p2, noise, new List<Prefab>()));
+
+            nodes.Add(p1);
+            nodes.Add(p2);
+        }
 
         using Bitmap b = new(MAP_SIZE, MAP_SIZE);
 
@@ -689,20 +697,9 @@ public static class CaveBuilder
         {
             g.Clear(BackgroundColor);
 
-            foreach (Edge edge in edges)
-            {
-
-                Vector3i p1 = edge.StartPoint.position;
-                Vector3i p2 = edge.EndPoint.position;
-
-                // Console.WriteLine($"Start pathing from {p1} to {p2}, dist={AStar.EuclidianDist(p1, p2)}");
-                caveMap.UnionWith(PerlinRoute(p1, p2, noise, new List<Prefab>()));
-
-                b.SetPixel(p1.x, p1.z, NodeColor);
-                b.SetPixel(p2.x, p2.z, NodeColor);
-            }
-
-            DrawPath(b, caveMap);
+            DrawPoints(b, caveMap, TunnelsColor);
+            DrawPoints(b, nodes, NodeColor);
+            DrawPrefabs(g, prefabs);
         }
 
         Console.WriteLine($"{caveMap.Count} cave blocks generated.");

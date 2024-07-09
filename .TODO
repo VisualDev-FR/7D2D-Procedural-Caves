@@ -1,8 +1,14 @@
-☐ live config reloader
-☐ random pois placement
-☐ cave decoration
-☐ spawning system
-☐ full region reset
-☐ cave entrance system
-☐ increase terrain height
-☐ add caves decoration
+Live config loader:
+    ☐ full region reset
+
+Cave generation:
+    ☐ random pois placement
+    ☐ cave decoration
+    ☐ poi placement system
+    ☐ cave entrance system
+    ☐ natural fillers (rooms, canyon, rivers, tensionned stalactites, etc...)
+
+Cave generation menu:
+
+Cancelled:
+    ✘ increase terrain height @cancelled(24-07-10 00:26)
