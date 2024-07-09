@@ -1,4 +1,4 @@
-#pragma warning disable CA1416
+#pragma warning disable CA1416, CA1050
 
 using System;
 using System.Drawing;
@@ -334,8 +334,6 @@ public static class AStar
             }
         }
 
-        Console.Write("No path found!");
-
         return new List<Vector3i>();
     }
 
@@ -381,15 +379,15 @@ public static class CaveBuilder
 {
     public static readonly int SEED = new Random().Next();
 
-    public const int MAP_SIZE = 200;
+    public const int MAP_SIZE = 150;
 
-    public const int MAP_OFFSET = 200;
+    public const int MAP_OFFSET = MAP_SIZE / 10;
 
     public const float POINT_WIDTH = 5;
 
     public const float EDGE_WIDTH = MAP_SIZE / 2000;
 
-    public const int POINTS_COUNT = MAP_SIZE / 5;
+    public const int PREFAB_COUNT = MAP_SIZE / 5;
 
     public const float NOISE_THRESHOLD = 0.55f;
 
@@ -469,7 +467,7 @@ public static class CaveBuilder
         }
     }
 
-    public static void DrawPoints(Bitmap bitmap, List<Vector3i> points)
+    public static void DrawPath(Bitmap bitmap, List<Vector3i> points)
     {
         foreach (var point in points)
         {
@@ -488,6 +486,21 @@ public static class CaveBuilder
                 edge.EndPoint.ToPointF(),
             });
         }
+    }
+
+    private static void DrawNoise(Bitmap b, FastNoiseLite perlinNoise)
+    {
+        for (int x = 0; x < MAP_SIZE; x++)
+        {
+            for (int z = 0; z < MAP_SIZE; z++)
+            {
+                float noise = 0.5f * (perlinNoise.GetNoise(x, z) + 1);
+
+                if (noise < NOISE_THRESHOLD)
+                    b.SetPixel(x, z, Color.DarkGray);
+            }
+        }
+
     }
 
     public static List<Edge> KruskalMST(List<Prefab> prefabs)
@@ -521,26 +534,6 @@ public static class CaveBuilder
         return mst;
     }
 
-    private static void DrawGraph(string[] args)
-    {
-        int prefabCounts = args.Length > 1 ? int.Parse(args[1]) : POINTS_COUNT;
-
-        var prefabs = GetRandomPrefabs(prefabCounts);
-
-        List<Edge> edges = KruskalMST(prefabs);
-
-        using Bitmap b = new Bitmap(MAP_SIZE, MAP_SIZE);
-
-        using (Graphics g = Graphics.FromImage(b))
-        {
-            g.Clear(Color.Black);
-            DrawEdges(g, edges);
-            DrawPrefabs(g, prefabs);
-        }
-
-        b.Save(@"graph.png", ImageFormat.Png);
-    }
-
     private static Dictionary<string, bool> GetPrefabObstacles(List<Prefab> prefabs)
     {
         var obstacles = new Dictionary<string, bool>();
@@ -560,10 +553,56 @@ public static class CaveBuilder
     {
         Dictionary<string, bool> obstacles = GetPrefabObstacles(prefabs);
 
-        return AStar.FindPath(startPos, targetpos, obstacles, noise);
+        List<Vector3i> path = AStar.FindPath(startPos, targetpos, obstacles, noise);
+
+        if (path.Count > 0)
+        {
+            Console.WriteLine($"INFO     Path found from {startPos} to {targetpos}");
+        }
+        else
+        {
+            Console.WriteLine($"WARNING  Path not found from {startPos} to {targetpos}");
+        }
+
+        return path;
     }
 
-    private static void DrawPath(string[] args)
+    private static void GenerateGraph(string[] args)
+    {
+        int prefabCounts = args.Length > 1 ? int.Parse(args[1]) : PREFAB_COUNT;
+
+        var prefabs = GetRandomPrefabs(prefabCounts);
+
+        List<Edge> edges = KruskalMST(prefabs);
+
+        using Bitmap b = new Bitmap(MAP_SIZE, MAP_SIZE);
+
+        using (Graphics g = Graphics.FromImage(b))
+        {
+            g.Clear(Color.Black);
+            DrawEdges(g, edges);
+            DrawPrefabs(g, prefabs);
+        }
+
+        b.Save(@"graph.png", ImageFormat.Png);
+    }
+
+    private static void GenerateNoise(string[] args)
+    {
+        var noise = ParsePerlinNoise();
+
+        using Bitmap b = new Bitmap(MAP_SIZE, MAP_SIZE);
+
+        using (Graphics g = Graphics.FromImage(b))
+        {
+            g.Clear(Color.Black);
+            DrawNoise(b, noise);
+        }
+
+        b.Save(@"noise.png", ImageFormat.Png);
+    }
+
+    private static void GeneratePath(string[] args)
     {
         Prefab p1 = new()
         {
@@ -579,8 +618,6 @@ public static class CaveBuilder
 
         FastNoiseLite noise = ParsePerlinNoise();
 
-        List<Prefab> prefabs = new List<Prefab> { p1, p2 };
-
         List<Vector3i> path = PerlinRoute(p1.position, p2.position, noise, new List<Prefab>());
 
         using Bitmap b = new(MAP_SIZE, MAP_SIZE);
@@ -588,8 +625,8 @@ public static class CaveBuilder
         using (Graphics g = Graphics.FromImage(b))
         {
             g.Clear(Color.Black);
-            // DrawNoise(b, noise);
-            DrawPoints(b, path);
+            DrawNoise(b, noise);
+            DrawPath(b, path);
 
             b.SetPixel(p1.position.x, p1.position.z, Color.Yellow);
             b.SetPixel(p2.position.x, p2.position.z, Color.Yellow);
@@ -598,19 +635,40 @@ public static class CaveBuilder
         b.Save(@"pathing.png", ImageFormat.Png);
     }
 
-    private static void DrawNoise(Bitmap b, FastNoiseLite perlinNoise)
+    private static void GenerateCaves(string[] args)
     {
-        for (int x = 0; x < MAP_SIZE; x++)
-        {
-            for (int z = 0; z < MAP_SIZE; z++)
-            {
-                float noise = 0.5f * (perlinNoise.GetNoise(x, z) + 1);
+        int prefabCounts = args.Length > 1 ? int.Parse(args[1]) : PREFAB_COUNT;
 
-                if (noise < NOISE_THRESHOLD)
-                    b.SetPixel(x, z, Color.DarkGray);
+        var prefabs = GetRandomPrefabs(prefabCounts);
+
+        List<Edge> edges = KruskalMST(prefabs);
+
+        FastNoiseLite noise = ParsePerlinNoise();
+
+        using Bitmap b = new(MAP_SIZE, MAP_SIZE);
+
+        using (Graphics g = Graphics.FromImage(b))
+        {
+            g.Clear(Color.Black);
+
+            foreach (Edge edge in edges)
+            {
+
+                Vector3i p1 = edge.StartPoint.position;
+                Vector3i p2 = edge.EndPoint.position;
+
+                Console.WriteLine($"Start pathing from {p1} to {p2}");
+
+                List<Vector3i> path = PerlinRoute(p1, p2, noise, new List<Prefab>());
+
+                DrawPath(b, path);
+
+                b.SetPixel(p1.x, p1.z, Color.Yellow);
+                b.SetPixel(p2.x, p2.z, Color.Yellow);
             }
         }
 
+        b.Save(@"cave.png", ImageFormat.Png);
     }
 
     public static void Main(string[] args)
@@ -621,15 +679,20 @@ public static class CaveBuilder
         switch (args[0])
         {
             case "graph":
-                DrawGraph(args);
+                GenerateGraph(args);
                 break;
 
             case "path":
-                DrawPath(args);
+                GeneratePath(args);
                 break;
 
             case "noise":
-                // DrawNoise(args);
+                GenerateNoise(args);
+                break;
+
+            case "cave":
+            case "caves":
+                GenerateCaves(args);
                 break;
 
             default:
@@ -638,6 +701,3 @@ public static class CaveBuilder
         }
     }
 }
-
-
-#pragma warning restore CA1416
