@@ -404,9 +404,9 @@ public static class CaveBuilder
 
     public static readonly Color NoiseColor = Color.DarkGray;
 
-    private static FastNoiseLite ParsePerlinNoise()
+    private static FastNoiseLite ParsePerlinNoise(int seed = -1)
     {
-        var noise = new FastNoiseLite(SEED);
+        var noise = new FastNoiseLite(seed == -1 ? SEED : seed);
 
         noise.SetNoiseType(FastNoiseLite.NoiseType.Perlin);
         noise.SetFractalType(FastNoiseLite.FractalType.None);
@@ -566,13 +566,20 @@ public static class CaveBuilder
 
         HashSet<Vector3i> path = AStar.FindPath(startPos, targetpos, obstacles, noise);
 
-        int caveWidth = 5;
+        int maxCaveWidth = 20;
+        int minCaveWidth = 1;
+
+        FastNoiseLite noiseX = ParsePerlinNoise(rand.Next());
+        FastNoiseLite noiseZ = ParsePerlinNoise(rand.Next());
 
         foreach (Vector3i point in new List<Vector3i>(path))
         {
-            for (int x = point.x - caveWidth; x < point.x + caveWidth; x++)
+            int widthX = minCaveWidth + (int)(0.5f * maxCaveWidth * (1 + noiseX.GetNoise(point.x, point.z)));
+            int widthZ = widthX; // minCaveWidth + (int)(0.5f * maxCaveWidth * (1 + noiseZ.GetNoise(point.x, point.z)));
+
+            for (int x = point.x; x < point.x + widthX; x++)
             {
-                for (int z = point.z - caveWidth; z < point.z + caveWidth; z++)
+                for (int z = point.z; z < point.z + widthZ; z++)
                 {
                     path.Add(new Vector3i(x, 0, z));
                 }
