@@ -273,7 +273,7 @@ public class Node
 
 public static class AStar
 {
-    public static List<Vector3i> FindPath(Vector3i startPos, Vector3i targetPos, Dictionary<string, bool> obstacles, FastNoiseLite perlinNoise)
+    public static HashSet<Vector3i> FindPath(Vector3i startPos, Vector3i targetPos, Dictionary<string, bool> obstacles, FastNoiseLite perlinNoise)
     {
         Node startNode = new(startPos);
         Node goalNode = new(targetPos);
@@ -283,7 +283,7 @@ public static class AStar
 
         openSet.Add(startNode);
 
-        var path = new List<Vector3i>();
+        var path = new HashSet<Vector3i>();
         int counter = 0;
 
         while (openSet.Count > 0)
@@ -361,17 +361,15 @@ public static class AStar
         );
     }
 
-    private static List<Vector3i> ReconstructPath(Node currentNode)
+    private static HashSet<Vector3i> ReconstructPath(Node currentNode)
     {
-        List<Vector3i> path = new();
+        HashSet<Vector3i> path = new();
 
         while (currentNode != null)
         {
             path.Add(currentNode.position);
             currentNode = currentNode.Parent;
         }
-
-        path.Reverse();
 
         return path;
     }
@@ -380,7 +378,7 @@ public static class AStar
 
 public static class CaveBuilder
 {
-    private static int SEED = 479822329; //new Random().Next();
+    private static int SEED = new Random().Next();
 
     public const int MAP_SIZE = 6144;
 
@@ -476,14 +474,14 @@ public static class CaveBuilder
         }
     }
 
-    public static void DrawPath(Bitmap bitmap, List<Vector3i> points)
+    public static void DrawPath(Bitmap bitmap, HashSet<Vector3i> points)
     {
         foreach (var point in points)
         {
-            Debug.Assert(point.x >= 0);
-            Debug.Assert(point.z >= 0);
-            Debug.Assert(point.z < MAP_SIZE);
-            Debug.Assert(point.z < MAP_SIZE);
+            // Debug.Assert(point.x >= 0);
+            // Debug.Assert(point.z >= 0);
+            // Debug.Assert(point.z < MAP_SIZE);
+            // Debug.Assert(point.z < MAP_SIZE);
 
             bitmap.SetPixel(point.x, point.z, TunnelsColor);
         }
@@ -562,11 +560,11 @@ public static class CaveBuilder
         return obstacles;
     }
 
-    private static List<Vector3i> PerlinRoute(Vector3i startPos, Vector3i targetpos, FastNoiseLite noise, List<Prefab> prefabs)
+    private static HashSet<Vector3i> PerlinRoute(Vector3i startPos, Vector3i targetpos, FastNoiseLite noise, List<Prefab> prefabs)
     {
         Dictionary<string, bool> obstacles = GetPrefabObstacles(prefabs);
 
-        List<Vector3i> path = AStar.FindPath(startPos, targetpos, obstacles, noise);
+        HashSet<Vector3i> path = AStar.FindPath(startPos, targetpos, obstacles, noise);
 
         int caveWidth = 5;
 
@@ -635,7 +633,7 @@ public static class CaveBuilder
 
         FastNoiseLite noise = ParsePerlinNoise();
 
-        List<Vector3i> path = PerlinRoute(p1.position, p2.position, noise, new List<Prefab>());
+        HashSet<Vector3i> path = PerlinRoute(p1.position, p2.position, noise, new List<Prefab>());
 
         using Bitmap b = new(MAP_SIZE, MAP_SIZE);
 
@@ -657,6 +655,7 @@ public static class CaveBuilder
         int prefabCounts = args.Length > 1 ? int.Parse(args[1]) : PREFAB_COUNT;
 
         var prefabs = GetRandomPrefabs(prefabCounts);
+        var caveMap = new HashSet<Vector3i>();
 
         List<Edge> edges = KruskalMST(prefabs);
 
@@ -675,15 +674,16 @@ public static class CaveBuilder
                 Vector3i p2 = edge.EndPoint.position;
 
                 // Console.WriteLine($"Start pathing from {p1} to {p2}, dist={AStar.EuclidianDist(p1, p2)}");
-
-                List<Vector3i> path = PerlinRoute(p1, p2, noise, new List<Prefab>());
-
-                DrawPath(b, path);
+                caveMap.UnionWith(PerlinRoute(p1, p2, noise, new List<Prefab>()));
 
                 b.SetPixel(p1.x, p1.z, NodeColor);
                 b.SetPixel(p2.x, p2.z, NodeColor);
             }
+
+            DrawPath(b, caveMap);
         }
+
+        Console.WriteLine($"{caveMap.Count} cave blocks generated.");
 
         b.Save(@"cave.png", ImageFormat.Png);
     }
@@ -716,5 +716,20 @@ public static class CaveBuilder
                 Console.WriteLine($"Invalid command: {args[0]}");
                 break;
         }
+    }
+
+    public static void Test(string[] args)
+    {
+        var vectorSet = new HashSet<Vector3i>();
+
+        vectorSet.Add(new Vector3i(0, 1, 0));
+        vectorSet.Add(new Vector3i(0, 2, 0));
+        Debug.Assert(vectorSet.Count == 1);
+
+        vectorSet.Add(new Vector3i(0, 2, 1));
+        Debug.Assert(vectorSet.Count == 2);
+
+        vectorSet.Add(new Vector3i(0, 3, 1));
+        Debug.Assert(vectorSet.Count == 2);
     }
 }
