@@ -2,11 +2,11 @@
 
 
 using System;
+using System.IO;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Numerics;
 
 
 public class Vector3i
@@ -657,6 +657,21 @@ public static class CaveBuilder
         b.Save(@"pathing.png", ImageFormat.Png);
     }
 
+    private static void SaveCaveMap(HashSet<Vector3i> caveMap)
+    {
+        Console.WriteLine("Saving CaveMap...");
+
+        using (StreamWriter writer = new StreamWriter("cavemap.csv"))
+        {
+            foreach (var caveBlock in caveMap)
+            {
+                writer.WriteLine(caveBlock.ToString());
+            }
+        }
+
+        Console.WriteLine("Écriture terminée.");
+    }
+
     private static void GenerateCaves(string[] args)
     {
         int prefabCounts = args.Length > 1 ? int.Parse(args[1]) : PREFAB_COUNT;
@@ -693,6 +708,8 @@ public static class CaveBuilder
         Console.WriteLine($"{caveMap.Count} cave blocks generated.");
 
         b.Save(@"cave.png", ImageFormat.Png);
+
+        SaveCaveMap(caveMap);
     }
 
     public static void Main(string[] args)
