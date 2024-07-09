@@ -1,4 +1,5 @@
-#pragma warning disable CA1416, CA1050
+#pragma warning disable CA1416, CA1050, IDE0090
+
 
 using System;
 using System.Drawing;
@@ -242,10 +243,10 @@ public class Node
 
         foreach (var position in neighborsPos)
         {
-            if (position.x < 0 || position.x > CaveBuilder.MAP_SIZE)
+            if (position.x < 0 || position.x >= CaveBuilder.MAP_SIZE)
                 continue;
 
-            if (position.z < 0 || position.z > CaveBuilder.MAP_SIZE)
+            if (position.z < 0 || position.z >= CaveBuilder.MAP_SIZE)
                 continue;
 
             neighbors.Add(new Node(position));
@@ -281,27 +282,35 @@ public static class AStar
 
         openSet.Add(startNode);
 
+        var path = new List<Vector3i>();
+        int counter = 0;
+
         while (openSet.Count > 0)
         {
+            counter++;
+
             Node currentNode = GetLowestFCostNode(openSet);
 
-            if (currentNode.position.ToString() == goalNode.position.ToString())
+            if (currentNode.position == goalNode.position)
             {
-                return ReconstructPath(currentNode);
+                path = ReconstructPath(currentNode);
+                break;
             }
 
             openSet.Remove(currentNode);
             closedSet.Add(currentNode);
 
-            Console.WriteLine(openSet.Count);
+            // Console.WriteLine(counter);
+            // Console.WriteLine(currentNode.position);
 
             foreach (Node neighbor in currentNode.GetNeighbors(obstacles, perlinNoise))
             {
                 if (closedSet.Contains(neighbor))
                     continue;
 
+
                 float noise = 0.5f * (1 + perlinNoise.GetNoise(neighbor.position.x, neighbor.position.z));
-                float factor = noise < CaveBuilder.NOISE_THRESHOLD ? .01f : 1f;
+                float factor = noise < CaveBuilder.NOISE_THRESHOLD ? .5f : 1f;
 
                 float tentativeGCost = currentNode.GCost + EuclidianDist(currentNode, neighbor) * factor;
 
@@ -317,7 +326,12 @@ public static class AStar
             }
         }
 
-        return new List<Vector3i>();
+        if (path.Count > 0)
+        {
+            Console.WriteLine($"INFO     Path found from {startPos} to {targetPos}, {counter} iterations done.");
+        }
+
+        return path;
     }
 
     private static Node GetLowestFCostNode(HashSet<Node> nodes)
@@ -333,19 +347,16 @@ public static class AStar
         return lowestCostNode;
     }
 
-    private static int fastAbs(int value)
+    public static float EuclidianDist(Node nodeA, Node nodeB)
     {
-        if (value < 0)
-            return -value;
-
-        return value;
+        return EuclidianDist(nodeA.position, nodeB.position);
     }
 
-    private static float EuclidianDist(Node nodeA, Node nodeB)
+    public static float EuclidianDist(Vector3i p1, Vector3i p2)
     {
         return MathF.Sqrt(
-              MathF.Pow(nodeA.position.x - nodeB.position.x, 2)
-            + MathF.Pow(nodeA.position.z - nodeB.position.z, 2)
+              MathF.Pow(p1.x - p2.x, 2)
+            + MathF.Pow(p1.z - p2.z, 2)
         );
     }
 
@@ -368,11 +379,11 @@ public static class AStar
 
 public static class CaveBuilder
 {
-    public static readonly int SEED = new Random().Next();
+    public static readonly int SEED = 479822329; //new Random().Next();
 
-    public const int MAP_SIZE = 200;
+    public const int MAP_SIZE = 6144;
 
-    public const int MAP_OFFSET = MAP_SIZE / 10;
+    public const int MAP_OFFSET = MAP_SIZE / 60;
 
     public const float POINT_WIDTH = 5;
 
@@ -380,7 +391,7 @@ public static class CaveBuilder
 
     public const int PREFAB_COUNT = MAP_SIZE / 5;
 
-    public const float NOISE_THRESHOLD = 0.55f;
+    public const float NOISE_THRESHOLD = 0.50f;
 
     public static readonly Random rand = new Random(SEED);
 
@@ -551,15 +562,6 @@ public static class CaveBuilder
 
         List<Vector3i> path = AStar.FindPath(startPos, targetpos, obstacles, noise);
 
-        if (path.Count > 0)
-        {
-            Console.WriteLine($"INFO     Path found from {startPos} to {targetpos}");
-        }
-        else
-        {
-            Console.WriteLine($"WARNING  Path not found from {startPos} to {targetpos}");
-        }
-
         return path;
     }
 
@@ -603,7 +605,7 @@ public static class CaveBuilder
         Prefab p1 = new()
         {
             position = new Vector3i(10, 0, 10),
-            size = new Vector3i(10, 0, 10)
+            size = new Vector3i(10, 0, 10),
         };
 
         Prefab p2 = new()
@@ -653,7 +655,7 @@ public static class CaveBuilder
                 Vector3i p1 = edge.StartPoint.position;
                 Vector3i p2 = edge.EndPoint.position;
 
-                Console.WriteLine($"Start pathing from {p1} to {p2}");
+                // Console.WriteLine($"Start pathing from {p1} to {p2}, dist={AStar.EuclidianDist(p1, p2)}");
 
                 List<Vector3i> path = PerlinRoute(p1, p2, noise, new List<Prefab>());
 
