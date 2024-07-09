@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Numerics;
 
 
 public class Vector3i
@@ -379,7 +380,7 @@ public static class AStar
 
 public static class CaveBuilder
 {
-    public static readonly int SEED = 479822329; //new Random().Next();
+    private static int SEED = 479822329; //new Random().Next();
 
     public const int MAP_SIZE = 6144;
 
@@ -566,6 +567,19 @@ public static class CaveBuilder
         Dictionary<string, bool> obstacles = GetPrefabObstacles(prefabs);
 
         List<Vector3i> path = AStar.FindPath(startPos, targetpos, obstacles, noise);
+
+        int caveWidth = 5;
+
+        foreach (Vector3i point in new List<Vector3i>(path))
+        {
+            for (int x = point.x - caveWidth; x < point.x + caveWidth; x++)
+            {
+                for (int z = point.z - caveWidth; z < point.z + caveWidth; z++)
+                {
+                    path.Add(new Vector3i(x, 0, z));
+                }
+            }
+        }
 
         return path;
     }
