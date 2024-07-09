@@ -7,8 +7,10 @@ Cave generation:
     ☐ poi placement system
     ☐ cave entrance system
     ☐ natural fillers (rooms, canyon, rivers, tensionned stalactites, etc...)
+    ☐ Cave generation menu
 
-Cave generation menu:
+Misc:
+    ☐ live cave map
 
 Cancelled:
     ✘ increase terrain height @cancelled(24-07-10 00:26)

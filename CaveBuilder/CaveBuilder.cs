@@ -1,4 +1,4 @@
-#pragma warning disable CA1416, CA1050, IDE0090
+#pragma warning disable CA1416, CA1050, CA2211, IDE0090, IDE0044
 
 
 using System;
@@ -392,7 +392,7 @@ public static class CaveBuilder
 
     public const float NOISE_THRESHOLD = 0.50f;
 
-    public static readonly Random rand = new Random(SEED);
+    public static Random rand = new Random(SEED);
 
     public static readonly Color BackgroundColor = Color.Black;
 
