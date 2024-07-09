@@ -1,69 +1,113 @@
-﻿using System;
+using System;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Runtime.Versioning;
 using System.Collections.Generic;
 
 
-public class Rectangle
+public class Vector3i
 {
-    public const int OVERLAP_MARGIN = 50;
-
     public int x;
 
     public int y;
 
     public int z;
 
-    public int sizeX = 50;
+    public Vector3i(int x, int y, int z)
+    {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+    }
 
-    public int sizeY = 50;
+    public override string ToString()
+    {
+        return $"{x},{y},{z}";
+    }
 
-    public int sizeZ = 50;
+    public static bool operator !=(Vector3i p1, Vector3i p2)
+    {
+        return !(p1 == p2);
+    }
+
+    public static bool operator ==(Vector3i p1, Vector3i p2)
+    {
+        return p1.x == p2.x && p1.z == p2.z;
+    }
+
+    public override bool Equals(object obj)
+    {
+        var other = (Vector3i)obj;
+
+        return GetHashCode() == other.GetHashCode();
+    }
+
+    public override int GetHashCode()
+    {
+        return x * CaveBuilder.MAP_SIZE + z;
+    }
+}
+
+
+public class Prefab
+{
+    public const int OVERLAP_MARGIN = 50;
+
+    public Vector3i position;
+
+    public Vector3i size;
 
     public int rotation = 1;
 
-    public bool OverLaps2D(Rectangle other, int map_size, int map_offset)
+    public void SetRandomPosition(Random rand, int mapSize, int mapOffset)
     {
-        // is under left border
-        if (x < map_offset)
-            return true;
+        position = new Vector3i(
+            rand.Next(mapOffset, mapSize - mapOffset - size.x),
+            rand.Next(mapOffset, mapSize - mapOffset - size.y),
+            rand.Next(mapOffset, mapSize - mapOffset - size.z)
+        );
+    }
 
-        // is under top border
-        if (z < map_offset)
-            return true;
-
-        // is over right border
-        if (x + sizeX >= map_size - map_offset)
-            return true;
-
-        // is over bottom border
-        if (z + sizeZ >= map_size - map_offset)
-            return true;
-
-        if (x + sizeX + OVERLAP_MARGIN < other.x || other.x + other.sizeX + OVERLAP_MARGIN < x)
+    public bool OverLaps2D(Prefab other, int map_size, int map_offset)
+    {
+        if (position.x + size.x + OVERLAP_MARGIN < other.position.x || other.position.x + other.size.x + OVERLAP_MARGIN < position.x)
             return false;
 
-        if (z + sizeZ + OVERLAP_MARGIN < other.z || other.z + other.sizeZ + OVERLAP_MARGIN < z)
+        if (position.z + size.z + OVERLAP_MARGIN < other.position.z || other.position.z + other.size.z + OVERLAP_MARGIN < position.z)
             return false;
 
         return true;
     }
 
-    public bool OverLaps2D(List<Rectangle> others, int map_size, int map_offset)
+    public bool OverLaps2D(List<Prefab> others, int map_size, int map_offset)
     {
-        foreach (var point in others)
+        foreach (var prefab in others)
         {
-            if (OverLaps2D(point, map_size, map_offset))
+            if (OverLaps2D(prefab, map_size, map_offset))
                 return true;
         }
 
         return false;
     }
 
+    public List<Vector3i> GetAllPoints()
+    {
+        var points = new List<Vector3i>();
+
+        for (int x = position.x; x < position.x + size.x; x++)
+        {
+            for (int z = position.z; position.z < position.z + size.z; z++)
+            {
+                points.Add(new Vector3i(x, 0, z));
+            }
+        }
+
+        return points;
+    }
+
     public PointF ToPointF()
     {
-        return new PointF(x, z);
+        return new PointF(position.x, position.z);
     }
 }
 
@@ -76,21 +120,21 @@ public class Edge : IComparable<Edge>
 
     public float Weight { get; set; }
 
-    public Rectangle StartPoint { get; }
+    public Prefab StartPoint { get; }
 
-    public Rectangle EndPoint { get; }
+    public Prefab EndPoint { get; }
 
     private float GetWeight()
     {
         float euclidianDist = MathF.Sqrt(
-              MathF.Pow(StartPoint.x - EndPoint.x, 2)
-            + MathF.Pow(StartPoint.z - EndPoint.z, 2)
+              MathF.Pow(StartPoint.position.x - EndPoint.position.x, 2)
+            + MathF.Pow(StartPoint.position.z - EndPoint.position.z, 2)
         );
 
         return euclidianDist; // MathF.Abs(StartPoint.sizeX * StartPoint.sizeZ - EndPoint.sizeX * EndPoint.sizeZ);
     }
 
-    public Edge(int _start, int _end, Rectangle _startPoint, Rectangle _endPoint)
+    public Edge(int _start, int _end, Prefab _startPoint, Prefab _endPoint)
     {
         Start = _start;
         End = _end;
@@ -99,9 +143,9 @@ public class Edge : IComparable<Edge>
         Weight = GetWeight();
     }
 
-    public int CompareTo(Edge? other)
+    public int CompareTo(Edge other)
     {
-        return Weight.CompareTo(other?.Weight);
+        return Weight.CompareTo(other.Weight);
     }
 }
 
@@ -156,45 +200,223 @@ public class UnionFind
 }
 
 
+public class Node
+{
+    public Vector3i position;
+
+    public double GCost { get; set; } // coût du chemin depuis le noeud de départ jusqu'à ce noeud
+
+    public double HCost { get; set; } // estimation heuristique du coût restant jusqu'à l'objectif
+
+    public double FCost => GCost + HCost; // coût total estimé (GCost + HCost)
+
+    public Node Parent { get; set; } // noeud parent dans le chemin optimal
+
+    public Node(Vector3i pos)
+    {
+        position = pos;
+    }
+
+    public Node(int x, int y, int z)
+    {
+        position = new Vector3i(x, y, z);
+    }
+
+    public List<Node> GetNeighbors(Dictionary<string, bool> obstacles, FastNoiseLite perlinNoise)
+    {
+        var neighborsPos = new List<Vector3i>(){
+            new Vector3i(position.x + 1, position.y, position.z + 1),
+            new Vector3i(position.x - 1, position.y, position.z + 1),
+            new Vector3i(position.x + 1, position.y, position.z - 1),
+            new Vector3i(position.x - 1, position.y, position.z - 1),
+
+            new Vector3i(position.x, position.y, position.z + 1),
+            new Vector3i(position.x, position.y, position.z - 1),
+            new Vector3i(position.x + 1, position.y, position.z),
+            new Vector3i(position.x - 1, position.y, position.z),
+        };
+
+        var neighbors = new List<Node>();
+
+        foreach (var position in neighborsPos)
+        {
+            if (position.x < 0 || position.x > CaveBuilder.MAP_SIZE)
+                continue;
+
+            if (position.z < 0 || position.z > CaveBuilder.MAP_SIZE)
+                continue;
+
+            if (!obstacles.TryGetValue(position.ToString(), out bool isObstacle))
+            {
+                float noise = 0.5f * (1 + perlinNoise.GetNoise(position.x, position.z));
+
+                isObstacle = noise > CaveBuilder.NOISE_THRESHOLD;
+                obstacles[position.ToString()] = isObstacle;
+            }
+
+            if (!isObstacle)
+            {
+                neighbors.Add(new Node(position));
+            }
+        }
+
+        if (neighbors.Count > 0)
+            return neighbors;
+
+        foreach (var position in neighborsPos)
+        {
+            neighbors.Add(new Node(position));
+        }
+
+        return neighbors;
+    }
+
+
+    public override int GetHashCode()
+    {
+        return position.GetHashCode();
+    }
+
+
+    public override bool Equals(object obj)
+    {
+        Node other = (Node)obj;
+        return position.GetHashCode() == other.position.GetHashCode();
+    }
+}
+
+
+public static class AStar
+{
+    public static List<Vector3i> FindPath(Vector3i startPos, Vector3i targetPos, Dictionary<string, bool> obstacles, FastNoiseLite perlinNoise)
+    {
+        Node startNode = new(startPos);
+        Node goalNode = new(targetPos);
+
+        HashSet<Node> openSet = new HashSet<Node>();
+        HashSet<Node> closedSet = new HashSet<Node>();
+
+        openSet.Add(startNode);
+
+        while (openSet.Count > 0)
+        {
+            Node currentNode = GetLowestFCostNode(openSet);
+
+            if (currentNode.position.ToString() == goalNode.position.ToString())
+            {
+                return ReconstructPath(currentNode);
+            }
+
+            openSet.Remove(currentNode);
+            closedSet.Add(currentNode);
+
+            foreach (Node neighbor in currentNode.GetNeighbors(obstacles, perlinNoise))
+            {
+                if (closedSet.Contains(neighbor))
+                    continue;
+
+                // Console.WriteLine(neighbor.position.ToString());
+
+                double tentativeGCost = currentNode.GCost + EuclidianDist(currentNode, neighbor);
+
+                if (!openSet.Contains(neighbor) || tentativeGCost < neighbor.GCost)
+                {
+                    neighbor.Parent = currentNode;
+                    neighbor.GCost = tentativeGCost;
+                    neighbor.HCost = EuclidianDist(neighbor, goalNode);
+
+                    if (!openSet.Contains(neighbor))
+                        openSet.Add(neighbor);
+                }
+            }
+        }
+
+        Console.Write("No path found!");
+
+        return new List<Vector3i>();
+    }
+
+    private static Node GetLowestFCostNode(HashSet<Node> nodes)
+    {
+        Node lowestCostNode = null;
+        foreach (Node node in nodes)
+        {
+            if (lowestCostNode == null || node.FCost < lowestCostNode.FCost)
+            {
+                lowestCostNode = node;
+            }
+        }
+        return lowestCostNode;
+    }
+
+    private static double EuclidianDist(Node nodeA, Node nodeB)
+    {
+        return Math.Sqrt(
+              Math.Pow(nodeA.position.x - nodeB.position.x, 2)
+            + Math.Pow(nodeA.position.y - nodeB.position.y, 2)
+        );
+    }
+
+    private static List<Vector3i> ReconstructPath(Node currentNode)
+    {
+        List<Vector3i> path = new();
+
+        while (currentNode != null)
+        {
+            path.Add(currentNode.position);
+            currentNode = currentNode.Parent;
+        }
+
+        path.Reverse();
+
+        return path;
+    }
+}
+
+
 [SupportedOSPlatform("windows")]
 public static class CaveBuilder
 {
-    static readonly int SEED = new Random().Next();
+    public static readonly int SEED = new Random().Next();
 
-    const int MAP_SIZE = 6144;
+    public const int MAP_SIZE = 100;
 
-    const int MAP_OFFSET = 200;
+    public const int MAP_OFFSET = 200;
 
-    const float POINT_WIDTH = 5;
+    public const float POINT_WIDTH = 5;
 
-    const float EDGE_WIDTH = MAP_SIZE / 2000;
+    public const float EDGE_WIDTH = MAP_SIZE / 2000;
 
-    const int POINTS_COUNT = MAP_SIZE / 5;
+    public const int POINTS_COUNT = MAP_SIZE / 5;
 
-    static readonly Random rand = new Random(SEED);
+    public const float NOISE_THRESHOLD = 0.6f;
 
-    static readonly Color POINT_COLOR = Color.Green;
+    public static readonly Random rand = new Random(SEED);
 
-    static readonly Color EDGE_COLOR = Color.DarkGray;
+    public static readonly Color POINT_COLOR = Color.Green;
 
-    private static FastNoiseLite GetNoise()
+    public static readonly Color EDGE_COLOR = Color.DarkGray;
+
+    private static FastNoiseLite ParsePerlinNoise()
     {
         var noise = new FastNoiseLite(SEED);
+
+        noise.SetNoiseType(FastNoiseLite.NoiseType.Perlin);
+        noise.SetFractalOctaves(2);
+        noise.SetFrequency(0.1f);
 
         return noise;
     }
 
-    private static bool checkOverlaps(Rectangle rect, List<Rectangle> others)
+    private static bool CheckPrefabOverlaps(Prefab prefab, List<Prefab> others)
     {
         int i;
 
         for (i = 0; i < 100; i++)
         {
-            if (rect.OverLaps2D(others, MAP_SIZE, MAP_OFFSET))
+            if (prefab.OverLaps2D(others, MAP_SIZE, MAP_OFFSET))
             {
-                rect.x = rand.Next(0, MAP_SIZE);
-                rect.z = rand.Next(0, MAP_SIZE);
-                rect.z = rand.Next(0, MAP_SIZE);
+                prefab.SetRandomPosition(rand, MAP_SIZE, MAP_OFFSET);
             }
             else
             {
@@ -204,40 +426,52 @@ public static class CaveBuilder
 
         // Console.WriteLine($"{i + 1} iterations done.");
 
-        return !rect.OverLaps2D(others, MAP_SIZE, MAP_OFFSET);
+        return !prefab.OverLaps2D(others, MAP_SIZE, MAP_OFFSET);
     }
 
-    private static List<Rectangle> GetRectangles(int count)
+    private static List<Prefab> GetRandomPrefabs(int count)
     {
-        var points = new List<Rectangle>();
+        var prefabs = new List<Prefab>();
 
         for (int i = 0; i < count; i++)
         {
-            var point = new Rectangle()
+            var prefab = new Prefab()
             {
-                x = rand.Next(0, MAP_SIZE),
-                y = rand.Next(0, MAP_SIZE),
-                z = rand.Next(0, MAP_SIZE),
-                sizeX = rand.Next(8, 100),
-                sizeZ = rand.Next(8, 100)
+                size = new Vector3i(
+                    rand.Next(8, 100),
+                    rand.Next(8, 100),
+                    rand.Next(8, 100)
+                )
             };
 
-            if (checkOverlaps(point, points))
-                points.Add(point);
+            prefab.SetRandomPosition(rand, MAP_SIZE, MAP_OFFSET);
+
+            if (CheckPrefabOverlaps(prefab, prefabs))
+                prefabs.Add(prefab);
         }
 
-        Console.WriteLine($"{points.Count} points added");
+        Console.WriteLine($"{prefabs.Count} prefabs added");
 
-        return points;
+        return prefabs;
     }
 
-    public static void DrawPrefabs(Graphics graph, List<Rectangle> points)
+    public static void DrawPrefabs(Graphics graph, List<Prefab> prefabs)
     {
         using Pen pen = new Pen(POINT_COLOR, POINT_WIDTH);
 
+        foreach (var prefab in prefabs)
+        {
+            graph.DrawRectangle(pen, prefab.position.x, prefab.position.z, prefab.size.x, prefab.size.z);
+        }
+    }
+
+    public static void DrawPoints(Graphics graph, List<Vector3i> points)
+    {
+        using Pen pen = new Pen(Color.DarkRed, 1);
+
         foreach (var point in points)
         {
-            graph.DrawRectangle(pen, point.x, point.z, point.sizeX, point.sizeZ);
+            graph.DrawEllipse(pen, point.x, point.z, 1, 1);
         }
     }
 
@@ -254,23 +488,23 @@ public static class CaveBuilder
         }
     }
 
-    public static List<Edge> KruskalMST(List<Rectangle> points)
+    public static List<Edge> KruskalMST(List<Prefab> prefabs)
     {
         List<Edge> edges = new List<Edge>();
 
         // Generate all edges with them weight
-        for (int i = 0; i < points.Count; i++)
+        for (int i = 0; i < prefabs.Count; i++)
         {
-            for (int j = i + 1; j < points.Count; j++)
+            for (int j = i + 1; j < prefabs.Count; j++)
             {
-                edges.Add(new Edge(i, j, points[i], points[j]));
+                edges.Add(new Edge(i, j, prefabs[i], prefabs[j]));
             }
         }
 
         // Sort edges by weight
         edges.Sort();
 
-        UnionFind uf = new UnionFind(points.Count);
+        UnionFind uf = new UnionFind(prefabs.Count);
         List<Edge> mst = new List<Edge>();
 
         foreach (var edge in edges)
@@ -287,11 +521,11 @@ public static class CaveBuilder
 
     private static void DrawGraph(string[] args)
     {
-        int pointCounts = args.Length > 1 ? int.Parse(args[1]) : POINTS_COUNT;
+        int prefabCounts = args.Length > 1 ? int.Parse(args[1]) : POINTS_COUNT;
 
-        var points = GetRectangles(pointCounts);
+        var prefabs = GetRandomPrefabs(prefabCounts);
 
-        List<Edge> edges = KruskalMST(points);
+        List<Edge> edges = KruskalMST(prefabs);
 
         using Bitmap b = new Bitmap(MAP_SIZE, MAP_SIZE);
 
@@ -299,72 +533,86 @@ public static class CaveBuilder
         {
             g.Clear(Color.Black);
             DrawEdges(g, edges);
-            DrawPrefabs(g, points);
+            DrawPrefabs(g, prefabs);
         }
 
         b.Save(@"graph.png", ImageFormat.Png);
     }
 
-    private static List<Edge> WormPathing(Rectangle startPoint, Rectangle endPoint)
+    private static Dictionary<string, bool> GetPrefabObstacles(List<Prefab> prefabs)
     {
-        var edges = new List<Edge>
+        var obstacles = new Dictionary<string, bool>();
+
+        foreach (Prefab prefab in prefabs)
         {
-            // new Edge(0, 1, startPoint, endPoint)
-        };
-
-        var lastPoint = startPoint;
-        int n = 10;
-        int amplitude = 20;
-
-        for (int i = 0; i < n; i++)
-        {
-            int xi = startPoint.x + (endPoint.x - startPoint.x) * i / n;
-            int zi = startPoint.z + (endPoint.z - startPoint.z) * i / n;
-
-            xi += rand.Next(amplitude);
-            zi += rand.Next(amplitude);
-
-            var interPoint = new Rectangle()
+            foreach (Vector3i point in prefab.GetAllPoints())
             {
-                x = xi,
-                y = 0,
-                z = zi,
-            };
-
-            edges.Add(new Edge(0, 0, lastPoint, interPoint));
-
-            lastPoint = interPoint;
+                obstacles[point.ToString()] = true;
+            }
         }
 
-        edges.Add(new Edge(0, 0, lastPoint, endPoint));
+        return obstacles;
+    }
 
-        return edges;
+    private static List<Vector3i> PerlinRoute(Vector3i startPos, Vector3i targetpos, FastNoiseLite noise, List<Prefab> prefabs)
+    {
+        Dictionary<string, bool> obstacles = GetPrefabObstacles(prefabs);
+
+        return AStar.FindPath(startPos, targetpos, obstacles, noise);
     }
 
     private static void DrawPath(string[] args)
     {
-        Rectangle p1 = new Rectangle() { x = 10, y = 0, z = 10 };
-        Rectangle p2 = new Rectangle() { x = MAP_SIZE - 10, y = 0, z = MAP_SIZE - 10 };
+        Prefab p1 = new()
+        {
+            position = new Vector3i(10, 0, 10),
+            size = new Vector3i(10, 0, 10)
+        };
 
-        List<Rectangle> points = new List<Rectangle> { p1, p2 };
+        Prefab p2 = new()
+        {
+            position = new Vector3i(MAP_SIZE - 20, 0, MAP_SIZE - 20),
+            size = new Vector3i(10, 0, 10),
+        };
 
-        List<Edge> edges = WormPathing(p1, p2);
+        FastNoiseLite noise = ParsePerlinNoise();
 
-        using Bitmap b = new Bitmap(MAP_SIZE, MAP_SIZE);
+        List<Prefab> prefabs = new List<Prefab> { p1, p2 };
+
+        List<Vector3i> path = PerlinRoute(p1.position, p2.position, noise, new List<Prefab>());
+
+        using Bitmap b = new(MAP_SIZE, MAP_SIZE);
 
         using (Graphics g = Graphics.FromImage(b))
         {
-            g.Clear(Color.White);
-            DrawEdges(g, edges);
-            DrawPrefabs(g, points);
+            g.Clear(Color.Black);
+            DrawNoise(b, noise, 0.5f);
+            DrawPrefabs(g, prefabs);
+            DrawPoints(g, path);
         }
 
         b.Save(@"pathing.png", ImageFormat.Png);
     }
 
+    private static void DrawNoise(Bitmap b, FastNoiseLite perlinNoise, float threshold)
+    {
+        for (int x = 0; x < MAP_SIZE; x++)
+        {
+            for (int z = 0; z < MAP_SIZE; z++)
+            {
+                float noise = 0.5f * (perlinNoise.GetNoise(x, z) + 1);
+
+                if (noise < threshold)
+                    b.SetPixel(x, z, Color.DarkGray);
+            }
+        }
+
+    }
+
     public static void Main(string[] args)
     {
-        Console.WriteLine($"Seed = {SEED}");
+        Console.WriteLine($"SEED :{SEED}");
+        Console.WriteLine($"SIZE :{MAP_SIZE}");
 
         switch (args[0])
         {
@@ -374,6 +622,10 @@ public static class CaveBuilder
 
             case "path":
                 DrawPath(args);
+                break;
+
+            case "noise":
+                // DrawNoise(args);
                 break;
 
             default:
