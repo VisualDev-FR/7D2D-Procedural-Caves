@@ -395,9 +395,15 @@ public static class CaveBuilder
 
     public static readonly Random rand = new Random(SEED);
 
-    public static readonly Color POINT_COLOR = Color.Green;
+    public static readonly Color BackgroundColor = Color.Black;
 
-    public static readonly Color EDGE_COLOR = Color.DarkGray;
+    public static readonly Color TunnelsColor = Color.DarkRed;
+
+    public static readonly Color NodeColor = Color.Yellow;
+
+    public static readonly Color PrefabBoundsColor = Color.Green;
+
+    public static readonly Color NoiseColor = Color.DarkGray;
 
     private static FastNoiseLite ParsePerlinNoise()
     {
@@ -461,7 +467,7 @@ public static class CaveBuilder
 
     public static void DrawPrefabs(Graphics graph, List<Prefab> prefabs)
     {
-        using Pen pen = new Pen(POINT_COLOR, POINT_WIDTH);
+        using Pen pen = new Pen(PrefabBoundsColor, POINT_WIDTH);
 
         foreach (var prefab in prefabs)
         {
@@ -478,13 +484,13 @@ public static class CaveBuilder
             Debug.Assert(point.z < MAP_SIZE);
             Debug.Assert(point.z < MAP_SIZE);
 
-            bitmap.SetPixel(point.x, point.z, Color.DarkRed);
+            bitmap.SetPixel(point.x, point.z, TunnelsColor);
         }
     }
 
     public static void DrawEdges(Graphics graph, List<Edge> edges)
     {
-        using Pen pen = new Pen(EDGE_COLOR, EDGE_WIDTH);
+        using Pen pen = new Pen(TunnelsColor, EDGE_WIDTH);
 
         foreach (var edge in edges)
         {
@@ -504,10 +510,9 @@ public static class CaveBuilder
                 float noise = 0.5f * (perlinNoise.GetNoise(x, z) + 1);
 
                 if (noise < NOISE_THRESHOLD)
-                    b.SetPixel(x, z, Color.DarkGray);
+                    b.SetPixel(x, z, NoiseColor);
             }
         }
-
     }
 
     public static List<Edge> KruskalMST(List<Prefab> prefabs)
@@ -577,7 +582,7 @@ public static class CaveBuilder
 
         using (Graphics g = Graphics.FromImage(b))
         {
-            g.Clear(Color.Black);
+            g.Clear(BackgroundColor);
             DrawEdges(g, edges);
             DrawPrefabs(g, prefabs);
         }
@@ -593,7 +598,7 @@ public static class CaveBuilder
 
         using (Graphics g = Graphics.FromImage(b))
         {
-            g.Clear(Color.Black);
+            g.Clear(BackgroundColor);
             DrawNoise(b, noise);
         }
 
@@ -622,12 +627,12 @@ public static class CaveBuilder
 
         using (Graphics g = Graphics.FromImage(b))
         {
-            g.Clear(Color.Black);
+            g.Clear(BackgroundColor);
             DrawNoise(b, noise);
             DrawPath(b, path);
 
-            b.SetPixel(p1.position.x, p1.position.z, Color.Yellow);
-            b.SetPixel(p2.position.x, p2.position.z, Color.Yellow);
+            b.SetPixel(p1.position.x, p1.position.z, NodeColor);
+            b.SetPixel(p2.position.x, p2.position.z, NodeColor);
         }
 
         b.Save(@"pathing.png", ImageFormat.Png);
@@ -647,7 +652,7 @@ public static class CaveBuilder
 
         using (Graphics g = Graphics.FromImage(b))
         {
-            g.Clear(Color.Black);
+            g.Clear(BackgroundColor);
 
             foreach (Edge edge in edges)
             {
@@ -661,8 +666,8 @@ public static class CaveBuilder
 
                 DrawPath(b, path);
 
-                b.SetPixel(p1.x, p1.z, Color.Yellow);
-                b.SetPixel(p2.x, p2.z, Color.Yellow);
+                b.SetPixel(p1.x, p1.z, NodeColor);
+                b.SetPixel(p2.x, p2.z, NodeColor);
             }
         }
 
