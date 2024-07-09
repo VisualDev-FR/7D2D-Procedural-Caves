@@ -4,6 +4,7 @@ using System;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 
 public class Vector3i
@@ -205,11 +206,11 @@ public class Node
 {
     public Vector3i position;
 
-    public double GCost { get; set; } // coût du chemin depuis le noeud de départ jusqu'à ce noeud
+    public float GCost { get; set; } // coût du chemin depuis le noeud de départ jusqu'à ce noeud
 
-    public double HCost { get; set; } // estimation heuristique du coût restant jusqu'à l'objectif
+    public float HCost { get; set; } // estimation heuristique du coût restant jusqu'à l'objectif
 
-    public double FCost => GCost + HCost; // coût total estimé (GCost + HCost)
+    public float FCost => GCost + HCost; // coût total estimé (GCost + HCost)
 
     public Node Parent { get; set; } // noeud parent dans le chemin optimal
 
@@ -247,25 +248,6 @@ public class Node
             if (position.z < 0 || position.z > CaveBuilder.MAP_SIZE)
                 continue;
 
-            if (!obstacles.TryGetValue(position.ToString(), out bool isObstacle))
-            {
-                float noise = 0.5f * (1 + perlinNoise.GetNoise(position.x, position.z));
-
-                isObstacle = noise > CaveBuilder.NOISE_THRESHOLD;
-                obstacles[position.ToString()] = isObstacle;
-            }
-
-            if (!isObstacle)
-            {
-                neighbors.Add(new Node(position));
-            }
-        }
-
-        if (neighbors.Count > 0)
-            return neighbors;
-
-        foreach (var position in neighborsPos)
-        {
             neighbors.Add(new Node(position));
         }
 
@@ -311,22 +293,23 @@ public static class AStar
             openSet.Remove(currentNode);
             closedSet.Add(currentNode);
 
+            Console.WriteLine(openSet.Count);
+
             foreach (Node neighbor in currentNode.GetNeighbors(obstacles, perlinNoise))
             {
                 if (closedSet.Contains(neighbor))
                     continue;
 
-                // Console.WriteLine(neighbor.position.ToString());
+                float noise = 0.5f * (1 + perlinNoise.GetNoise(neighbor.position.x, neighbor.position.z));
+                float factor = noise < CaveBuilder.NOISE_THRESHOLD ? .01f : 1f;
 
-                float noise = 0.5f * (1 + perlinNoise.GetNoise(currentNode.position.x, currentNode.position.z));
-
-                double tentativeGCost = currentNode.GCost + EuclidianDist(currentNode, neighbor);
+                float tentativeGCost = currentNode.GCost + EuclidianDist(currentNode, neighbor) * factor;
 
                 if (!openSet.Contains(neighbor) || tentativeGCost < neighbor.GCost)
                 {
                     neighbor.Parent = currentNode;
                     neighbor.GCost = tentativeGCost;
-                    neighbor.HCost = EuclidianDist(neighbor, goalNode);
+                    neighbor.HCost = EuclidianDist(neighbor, goalNode) * factor;
 
                     if (!openSet.Contains(neighbor))
                         openSet.Add(neighbor);
@@ -350,11 +333,19 @@ public static class AStar
         return lowestCostNode;
     }
 
-    private static double EuclidianDist(Node nodeA, Node nodeB)
+    private static int fastAbs(int value)
     {
-        return Math.Sqrt(
-              Math.Pow(nodeA.position.x - nodeB.position.x, 2)
-            + Math.Pow(nodeA.position.y - nodeB.position.y, 2)
+        if (value < 0)
+            return -value;
+
+        return value;
+    }
+
+    private static float EuclidianDist(Node nodeA, Node nodeB)
+    {
+        return MathF.Sqrt(
+              MathF.Pow(nodeA.position.x - nodeB.position.x, 2)
+            + MathF.Pow(nodeA.position.z - nodeB.position.z, 2)
         );
     }
 
@@ -379,7 +370,7 @@ public static class CaveBuilder
 {
     public static readonly int SEED = new Random().Next();
 
-    public const int MAP_SIZE = 150;
+    public const int MAP_SIZE = 200;
 
     public const int MAP_OFFSET = MAP_SIZE / 10;
 
@@ -471,6 +462,11 @@ public static class CaveBuilder
     {
         foreach (var point in points)
         {
+            Debug.Assert(point.x >= 0);
+            Debug.Assert(point.z >= 0);
+            Debug.Assert(point.z < MAP_SIZE);
+            Debug.Assert(point.z < MAP_SIZE);
+
             bitmap.SetPixel(point.x, point.z, Color.DarkRed);
         }
     }
