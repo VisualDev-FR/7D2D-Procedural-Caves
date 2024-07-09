@@ -1,7 +1,8 @@
+#pragma warning disable CA1416
+
 using System;
 using System.Drawing;
 using System.Drawing.Imaging;
-using System.Runtime.Versioning;
 using System.Collections.Generic;
 
 
@@ -317,6 +318,8 @@ public static class AStar
 
                 // Console.WriteLine(neighbor.position.ToString());
 
+                float noise = 0.5f * (1 + perlinNoise.GetNoise(currentNode.position.x, currentNode.position.z));
+
                 double tentativeGCost = currentNode.GCost + EuclidianDist(currentNode, neighbor);
 
                 if (!openSet.Contains(neighbor) || tentativeGCost < neighbor.GCost)
@@ -374,12 +377,11 @@ public static class AStar
 }
 
 
-[SupportedOSPlatform("windows")]
 public static class CaveBuilder
 {
     public static readonly int SEED = new Random().Next();
 
-    public const int MAP_SIZE = 100;
+    public const int MAP_SIZE = 200;
 
     public const int MAP_OFFSET = 200;
 
@@ -389,7 +391,7 @@ public static class CaveBuilder
 
     public const int POINTS_COUNT = MAP_SIZE / 5;
 
-    public const float NOISE_THRESHOLD = 0.6f;
+    public const float NOISE_THRESHOLD = 0.55f;
 
     public static readonly Random rand = new Random(SEED);
 
@@ -402,7 +404,9 @@ public static class CaveBuilder
         var noise = new FastNoiseLite(SEED);
 
         noise.SetNoiseType(FastNoiseLite.NoiseType.Perlin);
-        noise.SetFractalOctaves(2);
+        noise.SetFractalType(FastNoiseLite.FractalType.None);
+        noise.SetFractalGain(1);
+        noise.SetFractalOctaves(1);
         noise.SetFrequency(0.1f);
 
         return noise;
@@ -465,13 +469,11 @@ public static class CaveBuilder
         }
     }
 
-    public static void DrawPoints(Graphics graph, List<Vector3i> points)
+    public static void DrawPoints(Bitmap bitmap, List<Vector3i> points)
     {
-        using Pen pen = new Pen(Color.DarkRed, 1);
-
         foreach (var point in points)
         {
-            graph.DrawEllipse(pen, point.x, point.z, 1, 1);
+            bitmap.SetPixel(point.x, point.z, Color.DarkRed);
         }
     }
 
@@ -586,15 +588,17 @@ public static class CaveBuilder
         using (Graphics g = Graphics.FromImage(b))
         {
             g.Clear(Color.Black);
-            DrawNoise(b, noise, 0.5f);
-            DrawPrefabs(g, prefabs);
-            DrawPoints(g, path);
+            // DrawNoise(b, noise);
+            DrawPoints(b, path);
+
+            b.SetPixel(p1.position.x, p1.position.z, Color.Yellow);
+            b.SetPixel(p2.position.x, p2.position.z, Color.Yellow);
         }
 
         b.Save(@"pathing.png", ImageFormat.Png);
     }
 
-    private static void DrawNoise(Bitmap b, FastNoiseLite perlinNoise, float threshold)
+    private static void DrawNoise(Bitmap b, FastNoiseLite perlinNoise)
     {
         for (int x = 0; x < MAP_SIZE; x++)
         {
@@ -602,7 +606,7 @@ public static class CaveBuilder
             {
                 float noise = 0.5f * (perlinNoise.GetNoise(x, z) + 1);
 
-                if (noise < threshold)
+                if (noise < NOISE_THRESHOLD)
                     b.SetPixel(x, z, Color.DarkGray);
             }
         }
@@ -634,3 +638,6 @@ public static class CaveBuilder
         }
     }
 }
+
+
+#pragma warning restore CA1416
