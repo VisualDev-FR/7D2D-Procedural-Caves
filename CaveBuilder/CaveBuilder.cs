@@ -8,6 +8,42 @@ using System.Drawing.Imaging;
 using System.Collections.Generic;
 using System.Diagnostics;
 
+public static class Logger
+{
+    private static void Logging(string level, string message)
+    {
+        Console.WriteLine($"{level.PadRight(8)}: {message}");
+    }
+
+    public static void Debug(string message)
+    {
+        Logging("DEBUG", message);
+    }
+
+    public static void Info(string message)
+    {
+        Logging("INFO", message);
+    }
+
+    public static void Warning(string message)
+    {
+        Logging("WARNING", message);
+    }
+
+    public static void Error(string message)
+    {
+        Logging("ERROR", message);
+    }
+
+    public static void Test()
+    {
+        Debug("coucou");
+        Info("coucou");
+        Warning("coucou");
+        Error("coucou");
+    }
+}
+
 
 public class Vector3i
 {
@@ -424,7 +460,7 @@ public static class CaveBuilder
 
     public static int MAX_PREFAB_SIZE = 100;
 
-    public const int MAP_SIZE = 500;
+    public const int MAP_SIZE = 6144;
 
     public const int MAP_OFFSET = MAP_SIZE / 60;
 
@@ -632,7 +668,11 @@ public static class CaveBuilder
 
         var prefabs = GetRandomPrefabs(prefabCounts);
 
+        Logger.Info("Start solving MST Krustal...");
+
         List<Edge> edges = KruskalMST(prefabs);
+
+        Logger.Info("Start Drawing graph...");
 
         using Bitmap b = new Bitmap(MAP_SIZE, MAP_SIZE);
 
@@ -642,6 +682,8 @@ public static class CaveBuilder
             DrawEdges(g, edges);
             DrawPrefabs(b, g, prefabs);
         }
+
+        Logger.Info($"{edges.Count} Generated edges.");
 
         b.Save(@"graph.png", ImageFormat.Png);
     }
