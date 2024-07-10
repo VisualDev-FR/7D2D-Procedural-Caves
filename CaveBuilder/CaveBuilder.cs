@@ -1,4 +1,4 @@
-#pragma warning disable CA1416, CA1050, CA2211, IDE0090, IDE0044
+#pragma warning disable CA1416, CA1050, CA2211, IDE0090, IDE0044, IDE0028
 
 
 using System;
@@ -39,6 +39,11 @@ public class Vector3i
         return p1.x == p2.x && p1.z == p2.z;
     }
 
+    public static Vector3i operator +(Vector3i p1, Vector3i p2)
+    {
+        return new Vector3i(p1.x + p2.x, p1.y + p2.y, p1.z + p2.z);
+    }
+
     public override bool Equals(object obj)
     {
         var other = (Vector3i)obj;
@@ -49,6 +54,20 @@ public class Vector3i
     public override int GetHashCode()
     {
         return x * CaveBuilder.MAP_SIZE + z;
+    }
+
+    public PointF ToPointF()
+    {
+        return new PointF(x, z);
+    }
+}
+
+
+public static class Utils
+{
+    public static int FastMin(int a, int b)
+    {
+        return a > b ? a : b;
     }
 }
 
@@ -61,7 +80,24 @@ public class Prefab
 
     public Vector3i size;
 
+    public List<Vector3i> nodes;
+
     public int rotation = 1;
+
+    public Prefab()
+    {
+        nodes = new List<Vector3i>();
+    }
+
+    public Prefab(Random rand)
+    {
+        nodes = new List<Vector3i>();
+        size = new Vector3i(
+            rand.Next(CaveBuilder.MIN_PREFAB_SIZE, CaveBuilder.MAX_PREFAB_SIZE),
+            rand.Next(CaveBuilder.MIN_PREFAB_SIZE, CaveBuilder.MAX_PREFAB_SIZE),
+            rand.Next(CaveBuilder.MIN_PREFAB_SIZE, CaveBuilder.MAX_PREFAB_SIZE)
+        );
+    }
 
     public void SetRandomPosition(Random rand, int mapSize, int mapOffset)
     {
@@ -70,6 +106,14 @@ public class Prefab
             rand.Next(mapOffset, mapSize - mapOffset - size.y),
             rand.Next(mapOffset, mapSize - mapOffset - size.z)
         );
+
+        nodes = new List<Vector3i>()
+        {
+            position + new Vector3i(size.x / 2 , 0, 0),
+            position + new Vector3i(0, 0, size.z / 2),
+            position + new Vector3i(size.x / 2, 0, size.z),
+            position + new Vector3i(size.x , 0, size.z / 2),
+        };
     }
 
     public bool OverLaps2D(Prefab other, int map_size, int map_offset)
@@ -109,10 +153,6 @@ public class Prefab
         return points;
     }
 
-    public PointF ToPointF()
-    {
-        return new PointF(position.x, position.z);
-    }
 }
 
 
@@ -124,21 +164,21 @@ public class Edge : IComparable<Edge>
 
     public float Weight { get; set; }
 
-    public Prefab StartPoint { get; }
+    public Vector3i StartPoint { get; }
 
-    public Prefab EndPoint { get; }
+    public Vector3i EndPoint { get; }
 
     private float GetWeight()
     {
         float euclidianDist = MathF.Sqrt(
-              MathF.Pow(StartPoint.position.x - EndPoint.position.x, 2)
-            + MathF.Pow(StartPoint.position.z - EndPoint.position.z, 2)
+              MathF.Pow(StartPoint.x - EndPoint.x, 2)
+            + MathF.Pow(StartPoint.z - EndPoint.z, 2)
         );
 
         return euclidianDist; // MathF.Abs(StartPoint.sizeX * StartPoint.sizeZ - EndPoint.sizeX * EndPoint.sizeZ);
     }
 
-    public Edge(int _start, int _end, Prefab _startPoint, Prefab _endPoint)
+    public Edge(int _start, int _end, Vector3i _startPoint, Vector3i _endPoint)
     {
         Start = _start;
         End = _end;
@@ -380,13 +420,15 @@ public static class CaveBuilder
 {
     private static int SEED = new Random().Next();
 
-    public const int MAP_SIZE = 6144;
+    public static int MIN_PREFAB_SIZE = 8;
+
+    public static int MAX_PREFAB_SIZE = 100;
+
+    public const int MAP_SIZE = 500;
 
     public const int MAP_OFFSET = MAP_SIZE / 60;
 
     public const float POINT_WIDTH = 5;
-
-    public const float EDGE_WIDTH = MAP_SIZE / 2000;
 
     public const int PREFAB_COUNT = MAP_SIZE / 5;
 
@@ -444,14 +486,7 @@ public static class CaveBuilder
 
         for (int i = 0; i < count; i++)
         {
-            var prefab = new Prefab()
-            {
-                size = new Vector3i(
-                    rand.Next(8, 100),
-                    rand.Next(8, 100),
-                    rand.Next(8, 100)
-                )
-            };
+            var prefab = new Prefab(rand);
 
             prefab.SetRandomPosition(rand, MAP_SIZE, MAP_OFFSET);
 
@@ -464,13 +499,14 @@ public static class CaveBuilder
         return prefabs;
     }
 
-    public static void DrawPrefabs(Graphics graph, List<Prefab> prefabs)
+    public static void DrawPrefabs(Bitmap b, Graphics graph, List<Prefab> prefabs)
     {
         using Pen pen = new Pen(PrefabBoundsColor, 2);
 
         foreach (var prefab in prefabs)
         {
             graph.DrawRectangle(pen, prefab.position.x, prefab.position.z, prefab.size.x, prefab.size.z);
+            DrawPoints(b, new HashSet<Vector3i>(prefab.nodes), NodeColor);
         }
     }
 
@@ -484,7 +520,7 @@ public static class CaveBuilder
 
     public static void DrawEdges(Graphics graph, List<Edge> edges)
     {
-        using Pen pen = new Pen(TunnelsColor, EDGE_WIDTH);
+        using Pen pen = new Pen(TunnelsColor, 2);
 
         foreach (var edge in edges)
         {
@@ -518,7 +554,13 @@ public static class CaveBuilder
         {
             for (int j = i + 1; j < prefabs.Count; j++)
             {
-                edges.Add(new Edge(i, j, prefabs[i], prefabs[j]));
+                foreach (var p1 in prefabs[i].nodes)
+                {
+                    foreach (var p2 in prefabs[j].nodes)
+                    {
+                        edges.Add(new Edge(i, j, p1, p2));
+                    }
+                }
             }
         }
 
@@ -598,7 +640,7 @@ public static class CaveBuilder
         {
             g.Clear(BackgroundColor);
             DrawEdges(g, edges);
-            DrawPrefabs(g, prefabs);
+            DrawPrefabs(b, g, prefabs);
         }
 
         b.Save(@"graph.png", ImageFormat.Png);
@@ -682,8 +724,8 @@ public static class CaveBuilder
         foreach (Edge edge in edges)
         {
 
-            Vector3i p1 = edge.StartPoint.position;
-            Vector3i p2 = edge.EndPoint.position;
+            Vector3i p1 = edge.StartPoint;
+            Vector3i p2 = edge.EndPoint;
 
             caveMap.UnionWith(PerlinRoute(p1, p2, noise, new List<Prefab>()));
 
@@ -699,7 +741,7 @@ public static class CaveBuilder
 
             DrawPoints(b, caveMap, TunnelsColor);
             DrawPoints(b, nodes, NodeColor);
-            DrawPrefabs(g, prefabs);
+            DrawPrefabs(b, g, prefabs);
         }
 
         Console.WriteLine($"{caveMap.Count} cave blocks generated.");
