@@ -7,6 +7,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 
 public static class Logger
 {
@@ -110,6 +111,20 @@ public static class Utils
     {
         return TimeSpan.FromSeconds(timer.ElapsedMilliseconds / 1000).ToString(format);
     }
+
+    public static float EuclidianDist(Node nodeA, Node nodeB)
+    {
+        return EuclidianDist(nodeA.position, nodeB.position);
+    }
+
+    public static float EuclidianDist(Vector3i p1, Vector3i p2)
+    {
+        return MathF.Sqrt(
+              MathF.Pow(p1.x - p2.x, 2)
+            + MathF.Pow(p1.z - p2.z, 2)
+        );
+    }
+
 }
 
 
@@ -399,13 +414,13 @@ public static class AStarPerlin
                 float noise = 0.5f * (1 + perlinNoise.GetNoise(neighbor.position.x, neighbor.position.z));
                 float factor = noise < CaveBuilder.NOISE_THRESHOLD ? .5f : 1f;
 
-                float tentativeGCost = currentNode.GCost + EuclidianDist(currentNode, neighbor) * factor;
+                float tentativeGCost = currentNode.GCost + Utils.EuclidianDist(currentNode, neighbor) * factor;
 
                 if (!openSet.Contains(neighbor) || tentativeGCost < neighbor.GCost)
                 {
                     neighbor.Parent = currentNode;
                     neighbor.GCost = tentativeGCost;
-                    neighbor.HCost = EuclidianDist(neighbor, goalNode) * factor;
+                    neighbor.HCost = Utils.EuclidianDist(neighbor, goalNode) * factor;
 
                     openSet.Add(neighbor);
                 }
@@ -433,19 +448,6 @@ public static class AStarPerlin
         return lowestCostNode;
     }
 
-    public static float EuclidianDist(Node nodeA, Node nodeB)
-    {
-        return EuclidianDist(nodeA.position, nodeB.position);
-    }
-
-    public static float EuclidianDist(Vector3i p1, Vector3i p2)
-    {
-        return MathF.Sqrt(
-              MathF.Pow(p1.x - p2.x, 2)
-            + MathF.Pow(p1.z - p2.z, 2)
-        );
-    }
-
     private static HashSet<Vector3i> ReconstructPath(Node currentNode)
     {
         HashSet<Vector3i> path = new();
@@ -465,7 +467,7 @@ public static class CaveBuilder
 {
     private static int SEED = new Random().Next();
 
-    public const int MAP_SIZE = 6144;
+    public const int MAP_SIZE = 1000;
 
     public static int MIN_PREFAB_SIZE = 8;
 
@@ -595,9 +597,22 @@ public static class CaveBuilder
         }
     }
 
+    public static List<Vector3i> CollectPrefabNodes(List<Prefab> prefabs)
+    {
+        var nodes = new HashSet<Vector3i>();
+
+        foreach (var prefab in prefabs)
+        {
+            nodes.UnionWith(prefab.nodes);
+        }
+
+        return nodes.ToList();
+    }
+
     public static List<Edge> KruskalMST(List<Prefab> prefabs)
     {
-        List<Edge> edges = new List<Edge>();
+        List<Edge> edges = new();
+        List<Vector3i> nodes = CollectPrefabNodes(prefabs);
 
         // Generate all edges with them weight
         for (int i = 0; i < prefabs.Count; i++)
@@ -608,7 +623,10 @@ public static class CaveBuilder
                 {
                     foreach (var p2 in prefabs[j].nodes)
                     {
-                        edges.Add(new Edge(i, j, p1, p2));
+                        int index1 = nodes.IndexOf(p1);
+                        int index2 = nodes.IndexOf(p2);
+
+                        edges.Add(new Edge(index1, index2, p1, p2));
                     }
                 }
             }
@@ -617,7 +635,7 @@ public static class CaveBuilder
         // Sort edges by weight
         edges.Sort();
 
-        UnionFind uf = new UnionFind(prefabs.Count);
+        UnionFind uf = new UnionFind(nodes.Count);
         List<Edge> mst = new List<Edge>();
 
         foreach (var edge in edges)
@@ -787,12 +805,12 @@ public static class CaveBuilder
             Vector3i p1 = edge.StartPos;
             Vector3i p2 = edge.EndPos;
 
+            Logger.Info($"Noise pathing: {100.0f * index++ / edges.Count:F0}% ({index} / {edges.Count}), dist={Utils.EuclidianDist(p1, p2)}");
+
             caveMap.UnionWith(PerlinRoute(p1, p2, noise, obstacles));
 
             nodes.Add(p1);
             nodes.Add(p2);
-
-            Logger.Info($"Perlin pathing: {100.0f * index++ / edges.Count:F0}% ({index} / {edges.Count})");
         }
 
         using Bitmap b = new(MAP_SIZE, MAP_SIZE);
