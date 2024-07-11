@@ -678,11 +678,16 @@ public static class GraphSolver
 
     public static List<Edge> Resolve(List<Prefab> prefabs)
     {
+        Stopwatch timer = new();
+
+        timer.Start();
 
         List<Vector3i> nodes = CollectPrefabNodes(prefabs);
         List<Edge> graph = BuildGraph(prefabs, nodes);
 
         List<Edge> mst = KruskalMST(graph, nodes.Count);
+
+        Logger.Info($"MST Solved in {Utils.TimeFormat(timer)}");
 
         return mst;
     }
@@ -693,7 +698,7 @@ public static class CaveBuilder
 {
     private static int SEED = new Random().Next();
 
-    public const int MAP_SIZE = 4000;
+    public const int MAP_SIZE = 3000;
 
     public static int MIN_PREFAB_SIZE = 8;
 
