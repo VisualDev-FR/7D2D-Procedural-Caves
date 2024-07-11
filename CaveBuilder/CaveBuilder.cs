@@ -368,7 +368,34 @@ public class Node
 
 public static class AStarPerlin
 {
-    public static HashSet<Vector3i> FindPath(Vector3i startPos, Vector3i targetPos, HashSet<Vector3i> obstacles, FastNoiseLite perlinNoise)
+
+    private static Node GetLowestFCostNode(HashSet<Node> nodes)
+    {
+        Node lowestCostNode = null;
+        foreach (Node node in nodes)
+        {
+            if (lowestCostNode == null || node.FCost < lowestCostNode.FCost)
+            {
+                lowestCostNode = node;
+            }
+        }
+        return lowestCostNode;
+    }
+
+    private static HashSet<Vector3i> ReconstructPath(Node currentNode)
+    {
+        HashSet<Vector3i> path = new();
+
+        while (currentNode != null)
+        {
+            path.Add(currentNode.position);
+            currentNode = currentNode.Parent;
+        }
+
+        return path;
+    }
+
+    private static HashSet<Vector3i> FindPath(Vector3i startPos, Vector3i targetPos, HashSet<Vector3i> obstacles, FastNoiseLite perlinNoise)
     {
         Node startNode = new(startPos);
         Node goalNode = new(targetPos);
@@ -435,28 +462,30 @@ public static class AStarPerlin
         return path;
     }
 
-    private static Node GetLowestFCostNode(HashSet<Node> nodes)
-    {
-        Node lowestCostNode = null;
-        foreach (Node node in nodes)
-        {
-            if (lowestCostNode == null || node.FCost < lowestCostNode.FCost)
-            {
-                lowestCostNode = node;
-            }
-        }
-        return lowestCostNode;
-    }
 
-    private static HashSet<Vector3i> ReconstructPath(Node currentNode)
+    public static HashSet<Vector3i> PerlinRoute(Vector3i startPos, Vector3i targetpos, FastNoiseLite noise, HashSet<Vector3i> obstacles)
     {
-        HashSet<Vector3i> path = new();
+        HashSet<Vector3i> path = FindPath(startPos, targetpos, obstacles, noise);
 
-        while (currentNode != null)
-        {
-            path.Add(currentNode.position);
-            currentNode = currentNode.Parent;
-        }
+        // int maxCaveWidth = 20;
+        // int minCaveWidth = 1;
+
+        // FastNoiseLite noiseX = ParsePerlinNoise(rand.Next());
+        // FastNoiseLite noiseZ = ParsePerlinNoise(rand.Next());
+
+        // foreach (Vector3i point in new List<Vector3i>(path))
+        // {
+        //     int widthX = minCaveWidth + (int)(0.5f * maxCaveWidth * (1 + noiseX.GetNoise(point.x, point.z)));
+        //     int widthZ = widthX; // minCaveWidth + (int)(0.5f * maxCaveWidth * (1 + noiseZ.GetNoise(point.x, point.z)));
+
+        //     for (int x = point.x; x < point.x + widthX; x++)
+        //     {
+        //         for (int z = point.z; z < point.z + widthZ; z++)
+        //         {
+        //             path.Add(new Vector3i(x, 0, z));
+        //         }
+        //     }
+        // }
 
         return path;
     }
@@ -679,33 +708,6 @@ public static class CaveBuilder
         return obstacles;
     }
 
-    private static HashSet<Vector3i> PerlinRoute(Vector3i startPos, Vector3i targetpos, FastNoiseLite noise, HashSet<Vector3i> obstacles)
-    {
-        HashSet<Vector3i> path = AStarPerlin.FindPath(startPos, targetpos, obstacles, noise);
-
-        // int maxCaveWidth = 20;
-        // int minCaveWidth = 1;
-
-        // FastNoiseLite noiseX = ParsePerlinNoise(rand.Next());
-        // FastNoiseLite noiseZ = ParsePerlinNoise(rand.Next());
-
-        // foreach (Vector3i point in new List<Vector3i>(path))
-        // {
-        //     int widthX = minCaveWidth + (int)(0.5f * maxCaveWidth * (1 + noiseX.GetNoise(point.x, point.z)));
-        //     int widthZ = widthX; // minCaveWidth + (int)(0.5f * maxCaveWidth * (1 + noiseZ.GetNoise(point.x, point.z)));
-
-        //     for (int x = point.x; x < point.x + widthX; x++)
-        //     {
-        //         for (int z = point.z; z < point.z + widthZ; z++)
-        //         {
-        //             path.Add(new Vector3i(x, 0, z));
-        //         }
-        //     }
-        // }
-
-        return path;
-    }
-
     private static void GenerateGraph(string[] args)
     {
         int prefabCounts = args.Length > 1 ? int.Parse(args[1]) : PREFAB_COUNT;
@@ -766,7 +768,7 @@ public static class CaveBuilder
         FastNoiseLite noise = ParsePerlinNoise();
 
         HashSet<Vector3i> obstacles = GetPrefabObstacles(prefabs);
-        HashSet<Vector3i> path = PerlinRoute(p1.position, p2.position, noise, obstacles);
+        HashSet<Vector3i> path = AStarPerlin.PerlinRoute(p1.position, p2.position, noise, obstacles);
 
         using Bitmap b = new(MAP_SIZE, MAP_SIZE);
 
@@ -824,7 +826,7 @@ public static class CaveBuilder
 
             Logger.Info($"Noise pathing: {100.0f * index++ / edges.Count:F0}% ({index} / {edges.Count}), dist={Utils.EuclidianDist(p1, p2)}");
 
-            caveMap.UnionWith(PerlinRoute(p1, p2, noise, obstacles));
+            caveMap.UnionWith(AStarPerlin.PerlinRoute(p1, p2, noise, obstacles));
 
             nodes.Add(p1);
             nodes.Add(p2);
