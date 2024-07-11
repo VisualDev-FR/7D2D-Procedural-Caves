@@ -463,6 +463,77 @@ public static class AStarPerlin
 }
 
 
+public static class GraphSolver
+{
+
+    private static List<Vector3i> CollectPrefabNodes(List<Prefab> prefabs)
+    {
+        var nodes = new HashSet<Vector3i>();
+
+        foreach (var prefab in prefabs)
+        {
+            nodes.UnionWith(prefab.nodes);
+        }
+
+        return nodes.ToList();
+    }
+
+    private static List<Edge> BuildGraph(List<Prefab> prefabs, List<Vector3i> nodes)
+    {
+        List<Edge> edges = new();
+
+        // Generate all edges with them weight
+        for (int i = 0; i < prefabs.Count; i++)
+        {
+            for (int j = i + 1; j < prefabs.Count; j++)
+            {
+                foreach (var p1 in prefabs[i].nodes)
+                {
+                    foreach (var p2 in prefabs[j].nodes)
+                    {
+                        int index1 = nodes.IndexOf(p1);
+                        int index2 = nodes.IndexOf(p2);
+
+                        edges.Add(new Edge(index1, index2, p1, p2));
+                    }
+                }
+            }
+        }
+
+        return edges;
+    }
+
+    private static List<Edge> KruskalMST(List<Edge> edges, int nodeCounts)
+    {
+        // Sort edges by weight
+        edges.Sort();
+
+        UnionFind uf = new UnionFind(nodeCounts);
+        List<Edge> mst = new List<Edge>();
+
+        foreach (var edge in edges)
+        {
+            if (uf.Find(edge.Start) != uf.Find(edge.End))
+            {
+                uf.Union(edge.Start, edge.End);
+                mst.Add(edge);
+            }
+        }
+
+        return mst;
+    }
+
+    public static List<Edge> Resolve(List<Prefab> prefabs)
+    {
+
+        List<Vector3i> nodes = CollectPrefabNodes(prefabs);
+        List<Edge> graph = BuildGraph(prefabs, nodes);
+
+        return KruskalMST(graph, nodes.Count);
+    }
+}
+
+
 public static class CaveBuilder
 {
     private static int SEED = new Random().Next();
@@ -472,7 +543,6 @@ public static class CaveBuilder
     public static int MIN_PREFAB_SIZE = 8;
 
     public static int MAX_PREFAB_SIZE = 100;
-
 
     public const int MAP_OFFSET = MAP_SIZE / 60;
 
@@ -597,59 +667,6 @@ public static class CaveBuilder
         }
     }
 
-    public static List<Vector3i> CollectPrefabNodes(List<Prefab> prefabs)
-    {
-        var nodes = new HashSet<Vector3i>();
-
-        foreach (var prefab in prefabs)
-        {
-            nodes.UnionWith(prefab.nodes);
-        }
-
-        return nodes.ToList();
-    }
-
-    public static List<Edge> KruskalMST(List<Prefab> prefabs)
-    {
-        List<Edge> edges = new();
-        List<Vector3i> nodes = CollectPrefabNodes(prefabs);
-
-        // Generate all edges with them weight
-        for (int i = 0; i < prefabs.Count; i++)
-        {
-            for (int j = i + 1; j < prefabs.Count; j++)
-            {
-                foreach (var p1 in prefabs[i].nodes)
-                {
-                    foreach (var p2 in prefabs[j].nodes)
-                    {
-                        int index1 = nodes.IndexOf(p1);
-                        int index2 = nodes.IndexOf(p2);
-
-                        edges.Add(new Edge(index1, index2, p1, p2));
-                    }
-                }
-            }
-        }
-
-        // Sort edges by weight
-        edges.Sort();
-
-        UnionFind uf = new UnionFind(nodes.Count);
-        List<Edge> mst = new List<Edge>();
-
-        foreach (var edge in edges)
-        {
-            if (uf.Find(edge.Start) != uf.Find(edge.End))
-            {
-                uf.Union(edge.Start, edge.End);
-                mst.Add(edge);
-            }
-        }
-
-        return mst;
-    }
-
     private static HashSet<Vector3i> GetPrefabObstacles(List<Prefab> prefabs)
     {
         var obstacles = new HashSet<Vector3i>();
@@ -697,7 +714,7 @@ public static class CaveBuilder
 
         Logger.Info("Start solving MST Krustal...");
 
-        List<Edge> edges = KruskalMST(prefabs);
+        List<Edge> edges = GraphSolver.Resolve(prefabs);
 
         Logger.Info("Start Drawing graph...");
 
@@ -794,7 +811,7 @@ public static class CaveBuilder
 
         Logger.Info("Start solving MST Krustal...");
 
-        List<Edge> edges = KruskalMST(prefabs);
+        List<Edge> edges = GraphSolver.Resolve(prefabs);
 
         FastNoiseLite noise = ParsePerlinNoise();
 
