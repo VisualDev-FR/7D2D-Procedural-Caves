@@ -267,12 +267,14 @@ public class Prefab
         return points;
     }
 
-    public HashSet<Vector3i> GetNoiseAround(Random rand, FastNoiseLite perlinNoise)
+    public HashSet<Vector3i> GetNoiseAround(Random rand)
     {
         const int MIN_RADIUS = 1;
         const int MAX_RADIUS = 10;
 
         var noiseMap = new HashSet<Vector3i>();
+
+        FastNoiseLite perlinNoise = CaveBuilder.ParsePerlinNoise(rand.Next());
 
         foreach (var pos in GetEdges())
         {
@@ -515,7 +517,7 @@ public static class AStarPerlin
         return path;
     }
 
-    private static HashSet<Vector3i> FindPath(Vector3i startPos, Vector3i targetPos, HashSet<Vector3i> obstacles, FastNoiseLite perlinNoise)
+    private static HashSet<Vector3i> FindPath(Vector3i startPos, Vector3i targetPos, HashSet<Vector3i> obstacles, HashSet<Vector3i> noiseMap, FastNoiseLite perlinNoise)
     {
         Node startNode = new(startPos);
         Node goalNode = new(targetPos);
@@ -561,6 +563,8 @@ public static class AStarPerlin
                 float noise = 0.5f * (1 + perlinNoise.GetNoise(neighbor.position.x, neighbor.position.z));
                 float factor = noise < CaveBuilder.NOISE_THRESHOLD ? .5f : 1f;
 
+                factor *= noiseMap.Contains(neighbor.position) ? 1f : .5f;
+
                 float tentativeGCost = currentNode.GCost + Utils.EuclidianDist(currentNode, neighbor) * factor;
 
                 if (!openSet.Contains(neighbor) || tentativeGCost < neighbor.GCost)
@@ -583,9 +587,9 @@ public static class AStarPerlin
     }
 
 
-    public static HashSet<Vector3i> PerlinRoute(Vector3i startPos, Vector3i targetpos, FastNoiseLite noise, HashSet<Vector3i> obstacles)
+    public static HashSet<Vector3i> PerlinRoute(Vector3i startPos, Vector3i targetpos, FastNoiseLite noise, HashSet<Vector3i> obstacles, HashSet<Vector3i> noiseMap)
     {
-        HashSet<Vector3i> path = FindPath(startPos, targetpos, obstacles, noise);
+        HashSet<Vector3i> path = FindPath(startPos, targetpos, obstacles, noiseMap, noise);
 
         // int maxCaveWidth = 20;
         // int minCaveWidth = 1;
@@ -689,7 +693,7 @@ public static class CaveBuilder
 {
     private static int SEED = new Random().Next();
 
-    public const int MAP_SIZE = 1000;
+    public const int MAP_SIZE = 4000;
 
     public static int MIN_PREFAB_SIZE = 8;
 
@@ -744,7 +748,7 @@ public static class CaveBuilder
         return visited;
     }
 
-    private static FastNoiseLite ParsePerlinNoise(int seed = -1)
+    public static FastNoiseLite ParsePerlinNoise(int seed = -1)
     {
         var noise = new FastNoiseLite(seed == -1 ? SEED : seed);
 
@@ -847,7 +851,7 @@ public static class CaveBuilder
         }
     }
 
-    private static HashSet<Vector3i> GetPrefabObstacles(List<Prefab> prefabs)
+    private static HashSet<Vector3i> CollectPrefabObstacles(List<Prefab> prefabs)
     {
         var obstacles = new HashSet<Vector3i>();
 
@@ -857,6 +861,17 @@ public static class CaveBuilder
         }
 
         return obstacles;
+    }
+    private static HashSet<Vector3i> CollectPrefabNoise(List<Prefab> prefabs, FastNoiseLite noise)
+    {
+        var noiseMap = new HashSet<Vector3i>();
+
+        foreach (Prefab prefab in prefabs)
+        {
+            noiseMap.UnionWith(prefab.GetNoiseAround(rand));
+        }
+
+        return noiseMap;
     }
 
     private static void GenerateGraph(string[] args)
@@ -916,17 +931,22 @@ public static class CaveBuilder
 
         var prefabs = new List<Prefab>() { p1, p2 };
 
+        p1.UpdateInnerPoints();
+        p2.UpdateInnerPoints();
+
         FastNoiseLite noise = ParsePerlinNoise();
 
-        HashSet<Vector3i> obstacles = GetPrefabObstacles(prefabs);
-        HashSet<Vector3i> path = AStarPerlin.PerlinRoute(p1.position, p2.position, noise, obstacles);
+        HashSet<Vector3i> obstacles = CollectPrefabObstacles(prefabs);
+        HashSet<Vector3i> noiseMap = CollectPrefabNoise(prefabs, noise);
+        HashSet<Vector3i> path = AStarPerlin.PerlinRoute(p1.position, p2.position, noise, obstacles, noiseMap);
 
         using Bitmap b = new(MAP_SIZE, MAP_SIZE);
 
         using (Graphics g = Graphics.FromImage(b))
         {
             g.Clear(BackgroundColor);
-            DrawNoise(b, noise);
+            // DrawNoise(b, noise);
+            DrawPoints(b, noiseMap, NoiseColor);
             DrawPoints(b, path, TunnelsColor);
             DrawPrefabs(b, g, prefabs);
 
@@ -954,19 +974,20 @@ public static class CaveBuilder
         Stopwatch timer = new Stopwatch();
         timer.Start();
 
-        int prefabCounts = args.Length > 1 ? int.Parse(args[1]) : PREFAB_COUNT;
 
+        FastNoiseLite noise = ParsePerlinNoise();
+
+        int prefabCounts = args.Length > 1 ? int.Parse(args[1]) : PREFAB_COUNT;
         var prefabs = GetRandomPrefabs(prefabCounts);
 
-        HashSet<Vector3i> obstacles = GetPrefabObstacles(prefabs);
+        HashSet<Vector3i> obstacles = CollectPrefabObstacles(prefabs);
+        HashSet<Vector3i> noiseMap = CollectPrefabNoise(prefabs, noise);
         HashSet<Vector3i> caveMap = new(3_000_000);
         HashSet<Vector3i> nodes = new();
 
         Logger.Info("Start solving MST Krustal...");
 
         List<Edge> edges = GraphSolver.Resolve(prefabs);
-
-        FastNoiseLite noise = ParsePerlinNoise();
 
         int index = 0;
 
@@ -977,7 +998,7 @@ public static class CaveBuilder
 
             Logger.Info($"Noise pathing: {100.0f * index++ / edges.Count:F0}% ({index} / {edges.Count}), dist={Utils.EuclidianDist(p1, p2)}");
 
-            caveMap.UnionWith(AStarPerlin.PerlinRoute(p1, p2, noise, obstacles));
+            caveMap.UnionWith(AStarPerlin.PerlinRoute(p1, p2, noise, obstacles, noiseMap));
 
             nodes.Add(p1);
             nodes.Add(p2);
@@ -998,36 +1019,6 @@ public static class CaveBuilder
         SaveCaveMap(caveMap, "cavemap.csv");
 
         Console.WriteLine($"{caveMap.Count} cave blocks generated, timer={Utils.TimeFormat(timer)}.");
-    }
-
-    private static HashSet<Vector3i> CreateCircle(Vector3i center, int radius)
-    {
-        HashSet<Vector3i> queue = new() { center };
-        HashSet<Vector3i> visited = new();
-
-        while (queue.Count > 0)
-        {
-            foreach (var pos in queue.ToArray())
-            {
-                queue.Remove(pos);
-
-                if (visited.Contains(pos))
-                    continue;
-
-                visited.Add(pos);
-
-                if (Utils.EuclidianDist(pos, center) >= radius)
-                    continue;
-
-                queue.Add(new Vector3i(pos.x + 1, pos.y, pos.z));
-                queue.Add(new Vector3i(pos.x - 1, pos.y, pos.z));
-                queue.Add(new Vector3i(pos.x, pos.y, pos.z + 1));
-                queue.Add(new Vector3i(pos.x, pos.y, pos.z - 1));
-
-            }
-        }
-
-        return visited;
     }
 
     private static void GeneratePrefab(string[] args)
@@ -1051,7 +1042,7 @@ public static class CaveBuilder
         {
             g.Clear(BackgroundColor);
 
-            DrawPoints(b, prefab.GetNoiseAround(rand, noise), NoiseColor);
+            DrawPoints(b, prefab.GetNoiseAround(rand), NoiseColor);
             g.DrawRectangle(pen, prefab.position.x, prefab.position.z, prefab.size.x, prefab.size.z);
             DrawPoints(b, prefab.nodes.ToHashSet(), NodeColor);
         }
