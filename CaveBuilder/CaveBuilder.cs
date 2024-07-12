@@ -8,6 +8,7 @@ using System.Drawing.Imaging;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Numerics;
 
 
 public static class Logger
@@ -15,6 +16,11 @@ public static class Logger
     private static void Logging(string level, string message)
     {
         Console.WriteLine($"{level,-10} {message}");
+    }
+
+    public static void Blank()
+    {
+        Console.WriteLine("");
     }
 
     public static void Debug(string message)
@@ -291,6 +297,27 @@ public class Prefab
 
         return noiseMap;
     }
+
+    public Vector3i GetCenter()
+    {
+        return new Vector3i(
+            position.x + size.x / 2,
+            position.y + size.y / 2,
+            position.z + size.z / 2
+        );
+    }
+
+    public override int GetHashCode()
+    {
+        return position.GetHashCode();
+    }
+
+    public override bool Equals(object obj)
+    {
+        var other = (Vector3i)obj;
+
+        return GetHashCode() == other.GetHashCode();
+    }
 }
 
 
@@ -339,9 +366,37 @@ public class Edge : IComparable<Edge>
         Weight = GetWeight();
     }
 
+    public Edge(int index1, int index2, Vector3i _startPoint, Vector3i _endPoint)
+    {
+        prefabIndex1 = index1;
+        prefabIndex2 = index2;
+        node1 = _startPoint;
+        node2 = _endPoint;
+        Weight = GetWeight();
+    }
+
+    public Edge(Vector3i node1, Vector3i node2)
+    {
+        this.node1 = node1;
+        this.node2 = node2;
+        Weight = GetWeight();
+    }
+
     public int CompareTo(Edge other)
     {
         return Weight.CompareTo(other.Weight);
+    }
+
+    public override int GetHashCode()
+    {
+        int hash1 = node1.GetHashCode();
+        int hash2 = node2.GetHashCode();
+
+        int hash = 17;
+        hash = hash * 23 + hash1 + hash2;
+        hash = hash * 23 + hash1 + hash2;
+
+        return hash;
     }
 }
 
@@ -631,6 +686,94 @@ public static class GraphSolver
         return nodes.ToList();
     }
 
+    private static List<Edge> BuildPrefabGraph(List<Prefab> prefabs, List<Vector3i> nodesPool)
+    {
+        Dictionary<int, List<Edge>> prefabEdges = new();
+
+        for (int i = 0; i < prefabs.Count; i++)
+        {
+            for (int j = i + 1; j < prefabs.Count; j++)
+            {
+                Vector3i p1 = prefabs[i].GetCenter();
+                Vector3i p2 = prefabs[j].GetCenter();
+
+                var edge = new Edge(i, j, p1, p2);
+
+                if (!prefabEdges.ContainsKey(i))
+                    prefabEdges.Add(i, new List<Edge>());
+
+                if (!prefabEdges.ContainsKey(j))
+                    prefabEdges.Add(j, new List<Edge>());
+
+                prefabEdges[i].Add(edge);
+                prefabEdges[j].Add(edge);
+            }
+        }
+
+        Logger.Debug($"node count = {prefabEdges.Count * 4}");
+
+        var graph = new HashSet<Edge>();
+        var visitedNodes = new HashSet<Vector3i>();
+
+        for (int i = 0; i < prefabs.Count; i++)
+        {
+            var relatedPrefabEdges = prefabEdges[i];
+            var nodes = prefabs[i].nodes.ToHashSet();
+
+            Debug.Assert(relatedPrefabEdges.Count == prefabs.Count - 1);
+
+            relatedPrefabEdges.Sort();
+
+            HashSet<Vector3i> connectedNodes = new();
+
+            for (int j = 0; j < relatedPrefabEdges.Count; j++)
+            {
+                if (nodes.Count == 0)
+                    break;
+
+                var relatedEdge = relatedPrefabEdges[j];
+                var edges = new List<Edge>();
+
+                var nodes1 = prefabs[relatedEdge.prefabIndex1].nodes;
+                var nodes2 = prefabs[relatedEdge.prefabIndex2].nodes;
+
+                foreach (var node1 in nodes1)
+                {
+                    foreach (var node2 in nodes2)
+                    {
+                        int index1 = nodesPool.IndexOf(node1);
+                        int index2 = nodesPool.IndexOf(node2);
+
+                        var edge = new Edge(node1, node2);
+
+                        edges.Add(edge);
+                    }
+                }
+
+                edges.Sort();
+
+                var edgeNode1 = edges[0].node1;
+                var edgeNode2 = edges[0].node2;
+
+                if (connectedNodes.Contains(edgeNode1) || connectedNodes.Contains(edgeNode2))
+                    continue;
+
+                connectedNodes.Add(edgeNode1);
+                connectedNodes.Add(edgeNode2);
+
+                nodes.Remove(edgeNode1);
+                nodes.Remove(edgeNode2);
+
+                graph.Add(edges[0]);
+                continue;
+            }
+
+            // break;
+        }
+
+        return graph.ToList();
+    }
+
     private static List<Edge> BuildGraph(List<Prefab> prefabs, List<Vector3i> nodes)
     {
         List<Edge> edges = new();
@@ -683,22 +826,18 @@ public static class GraphSolver
         timer.Start();
 
         List<Vector3i> nodes = CollectPrefabNodes(prefabs);
-        List<Edge> graph = BuildGraph(prefabs, nodes);
+        List<Edge> graph = BuildPrefabGraph(prefabs, nodes);
 
-        List<Edge> mst = KruskalMST(graph, nodes.Count);
-
-        Logger.Info($"MST Solved in {Utils.TimeFormat(timer)}");
-
-        return mst;
+        return graph;
     }
 }
 
 
 public static class CaveBuilder
 {
-    private static int SEED = new Random().Next();
+    private static int SEED = 12345; // new Random().Next();
 
-    public const int MAP_SIZE = 3000;
+    public const int MAP_SIZE = 1000;
 
     public static int MIN_PREFAB_SIZE = 8;
 
@@ -789,6 +928,8 @@ public static class CaveBuilder
 
     private static List<Prefab> GetRandomPrefabs(int count)
     {
+        Logger.Info("Start POIs placement...");
+
         var prefabs = new List<Prefab>();
 
         for (int i = 0; i < count; i++)
@@ -801,7 +942,7 @@ public static class CaveBuilder
                 prefabs.Add(prefab);
         }
 
-        Console.WriteLine($"{prefabs.Count} prefabs added");
+        Logger.Info($"{prefabs.Count} prefabs added");
 
         return prefabs;
     }
@@ -867,6 +1008,7 @@ public static class CaveBuilder
 
         return obstacles;
     }
+
     private static HashSet<Vector3i> CollectPrefabNoise(List<Prefab> prefabs, FastNoiseLite noise)
     {
         var noiseMap = new HashSet<Vector3i>();
