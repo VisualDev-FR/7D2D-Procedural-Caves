@@ -686,7 +686,7 @@ public static class GraphSolver
         return nodes.ToList();
     }
 
-    private static List<Edge> BuildPrefabGraph(List<Prefab> prefabs, List<Vector3i> nodesPool)
+    private static List<Edge> BuildPrefabGraph(List<Prefab> prefabs)
     {
         Dictionary<int, List<Edge>> prefabEdges = new();
 
@@ -713,7 +713,6 @@ public static class GraphSolver
         Logger.Debug($"node count = {prefabEdges.Count * 4}");
 
         var graph = new HashSet<Edge>();
-        var visitedNodes = new HashSet<Vector3i>();
 
         for (int i = 0; i < prefabs.Count; i++)
         {
@@ -741,9 +740,6 @@ public static class GraphSolver
                 {
                     foreach (var node2 in nodes2)
                     {
-                        int index1 = nodesPool.IndexOf(node1);
-                        int index2 = nodesPool.IndexOf(node2);
-
                         var edge = new Edge(node1, node2);
 
                         edges.Add(edge);
@@ -774,59 +770,15 @@ public static class GraphSolver
         return graph.ToList();
     }
 
-    private static List<Edge> BuildGraph(List<Prefab> prefabs, List<Vector3i> nodes)
-    {
-        List<Edge> edges = new();
-
-        // Generate all edges with them weight
-        for (int i = 0; i < prefabs.Count; i++)
-        {
-            for (int j = i + 1; j < prefabs.Count; j++)
-            {
-                foreach (var node1 in prefabs[i].nodes)
-                {
-                    foreach (var node2 in prefabs[j].nodes)
-                    {
-                        int nodeIndex1 = nodes.IndexOf(node1);
-                        int nodeIndex2 = nodes.IndexOf(node2);
-
-                        edges.Add(new Edge(nodeIndex1, nodeIndex2, i, j, node1, node2));
-                    }
-                }
-            }
-        }
-
-        return edges;
-    }
-
-    private static List<Edge> KruskalMST(List<Edge> edges, int nodeCounts)
-    {
-        // Sort edges by weight
-        edges.Sort();
-
-        UnionFind uf = new UnionFind(nodeCounts);
-        List<Edge> mst = new List<Edge>();
-
-        foreach (var edge in edges)
-        {
-            if (uf.Find(edge.nodeIndex1) != uf.Find(edge.nodeIndex2))
-            {
-                uf.Union(edge.nodeIndex1, edge.nodeIndex2);
-                mst.Add(edge);
-            }
-        }
-
-        return mst;
-    }
-
     public static List<Edge> Resolve(List<Prefab> prefabs)
     {
         Stopwatch timer = new();
 
         timer.Start();
 
-        List<Vector3i> nodes = CollectPrefabNodes(prefabs);
-        List<Edge> graph = BuildPrefabGraph(prefabs, nodes);
+        List<Edge> graph = BuildPrefabGraph(prefabs);
+
+        Logger.Info($"Graph resolved in {Utils.TimeFormat(timer)}");
 
         return graph;
     }
