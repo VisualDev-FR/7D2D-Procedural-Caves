@@ -520,8 +520,12 @@ public class Node
 }
 
 
-public static class AStarPerlin
+public static class CaveTunneler
 {
+    private static FastNoiseLite pathingNoise;
+
+    private static FastNoiseLite thickingNoise;
+
     private static Node GetLowestFCostNode(HashSet<Node> nodes)
     {
         Node lowestCostNode = null;
@@ -614,31 +618,36 @@ public static class AStarPerlin
         return path;
     }
 
+    public static HashSet<Vector3i> ThickenCaveMap(HashSet<Vector3i> wiredCaveMap, HashSet<Vector3i> obstacles)
+    {
+        var caveMap = new HashSet<Vector3i>();
+
+        // const int MIN_CAVE_WIDTH = 1;
+        // const int MAX_CAVE_WIDTH = 20;
+
+        foreach (var position in wiredCaveMap)
+        {
+            float noise = 0.5f * (1 + thickingNoise.GetNoise(position.x, position.z));
+            float radius = 2; // MIN_CAVE_WIDTH + noise * (MAX_CAVE_WIDTH - MIN_CAVE_WIDTH);
+
+            var circle = CaveBuilder.ParseCircle(position, radius);
+
+            caveMap.UnionWith(circle);
+        }
+
+        caveMap.ExceptWith(obstacles);
+
+        return caveMap;
+    }
+
     public static HashSet<Vector3i> PerlinRoute(Vector3i startPos, Vector3i targetpos, FastNoiseLite noise, HashSet<Vector3i> obstacles, HashSet<Vector3i> noiseMap)
     {
-        HashSet<Vector3i> path = FindPath(startPos, targetpos, obstacles, noiseMap, noise);
+        pathingNoise = CaveBuilder.ParsePerlinNoise();
+        thickingNoise = CaveBuilder.ParsePerlinNoise();
 
-        // int maxCaveWidth = 20;
-        // int minCaveWidth = 1;
+        HashSet<Vector3i> caveMap = FindPath(startPos, targetpos, obstacles, noiseMap, noise);
 
-        // FastNoiseLite noiseX = ParsePerlinNoise(rand.Next());
-        // FastNoiseLite noiseZ = ParsePerlinNoise(rand.Next());
-
-        // foreach (Vector3i point in new List<Vector3i>(path))
-        // {
-        //     int widthX = minCaveWidth + (int)(0.5f * maxCaveWidth * (1 + noiseX.GetNoise(point.x, point.z)));
-        //     int widthZ = widthX; // minCaveWidth + (int)(0.5f * maxCaveWidth * (1 + noiseZ.GetNoise(point.x, point.z)));
-
-        //     for (int x = point.x; x < point.x + widthX; x++)
-        //     {
-        //         for (int z = point.z; z < point.z + widthZ; z++)
-        //         {
-        //             path.Add(new Vector3i(x, 0, z));
-        //         }
-        //     }
-        // }
-
-        return path;
+        return caveMap;
     }
 }
 
@@ -996,7 +1005,7 @@ public static class CaveBuilder
 
         HashSet<Vector3i> obstacles = CollectPrefabObstacles(prefabs);
         HashSet<Vector3i> noiseMap = CollectPrefabNoise(prefabs, noise);
-        HashSet<Vector3i> path = AStarPerlin.PerlinRoute(p1.position, p2.position, noise, obstacles, noiseMap);
+        HashSet<Vector3i> path = CaveTunneler.PerlinRoute(p1.position, p2.position, noise, obstacles, noiseMap);
 
         using Bitmap b = new(MAP_SIZE, MAP_SIZE);
 
@@ -1044,7 +1053,7 @@ public static class CaveBuilder
 
         List<Edge> edges = GraphSolver.Resolve(prefabs);
 
-        var caveMap = new ConcurrentBag<Vector3i>();
+        var wiredCaveMap = new ConcurrentBag<Vector3i>();
         int index = 0;
 
         Parallel.ForEach(edges, edge =>
@@ -1054,13 +1063,15 @@ public static class CaveBuilder
 
             Logger.Info($"Noise pathing: {100.0f * index++ / edges.Count:F0}% ({index} / {edges.Count}), dist={Utils.SqrEuclidianDist(p1, p2)}");
 
-            HashSet<Vector3i> path = AStarPerlin.PerlinRoute(p1, p2, noise, obstacles, noiseMap);
+            HashSet<Vector3i> path = CaveTunneler.PerlinRoute(p1, p2, noise, obstacles, noiseMap);
 
             foreach (Vector3i node in path)
             {
-                caveMap.Add(node);
+                wiredCaveMap.Add(node);
             }
         });
+
+        var caveMap = CaveTunneler.ThickenCaveMap(wiredCaveMap.ToHashSet(), obstacles);
 
         using Bitmap b = new(MAP_SIZE, MAP_SIZE);
 
@@ -1068,14 +1079,15 @@ public static class CaveBuilder
         {
             g.Clear(BackgroundColor);
 
-            DrawPoints(b, caveMap.ToHashSet(), TunnelsColor);
+            DrawPoints(b, caveMap, TunnelsColor);
             DrawPrefabs(b, g, prefabs);
         }
 
         b.Save(@"cave.png", ImageFormat.Png);
-        SaveCaveMap(caveMap.ToHashSet(), "cavemap.csv");
 
-        Console.WriteLine($"{caveMap.Count} cave blocks generated, timer={Utils.TimeFormat(timer)}.");
+        SaveCaveMap(wiredCaveMap.ToHashSet(), "cavemap.csv");
+
+        Console.WriteLine($"{wiredCaveMap.Count} cave blocks generated, timer={Utils.TimeFormat(timer)}.");
     }
 
     private static void GeneratePrefab(string[] args)
