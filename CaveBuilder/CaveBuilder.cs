@@ -862,7 +862,7 @@ public static class CaveBuilder
                 prefabs.Add(prefab);
         }
 
-        Logger.Info($"{prefabs.Count} prefabs added");
+        Logger.Info($"{prefabs.Count} / {PREFAB_COUNT} prefabs added");
 
         return prefabs;
     }
@@ -1085,9 +1085,9 @@ public static class CaveBuilder
 
         b.Save(@"cave.png", ImageFormat.Png);
 
-        SaveCaveMap(wiredCaveMap.ToHashSet(), "cavemap.csv");
+        SaveCaveMap(caveMap, "cavemap.csv");
 
-        Console.WriteLine($"{wiredCaveMap.Count} cave blocks generated, timer={Utils.TimeFormat(timer)}.");
+        Console.WriteLine($"{caveMap.Count} cave blocks generated, timer={Utils.TimeFormat(timer)}.");
     }
 
     private static void GeneratePrefab(string[] args)
@@ -1121,8 +1121,10 @@ public static class CaveBuilder
 
     public static void Main(string[] args)
     {
-        Logger.Info($"SEED={SEED}");
-        Logger.Info($"SIZE={MAP_SIZE}\n");
+        Logger.Info($"SEED .......... {SEED}");
+        Logger.Info($"SIZE .......... {MAP_SIZE}");
+        Logger.Info($"PREFAB_COUNT .. {PREFAB_COUNT}");
+        Logger.Blank();
 
         switch (args[0])
         {
