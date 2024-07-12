@@ -1,4 +1,4 @@
-#pragma warning disable CA1416, CA1050, CA2211, IDE0090, IDE0044, IDE0028
+#pragma warning disable CA1416, CA1050, CA2211, IDE0090, IDE0044, IDE0028, IDE0305
 
 
 using System;
@@ -6,9 +6,10 @@ using System.IO;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Linq;
-using System.Numerics;
+using System.Threading.Tasks;
 
 
 public static class Logger
@@ -789,7 +790,7 @@ public static class CaveBuilder
 {
     private static int SEED = 12345; // new Random().Next();
 
-    public const int MAP_SIZE = 1000;
+    public const int MAP_SIZE = 6144;
 
     public static int MIN_PREFAB_SIZE = 8;
 
@@ -1073,7 +1074,6 @@ public static class CaveBuilder
         Stopwatch timer = new Stopwatch();
         timer.Start();
 
-
         FastNoiseLite noise = ParsePerlinNoise();
 
         int prefabCounts = args.Length > 1 ? int.Parse(args[1]) : PREFAB_COUNT;
@@ -1081,27 +1081,28 @@ public static class CaveBuilder
 
         HashSet<Vector3i> obstacles = CollectPrefabObstacles(prefabs);
         HashSet<Vector3i> noiseMap = CollectPrefabNoise(prefabs, noise);
-        HashSet<Vector3i> caveMap = new(3_000_000);
-        HashSet<Vector3i> nodes = new();
 
         Logger.Info("Start solving MST Krustal...");
 
         List<Edge> edges = GraphSolver.Resolve(prefabs);
 
+        var caveMap = new ConcurrentBag<Vector3i>();
         int index = 0;
 
-        foreach (Edge edge in edges)
+        Parallel.ForEach(edges, edge =>
         {
             Vector3i p1 = edge.node1;
             Vector3i p2 = edge.node2;
 
             Logger.Info($"Noise pathing: {100.0f * index++ / edges.Count:F0}% ({index} / {edges.Count}), dist={Utils.EuclidianDist(p1, p2)}");
 
-            caveMap.UnionWith(AStarPerlin.PerlinRoute(p1, p2, noise, obstacles, noiseMap));
+            HashSet<Vector3i> path = AStarPerlin.PerlinRoute(p1, p2, noise, obstacles, noiseMap);
 
-            nodes.Add(p1);
-            nodes.Add(p2);
-        }
+            foreach (Vector3i node in path)
+            {
+                caveMap.Add(node);
+            }
+        });
 
         using Bitmap b = new(MAP_SIZE, MAP_SIZE);
 
@@ -1109,13 +1110,12 @@ public static class CaveBuilder
         {
             g.Clear(BackgroundColor);
 
-            DrawPoints(b, caveMap, TunnelsColor);
-            DrawPoints(b, nodes, NodeColor);
+            DrawPoints(b, caveMap.ToHashSet(), TunnelsColor);
             DrawPrefabs(b, g, prefabs);
         }
 
         b.Save(@"cave.png", ImageFormat.Png);
-        SaveCaveMap(caveMap, "cavemap.csv");
+        SaveCaveMap(caveMap.ToHashSet(), "cavemap.csv");
 
         Console.WriteLine($"{caveMap.Count} cave blocks generated, timer={Utils.TimeFormat(timer)}.");
     }
