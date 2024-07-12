@@ -10,6 +10,7 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Runtime.CompilerServices;
 
 
 public static class Logger
@@ -125,19 +126,20 @@ public static class Utils
         return TimeSpan.FromSeconds(timer.ElapsedMilliseconds / 1000).ToString(format);
     }
 
-    public static float EuclidianDist(Node nodeA, Node nodeB)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float SqrEuclidianDist(Node nodeA, Node nodeB)
     {
-        return EuclidianDist(nodeA.position, nodeB.position);
+        return SqrEuclidianDist(nodeA.position, nodeB.position);
     }
 
-    public static float EuclidianDist(Vector3i p1, Vector3i p2)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float SqrEuclidianDist(Vector3i p1, Vector3i p2)
     {
-        return MathF.Sqrt(
-              MathF.Pow(p1.x - p2.x, 2)
-            + MathF.Pow(p1.z - p2.z, 2)
-        );
-    }
+        float dx = p1.x - p2.x;
+        float dy = p1.z - p2.z;
 
+        return dx * dx + dy * dy;
+    }
 }
 
 
@@ -504,7 +506,6 @@ public class Node
         return neighbors;
     }
 
-
     public override int GetHashCode()
     {
         return position.GetHashCode();
@@ -587,12 +588,9 @@ public static class AStarPerlin
         openSet.Add(startNode);
 
         var path = new HashSet<Vector3i>();
-        int counter = 0;
 
         while (openSet.Count > 0)
         {
-            counter++;
-
             Node currentNode = GetLowestFCostNode(openSet);
 
             if (currentNode.position == goalNode.position)
@@ -621,13 +619,13 @@ public static class AStarPerlin
 
                 factor *= noiseMap.Contains(neighbor.position) ? 1f : .5f;
 
-                float tentativeGCost = currentNode.GCost + Utils.EuclidianDist(currentNode, neighbor) * factor;
+                float tentativeGCost = currentNode.GCost + Utils.SqrEuclidianDist(currentNode, neighbor) * factor;
 
                 if (!openSet.Contains(neighbor) || tentativeGCost < neighbor.GCost)
                 {
                     neighbor.Parent = currentNode;
                     neighbor.GCost = tentativeGCost;
-                    neighbor.HCost = Utils.EuclidianDist(neighbor, goalNode) * factor;
+                    neighbor.HCost = Utils.SqrEuclidianDist(neighbor, goalNode) * factor;
 
                     openSet.Add(neighbor);
                 }
@@ -636,12 +634,11 @@ public static class AStarPerlin
 
         if (path.Count == 0)
         {
-            Logger.Warning($"No Path found from {startPos} to {targetPos}, {counter} iterations done.");
+            Logger.Warning($"No Path found from {startPos} to {targetPos}.");
         }
 
         return path;
     }
-
 
     public static HashSet<Vector3i> PerlinRoute(Vector3i startPos, Vector3i targetpos, FastNoiseLite noise, HashSet<Vector3i> obstacles, HashSet<Vector3i> noiseMap)
     {
@@ -832,7 +829,7 @@ public static class CaveBuilder
 
                 visited.Add(pos);
 
-                if (Utils.EuclidianDist(pos, center) >= radius)
+                if (Utils.SqrEuclidianDist(pos, center) >= radius)
                     continue;
 
                 queue.Add(new Vector3i(pos.x + 1, pos.y, pos.z));
@@ -1094,7 +1091,7 @@ public static class CaveBuilder
             Vector3i p1 = edge.node1;
             Vector3i p2 = edge.node2;
 
-            Logger.Info($"Noise pathing: {100.0f * index++ / edges.Count:F0}% ({index} / {edges.Count}), dist={Utils.EuclidianDist(p1, p2)}");
+            Logger.Info($"Noise pathing: {100.0f * index++ / edges.Count:F0}% ({index} / {edges.Count}), dist={Utils.SqrEuclidianDist(p1, p2)}");
 
             HashSet<Vector3i> path = AStarPerlin.PerlinRoute(p1, p2, noise, obstacles, noiseMap);
 
