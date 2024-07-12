@@ -4,5 +4,5 @@ cd %~dp0
 
 dotnet build --no-incremental > .log
 
-.\bin\Debug\net8.0\standalone.exe %*
+.\bin\Debug\net8.0\cave-builder.exe %*
 
