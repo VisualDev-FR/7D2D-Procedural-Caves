@@ -520,34 +520,8 @@ public class Node
 }
 
 
-public class CachedNoise
-{
-    public FastNoiseLite noise = null;
-
-    public FastNoiseLite.NoiseType noiseType;
-
-    public FastNoiseLite.FractalType fractalType;
-
-    public int seed = CaveBuilder.rand.Next();
-
-    public int fractalGain = 1;
-
-    public void Init()
-    {
-        var noise = new FastNoiseLite(seed);
-
-        noise.SetNoiseType(FastNoiseLite.NoiseType.Perlin);
-        noise.SetFractalType(FastNoiseLite.FractalType.None);
-        noise.SetFractalGain(1);
-        noise.SetFractalOctaves(1);
-        noise.SetFrequency(0.1f);
-    }
-}
-
-
 public static class AStarPerlin
 {
-
     private static Node GetLowestFCostNode(HashSet<Node> nodes)
     {
         Node lowestCostNode = null;
@@ -671,19 +645,6 @@ public static class AStarPerlin
 
 public static class GraphSolver
 {
-
-    private static List<Vector3i> CollectPrefabNodes(List<Prefab> prefabs)
-    {
-        var nodes = new HashSet<Vector3i>();
-
-        foreach (var prefab in prefabs)
-        {
-            nodes.UnionWith(prefab.nodes);
-        }
-
-        return nodes.ToList();
-    }
-
     private static List<Edge> BuildPrefabGraph(List<Prefab> prefabs)
     {
         Dictionary<int, List<Edge>> prefabEdges = new();
