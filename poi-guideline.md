@@ -18,6 +18,7 @@
 ## Supported Tags:
 
 * `devonly` (mandatory)
+* `cave` (mandatory)
 * `cavefiller`
 * `entrance`
 * `flooded`

@@ -3,45 +3,21 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Collections;
 using System;
-using System.IO;
 using System.Xml.Linq;
 using WorldGenerationEngineFinal;
-using UnityEngine.Scripting;
-
+using System.Diagnostics.Eventing.Reader;
 
 
 namespace Harmony
 {
-    public class SCoreCaveProject
+    public class ProceduralCaveSystem
     {
-        // private static readonly float depth = 30;
+        public static Dictionary<string, PrefabData> AllCavePrefabs = new Dictionary<string, PrefabData>();
 
-        // // Make the world darker underground
-        // [HarmonyPatch(typeof(SkyManager))]
-        // [HarmonyPatch("Update")]
-        // public class CaveProjectSkyManager
-        // {
-        //     public static bool Prefix(float ___sunIntensity, float ___sMaxSunIntensity)
-        //     {
-        //         if (GamePrefs.GetString(EnumGamePrefs.GameWorld) == "Empty" || GamePrefs.GetString(EnumGamePrefs.GameWorld) == "Playtesting")
-        //             return true;
+        public static FastTags<TagGroup.Poi> CaveEntranceTags = FastTags<TagGroup.Poi>.Parse("entrance");
 
+        public static FastTags<TagGroup.Poi> caveTags = FastTags<TagGroup.Poi>.Parse("cave");
 
-        //         if (GameManager.Instance.World.GetPrimaryPlayer() == null)
-        //             return true;
-
-        //         if (GameManager.Instance.World.GetPrimaryPlayer().position.y < depth) SkyManager.SetSunIntensity(0.1f);
-        //         return true;
-        //     }
-
-        //     public static void Postfix(float ___sunIntensity, float ___sMaxSunIntensity)
-        //     {
-        //         if (GameManager.Instance.World.GetPrimaryPlayer() == null)
-        //             return;
-
-        //         if (GameManager.Instance.World.GetPrimaryPlayer().position.y < depth) SkyManager.SetSunIntensity(0.1f);
-        //     }
-        // }
 
         [HarmonyPatch(typeof(SpawnManagerBiomes))]
         [HarmonyPatch("Update")]
@@ -219,6 +195,7 @@ namespace Harmony
             }
         }
 
+
         [HarmonyPatch(typeof(TerrainGeneratorWithBiomeResource))]
         [HarmonyPatch("GenerateTerrain")]
         [HarmonyPatch(new[] { typeof(World), typeof(Chunk), typeof(GameRandom), typeof(Vector3i), typeof(Vector3i), typeof(bool), typeof(bool) })]
@@ -243,11 +220,11 @@ namespace Harmony
             }
         }
 
+
         [HarmonyPatch(typeof(DynamicPrefabDecorator))]
         [HarmonyPatch("Load")]
         public class DynamicPrefabDecorator_Load
         {
-
             private static XmlFile ReadCavePrefabsDatas(string _path)
             {
 
@@ -328,11 +305,110 @@ namespace Harmony
         }
 
 
+        [HarmonyPatch(typeof(PrefabManager))]
+        [HarmonyPatch("LoadPrefabs")]
+        public static class PrefabManager_LoadPrefabs
+        {
+            public static IEnumerator LoadPrefabs()
+            {
+                PrefabManager.ClearDisplayed();
+                if (PrefabManager.AllPrefabDatas.Count != 0)
+                {
+                    yield break;
+                }
+                MicroStopwatch ms = new MicroStopwatch(_bStart: true);
+                List<PathAbstractions.AbstractedLocation> prefabs = PathAbstractions.PrefabsSearchPaths.GetAvailablePathsList(null, null, null, _ignoreDuplicateNames: true);
+                FastTags<TagGroup.Poi> filter = FastTags<TagGroup.Poi>.Parse("navonly,devonly,testonly,biomeonly");
+
+                for (int i = 0; i < prefabs.Count; i++)
+                {
+                    PathAbstractions.AbstractedLocation location = prefabs[i];
+                    int num = location.Folder.LastIndexOf("/Prefabs/");
+                    if (num >= 0 && location.Folder.Substring(num + 8, 5).EqualsCaseInsensitive("/test"))
+                    {
+                        continue;
+                    }
+                    PrefabData prefabData = PrefabData.LoadPrefabData(location);
+
+                    if (prefabData == null || prefabData.Tags.IsEmpty)
+                        Log.Warning("Could not load prefab data for " + location.Name);
+
+                    if (prefabData.Tags.Test_AnySet(caveTags))
+                    {
+                        AllCavePrefabs[location.Name.ToLower()] = prefabData;
+                    }
+                    else if (!prefabData.Tags.Test_AnySet(filter))
+                    {
+                        PrefabManager.AllPrefabDatas[location.Name.ToLower()] = prefabData;
+                    }
+
+                    if (ms.ElapsedMilliseconds > 500)
+                    {
+                        yield return null;
+                        ms.ResetAndRestart();
+                    }
+                }
+
+                if (AllCavePrefabs.Count == 0)
+                    Log.Out($"[Cave] No cave prefab was loaded.");
+
+                foreach (var prefab in AllCavePrefabs.Values)
+                {
+                    Log.Out($"[Cave] cave prefab found: {prefab.Name}");
+                }
+
+                Log.Out("LoadPrefabs {0} of {1} in {2}", PrefabManager.AllPrefabDatas.Count, prefabs.Count, (float)ms.ElapsedMilliseconds * 0.001f);
+            }
+
+            public static bool Prefix(ref IEnumerator __result)
+            {
+                __result = LoadPrefabs();
+
+                return false;
+            }
+        }
+
+
         [HarmonyPatch(typeof(WorldBuilder))]
         [HarmonyPatch("GenerateData")]
-        public class WorldBuilder_GenerateData
+        public static class WorldBuilder_GenerateData
         {
-            public static IEnumerator GenerateData(WorldBuilder wb)
+            public static WorldBuilder wb;
+
+            public static List<PrefabData> GetCaveEntrancePrefabs()
+            {
+                var prefabDatas = new List<PrefabData>();
+
+                foreach (var prefabData in AllCavePrefabs.Values)
+                {
+                    if (prefabData.Tags.Test_AnySet(CaveEntranceTags))
+                    {
+                        prefabDatas.Add(prefabData);
+                    }
+                }
+
+                return prefabDatas;
+            }
+
+            public static IEnumerator AddCaveEntrances()
+            {
+                List<PrefabDataInstance> existingPrefabs = PrefabManager.UsedPrefabsWorld;
+
+                var caveEntrances = GetCaveEntrancePrefabs();
+
+                if (caveEntrances.Count == 0)
+                {
+                    Log.Out($"[Cave] No cave entrance found.");
+                    yield break;
+                }
+
+                foreach (var prefab in caveEntrances)
+                {
+                    Log.Out($"[Cave] prefabEntrance = {prefab.Name}");
+                }
+            }
+
+            public static IEnumerator GenerateData()
             {
                 yield return wb.Init();
                 yield return wb.SetMessage(string.Format(Localization.Get("xuiWorldGenerationGenerating"), wb.WorldName), _logToConsole: true);
@@ -341,7 +417,11 @@ namespace Harmony
                 {
                     yield break;
                 }
+
                 wb.initStreetTiles();
+
+                // Log.Out($"[Cave1] unused street tiles = {WildernessPlanner.GetUnusedWildernessTiles().Count}");
+
                 if (wb.IsCanceled)
                 {
                     yield break;
@@ -386,6 +466,7 @@ namespace Harmony
                     yield return wb.smoothWildernessTerrain();
                     yield return WildernessPathPlanner.Plan(wb.Seed);
                 }
+
                 int num = 12 - wb.playerSpawns.Count;
                 if (num > 0)
                 {
@@ -405,6 +486,9 @@ namespace Harmony
                     yield return wb.SetMessage("Smooth Road Terrain", _logToConsole: true);
                     yield return WorldBuilder.smoothRoadTerrain(wb.dest, wb.HeightMap, wb.WorldSize);
                 }
+
+                yield return AddCaveEntrances();
+
                 wb.paths.Clear();
                 wb.wildernessPaths.Clear();
                 yield return wb.FinalizeWater();
@@ -416,7 +500,9 @@ namespace Harmony
             {
                 Log.Out($"[Cave] start WorldBuilder_GenerateData Prefix.");
 
-                __result = GenerateData(__instance);
+                wb = __instance;
+
+                __result = GenerateData();
                 return false;
             }
         }
