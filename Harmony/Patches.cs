@@ -495,7 +495,7 @@ public class ProceduralCaveSystem
 
         public static bool Prefix(WorldBuilder __instance, ref IEnumerator __result)
         {
-            Log.Out($"[Cave] start WorldBuilder_GenerateData Prefix.");
+            Log.Out($"[Cave] start WorldBuilder_GenerateData Prefix. {CaveBuilder.SEED}");
 
             wb = __instance;
 

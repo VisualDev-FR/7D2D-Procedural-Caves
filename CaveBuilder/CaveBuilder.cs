@@ -2,20 +2,14 @@
 
 
 using System;
-using System.IO;
-using System.Drawing;
-using System.Drawing.Imaging;
 using System.Collections.Generic;
-using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Runtime.CompilerServices;
 
 using Random = System.Random;
-using Graphics = System.Drawing.Graphics;
 using Debug = System.Diagnostics.Debug;
-using Color = System.Drawing.Color;
+
 
 
 public static class Logger
@@ -92,10 +86,6 @@ public static class CaveUtils
         return dx * dx + dy * dy;
     }
 
-    public static PointF ParsePointF(Vector3i point)
-    {
-        return new PointF(point.x, point.z);
-    }
 }
 
 
@@ -306,12 +296,7 @@ public class Edge : IComparable<Edge>
 
     private float GetWeight()
     {
-        float euclidianDist = MathF.Sqrt(
-              MathF.Pow(node1.x - node2.x, 2)
-            + MathF.Pow(node1.z - node2.z, 2)
-        );
-
-        return euclidianDist; // MathF.Abs(StartPoint.sizeX * StartPoint.sizeZ - EndPoint.sizeX * EndPoint.sizeZ);
+        return CaveUtils.SqrEuclidianDist(node1, node2);
     }
 
     public Edge(int index1, int index2, int prefab1, int prefab2, Vector3i _startPoint, Vector3i _endPoint)
@@ -447,7 +432,7 @@ public static class CaveTunneler
 
     private static HashSet<Vector3i> ReconstructPath(Node currentNode)
     {
-        HashSet<Vector3i> path = new();
+        var path = new HashSet<Vector3i>();
 
         while (currentNode != null)
         {
@@ -460,8 +445,8 @@ public static class CaveTunneler
 
     private static HashSet<Vector3i> FindPath(Vector3i startPos, Vector3i targetPos, HashSet<Vector3i> obstacles, HashSet<Vector3i> noiseMap, FastNoiseLite perlinNoise)
     {
-        Node startNode = new(startPos);
-        Node goalNode = new(targetPos);
+        var startNode = new Node(startPos);
+        var goalNode = new Node(targetPos);
 
         HashSet<Node> openSet = new HashSet<Node>();
         HashSet<Node> closedSet = new HashSet<Node>();
@@ -556,7 +541,7 @@ public static class GraphSolver
 {
     private static List<Edge> BuildPrefabGraph(List<PrefabWrapper> prefabs)
     {
-        Dictionary<int, List<Edge>> prefabEdges = new();
+        var prefabEdges = new Dictionary<int, List<Edge>>();
 
         for (int i = 0; i < prefabs.Count; i++)
         {
@@ -591,7 +576,7 @@ public static class GraphSolver
 
             relatedPrefabEdges.Sort();
 
-            HashSet<Vector3i> connectedNodes = new();
+            var connectedNodes = new HashSet<Vector3i>();
 
             for (int j = 0; j < relatedPrefabEdges.Count; j++)
             {
@@ -640,7 +625,7 @@ public static class GraphSolver
 
     public static List<Edge> Resolve(List<PrefabWrapper> prefabs)
     {
-        Stopwatch timer = new();
+        var timer = new Stopwatch();
 
         timer.Start();
 
@@ -655,7 +640,7 @@ public static class GraphSolver
 
 public static class CaveBuilder
 {
-    private static int SEED = 12345; // new Random().Next();
+    public static int SEED = 12345; // new Random().Next();
 
     public const int MAP_SIZE = 6144;
 
@@ -675,20 +660,10 @@ public static class CaveBuilder
 
     public static Random rand = new Random(SEED);
 
-    public static readonly Color BackgroundColor = Color.Black;
-
-    public static readonly Color TunnelsColor = Color.DarkRed;
-
-    public static readonly Color NodeColor = Color.Yellow;
-
-    public static readonly Color PrefabBoundsColor = Color.Green;
-
-    public static readonly Color NoiseColor = Color.DarkGray;
-
     public static HashSet<Vector3i> ParseCircle(Vector3i center, float radius)
     {
-        HashSet<Vector3i> queue = new() { center };
-        HashSet<Vector3i> visited = new();
+        var queue = new HashSet<Vector3i>() { center };
+        var visited = new HashSet<Vector3i>();
 
         while (queue.Count > 0)
         {
@@ -727,7 +702,7 @@ public static class CaveBuilder
         return noise;
     }
 
-    private static bool CheckPrefabOverlaps(PrefabWrapper prefab, List<PrefabWrapper> others)
+    public static bool CheckPrefabOverlaps(PrefabWrapper prefab, List<PrefabWrapper> others)
     {
         int i;
 
@@ -748,7 +723,7 @@ public static class CaveBuilder
         return !prefab.OverLaps2D(others, MAP_SIZE, MAP_OFFSET);
     }
 
-    private static List<PrefabWrapper> GetRandomPrefabs(int count)
+    public static List<PrefabWrapper> GetRandomPrefabs(int count)
     {
         Logger.Info("Start POIs placement...");
 
@@ -769,57 +744,7 @@ public static class CaveBuilder
         return prefabs;
     }
 
-    public static void DrawPrefabs(Bitmap b, Graphics graph, List<PrefabWrapper> prefabs, bool fill = false)
-    {
-        using Pen pen = new Pen(PrefabBoundsColor, 1);
-
-        foreach (var prefab in prefabs)
-        {
-            graph.DrawRectangle(pen, prefab.position.x, prefab.position.z, prefab.size.x, prefab.size.z);
-
-            if (fill)
-                DrawPoints(b, new HashSet<Vector3i>(prefab.innerPoints), PrefabBoundsColor);
-
-            DrawPoints(b, new HashSet<Vector3i>(prefab.nodes), NodeColor);
-        }
-    }
-
-    public static void DrawPoints(Bitmap bitmap, HashSet<Vector3i> points, Color color)
-    {
-        foreach (var point in points)
-        {
-            bitmap.SetPixel(point.x, point.z, color);
-        }
-    }
-
-    public static void DrawEdges(Graphics graph, List<Edge> edges)
-    {
-        using Pen pen = new Pen(TunnelsColor, 2);
-
-        foreach (var edge in edges)
-        {
-            graph.DrawCurve(pen, new PointF[2]{
-                CaveUtils.ParsePointF(edge.node1),
-                CaveUtils.ParsePointF(edge.node2),
-            });
-        }
-    }
-
-    private static void DrawNoise(Bitmap b, FastNoiseLite perlinNoise)
-    {
-        for (int x = 0; x < MAP_SIZE; x++)
-        {
-            for (int z = 0; z < MAP_SIZE; z++)
-            {
-                float noise = 0.5f * (perlinNoise.GetNoise(x, z) + 1);
-
-                if (noise < NOISE_THRESHOLD)
-                    b.SetPixel(x, z, NoiseColor);
-            }
-        }
-    }
-
-    private static HashSet<Vector3i> CollectPrefabObstacles(List<PrefabWrapper> prefabs)
+    public static HashSet<Vector3i> CollectPrefabObstacles(List<PrefabWrapper> prefabs)
     {
         var obstacles = new HashSet<Vector3i>();
 
@@ -831,7 +756,7 @@ public static class CaveBuilder
         return obstacles;
     }
 
-    private static HashSet<Vector3i> CollectPrefabNoise(List<PrefabWrapper> prefabs, FastNoiseLite noise)
+    public static HashSet<Vector3i> CollectPrefabNoise(List<PrefabWrapper> prefabs, FastNoiseLite noise)
     {
         var noiseMap = new HashSet<Vector3i>();
 
@@ -843,239 +768,4 @@ public static class CaveBuilder
         return noiseMap;
     }
 
-    private static void GenerateGraph(string[] args)
-    {
-        int prefabCounts = args.Length > 1 ? int.Parse(args[1]) : PREFAB_COUNT;
-
-        var prefabs = GetRandomPrefabs(prefabCounts);
-
-        Logger.Info("Start solving MST Krustal...");
-
-        List<Edge> edges = GraphSolver.Resolve(prefabs);
-
-        Logger.Info("Start Drawing graph...");
-
-        using Bitmap b = new Bitmap(MAP_SIZE, MAP_SIZE);
-
-        using (Graphics g = Graphics.FromImage(b))
-        {
-            g.Clear(BackgroundColor);
-            DrawEdges(g, edges);
-            DrawPrefabs(b, g, prefabs);
-        }
-
-        Logger.Info($"{edges.Count} Generated edges.");
-
-        b.Save(@"graph.png", ImageFormat.Png);
-    }
-
-    private static void GenerateNoise(string[] args)
-    {
-        var noise = ParsePerlinNoise();
-
-        using Bitmap b = new Bitmap(MAP_SIZE, MAP_SIZE);
-
-        using (Graphics g = Graphics.FromImage(b))
-        {
-            g.Clear(BackgroundColor);
-            DrawNoise(b, noise);
-        }
-
-        b.Save(@"noise.png", ImageFormat.Png);
-    }
-
-    private static void GeneratePath(string[] args)
-    {
-        PrefabWrapper p1 = new()
-        {
-            position = new Vector3i(10, 0, 10),
-            size = new Vector3i(10, 1, 10),
-        };
-
-        PrefabWrapper p2 = new()
-        {
-            position = new Vector3i(MAP_SIZE - 20, 0, MAP_SIZE - 20),
-            size = new Vector3i(10, 1, 10),
-        };
-
-        var prefabs = new List<PrefabWrapper>() { p1, p2 };
-
-        p1.UpdateInnerPoints();
-        p2.UpdateInnerPoints();
-
-        FastNoiseLite noise = ParsePerlinNoise();
-        HashSet<Vector3i> obstacles = CollectPrefabObstacles(prefabs);
-        HashSet<Vector3i> noiseMap = CollectPrefabNoise(prefabs, noise);
-
-        HashSet<Vector3i> path = CaveTunneler.PerlinRoute(p1.position, p2.position, noise, obstacles, noiseMap);
-
-        using Bitmap b = new(MAP_SIZE, MAP_SIZE);
-
-        using (Graphics g = Graphics.FromImage(b))
-        {
-            g.Clear(BackgroundColor);
-            // DrawNoise(b, noise);
-            DrawPoints(b, noiseMap, NoiseColor);
-            DrawPoints(b, path, TunnelsColor);
-            DrawPrefabs(b, g, prefabs);
-
-            b.SetPixel(p1.position.x, p1.position.z, NodeColor);
-            b.SetPixel(p2.position.x, p2.position.z, NodeColor);
-        }
-
-        b.Save(@"pathing.png", ImageFormat.Png);
-    }
-
-    private static void SaveCaveMap(HashSet<Vector3i> caveMap, string filename)
-    {
-        using (StreamWriter writer = new StreamWriter(filename))
-        {
-            foreach (var caveBlock in caveMap)
-            {
-                writer.WriteLine(caveBlock.ToString());
-            }
-            Logger.Info($"CaveMap saved '{filename}'.");
-        }
-    }
-
-    private static void GenerateCaves(string[] args)
-    {
-        Stopwatch timer = new Stopwatch();
-        timer.Start();
-
-        FastNoiseLite noise = ParsePerlinNoise();
-
-        int prefabCounts = args.Length > 1 ? int.Parse(args[1]) : PREFAB_COUNT;
-        var prefabs = GetRandomPrefabs(prefabCounts);
-
-        HashSet<Vector3i> obstacles = CollectPrefabObstacles(prefabs);
-        HashSet<Vector3i> noiseMap = CollectPrefabNoise(prefabs, noise);
-
-        Logger.Info("Start solving MST Krustal...");
-
-        List<Edge> edges = GraphSolver.Resolve(prefabs);
-
-        var wiredCaveMap = new ConcurrentBag<Vector3i>();
-        int index = 0;
-
-        Parallel.ForEach(edges, edge =>
-        {
-            Vector3i p1 = edge.node1;
-            Vector3i p2 = edge.node2;
-
-            Logger.Info($"Noise pathing: {100.0f * index++ / edges.Count:F0}% ({index} / {edges.Count}), dist={CaveUtils.SqrEuclidianDist(p1, p2)}");
-
-            HashSet<Vector3i> path = CaveTunneler.PerlinRoute(p1, p2, noise, obstacles, noiseMap);
-
-            foreach (Vector3i node in path)
-            {
-                wiredCaveMap.Add(node);
-            }
-        });
-
-        Logger.Info("Start caves thickening");
-
-        var caveMap = CaveTunneler.ThickenCaveMap(wiredCaveMap.ToHashSet(), obstacles);
-
-        Logger.Info("Start caves drawing");
-
-        using Bitmap b = new(MAP_SIZE, MAP_SIZE);
-
-        using (Graphics g = Graphics.FromImage(b))
-        {
-            g.Clear(BackgroundColor);
-
-            DrawPoints(b, caveMap, TunnelsColor);
-            DrawPrefabs(b, g, prefabs);
-        }
-
-        b.Save(@"cave.png", ImageFormat.Png);
-
-        SaveCaveMap(caveMap, "cavemap.csv");
-
-        Console.WriteLine($"{caveMap.Count} cave blocks generated, timer={CaveUtils.TimeFormat(timer)}.");
-    }
-
-    private static void GeneratePrefab(string[] args)
-    {
-        var mapCenter = new Vector3i(-10 + MAP_SIZE / 2, 0, -10 + MAP_SIZE / 2);
-        var prefab = new PrefabWrapper()
-        {
-            position = mapCenter,
-            size = new Vector3i(20, 0, 20),
-        };
-
-        prefab.UpdateNodes(rand);
-        prefab.UpdateInnerPoints();
-
-        using Bitmap b = new(MAP_SIZE, MAP_SIZE);
-        using Pen pen = new Pen(PrefabBoundsColor, 1);
-
-        var noise = ParsePerlinNoise(SEED);
-
-        using (Graphics g = Graphics.FromImage(b))
-        {
-            g.Clear(BackgroundColor);
-
-            DrawPoints(b, prefab.GetNoiseAround(rand), NoiseColor);
-            g.DrawRectangle(pen, prefab.position.x, prefab.position.z, prefab.size.x, prefab.size.z);
-            DrawPoints(b, prefab.nodes.ToHashSet(), NodeColor);
-        }
-
-        b.Save(@"prefab.png", ImageFormat.Png);
-    }
-
-    public static void Main(string[] args)
-    {
-        Logger.Info($"SEED .......... {SEED}");
-        Logger.Info($"SIZE .......... {MAP_SIZE}");
-        Logger.Info($"PREFAB_COUNT .. {PREFAB_COUNT}");
-        Logger.Blank();
-
-        switch (args[0])
-        {
-            case "graph":
-                GenerateGraph(args);
-                break;
-
-            case "path":
-                GeneratePath(args);
-                break;
-
-            case "noise":
-                GenerateNoise(args);
-                break;
-
-            case "cave":
-            case "caves":
-                GenerateCaves(args);
-                break;
-
-            case "prefab":
-                GeneratePrefab(args);
-                break;
-
-            default:
-                Console.WriteLine($"Invalid command: {args[0]}");
-                break;
-        }
-    }
-
-    public static void Test(string[] args)
-    {
-        var vectorSet = new HashSet<Vector3i>();
-
-        vectorSet.Add(new Vector3i(0, 1, 0));
-        vectorSet.Add(new Vector3i(0, 2, 0));
-        Debug.Assert(vectorSet.Count == 1);
-
-        vectorSet.Add(new Vector3i(0, 2, 1));
-        Debug.Assert(vectorSet.Count == 2);
-
-        vectorSet.Add(new Vector3i(0, 3, 1));
-        Debug.Assert(vectorSet.Count == 2);
-
-        Debug.Assert(vectorSet.Contains(new Vector3i(0, 8, 1)));
-        Debug.Assert(vectorSet.Contains(new Vector3i(0, 5, 0)));
-    }
 }

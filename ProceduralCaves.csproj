@@ -81,17 +81,19 @@
     <Compile Include="Harmony\Patches.cs" />
 
     <!-- WorldGen -->
-    <Compile Include="Scripts\WorldGen\FastNoiseLite.cs" />
     <Compile Include="Scripts\WorldGen\LegacyCaveTunneler.cs" />
 
     <!-- Utils -->
     <Compile Include="Scripts\Utils\CaveConfig.cs" />
-    <Compile Include="Scripts\Utils\AdvLogging.cs" />
     <Compile Include="Scripts\builder.cs" />
 
     <!-- Debug -->
     <Compile Include="Scripts\Debug\CaveSystemCLI.cs" />
     <Compile Include="Scripts\Debug\XUiC_CavesConfig.cs" />
+
+    <!-- Cave Builder -->
+    <Compile Include="CaveBuilder\FastNoiseLite.cs" />
+    <Compile Include="CaveBuilder\CaveBuilder.cs" />
 
   </ItemGroup>
   <ItemGroup />
