@@ -12,6 +12,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Runtime.CompilerServices;
 
+using Random = System.Random;
+using Graphics = System.Drawing.Graphics;
+using Debug = System.Diagnostics.Debug;
+using Color = System.Drawing.Color;
+
 
 public static class Logger
 {
@@ -55,61 +60,7 @@ public static class Logger
 }
 
 
-public class Vector3i
-{
-    public int x;
-
-    public int y;
-
-    public int z;
-
-    public Vector3i(int x, int y, int z)
-    {
-        this.x = x;
-        this.y = y;
-        this.z = z;
-    }
-
-    public override string ToString()
-    {
-        return $"{x},{y},{z}";
-    }
-
-    public static bool operator !=(Vector3i p1, Vector3i p2)
-    {
-        return !(p1 == p2);
-    }
-
-    public static bool operator ==(Vector3i p1, Vector3i p2)
-    {
-        return p1.x == p2.x && p1.z == p2.z;
-    }
-
-    public static Vector3i operator +(Vector3i p1, Vector3i p2)
-    {
-        return new Vector3i(p1.x + p2.x, p1.y + p2.y, p1.z + p2.z);
-    }
-
-    public override bool Equals(object obj)
-    {
-        var other = (Vector3i)obj;
-
-        return GetHashCode() == other.GetHashCode();
-    }
-
-    public override int GetHashCode()
-    {
-        return x * CaveBuilder.MAP_SIZE + z;
-    }
-
-    public PointF ToPointF()
-    {
-        return new PointF(x, z);
-    }
-}
-
-
-public static class Utils
+public static class CaveUtils
 {
     public static int FastMin(int a, int b)
     {
@@ -140,10 +91,15 @@ public static class Utils
 
         return dx * dx + dy * dy;
     }
+
+    public static PointF ParsePointF(Vector3i point)
+    {
+        return new PointF(point.x, point.z);
+    }
 }
 
 
-public class Prefab
+public class PrefabWrapper
 {
     public const int OVERLAP_MARGIN = 50;
 
@@ -157,17 +113,17 @@ public class Prefab
 
     public List<Vector3i> innerPoints;
 
-    public Prefab()
+    public PrefabWrapper()
     {
         nodes = new List<Vector3i>();
     }
 
-    public Prefab(Random rand)
+    public PrefabWrapper(Random rand)
     {
         nodes = new List<Vector3i>();
         size = new Vector3i(
             rand.Next(CaveBuilder.MIN_PREFAB_SIZE, CaveBuilder.MAX_PREFAB_SIZE),
-            rand.Next(CaveBuilder.MIN_PREFAB_SIZE, CaveBuilder.MAX_PREFAB_SIZE),
+            1,
             rand.Next(CaveBuilder.MIN_PREFAB_SIZE, CaveBuilder.MAX_PREFAB_SIZE)
         );
     }
@@ -204,7 +160,7 @@ public class Prefab
         {
             for (int z = position.z; z <= (position.z + size.z); z++)
             {
-                innerPoints.Add(new Vector3i(x, 0, z));
+                innerPoints.Add(new Vector3i(x, position.y, z));
             }
         }
     }
@@ -213,7 +169,7 @@ public class Prefab
     {
         position = new Vector3i(
             rand.Next(mapOffset, mapSize - mapOffset - size.x),
-            rand.Next(mapOffset, mapSize - mapOffset - size.y),
+            CaveBuilder.PREFAB_Y,
             rand.Next(mapOffset, mapSize - mapOffset - size.z)
         );
 
@@ -221,7 +177,7 @@ public class Prefab
         UpdateInnerPoints();
     }
 
-    public bool OverLaps2D(Prefab other, int map_size, int map_offset)
+    public bool OverLaps2D(PrefabWrapper other, int map_size, int map_offset)
     {
         if (position.x + size.x + OVERLAP_MARGIN < other.position.x || other.position.x + other.size.x + OVERLAP_MARGIN < position.x)
             return false;
@@ -232,7 +188,7 @@ public class Prefab
         return true;
     }
 
-    public bool OverLaps2D(List<Prefab> others, int map_size, int map_offset)
+    public bool OverLaps2D(List<PrefabWrapper> others, int map_size, int map_offset)
     {
         foreach (var prefab in others)
         {
@@ -305,7 +261,7 @@ public class Prefab
     {
         return new Vector3i(
             position.x + size.x / 2,
-            position.y + size.y / 2,
+            position.y,
             position.z + size.z / 2
         );
     }
@@ -342,8 +298,8 @@ public class Edge : IComparable<Edge>
 
     public string HashPrefabs()
     {
-        int index1 = Utils.FastMin(prefabIndex1, prefabIndex2);
-        int index2 = Utils.FastMax(prefabIndex1, prefabIndex2);
+        int index1 = CaveUtils.FastMin(prefabIndex1, prefabIndex2);
+        int index2 = CaveUtils.FastMax(prefabIndex1, prefabIndex2);
 
         return $"{index1};{index2}";
     }
@@ -400,56 +356,6 @@ public class Edge : IComparable<Edge>
         hash = hash * 23 + hash1 + hash2;
 
         return hash;
-    }
-}
-
-
-public class UnionFind
-{
-    private int[] parent;
-    private int[] rank;
-
-    public UnionFind(int size)
-    {
-        parent = new int[size];
-        rank = new int[size];
-        for (int i = 0; i < size; i++)
-        {
-            parent[i] = i;
-            rank[i] = 0;
-        }
-    }
-
-    public int Find(int x)
-    {
-        if (parent[x] != x)
-        {
-            parent[x] = Find(parent[x]);
-        }
-        return parent[x];
-    }
-
-    public void Union(int x, int y)
-    {
-        int rootX = Find(x);
-        int rootY = Find(y);
-
-        if (rootX != rootY)
-        {
-            if (rank[rootX] > rank[rootY])
-            {
-                parent[rootY] = rootX;
-            }
-            else if (rank[rootX] < rank[rootY])
-            {
-                parent[rootX] = rootY;
-            }
-            else
-            {
-                parent[rootY] = rootX;
-                rank[rootX]++;
-            }
-        }
     }
 }
 
@@ -597,13 +503,13 @@ public static class CaveTunneler
 
                 factor *= noiseMap.Contains(neighbor.position) ? 1f : .5f;
 
-                float tentativeGCost = currentNode.GCost + Utils.SqrEuclidianDist(currentNode, neighbor) * factor;
+                float tentativeGCost = currentNode.GCost + CaveUtils.SqrEuclidianDist(currentNode, neighbor) * factor;
 
                 if (!openSet.Contains(neighbor) || tentativeGCost < neighbor.GCost)
                 {
                     neighbor.Parent = currentNode;
                     neighbor.GCost = tentativeGCost;
-                    neighbor.HCost = Utils.SqrEuclidianDist(neighbor, goalNode) * factor;
+                    neighbor.HCost = CaveUtils.SqrEuclidianDist(neighbor, goalNode) * factor;
 
                     openSet.Add(neighbor);
                 }
@@ -648,7 +554,7 @@ public static class CaveTunneler
 
 public static class GraphSolver
 {
-    private static List<Edge> BuildPrefabGraph(List<Prefab> prefabs)
+    private static List<Edge> BuildPrefabGraph(List<PrefabWrapper> prefabs)
     {
         Dictionary<int, List<Edge>> prefabEdges = new();
 
@@ -732,7 +638,7 @@ public static class GraphSolver
         return graph.ToList();
     }
 
-    public static List<Edge> Resolve(List<Prefab> prefabs)
+    public static List<Edge> Resolve(List<PrefabWrapper> prefabs)
     {
         Stopwatch timer = new();
 
@@ -740,7 +646,7 @@ public static class GraphSolver
 
         List<Edge> graph = BuildPrefabGraph(prefabs);
 
-        Logger.Info($"Graph resolved in {Utils.TimeFormat(timer)}");
+        Logger.Info($"Graph resolved in {CaveUtils.TimeFormat(timer)}");
 
         return graph;
     }
@@ -753,9 +659,11 @@ public static class CaveBuilder
 
     public const int MAP_SIZE = 6144;
 
-    public static int MIN_PREFAB_SIZE = 8;
+    public const int PREFAB_Y = 5;
 
-    public static int MAX_PREFAB_SIZE = 100;
+    public const int MIN_PREFAB_SIZE = 8;
+
+    public const int MAX_PREFAB_SIZE = 100;
 
     public const int MAP_OFFSET = MAP_SIZE / 60;
 
@@ -793,7 +701,7 @@ public static class CaveBuilder
 
                 visited.Add(pos);
 
-                if (Utils.SqrEuclidianDist(pos, center) >= radius)
+                if (CaveUtils.SqrEuclidianDist(pos, center) >= radius)
                     continue;
 
                 queue.Add(new Vector3i(pos.x + 1, pos.y, pos.z));
@@ -819,7 +727,7 @@ public static class CaveBuilder
         return noise;
     }
 
-    private static bool CheckPrefabOverlaps(Prefab prefab, List<Prefab> others)
+    private static bool CheckPrefabOverlaps(PrefabWrapper prefab, List<PrefabWrapper> others)
     {
         int i;
 
@@ -840,15 +748,15 @@ public static class CaveBuilder
         return !prefab.OverLaps2D(others, MAP_SIZE, MAP_OFFSET);
     }
 
-    private static List<Prefab> GetRandomPrefabs(int count)
+    private static List<PrefabWrapper> GetRandomPrefabs(int count)
     {
         Logger.Info("Start POIs placement...");
 
-        var prefabs = new List<Prefab>();
+        var prefabs = new List<PrefabWrapper>();
 
         for (int i = 0; i < count; i++)
         {
-            var prefab = new Prefab(rand);
+            var prefab = new PrefabWrapper(rand);
 
             prefab.SetRandomPosition(rand, MAP_SIZE, MAP_OFFSET);
 
@@ -861,7 +769,7 @@ public static class CaveBuilder
         return prefabs;
     }
 
-    public static void DrawPrefabs(Bitmap b, Graphics graph, List<Prefab> prefabs, bool fill = false)
+    public static void DrawPrefabs(Bitmap b, Graphics graph, List<PrefabWrapper> prefabs, bool fill = false)
     {
         using Pen pen = new Pen(PrefabBoundsColor, 1);
 
@@ -891,8 +799,8 @@ public static class CaveBuilder
         foreach (var edge in edges)
         {
             graph.DrawCurve(pen, new PointF[2]{
-                edge.node1.ToPointF(),
-                edge.node2.ToPointF(),
+                CaveUtils.ParsePointF(edge.node1),
+                CaveUtils.ParsePointF(edge.node2),
             });
         }
     }
@@ -911,11 +819,11 @@ public static class CaveBuilder
         }
     }
 
-    private static HashSet<Vector3i> CollectPrefabObstacles(List<Prefab> prefabs)
+    private static HashSet<Vector3i> CollectPrefabObstacles(List<PrefabWrapper> prefabs)
     {
         var obstacles = new HashSet<Vector3i>();
 
-        foreach (Prefab prefab in prefabs)
+        foreach (PrefabWrapper prefab in prefabs)
         {
             obstacles.UnionWith(prefab.innerPoints);
         }
@@ -923,11 +831,11 @@ public static class CaveBuilder
         return obstacles;
     }
 
-    private static HashSet<Vector3i> CollectPrefabNoise(List<Prefab> prefabs, FastNoiseLite noise)
+    private static HashSet<Vector3i> CollectPrefabNoise(List<PrefabWrapper> prefabs, FastNoiseLite noise)
     {
         var noiseMap = new HashSet<Vector3i>();
 
-        foreach (Prefab prefab in prefabs)
+        foreach (PrefabWrapper prefab in prefabs)
         {
             noiseMap.UnionWith(prefab.GetNoiseAround(rand));
         }
@@ -978,27 +886,27 @@ public static class CaveBuilder
 
     private static void GeneratePath(string[] args)
     {
-        Prefab p1 = new()
+        PrefabWrapper p1 = new()
         {
             position = new Vector3i(10, 0, 10),
-            size = new Vector3i(10, 0, 10),
+            size = new Vector3i(10, 1, 10),
         };
 
-        Prefab p2 = new()
+        PrefabWrapper p2 = new()
         {
             position = new Vector3i(MAP_SIZE - 20, 0, MAP_SIZE - 20),
-            size = new Vector3i(10, 0, 10),
+            size = new Vector3i(10, 1, 10),
         };
 
-        var prefabs = new List<Prefab>() { p1, p2 };
+        var prefabs = new List<PrefabWrapper>() { p1, p2 };
 
         p1.UpdateInnerPoints();
         p2.UpdateInnerPoints();
 
         FastNoiseLite noise = ParsePerlinNoise();
-
         HashSet<Vector3i> obstacles = CollectPrefabObstacles(prefabs);
         HashSet<Vector3i> noiseMap = CollectPrefabNoise(prefabs, noise);
+
         HashSet<Vector3i> path = CaveTunneler.PerlinRoute(p1.position, p2.position, noise, obstacles, noiseMap);
 
         using Bitmap b = new(MAP_SIZE, MAP_SIZE);
@@ -1055,7 +963,7 @@ public static class CaveBuilder
             Vector3i p1 = edge.node1;
             Vector3i p2 = edge.node2;
 
-            Logger.Info($"Noise pathing: {100.0f * index++ / edges.Count:F0}% ({index} / {edges.Count}), dist={Utils.SqrEuclidianDist(p1, p2)}");
+            Logger.Info($"Noise pathing: {100.0f * index++ / edges.Count:F0}% ({index} / {edges.Count}), dist={CaveUtils.SqrEuclidianDist(p1, p2)}");
 
             HashSet<Vector3i> path = CaveTunneler.PerlinRoute(p1, p2, noise, obstacles, noiseMap);
 
@@ -1065,7 +973,11 @@ public static class CaveBuilder
             }
         });
 
+        Logger.Info("Start caves thickening");
+
         var caveMap = CaveTunneler.ThickenCaveMap(wiredCaveMap.ToHashSet(), obstacles);
+
+        Logger.Info("Start caves drawing");
 
         using Bitmap b = new(MAP_SIZE, MAP_SIZE);
 
@@ -1081,13 +993,13 @@ public static class CaveBuilder
 
         SaveCaveMap(caveMap, "cavemap.csv");
 
-        Console.WriteLine($"{caveMap.Count} cave blocks generated, timer={Utils.TimeFormat(timer)}.");
+        Console.WriteLine($"{caveMap.Count} cave blocks generated, timer={CaveUtils.TimeFormat(timer)}.");
     }
 
     private static void GeneratePrefab(string[] args)
     {
         var mapCenter = new Vector3i(-10 + MAP_SIZE / 2, 0, -10 + MAP_SIZE / 2);
-        var prefab = new Prefab()
+        var prefab = new PrefabWrapper()
         {
             position = mapCenter,
             size = new Vector3i(20, 0, 20),
