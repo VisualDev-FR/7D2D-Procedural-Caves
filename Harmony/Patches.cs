@@ -1,10 +1,14 @@
 using HarmonyLib;
 using UnityEngine;
 using System.Collections.Generic;
+using System.Collections;
 using System;
 using System.IO;
-using System.Linq;
 using System.Xml.Linq;
+using WorldGenerationEngineFinal;
+using UnityEngine.Scripting;
+
+
 
 namespace Harmony
 {
@@ -259,7 +263,7 @@ namespace Harmony
                 }
                 catch (Exception ex)
                 {
-                    Log.Error("[Caves] Loading cavePrefabs.xml file for level '" + Path.GetFileName(_path) + "': " + ex.Message);
+                    Log.Error("[Caves] Loading cavePrefabs.xml file for level '" + System.IO.Path.GetFileName(_path) + "': " + ex.Message);
                     Log.Exception(ex);
                     return null;
                 }
@@ -312,7 +316,7 @@ namespace Harmony
                     }
                     catch (Exception ex2)
                     {
-                        Log.Error("Loading prefabs xml file for level '" + Path.GetFileName(_path) + "': " + ex2.Message);
+                        Log.Error("Loading prefabs xml file for level '" + System.IO.Path.GetFileName(_path) + "': " + ex2.Message);
                         Log.Exception(ex2);
                     }
                 }
@@ -320,6 +324,100 @@ namespace Harmony
 
                 Log.Out($"[Caves] success loading of cavePrefabs");
                 return;
+            }
+        }
+
+
+        [HarmonyPatch(typeof(WorldBuilder))]
+        [HarmonyPatch("GenerateData")]
+        public class WorldBuilder_GenerateData
+        {
+            public static IEnumerator GenerateData(WorldBuilder wb)
+            {
+                yield return wb.Init();
+                yield return wb.SetMessage(string.Format(Localization.Get("xuiWorldGenerationGenerating"), wb.WorldName), _logToConsole: true);
+                yield return wb.generateTerrain();
+                if (wb.IsCanceled)
+                {
+                    yield break;
+                }
+                wb.initStreetTiles();
+                if (wb.IsCanceled)
+                {
+                    yield break;
+                }
+                if (wb.Towns != 0 || wb.Wilderness != 0)
+                {
+                    yield return PrefabManager.LoadPrefabs();
+                    PrefabManager.ShufflePrefabData(wb.Seed);
+                    yield return null;
+                    PathingUtils.SetupPathingGrid();
+                }
+                else
+                {
+                    PrefabManager.ClearDisplayed();
+                }
+                if (wb.Towns != 0)
+                {
+                    yield return TownPlanner.Plan(wb.thisWorldProperties, wb.Seed);
+                }
+                yield return wb.GenerateTerrainLast();
+                if (wb.IsCanceled)
+                {
+                    yield break;
+                }
+                yield return POISmoother.SmoothStreetTiles();
+                if (wb.IsCanceled)
+                {
+                    yield break;
+                }
+                if (wb.Towns != 0 || wb.Wilderness != 0)
+                {
+                    yield return HighwayPlanner.Plan(wb.thisWorldProperties, wb.Seed);
+                    yield return TownPlanner.SpawnPrefabs();
+                    if (wb.IsCanceled)
+                    {
+                        yield break;
+                    }
+                }
+                if (wb.Wilderness != 0)
+                {
+                    yield return WildernessPlanner.Plan(wb.thisWorldProperties, wb.Seed);
+                    yield return wb.smoothWildernessTerrain();
+                    yield return WildernessPathPlanner.Plan(wb.Seed);
+                }
+                int num = 12 - wb.playerSpawns.Count;
+                if (num > 0)
+                {
+                    foreach (StreetTile item in WorldBuilder.CalcPlayerSpawnTiles())
+                    {
+                        if (wb.CreatePlayerSpawn(item.WorldPositionCenter, _isFallback: true) && --num <= 0)
+                        {
+                            break;
+                        }
+                    }
+                }
+                GC.Collect();
+                yield return wb.SetMessage("Draw Roads", _logToConsole: true);
+                yield return wb.DrawRoads(wb.dest);
+                if (wb.Towns != 0 || wb.Wilderness != 0)
+                {
+                    yield return wb.SetMessage("Smooth Road Terrain", _logToConsole: true);
+                    yield return WorldBuilder.smoothRoadTerrain(wb.dest, wb.HeightMap, wb.WorldSize);
+                }
+                wb.paths.Clear();
+                wb.wildernessPaths.Clear();
+                yield return wb.FinalizeWater();
+                GC.Collect();
+                Log.Out("RWG final in {0}:{1:00}, r={2:x}", wb.totalMS.Elapsed.Minutes, wb.totalMS.Elapsed.Seconds, Rand.Instance.PeekSample());
+            }
+
+            public static bool Prefix(WorldBuilder __instance, ref IEnumerator __result)
+            {
+                Log.Out($"[Cave] start WorldBuilder_GenerateData Prefix.");
+
+                __result = GenerateData(__instance);
+                return false;
             }
         }
     }
