@@ -1,6 +1,7 @@
 Live config loader:
     ☐ full region reset
 
+
 Cave generation:
     ☐ random pois placement
     ☐ cave decoration
@@ -9,7 +10,6 @@ Cave generation:
     ☐ natural fillers (rooms, canyon, rivers, tensionned stalactites, etc...)
     ☐ Cave generation menu
     ☐ Better procedural width
-    ☐ `Affiner les liens entre pois en prenant en compte les connecteurs`
 
 Misc:
     ☐ live cave map

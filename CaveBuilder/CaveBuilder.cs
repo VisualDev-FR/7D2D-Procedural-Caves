@@ -622,15 +622,9 @@ public static class CaveTunneler
     {
         var caveMap = new HashSet<Vector3i>();
 
-        // const int MIN_CAVE_WIDTH = 1;
-        // const int MAX_CAVE_WIDTH = 20;
-
         foreach (var position in wiredCaveMap)
         {
-            float noise = 0.5f * (1 + thickingNoise.GetNoise(position.x, position.z));
-            float radius = 2; // MIN_CAVE_WIDTH + noise * (MAX_CAVE_WIDTH - MIN_CAVE_WIDTH);
-
-            var circle = CaveBuilder.ParseCircle(position, radius);
+            var circle = CaveBuilder.ParseCircle(position, 2f);
 
             caveMap.UnionWith(circle);
         }
