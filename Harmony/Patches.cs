@@ -5,6 +5,7 @@ using System.Collections;
 using System;
 using System.Xml.Linq;
 using WorldGenerationEngineFinal;
+using System.Linq;
 
 
 public class ProceduralCaveSystem
@@ -23,17 +24,18 @@ public class ProceduralCaveSystem
         // We want to run our cave spawning class right under the main biome spawner.
         public static bool Prefix(SpawnManagerBiomes __instance, string _spawnerName, bool _bSpawnEnemyEntities, object _userData, ref List<Entity> ___spawnNearList, ref int ___lastClassId)
         {
-            if (!GameUtils.IsPlaytesting())
-            {
-                SpawnUpdate(_spawnerName, _bSpawnEnemyEntities, _userData as ChunkAreaBiomeSpawnData,
-                    ref ___spawnNearList, ref ___lastClassId);
-            }
+            // if (!GameUtils.IsPlaytesting())
+            // {
+            //     SpawnUpdate(_spawnerName, _bSpawnEnemyEntities, _userData as ChunkAreaBiomeSpawnData,
+            //         ref ___spawnNearList, ref ___lastClassId);
+            // }
 
             return true;
         }
         // This method is a modified version of vanilla, doing the same checks and balances.
         // However, we do use the player position a bit more, and we change which biome spawning group we
         // will use, when below the terrain.
+
         public static void SpawnUpdate(string _spawnerName, bool _bSpawnEnemyEntities, ChunkAreaBiomeSpawnData _chunkBiomeSpawnData, ref List<Entity> spawnNearList, ref int lastClassId)
         {
             var deepCaveThreshold = 30;
@@ -200,7 +202,7 @@ public class ProceduralCaveSystem
     {
         public static void Postfix(Chunk _chunk)
         {
-            LegacyCaveSystem.Add2DCaveToChunk(_chunk);
+            // LegacyCaveSystem.Add2DCaveToChunk(_chunk);
             // LegacyCaveSystem.Add3DCaveToChunk(_chunk);
         }
     }
@@ -389,9 +391,9 @@ public class ProceduralCaveSystem
 
         public static IEnumerator AddCaveEntrances(int count)
         {
-            List<PrefabDataInstance> existingPrefabs = PrefabManager.UsedPrefabsWorld;
+            CaveBuilder.MAP_SIZE = 2048;
 
-            var caveEntrances = GetCaveEntrancePrefabs();
+            List<PrefabData> caveEntrances = GetCaveEntrancePrefabs();
 
             if (caveEntrances.Count == 0)
             {
@@ -399,10 +401,27 @@ public class ProceduralCaveSystem
                 yield break;
             }
 
-            foreach (var prefab in caveEntrances)
+            List<PrefabWrapper> others = PrefabManager.UsedPrefabsWorld.Select(item => new PrefabWrapper(item)).ToList();
+
+            int added = 0;
+
+            for (int i = 0; i < count; i++)
             {
-                Log.Out($"[Cave] prefabEntrance = {prefab.Name}");
+                int index = i % caveEntrances.Count;
+                var prefab = caveEntrances[index];
+                var wrapper = new PrefabWrapper(others.Count + 1, prefab);
+
+                if (CaveBuilder.CheckPrefabOverlaps(ref wrapper, others))
+                {
+                    PrefabManager.AddUsedPrefabWorld(-1, wrapper.ToPrefabDataInstance());
+                    Log.Out($"[Cave] cave entrance added at {wrapper.position}");
+                    added++;
+                    yield return null;
+                }
             }
+
+            Log.Warning($"[Cave] {added} cave entrance added");
+            yield return null; ;
         }
 
         public static IEnumerator GenerateData()
@@ -483,6 +502,8 @@ public class ProceduralCaveSystem
                 yield return wb.SetMessage("Smooth Road Terrain", _logToConsole: true);
                 yield return WorldBuilder.smoothRoadTerrain(wb.dest, wb.HeightMap, wb.WorldSize);
             }
+
+            Log.Out("Start adding cave entrances");
 
             yield return AddCaveEntrances(20);
 

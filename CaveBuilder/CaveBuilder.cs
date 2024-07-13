@@ -11,7 +11,6 @@ using Random = System.Random;
 using Debug = System.Diagnostics.Debug;
 
 
-
 public static class Logger
 {
     private static void Logging(string level, string message)
@@ -93,13 +92,15 @@ public class PrefabWrapper
 {
     public const int OVERLAP_MARGIN = 50;
 
+    private PrefabDataInstance prefabDataInstance;
+
     public Vector3i position;
 
     public Vector3i size;
 
-    public List<Vector3i> nodes;
+    public byte rotation;
 
-    public int rotation = 1;
+    public List<Vector3i> nodes;
 
     public List<Vector3i> innerPoints;
 
@@ -116,6 +117,21 @@ public class PrefabWrapper
             1,
             rand.Next(CaveBuilder.MIN_PREFAB_SIZE, CaveBuilder.MAX_PREFAB_SIZE)
         );
+    }
+
+    public PrefabWrapper(PrefabDataInstance prefab)
+    {
+        prefabDataInstance = prefab;
+        position = prefab.boundingBoxPosition;
+        size = prefab.boundingBoxSize;
+        rotation = prefab.rotation;
+    }
+
+    public PrefabWrapper(int id, PrefabData prefabData)
+    {
+        position = new Vector3i();
+        rotation = 0;
+        prefabDataInstance = new PrefabDataInstance(id, position, rotation, prefabData);
     }
 
     public void UpdateNodes(Random rand = null)
@@ -266,6 +282,14 @@ public class PrefabWrapper
         var other = (Vector3i)obj;
 
         return GetHashCode() == other.GetHashCode();
+    }
+
+    public PrefabDataInstance ToPrefabDataInstance()
+    {
+        prefabDataInstance.boundingBoxPosition = position;
+        prefabDataInstance.rotation = rotation;
+
+        return prefabDataInstance;
     }
 }
 
@@ -642,21 +666,21 @@ public static class CaveBuilder
 {
     public static int SEED = 12345; // new Random().Next();
 
-    public const int MAP_SIZE = 6144;
+    public static int MAP_SIZE = 6144;
 
-    public const int PREFAB_Y = 5;
+    public static int PREFAB_Y = 5;
 
-    public const int MIN_PREFAB_SIZE = 8;
+    public static int MIN_PREFAB_SIZE = 8;
 
-    public const int MAX_PREFAB_SIZE = 100;
+    public static int MAX_PREFAB_SIZE = 100;
 
-    public const int MAP_OFFSET = MAP_SIZE / 60;
+    public static int MAP_OFFSET = MAP_SIZE / 60;
 
-    public const float POINT_WIDTH = 5;
+    public static float POINT_WIDTH = 5;
 
-    public const int PREFAB_COUNT = MAP_SIZE / 5;
+    public static int PREFAB_COUNT = MAP_SIZE / 5;
 
-    public const float NOISE_THRESHOLD = 0.5f;
+    public static float NOISE_THRESHOLD = 0.5f;
 
     public static Random rand = new Random(SEED);
 
@@ -702,7 +726,7 @@ public static class CaveBuilder
         return noise;
     }
 
-    public static bool CheckPrefabOverlaps(PrefabWrapper prefab, List<PrefabWrapper> others)
+    public static bool CheckPrefabOverlaps(ref PrefabWrapper prefab, List<PrefabWrapper> others)
     {
         int i;
 
@@ -725,23 +749,24 @@ public static class CaveBuilder
 
     public static List<PrefabWrapper> GetRandomPrefabs(int count)
     {
-        Logger.Info("Start POIs placement...");
+        throw new NotImplementedException();
+        // Logger.Info("Start POIs placement...");
 
-        var prefabs = new List<PrefabWrapper>();
+        // var prefabs = new List<PrefabWrapper>();
 
-        for (int i = 0; i < count; i++)
-        {
-            var prefab = new PrefabWrapper(rand);
+        // for (int i = 0; i < count; i++)
+        // {
+        //     var prefab = new PrefabWrapper(rand);
 
-            prefab.SetRandomPosition(rand, MAP_SIZE, MAP_OFFSET);
+        //     prefab.SetRandomPosition(rand, MAP_SIZE, MAP_OFFSET);
 
-            if (CheckPrefabOverlaps(prefab, prefabs))
-                prefabs.Add(prefab);
-        }
+        //     if (CheckPrefabOverlaps(prefab, prefabs))
+        //         prefabs.Add(prefab);
+        // }
 
-        Logger.Info($"{prefabs.Count} / {PREFAB_COUNT} prefabs added");
+        // Logger.Info($"{prefabs.Count} / {PREFAB_COUNT} prefabs added");
 
-        return prefabs;
+        // return prefabs;
     }
 
     public static HashSet<Vector3i> CollectPrefabObstacles(List<PrefabWrapper> prefabs)
