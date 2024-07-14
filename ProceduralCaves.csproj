@@ -79,7 +79,6 @@
     <!-- Harmony -->
     <Compile Include="Harmony\Init.cs" />
     <Compile Include="Harmony\Patches.cs" />
-    <Compile Include="Harmony\H_StreetTile.cs" />
 
     <!-- WorldGen -->
     <Compile Include="Scripts\WorldGen\LegacyCaveTunneler.cs" />
