@@ -473,19 +473,19 @@ public static class CaveTunneler
         var startNode = new Node(startPos);
         var goalNode = new Node(targetPos);
 
-        HashSet<Node> openSet = new HashSet<Node>();
-        HashSet<Node> closedSet = new HashSet<Node>();
+        HashSet<Node> queue = new HashSet<Node>();
+        HashSet<Node> visited = new HashSet<Node>();
 
         obstacles.Remove(startPos);
         obstacles.Remove(targetPos);
 
-        openSet.Add(startNode);
+        queue.Add(startNode);
 
         var path = new HashSet<Vector3i>();
 
-        while (openSet.Count > 0)
+        while (queue.Count > 0)
         {
-            Node currentNode = GetLowestFCostNode(openSet);
+            Node currentNode = GetLowestFCostNode(queue);
 
             if (currentNode.position == goalNode.position)
             {
@@ -493,20 +493,18 @@ public static class CaveTunneler
                 break;
             }
 
-            openSet.Remove(currentNode);
-            closedSet.Add(currentNode);
+            queue.Remove(currentNode);
+            visited.Add(currentNode);
 
             foreach (Node neighbor in currentNode.GetNeighbors())
             {
                 // Logger.Debug($"{currentNode.position} {neighbor.position} ({obstacles.Contains(neighbor.position)})");
 
-                if (closedSet.Contains(neighbor))
+                if (visited.Contains(neighbor))
                     continue;
 
                 if (obstacles.Contains(neighbor.position))
-                {
                     continue;
-                }
 
                 float noise = 0.5f * (1 + perlinNoise.GetNoise(neighbor.position.x, neighbor.position.z));
                 float factor = noise < CaveBuilder.NOISE_THRESHOLD ? .5f : 1f;
@@ -515,20 +513,20 @@ public static class CaveTunneler
 
                 float tentativeGCost = currentNode.GCost + CaveUtils.SqrEuclidianDist(currentNode, neighbor) * factor;
 
-                if (!openSet.Contains(neighbor) || tentativeGCost < neighbor.GCost)
+                if (!queue.Contains(neighbor) || tentativeGCost < neighbor.GCost)
                 {
                     neighbor.Parent = currentNode;
                     neighbor.GCost = tentativeGCost;
                     neighbor.HCost = CaveUtils.SqrEuclidianDist(neighbor, goalNode) * factor;
 
-                    openSet.Add(neighbor);
+                    queue.Add(neighbor);
                 }
             }
         }
 
         if (path.Count == 0)
         {
-            Logger.Warning($"No Path found from {startPos} to {targetPos}.");
+            Logger.Error($"No Path found from {startPos} to {targetPos}.");
         }
 
         return path;

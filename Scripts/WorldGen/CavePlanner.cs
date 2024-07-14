@@ -28,6 +28,16 @@ public static class CavePlanner
         return result.ToList();
     }
 
+    public static List<PrefabData> GetUndergroundPrefabs()
+    {
+        var result =
+            from prefab in AllCavePrefabs.Values
+            where prefab.Tags.Test_AnySet(caveTags) && !prefab.Tags.Test_AnySet(CaveEntranceTags)
+            select prefab;
+
+        return result.ToList();
+    }
+
     public static List<PrefabData> GetCaveEntrancePrefabs()
     {
         if (entrancePrefabs != null)
@@ -58,13 +68,35 @@ public static class CavePlanner
         CaveBuilder.rand = new Random(CaveBuilder.SEED);
     }
 
-    public static void PlaceCavePOIs()
+    private static PrefabDataInstance TrySpawnCavePrefab(PrefabData prefab, List<PrefabDataInstance> others)
     {
+        throw new NotImplementedException();
+    }
+
+    public static List<PrefabDataInstance> PlaceCavePOIs(int count)
+    {
+        var placedPrefabs = new List<PrefabDataInstance>();
+        var availablePrefabs = GetUndergroundPrefabs();
+        var usedPrefabs = GetUsedCavePrefabs();
+
+        for (int i = 0; i < count; i++)
+        {
+            var prefab = availablePrefabs[i % availablePrefabs.Count];
+            var prefabDataInstance = TrySpawnCavePrefab(prefab, usedPrefabs);
+
+            if (prefabDataInstance != null)
+            {
+                PrefabManager.AddUsedPrefabWorld(-1, prefabDataInstance);
+                placedPrefabs.Add(prefabDataInstance);
+            }
+        }
+
+        return placedPrefabs;
     }
 
     public static void GenerateCaveMap()
     {
-
+        List<PrefabDataInstance> cavePrefabs = PlaceCavePOIs(100);
     }
 
     public static void SaveCaveMap()
