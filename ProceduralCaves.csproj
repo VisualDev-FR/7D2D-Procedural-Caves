@@ -82,6 +82,7 @@
 
     <!-- WorldGen -->
     <Compile Include="Scripts\WorldGen\LegacyCaveTunneler.cs" />
+    <Compile Include="Scripts\WorldGen\CavePlanner.cs" />
 
     <!-- Utils -->
     <Compile Include="Scripts\Utils\CaveConfig.cs" />

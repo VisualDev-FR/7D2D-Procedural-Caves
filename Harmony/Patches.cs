@@ -5,47 +5,12 @@ using System.Collections;
 using System;
 using System.Xml.Linq;
 using WorldGenerationEngineFinal;
-using System.Linq;
 
 using Random = System.Random;
-using System.ComponentModel;
 
 
-public class ProceduralCaveSystem
+public static class ProceduralCaveSystem
 {
-    public static Dictionary<string, PrefabData> AllCavePrefabs = new Dictionary<string, PrefabData>();
-
-    public static FastTags<TagGroup.Poi> CaveEntranceTags = FastTags<TagGroup.Poi>.Parse("entrance");
-
-    public static FastTags<TagGroup.Poi> caveTags = FastTags<TagGroup.Poi>.Parse("cave");
-
-    public static Random rand = CaveBuilder.rand;
-
-    public static int entrancesAdded = 0;
-
-    public static List<PrefabData> entrancePrefabs;
-
-    public static List<PrefabData> GetCaveEntrancePrefabs()
-    {
-        if (entrancePrefabs != null)
-            return entrancePrefabs;
-
-        var prefabDatas = new List<PrefabData>();
-
-        foreach (var prefabData in AllCavePrefabs.Values)
-        {
-            if (prefabData.Tags.Test_AnySet(CaveEntranceTags))
-            {
-                prefabDatas.Add(prefabData);
-            }
-        }
-
-        entrancePrefabs = prefabDatas;
-
-        return prefabDatas;
-    }
-
-
     [HarmonyPatch(typeof(SpawnManagerBiomes), "Update")]
     public class CaveProjectSpawnmanagerBiomes
     {
@@ -357,9 +322,9 @@ public class ProceduralCaveSystem
                 if (prefabData == null || prefabData.Tags.IsEmpty)
                     Log.Warning("Could not load prefab data for " + location.Name);
 
-                if (prefabData.Tags.Test_AnySet(caveTags))
+                if (prefabData.Tags.Test_AnySet(CavePlanner.caveTags))
                 {
-                    AllCavePrefabs[location.Name.ToLower()] = prefabData;
+                    CavePlanner.AllCavePrefabs[location.Name.ToLower()] = prefabData;
                 }
                 else if (!prefabData.Tags.Test_AnySet(filter))
                 {
@@ -373,10 +338,10 @@ public class ProceduralCaveSystem
                 }
             }
 
-            if (AllCavePrefabs.Count == 0)
+            if (CavePlanner.AllCavePrefabs.Count == 0)
                 Log.Error($"[Cave] No cave prefab was loaded.");
 
-            foreach (var prefab in AllCavePrefabs.Values)
+            foreach (var prefab in CavePlanner.AllCavePrefabs.Values)
             {
                 Log.Out($"[Cave] cave prefab found: {prefab.Name}");
             }
@@ -398,13 +363,16 @@ public class ProceduralCaveSystem
     {
         public static bool Prefix(FastTags<TagGroup.Poi> _withoutTags, FastTags<TagGroup.Poi> _markerTags, Vector2i minSize, Vector2i maxSize, Vector2i center, bool _isRetry, ref PrefabData __result)
         {
+            int entrancesAdded = CavePlanner.GetAddedCaveEntrance().Count;
+
             if (entrancesAdded >= 20)
                 return true;
 
-            var prefabs = GetCaveEntrancePrefabs();
+            Log.Out($"[Cave] addedPrefabs = {entrancesAdded}");
 
-            __result = prefabs[rand.Next(prefabs.Count)];
-            entrancesAdded++;
+            var prefabs = CavePlanner.GetCaveEntrancePrefabs();
+
+            __result = prefabs[CavePlanner.rand.Next(prefabs.Count)];
 
             return false;
         }
@@ -415,19 +383,6 @@ public class ProceduralCaveSystem
     public static class WorldBuilder_GenerateFromUI
     {
         public static WorldBuilder worldBuilder;
-
-        private static List<PrefabDataInstance> GetAddedCaveEntrance()
-        {
-            var prefabs = new List<PrefabDataInstance>();
-
-            foreach (var prefab in PrefabManager.UsedPrefabsWorld)
-            {
-                if (prefab.prefab.Tags.Test_AnySet(caveTags))
-                    prefabs.Add(prefab);
-            }
-
-            return prefabs;
-        }
 
         public static IEnumerator GenerateFromUI()
         {
@@ -443,7 +398,7 @@ public class ProceduralCaveSystem
         {
             yield return GenerateFromUI();
 
-            var addedCaveEntrances = GetAddedCaveEntrance();
+            var addedCaveEntrances = CavePlanner.GetAddedCaveEntrance();
 
             Log.Out($"[Cave] {addedCaveEntrances.Count} Cave entrance added.");
 
@@ -451,6 +406,11 @@ public class ProceduralCaveSystem
             {
                 Log.Out($"[Cave] Cave entrance added at {prefab.boundingBoxPosition}");
             }
+
+            CavePlanner.GenerateCaveMap();
+            CavePlanner.SaveCaveMap();
+            CavePlanner.Cleanup();
+
             yield return null;
         }
 

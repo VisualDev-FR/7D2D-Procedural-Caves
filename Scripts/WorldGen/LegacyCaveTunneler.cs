@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using System.Security.Cryptography.X509Certificates;
-using HarmonyLib;
 using UnityEngine;
+
+
 public static class LegacyCaveSystem
 {
     private static BlockValue caveAir = new BlockValue((uint)Block.GetBlockByName("air").blockID);
