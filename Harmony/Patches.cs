@@ -363,7 +363,7 @@ public static class ProceduralCaveSystem
     {
         public static bool Prefix(FastTags<TagGroup.Poi> _withoutTags, FastTags<TagGroup.Poi> _markerTags, Vector2i minSize, Vector2i maxSize, Vector2i center, bool _isRetry, ref PrefabData __result)
         {
-            int entrancesAdded = CavePlanner.GetAddedCaveEntrance().Count;
+            int entrancesAdded = CavePlanner.GetUsedCavePrefabs().Count;
 
             if (entrancesAdded >= 20)
                 return true;
@@ -398,7 +398,7 @@ public static class ProceduralCaveSystem
         {
             yield return GenerateFromUI();
 
-            var addedCaveEntrances = CavePlanner.GetAddedCaveEntrance();
+            var addedCaveEntrances = CavePlanner.GetUsedCavePrefabs();
 
             Log.Out($"[Cave] {addedCaveEntrances.Count} Cave entrance added.");
 

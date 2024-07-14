@@ -18,7 +18,7 @@ public static class CavePlanner
 
     public static List<PrefabData> entrancePrefabs = null;
 
-    public static List<PrefabDataInstance> GetUsedCavePrefab()
+    public static List<PrefabDataInstance> GetUsedCavePrefabs()
     {
         var result =
             from PrefabDataInstance pdi in PrefabManager.UsedPrefabsWorld
@@ -49,19 +49,6 @@ public static class CavePlanner
         entrancePrefabs = prefabDatas;
 
         return prefabDatas;
-    }
-
-    public static List<PrefabDataInstance> GetAddedCaveEntrance()
-    {
-        var prefabs = new List<PrefabDataInstance>();
-
-        foreach (var prefab in PrefabManager.UsedPrefabsWorld)
-        {
-            if (prefab.prefab.Tags.Test_AnySet(caveTags))
-                prefabs.Add(prefab);
-        }
-
-        return prefabs;
     }
 
     public static void Cleanup()
