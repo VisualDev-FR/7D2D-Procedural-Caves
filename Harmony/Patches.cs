@@ -7,6 +7,9 @@ using System.Xml.Linq;
 using WorldGenerationEngineFinal;
 using System.Linq;
 
+using Random = System.Random;
+using System.ComponentModel;
+
 
 public class ProceduralCaveSystem
 {
@@ -16,9 +19,10 @@ public class ProceduralCaveSystem
 
     public static FastTags<TagGroup.Poi> caveTags = FastTags<TagGroup.Poi>.Parse("cave");
 
+    public static Random rand = CaveBuilder.rand;
 
-    [HarmonyPatch(typeof(SpawnManagerBiomes))]
-    [HarmonyPatch("Update")]
+
+    [HarmonyPatch(typeof(SpawnManagerBiomes), "Update")]
     public class CaveProjectSpawnmanagerBiomes
     {
         // We want to run our cave spawning class right under the main biome spawner.
@@ -208,8 +212,7 @@ public class ProceduralCaveSystem
     }
 
 
-    [HarmonyPatch(typeof(DynamicPrefabDecorator))]
-    [HarmonyPatch("DecorateChunk")]
+    [HarmonyPatch(typeof(DynamicPrefabDecorator), "DecorateChunk")]
     [HarmonyPatch(new[] { typeof(World), typeof(Chunk), typeof(bool) })]
     public class CaveProjectDynamicPrefabDecorator
     {
@@ -220,8 +223,7 @@ public class ProceduralCaveSystem
     }
 
 
-    [HarmonyPatch(typeof(DynamicPrefabDecorator))]
-    [HarmonyPatch("Load")]
+    [HarmonyPatch(typeof(DynamicPrefabDecorator), "Load")]
     public class DynamicPrefabDecorator_Load
     {
         private static XmlFile ReadCavePrefabsDatas(string _path)
@@ -304,8 +306,7 @@ public class ProceduralCaveSystem
     }
 
 
-    [HarmonyPatch(typeof(PrefabManager))]
-    [HarmonyPatch("LoadPrefabs")]
+    [HarmonyPatch(typeof(PrefabManager), "LoadPrefabs")]
     public static class PrefabManager_LoadPrefabs
     {
         public static IEnumerator LoadPrefabs()
@@ -322,11 +323,11 @@ public class ProceduralCaveSystem
             for (int i = 0; i < prefabs.Count; i++)
             {
                 PathAbstractions.AbstractedLocation location = prefabs[i];
-                int num = location.Folder.LastIndexOf("/Prefabs/");
-                if (num >= 0 && location.Folder.Substring(num + 8, 5).EqualsCaseInsensitive("/test"))
-                {
+
+                int prefabCount = location.Folder.LastIndexOf("/Prefabs/");
+                if (prefabCount >= 0 && location.Folder.Substring(prefabCount + 8, 5).EqualsCaseInsensitive("/test"))
                     continue;
-                }
+
                 PrefabData prefabData = PrefabData.LoadPrefabData(location);
 
                 if (prefabData == null || prefabData.Tags.IsEmpty)
@@ -349,14 +350,14 @@ public class ProceduralCaveSystem
             }
 
             if (AllCavePrefabs.Count == 0)
-                Log.Out($"[Cave] No cave prefab was loaded.");
+                Log.Error($"[Cave] No cave prefab was loaded.");
 
             foreach (var prefab in AllCavePrefabs.Values)
             {
                 Log.Out($"[Cave] cave prefab found: {prefab.Name}");
             }
 
-            Log.Out("LoadPrefabs {0} of {1} in {2}", PrefabManager.AllPrefabDatas.Count, prefabs.Count, (float)ms.ElapsedMilliseconds * 0.001f);
+            Log.Out($"LoadPrefabs {PrefabManager.AllPrefabDatas.Count} of {prefabs.Count} in {ms.ElapsedMilliseconds * 0.001f}");
         }
 
         public static bool Prefix(ref IEnumerator __result)
@@ -368,11 +369,10 @@ public class ProceduralCaveSystem
     }
 
 
-    [HarmonyPatch(typeof(WorldBuilder))]
-    [HarmonyPatch("GenerateData")]
+    [HarmonyPatch(typeof(WorldBuilder), "GenerateData")]
     public static class WorldBuilder_GenerateData
     {
-        public static WorldBuilder wb;
+        public static WorldBuilder worldBuilder;
 
         public static List<PrefabData> GetCaveEntrancePrefabs()
         {
@@ -389,11 +389,170 @@ public class ProceduralCaveSystem
             return prefabDatas;
         }
 
+        private static bool IsValidPosition(int x, int y, BiomeType biome, int centerHeight)
+        {
+            var worldSize = worldBuilder.WorldSize;
+
+            return x < worldSize && x >= 0 && y < worldSize && y >= 0
+                && worldBuilder.GetWater(x, y) <= 0
+                && biome == worldBuilder.GetBiome(x, y)
+                && Math.Abs(Mathf.CeilToInt(worldBuilder.GetHeight(x, y)) - centerHeight) <= 11;
+        }
+
+        private static List<int> GetHeights(Vector2i position, int sizeX, int sizeZ, BiomeType biome, int centerHeight)
+        {
+            var heights = new List<int>();
+
+            for (int x = position.x; x < position.x + sizeX; x++)
+            {
+                for (int y = position.y; y < position.y + sizeZ; y++)
+                {
+                    if (!IsValidPosition(x, y, biome, centerHeight))
+                    {
+                        return null;
+                    }
+
+                    int height = (int)worldBuilder.GetHeight(x, y);
+
+                    heights.Add(height);
+                }
+            }
+
+            return heights;
+        }
+
+        private static int GetMedianHeight(List<int> heights)
+        {
+            var sortedHeights = new List<int>(heights);
+            sortedHeights.Sort();
+
+            return sortedHeights[sortedHeights.Count / 2];
+        }
+
+        private static (int, int) GetRotatedSizes(PrefabData wildernessPrefab, int rotation)
+        {
+            var sizeX = wildernessPrefab.size.x;
+            var sizeZ = wildernessPrefab.size.z;
+
+            if (rotation == 1 || rotation == 3)
+            {
+                sizeX = wildernessPrefab.size.z;
+                sizeZ = wildernessPrefab.size.x;
+            }
+
+            return (sizeX, sizeZ);
+        }
+
+        private static Vector2i GetRandomPosition(GameRandom gameRandom, int sizeX, int sizeZ, int minSize, StreetTile streetTile, int offset)
+        {
+            if (sizeX > minSize || sizeZ > minSize)
+                return streetTile.WorldPositionCenter - new Vector2i((sizeX - minSize) / 2, (sizeZ - minSize) / 2);
+
+            try
+            {
+                return new Vector2i(
+                    gameRandom.RandomRange(streetTile.WorldPosition.x, streetTile.WorldPosition.x + sizeX),
+                    gameRandom.RandomRange(streetTile.WorldPosition.y, streetTile.WorldPosition.y + sizeZ)
+                );
+            }
+            catch
+            {
+                return streetTile.WorldPositionCenter - new Vector2i(sizeX / 2, sizeZ / 2);
+            }
+        }
+
+        private static Rect GetRect(Vector2i position, int sizeX, int sizeZ)
+        {
+            var size = Math.Max(sizeX, sizeZ);
+            var rect = new Rect(position.x, position.y, size, size);
+            var offset = new Vector2(size, size) / 2f;
+
+            rect.min -= offset;
+            rect.size += offset;
+            rect.center = new Vector2(position.x + sizeZ / 2, position.y + sizeX / 2);
+
+            return rect;
+        }
+
+        private static bool IsValidRect(Rect rect)
+        {
+            var worldSize = worldBuilder.WorldSize;
+
+            return rect.max.x < worldSize && rect.min.x >= 0 && rect.max.y < worldSize && rect.min.y >= 0;
+        }
+
+        private static bool TrySpawnCaveEntrance(PrefabData prefabData, StreetTile streetTile, int prefabId)
+        {
+            int seed = worldBuilder.Seed + 468372;
+            int MaxAttempts = 20;
+            int MinSize = 150;
+            int offset = 10;
+
+            GameRandom gameRandom = GameRandomManager.Instance.CreateGameRandom(seed);
+
+            for (int attempt = 0; attempt < MaxAttempts; attempt++)
+            {
+                var rotation = 0; // TODO: prefabData.RotationsToNorth + gameRandom.RandomRange(0, 4);
+                var (sizeX, sizeZ) = GetRotatedSizes(prefabData, rotation);
+                var position = GetRandomPosition(gameRandom, sizeX, sizeZ, MinSize, streetTile, offset);
+                var rect = GetRect(position, sizeX, sizeZ);
+
+                if (!IsValidRect(rect))
+                {
+                    continue;
+                }
+
+                var biome = worldBuilder.GetBiome((int)rect.center.x, (int)rect.center.y);
+                var centerHeight = Mathf.CeilToInt(worldBuilder.GetHeight((int)rect.center.x, (int)rect.center.y));
+                var heights = GetHeights(position, sizeX, sizeZ, biome, centerHeight);
+
+                if (heights == null)
+                {
+                    continue;
+                }
+
+                var medianHeight = GetMedianHeight(heights);
+
+                if (medianHeight + prefabData.yOffset < 2)
+                {
+                    continue;
+                }
+
+
+                var worldSize = worldBuilder.WorldSize;
+                var prefabHeight = medianHeight + prefabData.yOffset + 1;
+                var prefabPosition = new Vector3i(position.x, prefabHeight, position.y) - new Vector3i(worldSize / 2, 0, worldSize / 2);
+
+                Log.Out($"[Cave] position = {position}");
+                Log.Out($"[Cave] size = {sizeX}, {sizeZ}");
+                Log.Out($"[Cave] prefabPosition = {prefabPosition}");
+                Log.Out($"[Cave] add entrance at {prefabPosition}, medianHeight={medianHeight}");
+
+                PrefabDataInstance pdi = new PrefabDataInstance(prefabId, new Vector3i(prefabPosition), (byte)rotation, prefabData);
+                PrefabManager.AddUsedPrefabWorld(-1, pdi);
+
+                // streetTile.SpawnMarkerPartsAndPrefabsWilderness(prefabData, prefabPosition, rotation);
+                // streetTile.AddPrefab(pdi);
+                // worldBuilder.WildernessPrefabCount++;
+
+                GameRandomManager.Instance.FreeGameRandom(gameRandom);
+                return true;
+            }
+
+            return false;
+        }
+
         public static IEnumerator AddCaveEntrances(int count)
         {
-            CaveBuilder.MAP_SIZE = 2048;
+            Log.Out("Start adding cave entrances");
+            Log.Out($"[Cave] UnusedWildernessTiles = {WildernessPlanner.GetUnusedWildernessTiles().Count}");
+
+            yield return null;
 
             List<PrefabData> caveEntrances = GetCaveEntrancePrefabs();
+            List<StreetTile> streetTiles = WildernessPlanner.GetUnusedWildernessTiles();
+
+            int maxPrefabID = PrefabManager.UsedPrefabsWorld.Count + 1;
 
             if (caveEntrances.Count == 0)
             {
@@ -401,51 +560,80 @@ public class ProceduralCaveSystem
                 yield break;
             }
 
-            List<PrefabWrapper> others = PrefabManager.UsedPrefabsWorld.Select(item => new PrefabWrapper(item)).ToList();
-
-            int added = 0;
-
-            for (int i = 0; i < count; i++)
+            for (int i = 0; i < Utils.FastMin(count, streetTiles.Count); i++)
             {
-                int index = i % caveEntrances.Count;
-                var prefab = caveEntrances[index];
-                var wrapper = new PrefabWrapper(others.Count + 1, prefab);
+                PrefabData prefab = caveEntrances[i % caveEntrances.Count];
+                StreetTile streetTile = streetTiles[i % streetTiles.Count];
 
-                if (CaveBuilder.CheckPrefabOverlaps(ref wrapper, others))
-                {
-                    PrefabManager.AddUsedPrefabWorld(-1, wrapper.ToPrefabDataInstance());
-                    Log.Out($"[Cave] cave entrance added at {wrapper.position}");
-                    added++;
+                if (TrySpawnCaveEntrance(prefab, streetTile, maxPrefabID++))
                     yield return null;
-                }
+
+                yield return null;
             }
 
-            Log.Warning($"[Cave] {added} cave entrance added");
+            // CaveBuilder.MAP_SIZE = worldBuilder.WorldSize;
+            // int entrancesCount = 0;
+            // List<PrefabWrapper> others = PrefabManager.UsedPrefabsWorld.Select(item => new PrefabWrapper(item)).ToList();
+            // while (entrancesCount < count && entrancesCount < 2 * ++entrancesCount)
+            // {
+            //     int index = entrancesCount % caveEntrances.Count;
+            //     var prefab = caveEntrances[index];
+            //     var wrapper = new PrefabWrapper(others.Count + 1, prefab);
+
+            //     if (!CaveBuilder.TryPlacePrefab(ref wrapper, others))
+            //         continue;
+
+            //     var prefabCenter = wrapper.GetCenter();
+            //     var biome = worldBuilder.GetBiome(prefabCenter.x, prefabCenter.z);
+            //     var centerHeight = Mathf.CeilToInt(worldBuilder.GetHeight(prefabCenter.x, prefabCenter.z));
+            //     var heights = GetHeights(wrapper, biome, centerHeight);
+
+            //     if (heights == null)
+            //         continue;
+
+            //     var medianHeight = GetMedianHeight(heights);
+
+            //     if (medianHeight + wrapper.prefabDataInstance.prefab.yOffset < 2)
+            //         continue;
+
+            //     PrefabManager.AddUsedPrefabWorld(-1, wrapper.ToPrefabDataInstance(medianHeight - wrapper.prefabDataInstance.prefab.yOffset));
+
+
+            //     worldBuilder.GetStreetTileWorld(new Vector2i(wrapper.position.x, wrapper.position.z)).WildernessPOISize = 10;
+
+
+            //     Log.Out($"[Cave] cave entrance added at {wrapper.position}");
+            //     entrancesCount++;
+            //     yield return null;
+            // }
+            // Log.Warning($"[Cave] {entrancesCount} cave entrance added");
+
             yield return null; ;
         }
 
+
+
         public static IEnumerator GenerateData()
         {
-            yield return wb.Init();
-            yield return wb.SetMessage(string.Format(Localization.Get("xuiWorldGenerationGenerating"), wb.WorldName), _logToConsole: true);
-            yield return wb.generateTerrain();
-            if (wb.IsCanceled)
+            yield return worldBuilder.Init();
+            yield return worldBuilder.SetMessage(string.Format(Localization.Get("xuiWorldGenerationGenerating"), worldBuilder.WorldName), _logToConsole: true);
+            yield return worldBuilder.generateTerrain();
+
+            if (worldBuilder.IsCanceled)
             {
                 yield break;
             }
 
-            wb.initStreetTiles();
+            worldBuilder.initStreetTiles();
 
-            // Log.Out($"[Cave1] unused street tiles = {WildernessPlanner.GetUnusedWildernessTiles().Count}");
-
-            if (wb.IsCanceled)
+            if (worldBuilder.IsCanceled)
             {
                 yield break;
             }
-            if (wb.Towns != 0 || wb.Wilderness != 0)
+            if (worldBuilder.Towns != 0 || worldBuilder.Wilderness != 0)
             {
                 yield return PrefabManager.LoadPrefabs();
-                PrefabManager.ShufflePrefabData(wb.Seed);
+                PrefabManager.ShufflePrefabData(worldBuilder.Seed);
                 yield return null;
                 PathingUtils.SetupPathingGrid();
             }
@@ -453,72 +641,70 @@ public class ProceduralCaveSystem
             {
                 PrefabManager.ClearDisplayed();
             }
-            if (wb.Towns != 0)
+            if (worldBuilder.Towns != 0)
             {
-                yield return TownPlanner.Plan(wb.thisWorldProperties, wb.Seed);
+                yield return TownPlanner.Plan(worldBuilder.thisWorldProperties, worldBuilder.Seed);
             }
-            yield return wb.GenerateTerrainLast();
-            if (wb.IsCanceled)
+            yield return worldBuilder.GenerateTerrainLast();
+            if (worldBuilder.IsCanceled)
             {
                 yield break;
             }
             yield return POISmoother.SmoothStreetTiles();
-            if (wb.IsCanceled)
+            if (worldBuilder.IsCanceled)
             {
                 yield break;
             }
-            if (wb.Towns != 0 || wb.Wilderness != 0)
+            if (worldBuilder.Towns != 0 || worldBuilder.Wilderness != 0)
             {
-                yield return HighwayPlanner.Plan(wb.thisWorldProperties, wb.Seed);
+                yield return HighwayPlanner.Plan(worldBuilder.thisWorldProperties, worldBuilder.Seed);
                 yield return TownPlanner.SpawnPrefabs();
-                if (wb.IsCanceled)
+                if (worldBuilder.IsCanceled)
                 {
                     yield break;
                 }
             }
-            if (wb.Wilderness != 0)
+            if (worldBuilder.Wilderness != 0)
             {
-                yield return WildernessPlanner.Plan(wb.thisWorldProperties, wb.Seed);
-                yield return wb.smoothWildernessTerrain();
-                yield return WildernessPathPlanner.Plan(wb.Seed);
+                yield return WildernessPlanner.Plan(worldBuilder.thisWorldProperties, worldBuilder.Seed);
+                yield return worldBuilder.smoothWildernessTerrain();
+                yield return WildernessPathPlanner.Plan(worldBuilder.Seed);
             }
 
-            int num = 12 - wb.playerSpawns.Count;
+            int num = 12 - worldBuilder.playerSpawns.Count;
             if (num > 0)
             {
                 foreach (StreetTile item in WorldBuilder.CalcPlayerSpawnTiles())
                 {
-                    if (wb.CreatePlayerSpawn(item.WorldPositionCenter, _isFallback: true) && --num <= 0)
+                    if (worldBuilder.CreatePlayerSpawn(item.WorldPositionCenter, _isFallback: true) && --num <= 0)
                     {
                         break;
                     }
                 }
             }
             GC.Collect();
-            yield return wb.SetMessage("Draw Roads", _logToConsole: true);
-            yield return wb.DrawRoads(wb.dest);
-            if (wb.Towns != 0 || wb.Wilderness != 0)
+            yield return worldBuilder.SetMessage("Draw Roads", _logToConsole: true);
+            yield return worldBuilder.DrawRoads(worldBuilder.dest);
+            if (worldBuilder.Towns != 0 || worldBuilder.Wilderness != 0)
             {
-                yield return wb.SetMessage("Smooth Road Terrain", _logToConsole: true);
-                yield return WorldBuilder.smoothRoadTerrain(wb.dest, wb.HeightMap, wb.WorldSize);
+                yield return worldBuilder.SetMessage("Smooth Road Terrain", _logToConsole: true);
+                yield return WorldBuilder.smoothRoadTerrain(worldBuilder.dest, worldBuilder.HeightMap, worldBuilder.WorldSize);
             }
-
-            Log.Out("Start adding cave entrances");
 
             yield return AddCaveEntrances(20);
 
-            wb.paths.Clear();
-            wb.wildernessPaths.Clear();
-            yield return wb.FinalizeWater();
+            worldBuilder.paths.Clear();
+            worldBuilder.wildernessPaths.Clear();
+            yield return worldBuilder.FinalizeWater();
             GC.Collect();
-            Log.Out("RWG final in {0}:{1:00}, r={2:x}", wb.totalMS.Elapsed.Minutes, wb.totalMS.Elapsed.Seconds, Rand.Instance.PeekSample());
+            Log.Out("RWG final in {0}:{1:00}, r={2:x}", worldBuilder.totalMS.Elapsed.Minutes, worldBuilder.totalMS.Elapsed.Seconds, Rand.Instance.PeekSample());
         }
 
         public static bool Prefix(WorldBuilder __instance, ref IEnumerator __result)
         {
             Log.Out($"[Cave] start WorldBuilder_GenerateData Prefix. {CaveBuilder.SEED}");
 
-            wb = __instance;
+            worldBuilder = __instance;
 
             __result = GenerateData();
             return false;

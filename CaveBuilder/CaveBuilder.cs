@@ -92,7 +92,7 @@ public class PrefabWrapper
 {
     public const int OVERLAP_MARGIN = 50;
 
-    private PrefabDataInstance prefabDataInstance;
+    public PrefabDataInstance prefabDataInstance;
 
     public Vector3i position;
 
@@ -284,8 +284,9 @@ public class PrefabWrapper
         return GetHashCode() == other.GetHashCode();
     }
 
-    public PrefabDataInstance ToPrefabDataInstance()
+    public PrefabDataInstance ToPrefabDataInstance(int y)
     {
+        position.y = y;
         prefabDataInstance.boundingBoxPosition = position;
         prefabDataInstance.rotation = rotation;
 
@@ -726,25 +727,21 @@ public static class CaveBuilder
         return noise;
     }
 
-    public static bool CheckPrefabOverlaps(ref PrefabWrapper prefab, List<PrefabWrapper> others)
+    public static bool TryPlacePrefab(ref PrefabWrapper prefab, List<PrefabWrapper> others)
     {
-        int i;
+        int maxTries = 100;
 
-        for (i = 0; i < 100; i++)
+        while (maxTries-- > 0)
         {
-            if (prefab.OverLaps2D(others, MAP_SIZE, MAP_OFFSET))
+            prefab.SetRandomPosition(rand, MAP_SIZE, MAP_OFFSET);
+
+            if (!prefab.OverLaps2D(others, MAP_SIZE, MAP_OFFSET))
             {
-                prefab.SetRandomPosition(rand, MAP_SIZE, MAP_OFFSET);
-            }
-            else
-            {
-                break;
+                return true;
             }
         }
 
-        // Console.WriteLine($"{i + 1} iterations done.");
-
-        return !prefab.OverLaps2D(others, MAP_SIZE, MAP_OFFSET);
+        return false;
     }
 
     public static List<PrefabWrapper> GetRandomPrefabs(int count)

@@ -79,13 +79,13 @@
     <!-- Harmony -->
     <Compile Include="Harmony\Init.cs" />
     <Compile Include="Harmony\Patches.cs" />
+    <Compile Include="Harmony\H_StreetTile.cs" />
 
     <!-- WorldGen -->
     <Compile Include="Scripts\WorldGen\LegacyCaveTunneler.cs" />
 
     <!-- Utils -->
     <Compile Include="Scripts\Utils\CaveConfig.cs" />
-    <Compile Include="Scripts\builder.cs" />
 
     <!-- Debug -->
     <Compile Include="Scripts\Debug\CaveSystemCLI.cs" />

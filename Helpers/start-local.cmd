@@ -24,5 +24,9 @@ cd "%PATH_7D2D%"
 start "" "%PATH_7D2D%\7DaysToDie" -noeac
 
 del /Q "%APPDATA%\7DaysToDie\Saves\Navezgane\Caves\Region"
+del /Q "%APPDATA%\7DaysToDie\Saves\Old Honihebu County\Caves\Region"
+del /Q "%APPDATA%\7DaysToDie\Saves\Old Honihebu County\Entrances\Region"
+
+RMDIR "%APPDATA%\7DaysToDie\GeneratedWorlds\Old Honihebu County" /s /q
 
 exit /b 0
