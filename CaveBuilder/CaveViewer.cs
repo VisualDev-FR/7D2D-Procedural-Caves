@@ -159,7 +159,7 @@ public static class CaveViewer
         HashSet<Vector3i> obstacles = CaveBuilder.CollectPrefabObstacles(prefabs);
         HashSet<Vector3i> noiseMap = CaveBuilder.CollectPrefabNoise(prefabs, noise);
 
-        HashSet<Vector3i> path = Astar.PerlinRoute(p1.position, p2.position, noise, obstacles, noiseMap);
+        HashSet<Vector3i> path = CaveTunneler.PerlinRoute(p1.position, p2.position, noise, obstacles, noiseMap);
 
         using (var b = new Bitmap(MAP_SIZE, MAP_SIZE))
         {
@@ -177,6 +177,8 @@ public static class CaveViewer
 
             b.Save(@"pathing.png", ImageFormat.Png);
         }
+
+        path.UnionWith(obstacles);
 
         ToWaveFront(path.ToList(), "path.obj");
 
@@ -222,7 +224,7 @@ public static class CaveViewer
 
             Logger.Info($"Noise pathing: {100.0f * index++ / edges.Count:F0}% ({index} / {edges.Count}), dist={CaveUtils.SqrEuclidianDist(p1, p2)}");
 
-            HashSet<Vector3i> path = Astar.PerlinRoute(p1, p2, noise, obstacles, noiseMap);
+            HashSet<Vector3i> path = CaveTunneler.PerlinRoute(p1, p2, noise, obstacles, noiseMap);
 
             foreach (Vector3i node in path)
             {
@@ -232,7 +234,7 @@ public static class CaveViewer
 
         Logger.Info("Start caves thickening");
 
-        var caveMap = Astar.ThickenCaveMap(wiredCaveMap.ToHashSet(), obstacles);
+        var caveMap = CaveTunneler.ThickenCaveMap(wiredCaveMap.ToHashSet(), obstacles);
 
         Logger.Info("Start caves drawing");
 
@@ -253,6 +255,11 @@ public static class CaveViewer
         SaveCaveMap(caveMap, "cavemap.csv");
 
         Console.WriteLine($"{caveMap.Count} cave blocks generated, timer={CaveUtils.TimeFormat(timer)}.");
+
+        ToWaveFront(caveMap.ToList(), "cave.obj");
+
+        Process.Start("CMD.exe", $"/C {Path.GetFullPath("cave.obj")}");
+
     }
 
     public static void GeneratePrefab(string[] args)
