@@ -120,14 +120,20 @@ public static class CavePlanner
 
     public static bool OverLaps2D(Vector3i position, Vector3i size, PrefabDataInstance other)
     {
+        var otherSize = GetRotatedSize(other.boundingBoxSize, other.rotation);
         var otherPos = other.boundingBoxPosition;
-        var otherSize = other.boundingBoxSize;
 
         if (position.x + size.x + overLapMargin < otherPos.x || otherPos.x + otherSize.x + overLapMargin < position.x)
+        {
+            Log.Out($"[CaveOverlaps] {position}|{size}|{otherPos}|{otherSize}|{other.boundingBoxPosition}|{other.boundingBoxSize}|{other.rotation}");
             return false;
+        }
 
         if (position.z + size.z + overLapMargin < otherPos.z || otherPos.z + otherSize.z + overLapMargin < position.z)
+        {
+            Log.Out($"[CaveOverlaps] {position}|{size}|{otherPos}|{otherSize}|{other.boundingBoxPosition}|{other.boundingBoxSize}|{other.rotation}");
             return false;
+        }
 
         return true;
     }
@@ -159,7 +165,7 @@ public static class CavePlanner
 
         while (attempts-- > 0)
         {
-            int rotation = rand.Next(4);
+            int rotation = 0; //rand.Next(4);
 
             Vector3i rotatedSize = GetRotatedSize(prefab.size, rotation);
             Vector3i position = GetRandomPositionFor(rotatedSize);
@@ -186,7 +192,7 @@ public static class CavePlanner
 
     public static List<CavePrefab> PlaceCavePrefabs(int count)
     {
-        var placedPrefabs = new List<CavePrefab>();
+        var cavePrefabs = new List<CavePrefab>();
         var availablePrefabs = GetUndergroundPrefabs();
         var usedPrefabs = GetUsedCavePrefabs();
 
@@ -195,27 +201,28 @@ public static class CavePlanner
             var prefab = availablePrefabs[i % availablePrefabs.Count];
             var pdi = TrySpawnCavePrefab(prefab, usedPrefabs);
 
-            if (pdi != null)
+            if (pdi == null)
+                continue;
+
+            var cavePrefab = new CavePrefab(pdi);
+
+            if (cavePrefab.nodes.Count == 0)
             {
-                var cavePrefab = new CavePrefab(pdi);
-
-                if (cavePrefab.nodes.Count == 0)
-                {
-                    Log.Warning($"[Cave] no cave node found for {pdi.prefab.Name}");
-                    continue;
-                }
-
-                Log.Out($"[Cave] {cavePrefab.nodes.Count} nodes added to {pdi.prefab.Name} ({pdi.boundingBoxPosition}) -> ({cavePrefab.nodes[0]})");
-
-                PrefabManager.AddUsedPrefabWorld(-1, pdi);
-                usedPrefabs.Add(pdi);
-                placedPrefabs.Add(cavePrefab);
+                Log.Warning($"[Cave] no cave node found for {pdi.prefab.Name}");
+                continue;
             }
+
+            Log.Out($"[Cave] {cavePrefab.nodes.Count} nodes added to {pdi.prefab.Name} ({pdi.boundingBoxPosition}) -> ({cavePrefab.nodes[0]})");
+
+            PrefabManager.AddUsedPrefabWorld(-1, pdi);
+            usedPrefabs.Add(pdi);
+            cavePrefabs.Add(cavePrefab);
+
         }
 
-        Log.Warning($"[Cave] {placedPrefabs.Count} placed prefabs.");
+        Log.Warning($"[Cave] {cavePrefabs.Count} placed prefabs.");
 
-        return placedPrefabs;
+        return cavePrefabs;
     }
 
     public static void GenerateCaveMap()
@@ -226,6 +233,8 @@ public static class CavePlanner
         List<CavePrefab> cavePrefabs = PlaceCavePrefabs(100);
 
         GenerateGraph(cavePrefabs);
+
+        return;
 
         HashSet<Vector3i> obstacles = CaveBuilder.CollectPrefabObstacles(cavePrefabs);
         HashSet<Vector3i> prefabBoundNoise = new HashSet<Vector3i>(); // CaveBuilder.CollectPrefabNoise(cavePrefabs);
@@ -259,7 +268,7 @@ public static class CavePlanner
     {
         int worldSize = WorldBuilder.Instance.WorldSize;
         var pixels = Enumerable.Repeat(new Color32(0, 0, 0, 255), worldSize * worldSize).ToArray();
-        string filename = @"C:\tools\DEV\7D2D_Modding\7D2D-Procedural-caves\Scripts\graph.png";
+        string filename = @"C:\tools\DEV\7D2D_Modding\7D2D-Procedural-caves\CaveBuilder\graph.png";
 
         foreach (var prefab in prefabs)
         {
@@ -284,7 +293,7 @@ public static class CavePlanner
                     Log.Error($"[cave] index2 out of bounds {p1}");
                     continue;
                 }
-                pixels[index] = new Color32(255, 255, 0, 255);
+                pixels[index] = new Color32(255, 0, 0, 255);
             }
         }
 
