@@ -177,6 +177,10 @@ public static class CaveViewer
 
             b.Save(@"pathing.png", ImageFormat.Png);
         }
+
+        ToWaveFront(path.ToList(), "path.obj");
+
+        Process.Start("CMD.exe", $"/C {Path.GetFullPath("path.obj")}");
     }
 
     public static void SaveCaveMap(HashSet<Vector3i> caveMap, string filename)
@@ -281,6 +285,56 @@ public static class CaveViewer
 
             b.Save(@"prefab.png", ImageFormat.Png);
         }
+    }
+
+    static void ToWaveFront(List<Vector3i> positions, string filename)
+    {
+        float[,] vertices = new float[,]
+        {
+            {0f, 0f, 0f},
+            {1f, 0f, 0f},
+            {1f, 1f, 0f},
+            {0f, 1f, 0f},
+            {0f, 0f, 1f},
+            {1f, 0f, 1f},
+            {1f, 1f, 1f},
+            {0f, 1f, 1f}
+        };
+
+        using (StreamWriter writer = new StreamWriter(filename))
+        {
+            int vertexIndexOffset = 1;
+
+            for (int cubeIndex = 0; cubeIndex < positions.Count; cubeIndex++)
+            {
+                float x = positions[cubeIndex].x;
+                float y = positions[cubeIndex].y;
+                float z = positions[cubeIndex].z;
+
+                var cubeVerticesIndices = new int[vertices.GetLength(0)];
+
+                for (int i = 0; i < vertices.GetLength(0); i++)
+                {
+                    float vx = vertices[i, 0] + x;
+                    float vy = vertices[i, 1] + y;
+                    float vz = vertices[i, 2] + z;
+
+                    writer.WriteLine($"v {vx} {vy} {vz}");
+
+                    cubeVerticesIndices[i] = vertexIndexOffset;
+                    vertexIndexOffset++;
+                }
+
+                writer.WriteLine($"f {cubeVerticesIndices[0]} {cubeVerticesIndices[1]} {cubeVerticesIndices[2]} {cubeVerticesIndices[3]}"); // Face inférieure
+                writer.WriteLine($"f {cubeVerticesIndices[4]} {cubeVerticesIndices[5]} {cubeVerticesIndices[6]} {cubeVerticesIndices[7]}"); // Face supérieure
+                writer.WriteLine($"f {cubeVerticesIndices[0]} {cubeVerticesIndices[1]} {cubeVerticesIndices[5]} {cubeVerticesIndices[4]}"); // Face latérale
+                writer.WriteLine($"f {cubeVerticesIndices[1]} {cubeVerticesIndices[2]} {cubeVerticesIndices[6]} {cubeVerticesIndices[5]}"); // Face latérale
+                writer.WriteLine($"f {cubeVerticesIndices[2]} {cubeVerticesIndices[3]} {cubeVerticesIndices[7]} {cubeVerticesIndices[6]}"); // Face latérale
+                writer.WriteLine($"f {cubeVerticesIndices[3]} {cubeVerticesIndices[0]} {cubeVerticesIndices[4]} {cubeVerticesIndices[7]}"); // Face latérale
+            }
+        }
+
+        Console.WriteLine($"{positions.Count} voxels generated to '{filename}'.");
     }
 
     public static void Main(string[] args)

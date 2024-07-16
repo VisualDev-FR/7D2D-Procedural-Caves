@@ -180,7 +180,7 @@ public class PrefabWrapper
 
     public bool OverLaps2D(PrefabWrapper other)
     {
-        int overlapMargin = CavePlanner.overLapMargin;
+        int overlapMargin = CaveBuilder.overLapMargin;
 
         if (position.x + size.x + overlapMargin < other.position.x || other.position.x + other.size.x + overlapMargin < position.x)
             return false;
@@ -508,16 +508,16 @@ public class Node
 
         foreach (var position in neighborsPos)
         {
-            if (position.x < 0 || position.x >= CaveBuilder.MAP_SIZE - CavePlanner.radiationZoneMargin)
+            if (position.x < 0 || position.x >= CaveBuilder.MAP_SIZE - CaveBuilder.radiationZoneMargin)
                 continue;
 
-            if (position.z < 0 || position.z >= CaveBuilder.MAP_SIZE - CavePlanner.radiationZoneMargin)
+            if (position.z < 0 || position.z >= CaveBuilder.MAP_SIZE - CaveBuilder.radiationZoneMargin)
                 continue;
 
             if (position.y >= CaveBuilder.GetHeight(position.x, position.z))
                 continue;
 
-            if (position.y <= CavePlanner.cavePrefabBedRockMargin)
+            if (position.y <= CaveBuilder.cavePrefabBedRockMargin)
                 continue;
 
             neighbors.Add(new Node(position));
@@ -599,7 +599,7 @@ public static class Astar
 
             foreach (Node neighbor in neighbors)
             {
-                Logger.Debug($"{currentNode.position} {neighbor.position} ({obstacles.Contains(neighbor.position)})");
+                // Logger.Debug($"{currentNode.position} {neighbor.position} ({obstacles.Contains(neighbor.position)})");
 
                 if (visited.Contains(neighbor))
                     continue;
@@ -763,7 +763,7 @@ public static class CaveBuilder
 {
     public static int SEED = 12345; // new Random().Next();
 
-    public static int MAP_SIZE = 50;
+    public static int MAP_SIZE = 100;
 
     public static int PREFAB_Y = 5;
 
@@ -780,6 +780,12 @@ public static class CaveBuilder
     public static float NOISE_THRESHOLD = 0.5f;
 
     public static Random rand = new Random(SEED);
+
+    public static int overLapMargin;
+
+    public static int radiationZoneMargin;
+
+    public static int cavePrefabBedRockMargin;
 
     public static int GetHeight(int x, int z)
     {
