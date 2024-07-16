@@ -124,16 +124,10 @@ public static class CavePlanner
         var otherPos = other.boundingBoxPosition;
 
         if (position.x + size.x + overLapMargin < otherPos.x || otherPos.x + otherSize.x + overLapMargin < position.x)
-        {
-            Log.Out($"[CaveOverlaps] {position}|{size}|{otherPos}|{otherSize}|{other.boundingBoxPosition}|{other.boundingBoxSize}|{other.rotation}");
             return false;
-        }
 
         if (position.z + size.z + overLapMargin < otherPos.z || otherPos.z + otherSize.z + overLapMargin < position.z)
-        {
-            Log.Out($"[CaveOverlaps] {position}|{size}|{otherPos}|{otherSize}|{other.boundingBoxPosition}|{other.boundingBoxSize}|{other.rotation}");
             return false;
-        }
 
         return true;
     }
@@ -165,7 +159,7 @@ public static class CavePlanner
 
         while (attempts-- > 0)
         {
-            int rotation = 0; //rand.Next(4);
+            int rotation = rand.Next(4);
 
             Vector3i rotatedSize = GetRotatedSize(prefab.size, rotation);
             Vector3i position = GetRandomPositionFor(rotatedSize);
@@ -176,16 +170,21 @@ public static class CavePlanner
             if (!canBePlacedUnderTerrain)
                 continue;
 
+            // Log.Out($"[Cave] {position} - {HalfWorldSize} = {position - HalfWorldSize}");
+
+            position -= HalfWorldSize;
+
             if (OverLaps2D(position, rotatedSize, others))
                 continue;
 
-            position -= HalfWorldSize;
             position.y = rand.Next(cavePrefabBedRockMargin, minTerrainHeight - prefab.size.y - cavePrefabTerrainMargin);
+
+            Log.Out($"[Cave] cave prefab {prefab.Name} added at {position}");
 
             return new PrefabDataInstance(others.Count + 1, position, (byte)rotation, prefab);
         }
 
-        Log.Warning($"[Cave] can't place prefab {prefab.Name} after {maxPlacementAttempts} attempts.");
+        // Log.Warning($"[Cave] can't place prefab {prefab.Name} after {maxPlacementAttempts} attempts.");
 
         return null;
     }
@@ -212,7 +211,7 @@ public static class CavePlanner
                 continue;
             }
 
-            Log.Out($"[Cave] {cavePrefab.nodes.Count} nodes added to {pdi.prefab.Name} ({pdi.boundingBoxPosition}) -> ({cavePrefab.nodes[0]})");
+            // Log.Out($"[Cave] {cavePrefab.nodes.Count} nodes added to {pdi.prefab.Name} ({pdi.boundingBoxPosition}) -> ({cavePrefab.nodes[0]})");
 
             PrefabManager.AddUsedPrefabWorld(-1, pdi);
             usedPrefabs.Add(pdi);
