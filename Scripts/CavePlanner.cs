@@ -1,8 +1,16 @@
 using System;
+using System.IO;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Threading.Tasks;
 using WorldGenerationEngineFinal;
 
+using Random = System.Random;
+using UnityEngine;
+using UnityEngine.Experimental.Rendering;
+using Debug = System.Diagnostics.Debug;
 
 public static class CavePlanner
 {
@@ -29,6 +37,8 @@ public static class CavePlanner
     public static Vector3i HalfWorldSize => new Vector3i(WorldBuilder.Instance.HalfWorldSize, 0, WorldBuilder.Instance.HalfWorldSize);
 
     public static List<PrefabData> entrancePrefabs = null;
+
+    public static HashSet<Vector3i> caveMap = null;
 
     public static List<PrefabDataInstance> GetUsedCavePrefabs()
     {
@@ -77,6 +87,7 @@ public static class CavePlanner
     {
         entrancesAdded = 0;
         entrancePrefabs = null;
+        caveMap = new HashSet<Vector3i>();
         CaveBuilder.rand = new Random(CaveBuilder.SEED);
     }
 
@@ -173,22 +184,32 @@ public static class CavePlanner
         return null;
     }
 
-    public static List<PrefabDataInstance> PlaceCavePOIs(int count)
+    public static List<CavePrefab> PlaceCavePrefabs(int count)
     {
-        var placedPrefabs = new List<PrefabDataInstance>();
+        var placedPrefabs = new List<CavePrefab>();
         var availablePrefabs = GetUndergroundPrefabs();
         var usedPrefabs = GetUsedCavePrefabs();
 
         for (int i = 0; i < count; i++)
         {
             var prefab = availablePrefabs[i % availablePrefabs.Count];
-            var prefabDataInstance = TrySpawnCavePrefab(prefab, usedPrefabs);
+            var pdi = TrySpawnCavePrefab(prefab, usedPrefabs);
 
-            if (prefabDataInstance != null)
+            if (pdi != null)
             {
-                PrefabManager.AddUsedPrefabWorld(-1, prefabDataInstance);
-                placedPrefabs.Add(prefabDataInstance);
-                usedPrefabs.Add(prefabDataInstance);
+                var cavePrefab = new CavePrefab(pdi);
+
+                if (cavePrefab.nodes.Count == 0)
+                {
+                    Log.Warning($"[Cave] no cave node found for {pdi.prefab.Name}");
+                    continue;
+                }
+
+                Log.Out($"[Cave] {cavePrefab.nodes.Count} nodes added to {pdi.prefab.Name} ({pdi.boundingBoxPosition}) -> ({cavePrefab.nodes[0]})");
+
+                PrefabManager.AddUsedPrefabWorld(-1, pdi);
+                usedPrefabs.Add(pdi);
+                placedPrefabs.Add(cavePrefab);
             }
         }
 
@@ -199,7 +220,77 @@ public static class CavePlanner
 
     public static void GenerateCaveMap()
     {
-        List<PrefabDataInstance> cavePrefabs = PlaceCavePOIs(100);
+        var timer = new Stopwatch();
+        timer.Start();
+
+        List<CavePrefab> cavePrefabs = PlaceCavePrefabs(100);
+
+        GenerateGraph(cavePrefabs);
+
+        HashSet<Vector3i> obstacles = CaveBuilder.CollectPrefabObstacles(cavePrefabs);
+        HashSet<Vector3i> prefabBoundNoise = new HashSet<Vector3i>(); // CaveBuilder.CollectPrefabNoise(cavePrefabs);
+
+        List<Edge> edges = GraphSolver.Resolve(cavePrefabs);
+
+        var wiredCaveMap = new ConcurrentBag<Vector3i>();
+        int index = 0;
+
+        Parallel.ForEach(edges, edge =>
+        {
+            Vector3i p1 = edge.node1;
+            Vector3i p2 = edge.node2;
+
+            Log.Out($"Noise pathing: {100.0f * index++ / edges.Count:F0}% ({index} / {edges.Count}), dist={CaveUtils.EuclidianDist(p1, p2)}");
+
+            HashSet<Vector3i> path = CaveTunneler.FindPath(p1, p2, obstacles, prefabBoundNoise);
+
+            foreach (Vector3i node in path)
+            {
+                wiredCaveMap.Add(node);
+            }
+        });
+
+        caveMap = CaveTunneler.ThickenCaveMap(wiredCaveMap.ToHashSet(), obstacles);
+
+        Console.WriteLine($"{caveMap.Count} cave blocks generated, timer={CaveUtils.TimeFormat(timer)}.");
+    }
+
+    public static void GenerateGraph(List<CavePrefab> prefabs)
+    {
+        int worldSize = WorldBuilder.Instance.WorldSize;
+        var pixels = Enumerable.Repeat(new Color32(0, 0, 0, 255), worldSize * worldSize).ToArray();
+        string filename = @"C:\tools\DEV\7D2D_Modding\7D2D-Procedural-caves\Scripts\graph.png";
+
+        foreach (var prefab in prefabs)
+        {
+            foreach (var point in prefab.Get2DEdges())
+            {
+                var p1 = point + HalfWorldSize;
+                uint index = (uint)(p1.x + p1.z * worldSize);
+                if (index >= worldSize * worldSize)
+                {
+                    Log.Error($"[cave] index1 out of bounds {p1}");
+                    continue;
+                }
+                pixels[index] = new Color32(0, 255, 0, 255);
+            }
+
+            foreach (var point in prefab.nodes)
+            {
+                var p1 = point + HalfWorldSize;
+                uint index = (uint)(p1.x + p1.z * worldSize);
+                if (index >= worldSize * worldSize)
+                {
+                    Log.Error($"[cave] index2 out of bounds {p1}");
+                    continue;
+                }
+                pixels[index] = new Color32(255, 255, 0, 255);
+            }
+        }
+
+        var image = ImageConversion.EncodeArrayToPNG(pixels, GraphicsFormat.R8G8B8A8_UNorm, (uint)worldSize, (uint)worldSize, (uint)worldSize * 4);
+        SdFile.WriteAllBytes(filename, image);
+
     }
 
     public static void SaveCaveMap()

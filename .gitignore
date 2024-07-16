@@ -1,6 +1,4 @@
 .vscode
 .vs
 obj
-*.dll
-*.pdb
 *.zip

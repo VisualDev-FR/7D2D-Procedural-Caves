@@ -79,10 +79,15 @@ public static class CaveUtils
         return dx * dx + dy * dy + dz * dz;
     }
 
+    public static float EuclidianDist(Vector3i p1, Vector3i p2)
+    {
+        return (float)Math.Sqrt(SqrEuclidianDist(p1, p2));
+    }
+
 }
 
 
-public class PrefabWrapper
+public class CavePrefab
 {
     public PrefabDataInstance prefabDataInstance;
 
@@ -96,12 +101,12 @@ public class PrefabWrapper
 
     public List<Vector3i> innerPoints;
 
-    public PrefabWrapper()
+    public CavePrefab()
     {
         nodes = new List<Vector3i>();
     }
 
-    public PrefabWrapper(Random rand)
+    public CavePrefab(Random rand)
     {
         nodes = new List<Vector3i>();
         size = new Vector3i(
@@ -111,15 +116,34 @@ public class PrefabWrapper
         );
     }
 
-    public PrefabWrapper(PrefabDataInstance prefab)
+    public CavePrefab(PrefabDataInstance prefab)
     {
         prefabDataInstance = prefab;
         position = prefab.boundingBoxPosition;
         size = prefab.boundingBoxSize;
         rotation = prefab.rotation;
+
+        UpdateNodes(prefab);
+        UpdateInnerPoints();
     }
 
-    public PrefabWrapper(int id, PrefabData prefabData)
+    public void UpdateNodes(PrefabDataInstance prefab)
+    {
+        var caveNodeTags = FastTags<TagGroup.Poi>.Parse("cavenode");
+
+        nodes = new List<Vector3i>();
+
+        foreach (var marker in prefab.prefab.POIMarkers)
+        {
+            if (!marker.tags.Test_AnySet(caveNodeTags))
+                continue;
+
+            // TODO: handle all points of the node
+            nodes.Add(marker.start + prefabDataInstance.boundingBoxPosition);
+        }
+    }
+
+    public CavePrefab(int id, PrefabData prefabData)
     {
         position = new Vector3i();
         rotation = 0;
@@ -178,7 +202,7 @@ public class PrefabWrapper
         UpdateInnerPoints();
     }
 
-    public bool OverLaps2D(PrefabWrapper other)
+    public bool OverLaps2D(CavePrefab other)
     {
         int overlapMargin = CaveBuilder.overLapMargin;
 
@@ -191,7 +215,7 @@ public class PrefabWrapper
         return true;
     }
 
-    public bool OverLaps2D(List<PrefabWrapper> others)
+    public bool OverLaps2D(List<CavePrefab> others)
     {
         foreach (var prefab in others)
         {
@@ -233,6 +257,39 @@ public class PrefabWrapper
         };
 
         return faces;
+    }
+
+    public List<Vector3i> Get2DEdges()
+    {
+        List<Vector3i> points = new List<Vector3i>();
+
+        int x0 = position.x;
+        int z0 = position.z;
+
+        int x1 = x0 + size.x;
+        int z1 = z0 + size.z;
+
+        for (int x = x0; x <= x1; x++)
+        {
+            points.Add(new Vector3i(x, position.y, z0));
+        }
+
+        for (int x = x0; x <= x1; x++)
+        {
+            points.Add(new Vector3i(x, position.y, z1));
+        }
+
+        for (int z = z0; z <= z1; z++)
+        {
+            points.Add(new Vector3i(x0, position.y, z));
+        }
+
+        for (int z = z0; z <= z1; z++)
+        {
+            points.Add(new Vector3i(x1, position.y, z));
+        }
+
+        return points;
     }
 
     public HashSet<Vector3i> GetNoiseAround(Random rand)
@@ -567,7 +624,7 @@ public static class CaveTunneler
         return path;
     }
 
-    private static HashSet<Vector3i> FindPath(Vector3i startPos, Vector3i targetPos, HashSet<Vector3i> obstacles, HashSet<Vector3i> noiseMap, FastNoiseLite perlinNoise)
+    public static HashSet<Vector3i> FindPath(Vector3i startPos, Vector3i targetPos, HashSet<Vector3i> obstacles, HashSet<Vector3i> prefabBoundNoise)
     {
         var startNode = new Node(startPos);
         var goalNode = new Node(targetPos);
@@ -607,10 +664,10 @@ public static class CaveTunneler
                 if (obstacles.Contains(neighbor.position))
                     continue;
 
-                float noise = 0.5f * (1 + perlinNoise.GetNoise(neighbor.position.x, neighbor.position.y, neighbor.position.z));
+                float noise = 0.5f * (1 + CaveBuilder.pathingNoise.GetNoise(neighbor.position.x, neighbor.position.y, neighbor.position.z));
                 float factor = noise < CaveBuilder.NOISE_THRESHOLD ? .5f : 1f;
 
-                factor *= noiseMap.Contains(neighbor.position) ? 1f : .5f;
+                factor *= prefabBoundNoise.Contains(neighbor.position) ? 1f : .5f;
 
                 float tentativeGCost = currentNode.GCost + CaveUtils.SqrEuclidianDist(currentNode, neighbor) * factor;
 
@@ -649,18 +706,12 @@ public static class CaveTunneler
         return caveMap;
     }
 
-    public static HashSet<Vector3i> PerlinRoute(Vector3i startPos, Vector3i targetpos, FastNoiseLite noise, HashSet<Vector3i> obstacles, HashSet<Vector3i> noiseMap)
-    {
-        HashSet<Vector3i> caveMap = FindPath(startPos, targetpos, obstacles, noiseMap, noise);
-
-        return caveMap;
-    }
 }
 
 
 public static class GraphSolver
 {
-    private static List<Edge> BuildPrefabGraph(List<PrefabWrapper> prefabs)
+    private static List<Edge> BuildPrefabGraph(List<CavePrefab> prefabs)
     {
         var prefabEdges = new Dictionary<int, List<Edge>>();
 
@@ -744,7 +795,7 @@ public static class GraphSolver
         return graph.ToList();
     }
 
-    public static List<Edge> Resolve(List<PrefabWrapper> prefabs)
+    public static List<Edge> Resolve(List<CavePrefab> prefabs)
     {
         var timer = new Stopwatch();
 
@@ -786,6 +837,8 @@ public static class CaveBuilder
     public static int radiationZoneMargin;
 
     public static int cavePrefabBedRockMargin;
+
+    public static FastNoiseLite pathingNoise = ParsePerlinNoise();
 
     public static int GetHeight(int x, int z)
     {
@@ -836,7 +889,7 @@ public static class CaveBuilder
         return noise;
     }
 
-    public static bool TryPlacePrefab(ref PrefabWrapper prefab, List<PrefabWrapper> others)
+    public static bool TryPlacePrefab(ref CavePrefab prefab, List<CavePrefab> others)
     {
         int maxTries = 10;
 
@@ -853,15 +906,15 @@ public static class CaveBuilder
         return false;
     }
 
-    public static List<PrefabWrapper> GetRandomPrefabs(int count)
+    public static List<CavePrefab> GetRandomPrefabs(int count)
     {
         Logger.Info("Start POIs placement...");
 
-        var prefabs = new List<PrefabWrapper>();
+        var prefabs = new List<CavePrefab>();
 
         for (int i = 0; i < count; i++)
         {
-            var prefab = new PrefabWrapper(rand);
+            var prefab = new CavePrefab(rand);
 
             if (TryPlacePrefab(ref prefab, prefabs))
                 prefabs.Add(prefab);
@@ -872,11 +925,11 @@ public static class CaveBuilder
         return prefabs;
     }
 
-    public static HashSet<Vector3i> CollectPrefabObstacles(List<PrefabWrapper> prefabs)
+    public static HashSet<Vector3i> CollectPrefabObstacles(List<CavePrefab> prefabs)
     {
         var obstacles = new HashSet<Vector3i>();
 
-        foreach (PrefabWrapper prefab in prefabs)
+        foreach (CavePrefab prefab in prefabs)
         {
             obstacles.UnionWith(prefab.innerPoints);
         }
@@ -884,11 +937,11 @@ public static class CaveBuilder
         return obstacles;
     }
 
-    public static HashSet<Vector3i> CollectPrefabNoise(List<PrefabWrapper> prefabs, FastNoiseLite noise)
+    public static HashSet<Vector3i> CollectPrefabNoise(List<CavePrefab> prefabs)
     {
         var noiseMap = new HashSet<Vector3i>();
 
-        foreach (PrefabWrapper prefab in prefabs)
+        foreach (CavePrefab prefab in prefabs)
         {
             noiseMap.UnionWith(prefab.GetNoiseAround(rand));
         }

@@ -39,7 +39,7 @@ public static class CaveViewer
         return new PointF(point.x, point.z);
     }
 
-    public static void DrawPrefabs(Bitmap b, Graphics graph, List<PrefabWrapper> prefabs, bool fill = false)
+    public static void DrawPrefabs(Bitmap b, Graphics graph, List<CavePrefab> prefabs, bool fill = false)
     {
         using (var pen = new Pen(PrefabBoundsColor, 1))
         {
@@ -138,28 +138,27 @@ public static class CaveViewer
     {
         int positionY = 10;
 
-        var p1 = new PrefabWrapper()
+        var p1 = new CavePrefab()
         {
             position = new Vector3i(10, positionY, 10),
             size = new Vector3i(10, 10, 10),
         };
 
-        var p2 = new PrefabWrapper()
+        var p2 = new CavePrefab()
         {
             position = new Vector3i(MAP_SIZE - 20, positionY, MAP_SIZE - 20),
             size = new Vector3i(10, 10, 10),
         };
 
-        var prefabs = new List<PrefabWrapper>() { p1, p2 };
+        var prefabs = new List<CavePrefab>() { p1, p2 };
 
         p1.UpdateInnerPoints();
         p2.UpdateInnerPoints();
 
-        FastNoiseLite noise = CaveBuilder.ParsePerlinNoise();
         HashSet<Vector3i> obstacles = CaveBuilder.CollectPrefabObstacles(prefabs);
-        HashSet<Vector3i> noiseMap = CaveBuilder.CollectPrefabNoise(prefabs, noise);
+        HashSet<Vector3i> noiseMap = CaveBuilder.CollectPrefabNoise(prefabs);
 
-        HashSet<Vector3i> path = CaveTunneler.PerlinRoute(p1.position, p2.position, noise, obstacles, noiseMap);
+        HashSet<Vector3i> path = CaveTunneler.FindPath(p1.position, p2.position, obstacles, noiseMap);
 
         using (var b = new Bitmap(MAP_SIZE, MAP_SIZE))
         {
@@ -202,13 +201,11 @@ public static class CaveViewer
         var timer = new Stopwatch();
         timer.Start();
 
-        FastNoiseLite noise = CaveBuilder.ParsePerlinNoise();
-
         int prefabCounts = args.Length > 1 ? int.Parse(args[1]) : PREFAB_COUNT;
         var prefabs = CaveBuilder.GetRandomPrefabs(prefabCounts);
 
         HashSet<Vector3i> obstacles = CaveBuilder.CollectPrefabObstacles(prefabs);
-        HashSet<Vector3i> noiseMap = CaveBuilder.CollectPrefabNoise(prefabs, noise);
+        HashSet<Vector3i> noiseMap = CaveBuilder.CollectPrefabNoise(prefabs);
 
         Logger.Info("Start solving MST Krustal...");
 
@@ -224,7 +221,7 @@ public static class CaveViewer
 
             Logger.Info($"Noise pathing: {100.0f * index++ / edges.Count:F0}% ({index} / {edges.Count}), dist={CaveUtils.SqrEuclidianDist(p1, p2)}");
 
-            HashSet<Vector3i> path = CaveTunneler.PerlinRoute(p1, p2, noise, obstacles, noiseMap);
+            HashSet<Vector3i> path = CaveTunneler.FindPath(p1, p2, obstacles, noiseMap);
 
             foreach (Vector3i node in path)
             {
@@ -256,16 +253,14 @@ public static class CaveViewer
 
         Console.WriteLine($"{caveMap.Count} cave blocks generated, timer={CaveUtils.TimeFormat(timer)}.");
 
-        ToWaveFront(caveMap.ToList(), "cave.obj");
-
-        Process.Start("CMD.exe", $"/C {Path.GetFullPath("cave.obj")}");
+        ToWaveFront(caveMap.ToList(), "cave.obj", true);
 
     }
 
     public static void GeneratePrefab(string[] args)
     {
         var mapCenter = new Vector3i(-10 + MAP_SIZE / 2, 0, -10 + MAP_SIZE / 2);
-        var prefab = new PrefabWrapper()
+        var prefab = new CavePrefab()
         {
             position = mapCenter,
             size = new Vector3i(10, 10, 10),
@@ -294,7 +289,7 @@ public static class CaveViewer
         }
     }
 
-    static void ToWaveFront(List<Vector3i> positions, string filename)
+    static void ToWaveFront(List<Vector3i> positions, string filename, bool openFile = false)
     {
         float[,] vertices = new float[,]
         {
@@ -342,6 +337,9 @@ public static class CaveViewer
         }
 
         Console.WriteLine($"{positions.Count} voxels generated to '{filename}'.");
+
+        if (openFile)
+            Process.Start("CMD.exe", $"/C {Path.GetFullPath("cave.obj")}");
     }
 
     public static void Main(string[] args)
