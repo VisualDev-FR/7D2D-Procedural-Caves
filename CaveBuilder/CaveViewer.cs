@@ -1,3 +1,6 @@
+# pragma warning disable CA1416, CA1050, CA2211, IDE0290, IDE0063, IDE0305, IDE0090
+
+
 using System;
 using System.IO;
 using System.Drawing;
@@ -38,7 +41,7 @@ public static class CaveViewer
 
     public static void DrawPrefabs(Bitmap b, Graphics graph, List<PrefabWrapper> prefabs, bool fill = false)
     {
-        using (Pen pen = new Pen(PrefabBoundsColor, 1))
+        using (var pen = new Pen(PrefabBoundsColor, 1))
         {
             foreach (var prefab in prefabs)
             {
@@ -62,7 +65,7 @@ public static class CaveViewer
 
     public static void DrawEdges(Graphics graph, List<Edge> edges)
     {
-        using (Pen pen = new Pen(TunnelsColor, 2))
+        using (var pen = new Pen(TunnelsColor, 2))
         {
             foreach (var edge in edges)
             {
@@ -100,7 +103,7 @@ public static class CaveViewer
 
         Logger.Info("Start Drawing graph...");
 
-        using (Bitmap b = new Bitmap(MAP_SIZE, MAP_SIZE))
+        using (var b = new Bitmap(MAP_SIZE, MAP_SIZE))
         {
             using (Graphics g = Graphics.FromImage(b))
             {
@@ -119,7 +122,7 @@ public static class CaveViewer
     {
         var noise = CaveBuilder.ParsePerlinNoise();
 
-        using (Bitmap b = new Bitmap(MAP_SIZE, MAP_SIZE))
+        using (var b = new Bitmap(MAP_SIZE, MAP_SIZE))
         {
             using (Graphics g = Graphics.FromImage(b))
             {
@@ -133,16 +136,18 @@ public static class CaveViewer
 
     public static void GeneratePath(string[] args)
     {
+        int positionY = 10;
+
         var p1 = new PrefabWrapper()
         {
-            position = new Vector3i(10, 0, 10),
-            size = new Vector3i(10, 1, 10),
+            position = new Vector3i(10, positionY, 10),
+            size = new Vector3i(10, 10, 10),
         };
 
         var p2 = new PrefabWrapper()
         {
-            position = new Vector3i(MAP_SIZE - 20, 0, MAP_SIZE - 20),
-            size = new Vector3i(10, 1, 10),
+            position = new Vector3i(MAP_SIZE - 20, positionY, MAP_SIZE - 20),
+            size = new Vector3i(10, 10, 10),
         };
 
         var prefabs = new List<PrefabWrapper>() { p1, p2 };
@@ -154,7 +159,7 @@ public static class CaveViewer
         HashSet<Vector3i> obstacles = CaveBuilder.CollectPrefabObstacles(prefabs);
         HashSet<Vector3i> noiseMap = CaveBuilder.CollectPrefabNoise(prefabs, noise);
 
-        HashSet<Vector3i> path = CaveTunneler.PerlinRoute(p1.position, p2.position, noise, obstacles, noiseMap);
+        HashSet<Vector3i> path = Astar.PerlinRoute(p1.position, p2.position, noise, obstacles, noiseMap);
 
         using (var b = new Bitmap(MAP_SIZE, MAP_SIZE))
         {
@@ -176,7 +181,7 @@ public static class CaveViewer
 
     public static void SaveCaveMap(HashSet<Vector3i> caveMap, string filename)
     {
-        using (StreamWriter writer = new StreamWriter(filename))
+        using (var writer = new StreamWriter(filename))
         {
             foreach (var caveBlock in caveMap)
             {
@@ -188,7 +193,7 @@ public static class CaveViewer
 
     public static void GenerateCaves(string[] args)
     {
-        Stopwatch timer = new Stopwatch();
+        var timer = new Stopwatch();
         timer.Start();
 
         FastNoiseLite noise = CaveBuilder.ParsePerlinNoise();
@@ -213,7 +218,7 @@ public static class CaveViewer
 
             Logger.Info($"Noise pathing: {100.0f * index++ / edges.Count:F0}% ({index} / {edges.Count}), dist={CaveUtils.SqrEuclidianDist(p1, p2)}");
 
-            HashSet<Vector3i> path = CaveTunneler.PerlinRoute(p1, p2, noise, obstacles, noiseMap);
+            HashSet<Vector3i> path = Astar.PerlinRoute(p1, p2, noise, obstacles, noiseMap);
 
             foreach (Vector3i node in path)
             {
@@ -223,7 +228,7 @@ public static class CaveViewer
 
         Logger.Info("Start caves thickening");
 
-        var caveMap = CaveTunneler.ThickenCaveMap(wiredCaveMap.ToHashSet(), obstacles);
+        var caveMap = Astar.ThickenCaveMap(wiredCaveMap.ToHashSet(), obstacles);
 
         Logger.Info("Start caves drawing");
 
@@ -252,7 +257,7 @@ public static class CaveViewer
         var prefab = new PrefabWrapper()
         {
             position = mapCenter,
-            size = new Vector3i(20, 0, 20),
+            size = new Vector3i(10, 10, 10),
         };
 
         prefab.UpdateNodes(Rand);
@@ -268,7 +273,7 @@ public static class CaveViewer
                 {
                     g.Clear(BackgroundColor);
 
-                    DrawPoints(b, prefab.GetNoiseAround(Rand), NoiseColor);
+                    DrawPoints(b, prefab.GetNoiseAround(), NoiseColor);
                     g.DrawRectangle(pen, prefab.position.x, prefab.position.z, prefab.size.x, prefab.size.z);
                     DrawPoints(b, prefab.nodes.ToHashSet(), NodeColor);
                 }
