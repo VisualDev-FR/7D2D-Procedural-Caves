@@ -80,22 +80,19 @@ public static class CavePlanner
         CaveBuilder.rand = new Random(CaveBuilder.SEED);
     }
 
-    private static bool CanBePlacedUnderTerrain(Vector3i position, Vector3i size)
+    private static int GetMinTerrainHeight(Vector3i position, Vector3i size)
     {
+        int minHeight = 257;
+
         for (int x = position.x; x < position.x + size.x; x++)
         {
             for (int z = position.z; z < position.z + size.z; z++)
             {
-                int totalHeight = size.z + cavePrefabTerrainMargin + cavePrefabBedRockMargin;
-
-                if (totalHeight >= WorldBuilder.Instance.GetHeight(x, z))
-                {
-                    return false;
-                }
+                minHeight = Utils.FastMin(minHeight, (int)WorldBuilder.Instance.GetHeight(x, z));
             }
         }
 
-        return true;
+        return minHeight;
     }
 
     private static Vector3i GetRandomPositionFor(Vector3i size)
@@ -156,13 +153,17 @@ public static class CavePlanner
             Vector3i rotatedSize = GetRotatedSize(prefab.size, rotation);
             Vector3i position = GetRandomPositionFor(rotatedSize);
 
-            if (!CanBePlacedUnderTerrain(position, rotatedSize))
+            var minTerrainHeight = GetMinTerrainHeight(position, rotatedSize);
+            var canBePlacedUnderTerrain = minTerrainHeight >= (prefab.size.y + cavePrefabBedRockMargin + cavePrefabTerrainMargin);
+
+            if (!canBePlacedUnderTerrain)
                 continue;
 
             if (OverLaps2D(position, rotatedSize, others))
                 continue;
 
             position -= HalfWorldSize;
+            position.y = rand.Next(cavePrefabBedRockMargin, minTerrainHeight - prefab.size.y - cavePrefabTerrainMargin);
 
             return new PrefabDataInstance(others.Count + 1, position, (byte)rotation, prefab);
         }
