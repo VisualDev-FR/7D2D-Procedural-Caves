@@ -123,25 +123,26 @@ public class CavePrefab
         size = prefab.boundingBoxSize;
         rotation = prefab.rotation;
 
-        UpdateNodes(prefab);
+        // UpdateNodes(prefab);
         UpdateInnerPoints();
+        throw new NotImplementedException();
     }
 
-    public void UpdateNodes(PrefabDataInstance prefab)
-    {
-        var caveNodeTags = FastTags<TagGroup.Poi>.Parse("cavenode");
+    // public void UpdateNodes(PrefabDataInstance prefab)
+    // {
+    //     var caveNodeTags = FastTags<TagGroup.Poi>.Parse("cavenode");
 
-        nodes = new List<Vector3i>();
+    //     nodes = new List<Vector3i>();
 
-        foreach (var marker in prefab.prefab.POIMarkers)
-        {
-            if (!marker.tags.Test_AnySet(caveNodeTags))
-                continue;
+    //     foreach (var marker in prefab.prefab.POIMarkers)
+    //     {
+    //         if (!marker.tags.Test_AnySet(caveNodeTags))
+    //             continue;
 
-            // TODO: handle all points of the node
-            nodes.Add(marker.start + prefabDataInstance.boundingBoxPosition);
-        }
-    }
+    //         // TODO: handle all points of the node
+    //         nodes.Add(marker.start + prefabDataInstance.boundingBoxPosition);
+    //     }
+    // }
 
     public CavePrefab(int id, PrefabData prefabData)
     {
@@ -552,33 +553,52 @@ public class Node
 
     public List<Node> GetNeighbors()
     {
-        var neighborsPos = new List<Vector3i>(){
-            new Vector3i(position.x + 1, position.y, position.z),
-            new Vector3i(position.x - 1, position.y, position.z),
-            new Vector3i(position.x, position.y + 1, position.z),
-            new Vector3i(position.x, position.y - 1, position.z),
-            new Vector3i(position.x, position.y, position.z + 1),
-            new Vector3i(position.x, position.y, position.z - 1),
-        };
-
         var neighbors = new List<Node>();
 
-        foreach (var position in neighborsPos)
-        {
-            if (position.x < 0 || position.x >= CaveBuilder.MAP_SIZE - CaveBuilder.radiationZoneMargin)
-                continue;
+        if (position.x - CaveBuilder.radiationZoneMargin > 1)
+            neighbors.Add(new Node(position.x - 1, position.y, position.z));
 
-            if (position.z < 0 || position.z >= CaveBuilder.MAP_SIZE - CaveBuilder.radiationZoneMargin)
-                continue;
+        if (position.x + CaveBuilder.radiationZoneMargin < CaveBuilder.MAP_SIZE)
+            neighbors.Add(new Node(position.x + 1, position.y, position.z));
 
-            if (position.y >= CaveBuilder.GetHeight(position.x, position.z))
-                continue;
+        if (position.z - CaveBuilder.radiationZoneMargin > 1)
+            neighbors.Add(new Node(position.x, position.y, position.z - 1));
 
-            if (position.y <= CaveBuilder.cavePrefabBedRockMargin)
-                continue;
+        if (position.z + CaveBuilder.radiationZoneMargin < CaveBuilder.MAP_SIZE)
+            neighbors.Add(new Node(position.x, position.y, position.z + 1));
 
-            neighbors.Add(new Node(position));
-        }
+        if (position.y - CaveBuilder.cavePrefabBedRockMargin > 1)
+            neighbors.Add(new Node(position.x, position.y - 1, position.z));
+
+        if (position.y + CaveBuilder.cavePrefabterrainMargin < CaveBuilder.GetHeight(position.x, position.z))
+            neighbors.Add(new Node(position.x, position.y + 1, position.z));
+
+        // var neighborsPos = new List<Vector3i>()
+        // {
+        //     new Vector3i(position.x + 1, position.y, position.z),
+        //     new Vector3i(position.x - 1, position.y, position.z),
+        //     new Vector3i(position.x, position.y + 1, position.z),
+        //     new Vector3i(position.x, position.y - 1, position.z),
+        //     new Vector3i(position.x, position.y, position.z + 1),
+        //     new Vector3i(position.x, position.y, position.z - 1),
+        // };
+
+        // foreach (var position in neighborsPos)
+        // {
+        //     if (position.x < 0 || position.x >= CaveBuilder.MAP_SIZE - CaveBuilder.radiationZoneMargin)
+        //         continue;
+
+        //     if (position.z < 0 || position.z >= CaveBuilder.MAP_SIZE - CaveBuilder.radiationZoneMargin)
+        //         continue;
+
+        //     if (position.y >= CaveBuilder.GetHeight(position.x, position.z))
+        //         continue;
+
+        //     if (position.y <= CaveBuilder.cavePrefabBedRockMargin)
+        //         continue;
+
+        //     neighbors.Add(new Node(position));
+        // }
 
         return neighbors;
     }
@@ -596,21 +616,39 @@ public class Node
 }
 
 
-public static class CaveTunneler
+public class HashedPriorityQueue<TElement, TPriority>
 {
-    private static Node GetLowestFCostNode(HashSet<Node> nodes)
+    private PriorityQueue<TElement, TPriority> queue;
+
+    private HashSet<TElement> hashSet;
+
+    public int Count => queue.Count;
+
+    public HashedPriorityQueue()
     {
-        Node lowestCostNode = null;
-        foreach (Node node in nodes)
-        {
-            if (lowestCostNode == null || node.FCost < lowestCostNode.FCost)
-            {
-                lowestCostNode = node;
-            }
-        }
-        return lowestCostNode;
+        queue = new PriorityQueue<TElement, TPriority>();
+        hashSet = new HashSet<TElement>();
     }
 
+    public void Enqueue(TElement element, TPriority priority)
+    {
+        queue.Enqueue(element, priority);
+        hashSet.Add(element);
+    }
+
+    public TElement Dequeue()
+    {
+        return queue.Dequeue();
+    }
+
+    public bool Contains(TElement element)
+    {
+        return hashSet.Contains(element);
+    }
+}
+
+public static class CaveTunneler
+{
     private static HashSet<Vector3i> ReconstructPath(Node currentNode)
     {
         var path = new HashSet<Vector3i>();
@@ -629,19 +667,19 @@ public static class CaveTunneler
         var startNode = new Node(startPos);
         var goalNode = new Node(targetPos);
 
-        HashSet<Node> queue = new HashSet<Node>();
-        HashSet<Node> visited = new HashSet<Node>();
+        var queue = new HashedPriorityQueue<Node, float>();
+        var visited = new HashSet<Node>();
 
         obstacles.Remove(startPos);
         obstacles.Remove(targetPos);
 
-        queue.Add(startNode);
+        queue.Enqueue(startNode, float.MaxValue);
 
         var path = new HashSet<Vector3i>();
 
         while (queue.Count > 0)
         {
-            Node currentNode = GetLowestFCostNode(queue);
+            Node currentNode = queue.Dequeue();
 
             if (currentNode.position == goalNode.position)
             {
@@ -649,12 +687,9 @@ public static class CaveTunneler
                 break;
             }
 
-            queue.Remove(currentNode);
             visited.Add(currentNode);
 
-            var neighbors = currentNode.GetNeighbors();
-
-            foreach (Node neighbor in neighbors)
+            foreach (Node neighbor in currentNode.GetNeighbors())
             {
                 // Logger.Debug($"{currentNode.position} {neighbor.position} ({obstacles.Contains(neighbor.position)})");
 
@@ -671,13 +706,16 @@ public static class CaveTunneler
 
                 float tentativeGCost = currentNode.GCost + CaveUtils.SqrEuclidianDist(currentNode, neighbor) * factor;
 
-                if (!queue.Contains(neighbor) || tentativeGCost < neighbor.GCost)
+                bool isInQueue = queue.Contains(neighbor);
+
+                if (!isInQueue || tentativeGCost < neighbor.GCost)
                 {
                     neighbor.Parent = currentNode;
                     neighbor.GCost = tentativeGCost;
                     neighbor.HCost = CaveUtils.SqrEuclidianDist(neighbor, goalNode) * factor;
 
-                    queue.Add(neighbor);
+                    if (!isInQueue)
+                        queue.Enqueue(neighbor, neighbor.FCost);
                 }
             }
         }
@@ -807,12 +845,13 @@ public static class GraphSolver
 
         return graph;
     }
+
 }
 
 
 public static class CaveBuilder
 {
-    public static int SEED = new Random().Next();
+    public static int SEED = 12345; // new Random().Next();
 
     public static int MAP_SIZE = 1000;
 
@@ -837,6 +876,8 @@ public static class CaveBuilder
     public static int radiationZoneMargin;
 
     public static int cavePrefabBedRockMargin;
+
+    public static int cavePrefabterrainMargin;
 
     public static FastNoiseLite pathingNoise = ParsePerlinNoise();
 
