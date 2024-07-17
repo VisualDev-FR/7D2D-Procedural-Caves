@@ -616,35 +616,60 @@ public class Node
 }
 
 
-public class HashedPriorityQueue<TElement, TPriority>
+public class HashedPriorityQueue<T>
 {
-    private PriorityQueue<TElement, TPriority> queue;
+    // see https://github.com/FyiurAmron/PriorityQueue
+    private readonly SortedDictionary<float, Queue<T>> _sortedDictionary;
 
-    private HashSet<TElement> hashSet;
+    private HashSet<T> _items;
 
-    public int Count => queue.Count;
+    private int _count;
 
     public HashedPriorityQueue()
     {
-        queue = new PriorityQueue<TElement, TPriority>();
-        hashSet = new HashSet<TElement>();
+        _items = new HashSet<T>();
+        _sortedDictionary = new SortedDictionary<float, Queue<T>>();
+        _count = 0;
     }
 
-    public void Enqueue(TElement element, TPriority priority)
+    public void Enqueue(T item, float priority)
     {
-        queue.Enqueue(element, priority);
-        hashSet.Add(element);
+        if (!_sortedDictionary.TryGetValue(priority, out Queue<T> queue))
+        {
+            queue = new Queue<T>();
+            _sortedDictionary.Add(priority, queue);
+        }
+        _items.Add(item);
+        queue.Enqueue(item);
+        _count++;
     }
 
-    public TElement Dequeue()
+    public T Dequeue()
     {
-        return queue.Dequeue();
+        if (_count == 0)
+            throw new InvalidOperationException("The priority queue is empty.");
+
+        var firstPair = _sortedDictionary.First();
+        var queue = firstPair.Value;
+        var item = queue.Dequeue();
+
+        if (queue.Count == 0)
+        {
+            _sortedDictionary.Remove(firstPair.Key);
+        }
+        _count--;
+
+        _items.Remove(item);
+
+        return item;
     }
 
-    public bool Contains(TElement element)
+    public bool Contains(T element)
     {
-        return hashSet.Contains(element);
+        return _items.Contains(element);
     }
+
+    public int Count => _count;
 }
 
 public static class CaveTunneler
@@ -667,7 +692,7 @@ public static class CaveTunneler
         var startNode = new Node(startPos);
         var goalNode = new Node(targetPos);
 
-        var queue = new HashedPriorityQueue<Node, float>();
+        var queue = new HashedPriorityQueue<Node>();
         var visited = new HashSet<Node>();
 
         obstacles.Remove(startPos);
@@ -853,7 +878,7 @@ public static class CaveBuilder
 {
     public static int SEED = 12345; // new Random().Next();
 
-    public static int MAP_SIZE = 1000;
+    public static int MAP_SIZE = 100;
 
     public static int PREFAB_Y = 5;
 

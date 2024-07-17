@@ -2,3 +2,5 @@
 .vs
 obj
 *.zip
+*.dll
+*.pdb
