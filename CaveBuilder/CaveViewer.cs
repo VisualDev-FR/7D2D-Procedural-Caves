@@ -147,7 +147,7 @@ public static class CaveViewer
         var p2 = new CavePrefab()
         {
             position = new Vector3i(MAP_SIZE - 20, positionY, MAP_SIZE - 20),
-            size = new Vector3i(10, 10, 10),
+            size = new Vector3i(10, 100, 10),
         };
 
         var prefabs = new List<CavePrefab>() { p1, p2 };
@@ -158,7 +158,12 @@ public static class CaveViewer
         HashSet<Vector3i> obstacles = CaveBuilder.CollectPrefabObstacles(prefabs);
         HashSet<Vector3i> noiseMap = CaveBuilder.CollectPrefabNoise(prefabs);
 
+        var timer = new Stopwatch();
+        timer.Start();
+
         HashSet<Vector3i> path = CaveTunneler.FindPath(p1.position, p2.position, obstacles, noiseMap);
+
+        Logger.Info($"{p1.position} -> {p2.position} | Astar dist: {path.Count}, eucl dist: {CaveUtils.EuclidianDist(p1.position, p2.position)}, timer: {timer.ElapsedMilliseconds}ms");
 
         using (var b = new Bitmap(MAP_SIZE, MAP_SIZE))
         {
@@ -178,10 +183,6 @@ public static class CaveViewer
         }
 
         path.UnionWith(obstacles);
-
-        ToWaveFront(path.ToList(), "path.obj");
-
-        Process.Start("CMD.exe", $"/C {Path.GetFullPath("path.obj")}");
     }
 
     public static void SaveCaveMap(HashSet<Vector3i> caveMap, string filename)
@@ -252,9 +253,6 @@ public static class CaveViewer
         SaveCaveMap(caveMap, "cavemap.csv");
 
         Console.WriteLine($"{caveMap.Count} cave blocks generated, timer={CaveUtils.TimeFormat(timer)}.");
-
-        ToWaveFront(caveMap.ToList(), "cave.obj", true);
-
     }
 
     public static void GeneratePrefab(string[] args)
