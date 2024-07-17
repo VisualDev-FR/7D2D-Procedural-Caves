@@ -121,26 +121,25 @@ public class CavePrefab
         size = prefab.boundingBoxSize;
         rotation = prefab.rotation;
 
-        // UpdateNodes(prefab);
+        UpdateNodes(prefab);
         // UpdateInnerPoints();
-        throw new NotImplementedException();
     }
 
-    // public void UpdateNodes(PrefabDataInstance prefab)
-    // {
-    //     var caveNodeTags = FastTags<TagGroup.Poi>.Parse("cavenode");
+    public void UpdateNodes(PrefabDataInstance prefab)
+    {
+        var caveNodeTags = FastTags<TagGroup.Poi>.Parse("cavenode");
 
-    //     nodes = new List<Vector3i>();
+        nodes = new List<Vector3i>();
 
-    //     foreach (var marker in prefab.prefab.POIMarkers)
-    //     {
-    //         if (!marker.tags.Test_AnySet(caveNodeTags))
-    //             continue;
+        foreach (var marker in prefab.prefab.POIMarkers)
+        {
+            if (!marker.tags.Test_AnySet(caveNodeTags))
+                continue;
 
-    //         // TODO: handle all points of the node
-    //         nodes.Add(marker.start + prefabDataInstance.boundingBoxPosition);
-    //     }
-    // }
+            // TODO: handle all points of the node
+            nodes.Add(marker.start + prefabDataInstance.boundingBoxPosition);
+        }
+    }
 
     public CavePrefab(int id, PrefabData prefabData)
     {
@@ -920,7 +919,7 @@ public static class GraphSolver
 
 public static class CaveBuilder
 {
-    public static int SEED = 12345; // new Random().Next();
+    public static int SEED = new Random().Next();
 
     public static int MAP_SIZE = 6144;
 

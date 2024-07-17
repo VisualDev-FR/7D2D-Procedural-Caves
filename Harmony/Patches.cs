@@ -407,7 +407,7 @@ public static class ProceduralCaveSystem
                 Log.Out($"[Cave] Cave entrance added at {prefab.boundingBoxPosition}");
             }
 
-            CavePlanner.GenerateCaveMap();
+            yield return CavePlanner.GenerateCaveMap();
             CavePlanner.SaveCaveMap();
             CavePlanner.Cleanup();
 

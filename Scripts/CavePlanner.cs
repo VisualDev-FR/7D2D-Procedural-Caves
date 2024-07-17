@@ -10,7 +10,7 @@ using WorldGenerationEngineFinal;
 using Random = System.Random;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
-using Debug = System.Diagnostics.Debug;
+using System.Collections;
 
 public static class CavePlanner
 {
@@ -224,7 +224,7 @@ public static class CavePlanner
         return cavePrefabs;
     }
 
-    public static void GenerateCaveMap()
+    public static IEnumerator GenerateCaveMap()
     {
         var timer = new Stopwatch();
         timer.Start();
@@ -233,34 +233,37 @@ public static class CavePlanner
 
         GenerateGraph(cavePrefabs);
 
-        return;
+        // yield break;
 
-        HashSet<Vector3i> obstacles = CaveBuilder.CollectPrefabObstacles(cavePrefabs);
-        HashSet<Vector3i> prefabBoundNoise = new HashSet<Vector3i>(); // CaveBuilder.CollectPrefabNoise(cavePrefabs);
+        // HashSet<Vector3i> obstacles = CaveBuilder.CollectPrefabObstacles(cavePrefabs);
+        // HashSet<Vector3i> prefabBoundNoise = new HashSet<Vector3i>(); // CaveBuilder.CollectPrefabNoise(cavePrefabs);
 
         List<Edge> edges = GraphSolver.Resolve(cavePrefabs);
 
-        var wiredCaveMap = new ConcurrentBag<Vector3i>();
+        var wiredCaveMap = new HashSet<Vector3i>();
         int index = 0;
 
-        Parallel.ForEach(edges, edge =>
+        foreach (var edge in edges)
         {
             Vector3i p1 = edge.node1;
             Vector3i p2 = edge.node2;
 
-            Log.Out($"Noise pathing: {100.0f * index++ / edges.Count:F0}% ({index} / {edges.Count}), dist={CaveUtils.EuclidianDist(p1, p2)}");
+            string message = $"Cave tunneling: {100.0f * index++ / edges.Count:F0}% ({index} / {edges.Count})";
 
-            HashSet<Vector3i> path = CaveTunneler.FindPath(p1, p2, obstacles, prefabBoundNoise);
+            Log.Out($"Tunneling {p1} -> {p2} == {p1 + HalfWorldSize} -> {p2 + HalfWorldSize}");
 
-            foreach (Vector3i node in path)
-            {
-                wiredCaveMap.Add(node);
-            }
-        });
+            yield return WorldBuilder.Instance.SetMessage(message);
 
-        caveMap = CaveTunneler.ThickenCaveMap(wiredCaveMap.ToHashSet(), obstacles);
+            HashSet<Vector3i> path = CaveTunneler.FindPath(p1 + HalfWorldSize, p2 + HalfWorldSize, cavePrefabs);
 
-        Console.WriteLine($"{caveMap.Count} cave blocks generated, timer={CaveUtils.TimeFormat(timer)}.");
+            wiredCaveMap.UnionWith(path);
+        }
+
+        // caveMap = CaveTunneler.ThickenCaveMap(wiredCaveMap.ToHashSet(), obstacles);
+
+        // Console.WriteLine($"{caveMap.Count} cave blocks generated, timer={CaveUtils.TimeFormat(timer)}.");
+
+        yield return null;
     }
 
     public static void GenerateGraph(List<CavePrefab> prefabs)
