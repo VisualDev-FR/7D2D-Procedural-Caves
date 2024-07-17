@@ -48,7 +48,7 @@ public static class CaveViewer
                 graph.DrawRectangle(pen, prefab.position.x, prefab.position.z, prefab.size.x, prefab.size.z);
 
                 if (fill)
-                    DrawPoints(b, new HashSet<Vector3i>(prefab.innerPoints), PrefabBoundsColor);
+                    DrawPoints(b, prefab.GetInnerPoints().ToHashSet(), PrefabBoundsColor);
 
                 DrawPoints(b, new HashSet<Vector3i>(prefab.nodes), NodeColor);
             }
@@ -152,16 +152,13 @@ public static class CaveViewer
 
         var prefabs = new List<CavePrefab>() { p1, p2 };
 
-        p1.UpdateInnerPoints();
-        p2.UpdateInnerPoints();
-
-        HashSet<Vector3i> obstacles = CaveBuilder.CollectPrefabObstacles(prefabs);
-        HashSet<Vector3i> noiseMap = CaveBuilder.CollectPrefabNoise(prefabs);
+        // HashSet<Vector3i> obstacles = CaveBuilder.CollectPrefabObstacles(prefabs);
+        // HashSet<Vector3i> noiseMap = CaveBuilder.CollectPrefabNoise(prefabs);
 
         var timer = new Stopwatch();
         timer.Start();
 
-        HashSet<Vector3i> path = CaveTunneler.FindPath(p1.position, p2.position, obstacles, noiseMap);
+        HashSet<Vector3i> path = CaveTunneler.FindPath(p1.position, p2.position, prefabs);
 
         Logger.Info($"{p1.position} -> {p2.position} | Astar dist: {path.Count}, eucl dist: {CaveUtils.EuclidianDist(p1.position, p2.position)}, timer: {timer.ElapsedMilliseconds}ms");
 
@@ -171,7 +168,7 @@ public static class CaveViewer
             {
                 g.Clear(BackgroundColor);
                 // DrawNoise(b, noise);
-                DrawPoints(b, noiseMap, NoiseColor);
+                // DrawPoints(b, noiseMap, NoiseColor);
                 DrawPoints(b, path, TunnelsColor);
                 DrawPrefabs(b, g, prefabs);
 
@@ -181,8 +178,6 @@ public static class CaveViewer
 
             b.Save(@"pathing.png", ImageFormat.Png);
         }
-
-        path.UnionWith(obstacles);
     }
 
     public static void SaveCaveMap(HashSet<Vector3i> caveMap, string filename)
@@ -205,10 +200,7 @@ public static class CaveViewer
         int prefabCounts = args.Length > 1 ? int.Parse(args[1]) : PREFAB_COUNT;
         var prefabs = CaveBuilder.GetRandomPrefabs(prefabCounts);
 
-        HashSet<Vector3i> obstacles = CaveBuilder.CollectPrefabObstacles(prefabs);
-        HashSet<Vector3i> noiseMap = CaveBuilder.CollectPrefabNoise(prefabs);
-
-        Logger.Info("Start solving MST Krustal...");
+        Logger.Info("Start solving graph...");
 
         List<Edge> edges = GraphSolver.Resolve(prefabs);
 
@@ -222,7 +214,7 @@ public static class CaveViewer
 
             Logger.Info($"Noise pathing: {100.0f * index++ / edges.Count:F0}% ({index} / {edges.Count}), dist={CaveUtils.SqrEuclidianDist(p1, p2)}");
 
-            HashSet<Vector3i> path = CaveTunneler.FindPath(p1, p2, obstacles, noiseMap);
+            HashSet<Vector3i> path = CaveTunneler.FindPath(p1, p2, prefabs);
 
             foreach (Vector3i node in path)
             {
@@ -232,7 +224,7 @@ public static class CaveViewer
 
         Logger.Info("Start caves thickening");
 
-        var caveMap = CaveTunneler.ThickenCaveMap(wiredCaveMap.ToHashSet(), obstacles);
+        var caveMap = wiredCaveMap.ToHashSet();
 
         Logger.Info("Start caves drawing");
 
@@ -265,7 +257,7 @@ public static class CaveViewer
         };
 
         prefab.UpdateNodes(Rand);
-        prefab.UpdateInnerPoints();
+        // prefab.UpdateInnerPoints();
 
         using (var b = new Bitmap(MAP_SIZE, MAP_SIZE))
         {

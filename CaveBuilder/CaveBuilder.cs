@@ -1,15 +1,15 @@
-#pragma warning disable CA1416, CA1050, CA2211, IDE0090, IDE0044, IDE0028, IDE0305
+#pragma warning disable CS0162, CA1416, CA1050, CA2211, IDE0090, IDE0044, IDE0028, IDE0305, IDE0035
 
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 
 using Random = System.Random;
 using Debug = System.Diagnostics.Debug;
-using System.ComponentModel;
 
 
 public static class Logger
@@ -99,8 +99,6 @@ public class CavePrefab
 
     public List<Vector3i> nodes;
 
-    public List<Vector3i> innerPoints;
-
     public CavePrefab()
     {
         nodes = new List<Vector3i>();
@@ -124,7 +122,7 @@ public class CavePrefab
         rotation = prefab.rotation;
 
         // UpdateNodes(prefab);
-        UpdateInnerPoints();
+        // UpdateInnerPoints();
         throw new NotImplementedException();
     }
 
@@ -175,9 +173,9 @@ public class CavePrefab
         }
     }
 
-    public void UpdateInnerPoints()
+    public List<Vector3i> GetInnerPoints()
     {
-        innerPoints = new List<Vector3i>();
+        var innerPoints = new List<Vector3i>();
 
         for (int x = position.x; x <= (position.x + size.x); x++)
         {
@@ -189,6 +187,8 @@ public class CavePrefab
                 }
             }
         }
+
+        return innerPoints;
     }
 
     public void SetRandomPosition(Random rand, int mapSize, int mapOffset)
@@ -200,7 +200,6 @@ public class CavePrefab
         );
 
         UpdateNodes(rand);
-        UpdateInnerPoints();
     }
 
     public bool OverLaps2D(CavePrefab other)
@@ -225,6 +224,30 @@ public class CavePrefab
         }
 
         return false;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool Intersect(Vector3i point)
+    {
+        if (point.x <= position.x)
+            return false;
+
+        if (point.x >= position.x + size.x)
+            return false;
+
+        if (point.y <= position.y)
+            return false;
+
+        if (point.y >= position.y + size.z)
+            return false;
+
+        if (point.z <= position.z)
+            return false;
+
+        if (point.z >= position.z + size.z)
+            return false;
+
+        return true;
     }
 
     public List<Edge> GetFaces()
@@ -397,6 +420,8 @@ public class CavePrefab
 
     public HashSet<Vector3i> GetNoiseAround()
     {
+        throw new NotImplementedException("Too high memory usage");
+
         var coveredPoints = new HashSet<Vector3i>();
         var noiseMap = new HashSet<Vector3i>();
 
@@ -412,7 +437,7 @@ public class CavePrefab
 
             noiseMap.UnionWith(CaveBuilder.ParseCircle(center, radius));
             coveredPoints.UnionWith(noiseMap);
-            coveredPoints.IntersectWith(innerPoints);
+            // coveredPoints.IntersectWith(innerPoints);
 
             // Logger.Debug($"{coveredPoints.Count}");
         }
@@ -621,13 +646,13 @@ public class HashedPriorityQueue<T>
     // see https://github.com/FyiurAmron/PriorityQueue
     private readonly SortedDictionary<float, Queue<T>> _sortedDictionary;
 
-    private HashSet<T> _items;
+    private HashSet<int> _items;
 
     private int _count;
 
     public HashedPriorityQueue()
     {
-        _items = new HashSet<T>();
+        _items = new HashSet<int>();
         _sortedDictionary = new SortedDictionary<float, Queue<T>>();
         _count = 0;
     }
@@ -639,7 +664,7 @@ public class HashedPriorityQueue<T>
             queue = new Queue<T>();
             _sortedDictionary.Add(priority, queue);
         }
-        _items.Add(item);
+        _items.Add(item.GetHashCode());
         queue.Enqueue(item);
         _count++;
     }
@@ -659,21 +684,24 @@ public class HashedPriorityQueue<T>
         }
         _count--;
 
-        _items.Remove(item);
+        _items.Remove(item.GetHashCode());
 
         return item;
     }
 
     public bool Contains(T element)
     {
-        return _items.Contains(element);
+        return _items.Contains(element.GetHashCode());
     }
 
     public int Count => _count;
 }
 
+
 public static class CaveTunneler
 {
+    private static ConcurrentDictionary<Vector3i, bool> validPositions = new ConcurrentDictionary<Vector3i, bool>();
+
     private static HashSet<Vector3i> ReconstructPath(Node currentNode)
     {
         var path = new HashSet<Vector3i>();
@@ -687,16 +715,33 @@ public static class CaveTunneler
         return path;
     }
 
-    public static HashSet<Vector3i> FindPath(Vector3i startPos, Vector3i targetPos, HashSet<Vector3i> obstacles, HashSet<Vector3i> prefabBoundNoise)
+    private static bool IsInPrefab(Vector3i position, List<CavePrefab> prefabs)
     {
+        if (validPositions.TryGetValue(position, out var isValid))
+            return isValid;
+
+        foreach (var prefab in prefabs)
+        {
+            if (prefab.Intersect(position))
+            {
+                validPositions[position] = true;
+                return true;
+            }
+        }
+
+        validPositions[position] = false;
+        return false;
+    }
+
+    public static HashSet<Vector3i> FindPath(Vector3i startPos, Vector3i targetPos, List<CavePrefab> prefabs)
+    {
+        // validPositions = new ConcurrentDictionary<Vector3i, bool>();
+
         var startNode = new Node(startPos);
         var goalNode = new Node(targetPos);
 
         var queue = new HashedPriorityQueue<Node>();
         var visited = new HashSet<Node>();
-
-        obstacles.Remove(startPos);
-        obstacles.Remove(targetPos);
 
         queue.Enqueue(startNode, float.MaxValue);
 
@@ -717,17 +762,16 @@ public static class CaveTunneler
             foreach (Node neighbor in currentNode.GetNeighbors())
             {
                 // Logger.Debug($"{currentNode.position} {neighbor.position} ({obstacles.Contains(neighbor.position)})");
-
                 if (visited.Contains(neighbor))
                     continue;
 
-                if (obstacles.Contains(neighbor.position))
+                if (IsInPrefab(neighbor.position, prefabs))
                     continue;
 
                 float noise = 0.5f * (1 + CaveBuilder.pathingNoise.GetNoise(neighbor.position.x, neighbor.position.y, neighbor.position.z));
                 float factor = noise < CaveBuilder.NOISE_THRESHOLD ? .5f : 1f;
 
-                factor *= prefabBoundNoise.Contains(neighbor.position) ? 1f : .5f;
+                // factor *= prefabBoundNoise.Contains(neighbor.position) ? 1f : .5f;
 
                 float tentativeGCost = currentNode.GCost + CaveUtils.SqrEuclidianDist(currentNode, neighbor) * factor;
 
@@ -878,7 +922,7 @@ public static class CaveBuilder
 {
     public static int SEED = 12345; // new Random().Next();
 
-    public static int MAP_SIZE = 100;
+    public static int MAP_SIZE = 6144;
 
     public static int PREFAB_Y = 5;
 
@@ -993,11 +1037,13 @@ public static class CaveBuilder
 
     public static HashSet<Vector3i> CollectPrefabObstacles(List<CavePrefab> prefabs)
     {
+        throw new NotImplementedException("");
+
         var obstacles = new HashSet<Vector3i>();
 
         foreach (CavePrefab prefab in prefabs)
         {
-            obstacles.UnionWith(prefab.innerPoints);
+            // obstacles.UnionWith(prefab.innerPoints);
         }
 
         return obstacles;
@@ -1009,7 +1055,9 @@ public static class CaveBuilder
 
         foreach (CavePrefab prefab in prefabs)
         {
-            noiseMap.UnionWith(prefab.GetNoiseAround(rand));
+            var noise = prefab.GetNoiseAround(rand);
+            Logger.Info($"{noise.Count} / {noiseMap.Count}");
+            noiseMap.UnionWith(noise);
         }
 
         return noiseMap;
