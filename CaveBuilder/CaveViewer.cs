@@ -284,8 +284,35 @@ public static class CaveViewer
         }
     }
 
-    public static void GenerateCaveMap()
+    public static void GenerateCaveMap(string[] args)
     {
+        string filename = "cavemap.txt";
+
+        if (args[1] == "read")
+        {
+            var caveMap = CaveBuilder.ReadCaveMap(filename);
+            int index = 0;
+
+            Log.Out($"Chunk count: {caveMap.Count}");
+
+            foreach (var entry in caveMap)
+            {
+
+                Log.Out(entry.Key.ToString());
+                Log.Out(string.Concat(Enumerable.Repeat("=", 10)));
+
+                foreach (var point in entry.Value)
+                {
+                    Log.Out(point.ToString());
+                    if (index++ > 100)
+                        return;
+                }
+
+                Log.Out("");
+            }
+            return;
+        }
+
         var points = new HashSet<Vector3i>(){
             new Vector3i(0, 0, 0),
             new Vector3i(1, 0, 1),
@@ -294,7 +321,7 @@ public static class CaveViewer
             new Vector3i(1, 0, 18),
         };
 
-        CaveBuilder.ExportCaveMap("cavemap.txt", points);
+        CaveBuilder.ExportCaveMap(filename, points);
     }
 
     static void ToWaveFront(List<Vector3i> positions, string filename, bool openFile = false)
@@ -352,6 +379,9 @@ public static class CaveViewer
 
     public static void Main(string[] args)
     {
+        // Log.Out("1.2".Split('.').Length.ToString());
+        // return;
+
         Logger.Info($"SEED .......... {SEED}");
         Logger.Info($"SIZE .......... {MAP_SIZE}");
         Logger.Info($"PREFAB_COUNT .. {PREFAB_COUNT}");
@@ -381,7 +411,7 @@ public static class CaveViewer
                 break;
 
             case "cavemap":
-                GenerateCaveMap();
+                GenerateCaveMap(args);
                 break;
 
             default:
