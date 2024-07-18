@@ -127,12 +127,11 @@ public class CavePrefab
     public CavePrefab(PrefabDataInstance pdi)
     {
         prefabDataInstance = pdi;
-        position = pdi.boundingBoxPosition + CavePlanner.HalfWorldSize;
+        position = pdi.boundingBoxPosition + new Vector3i(CaveBuilder.worldSize / 2, 0, CaveBuilder.worldSize / 2);
         size = pdi.boundingBoxSize;
         rotation = pdi.rotation;
 
         UpdateNodes(pdi);
-        // UpdateInnerPoints();
     }
 
     public void UpdateNodes(PrefabDataInstance prefab)
@@ -649,66 +648,59 @@ public class Node
 
 public class HashedPriorityQueue<T>
 {
-    private List<T> items;
+    // see https://github.com/FyiurAmron/PriorityQueue
+    private readonly SortedDictionary<float, Queue<T>> _sortedDictionary;
 
-    private List<float> priorities;
+    private HashSet<T> _items;
 
-    private HashSet<int> hashCodes;
-
-    public int Count => items.Count;
+    private int _count;
 
     public HashedPriorityQueue()
     {
-        items = new List<T>();
-        priorities = new List<float>();
-        hashCodes = new HashSet<int>();
+        _items = new HashSet<T>();
+        _sortedDictionary = new SortedDictionary<float, Queue<T>>();
+        _count = 0;
     }
 
     public void Enqueue(T item, float priority)
     {
-        int index = 0;
-        int size = items.Count;
-
-        // binary search to find the index to insert
-        while (index < size)
+        if (!_sortedDictionary.TryGetValue(priority, out Queue<T> queue))
         {
-            int currentIndex = (index + size) / 2;
-
-            if (priorities[currentIndex] < priority)
-            {
-                index = currentIndex + 1;
-            }
-            else
-            {
-                size = currentIndex;
-            }
+            queue = new Queue<T>();
+            _sortedDictionary.Add(priority, queue);
         }
-
-        items.Insert(index, item);
-        priorities.Insert(index, priority);
-        hashCodes.Add(item.GetHashCode());
+        _items.Add(item);
+        queue.Enqueue(item);
+        _count++;
     }
 
     public T Dequeue()
     {
-        if (items.Count == 0)
+        if (_count == 0)
             throw new InvalidOperationException("The priority queue is empty.");
 
-        var item = items[0];
+        var firstPair = _sortedDictionary.First();
+        var queue = firstPair.Value;
+        var item = queue.Dequeue();
 
-        items.RemoveAt(0);
-        priorities.RemoveAt(0);
+        if (queue.Count == 0)
+        {
+            _sortedDictionary.Remove(firstPair.Key);
+        }
+        _count--;
+
+        _items.Remove(item);
 
         return item;
     }
 
     public bool Contains(T element)
     {
-        return hashCodes.Contains(element.GetHashCode());
+        return _items.Contains(element);
     }
 
+    public int Count => _count;
 }
-
 
 public static class CaveTunneler
 {
@@ -747,8 +739,6 @@ public static class CaveTunneler
 
     public static HashSet<Vector3i> FindPath(Vector3i startPos, Vector3i targetPos, List<CavePrefab> prefabs)
     {
-        // validPositions = new ConcurrentDictionary<Vector3i, bool>();
-
         var startNode = new Node(startPos);
         var goalNode = new Node(targetPos);
 
@@ -757,7 +747,7 @@ public static class CaveTunneler
 
         queue.Enqueue(startNode, float.MaxValue);
 
-        var path = new HashSet<Vector3i>(1000);
+        var path = new HashSet<Vector3i>();
 
         while (queue.Count > 0)
         {
