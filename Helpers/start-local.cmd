@@ -27,6 +27,6 @@ del /Q "%APPDATA%\7DaysToDie\Saves\Navezgane\Caves\Region"
 del /Q "%APPDATA%\7DaysToDie\Saves\Old Honihebu County\Caves\Region"
 del /Q "%APPDATA%\7DaysToDie\Saves\Old Honihebu County\Entrances\Region"
 
-RMDIR "%APPDATA%\7DaysToDie\GeneratedWorlds\Old Honihebu County" /s /q
+@REM RMDIR "%APPDATA%\7DaysToDie\GeneratedWorlds\Old Honihebu County" /s /q
 
 exit /b 0

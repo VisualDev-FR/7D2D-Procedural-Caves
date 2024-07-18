@@ -396,6 +396,8 @@ public static class ProceduralCaveSystem
 
         public static IEnumerator GenerateFromUIPostFix()
         {
+            CavePlanner.Cleanup();
+
             yield return GenerateFromUI();
 
             var addedCaveEntrances = CavePlanner.GetUsedCavePrefabs();
@@ -408,10 +410,6 @@ public static class ProceduralCaveSystem
             }
 
             yield return CavePlanner.GenerateCaveMap();
-            CavePlanner.SaveCaveMap();
-            CavePlanner.Cleanup();
-
-            yield return null;
         }
 
         public static bool Prefix(WorldBuilder __instance, ref IEnumerator __result)
@@ -419,6 +417,18 @@ public static class ProceduralCaveSystem
             worldBuilder = __instance;
             __result = GenerateFromUIPostFix();
             return false;
+        }
+    }
+
+    [HarmonyPatch(typeof(WorldBuilder), "saveRawHeightmap")]
+    public static class WorldBuilder_saveRawHeightmap
+    {
+        public static bool Prefix()
+        {
+            Log.Out("start WorldBuilder_saveRawHeightmap postfix");
+            CavePlanner.SaveCaveMap();
+
+            return true;
         }
     }
 }

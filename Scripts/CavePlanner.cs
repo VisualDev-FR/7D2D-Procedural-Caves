@@ -19,11 +19,13 @@ public static class CavePlanner
 
     public static Random rand = CaveBuilder.rand;
 
-    public static int WorldSize => WorldBuilder.Instance.WorldSize;
+    public static WorldBuilder WorldBuilder => WorldBuilder.Instance;
+
+    public static int WorldSize => WorldBuilder.WorldSize;
 
     public static int RadiationSize => StreetTile.TileSize + radiationZoneMargin;
 
-    public static int Seed => WorldBuilder.Instance.Seed + WorldSize;
+    public static int Seed => WorldBuilder.Seed + WorldSize;
 
     public static int entrancesAdded = 0;
 
@@ -37,7 +39,7 @@ public static class CavePlanner
 
     public static int overLapMargin = 30;
 
-    public static Vector3i HalfWorldSize => new Vector3i(WorldBuilder.Instance.HalfWorldSize, 0, WorldBuilder.Instance.HalfWorldSize);
+    public static Vector3i HalfWorldSize => new Vector3i(WorldBuilder.HalfWorldSize, 0, WorldBuilder.HalfWorldSize);
 
     public static List<PrefabData> entrancePrefabs = null;
 
@@ -102,7 +104,7 @@ public static class CavePlanner
         {
             for (int z = position.z; z < position.z + size.z; z++)
             {
-                minHeight = Utils.FastMin(minHeight, (int)WorldBuilder.Instance.GetHeight(x, z));
+                minHeight = Utils.FastMin(minHeight, (int)WorldBuilder.GetHeight(x, z));
             }
         }
 
@@ -233,7 +235,7 @@ public static class CavePlanner
         var timer = new Stopwatch();
         timer.Start();
 
-        yield return WorldBuilder.Instance.SetMessage("Spawning cave prefabs...", _logToConsole: true);
+        yield return WorldBuilder.SetMessage("Spawning cave prefabs...", _logToConsole: true);
 
         List<CavePrefab> cavePrefabs = PlaceCavePrefabs(100);
 
@@ -254,7 +256,7 @@ public static class CavePlanner
 
             Log.Out($"Tunneling {p1} -> {p2} == {p1 + HalfWorldSize} -> {p2 + HalfWorldSize}");
 
-            yield return WorldBuilder.Instance.SetMessage(message);
+            yield return WorldBuilder.SetMessage(message);
 
             HashSet<Vector3i> path = CaveTunneler.FindPath(p1 + HalfWorldSize, p2 + HalfWorldSize, cavePrefabs);
 
@@ -265,6 +267,8 @@ public static class CavePlanner
 
         // caveMap = CaveTunneler.ThickenCaveMap(wiredCaveMap.ToHashSet(), obstacles);
 
+        caveMap  = wiredCaveMap;
+
         Log.Out($"{caveMap.Count} cave blocks generated, timer={CaveUtils.TimeFormat(timer)}.");
 
         yield return null;
@@ -272,10 +276,11 @@ public static class CavePlanner
 
     public static IEnumerator GenerateCavePreview(List<CavePrefab> prefabs, HashSet<Vector3i> caveMap)
     {
-        var pixels = Enumerable.Repeat(new Color32(0, 0, 0, 255), WorldSize * WorldSize).ToArray();
         string filename = @"C:\tools\DEV\7D2D_Modding\7D2D-Procedural-caves\CaveBuilder\graph.png";
 
-        yield return WorldBuilder.Instance.SetMessage("Creating cave preview...", _logToConsole: true);
+        var pixels = Enumerable.Repeat(new Color32(0, 0, 0, 255), WorldSize * WorldSize).ToArray();
+
+        yield return WorldBuilder.SetMessage("Creating cave preview...", _logToConsole: true);
 
         foreach (var prefab in prefabs)
         {
@@ -309,7 +314,18 @@ public static class CavePlanner
 
     public static void SaveCaveMap()
     {
+        string filename = WorldBuilder.WorldPath + "cavemap.csv";
 
+        Log.Out(filename);
+        Log.Out($"caveMap size = {caveMap.Count}");
+
+        using (var writer = new StreamWriter(filename))
+        {
+            foreach (var position in caveMap)
+            {
+                var blockPos = position - HalfWorldSize;
+                writer.WriteLine(blockPos.ToString());
+            }
+        }
     }
-
 }
