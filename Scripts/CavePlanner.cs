@@ -256,9 +256,6 @@ public static class CavePlanner
 
         Log.Out($"[Cave] {cavePrefabs.Count} cave prefabs added.");
 
-        // HashSet<Vector3i> obstacles = CaveBuilder.CollectPrefabObstacles(cavePrefabs);
-        // HashSet<Vector3i> prefabBoundNoise = new HashSet<Vector3i>(); // CaveBuilder.CollectPrefabNoise(cavePrefabs);
-
         List<Edge> edges = GraphSolver.Resolve(cavePrefabs);
 
         var wiredCaveMap = new HashSet<Vector3i>();
@@ -281,8 +278,6 @@ public static class CavePlanner
         }
 
         yield return GenerateCavePreview(cavePrefabs, wiredCaveMap);
-
-        // caveMap = CaveTunneler.ThickenCaveMap(wiredCaveMap.ToHashSet(), obstacles);
 
         caveMap = wiredCaveMap;
 
@@ -336,14 +331,7 @@ public static class CavePlanner
         Log.Out(filename);
         Log.Out($"caveMap size = {caveMap.Count}");
 
-        using (var writer = new StreamWriter(filename))
-        {
-            foreach (var position in caveMap)
-            {
-                var blockPos = position - HalfWorldSize;
-                writer.WriteLine(blockPos.ToString());
-            }
-        }
+        CaveBuilder.ExportCaveMap(filename, caveMap);
     }
 }
 

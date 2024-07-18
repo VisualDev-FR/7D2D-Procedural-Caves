@@ -5,59 +5,32 @@ using System;
 
 public static class CaveGenerator
 {
-    public static HashSet<CaveBlock> caveMap;
+    public static Dictionary<Vector3i, List<Vector3i>> caveMap;
 
     private static BlockValue caveAirBlock = new BlockValue((uint)Block.GetBlockByName("air").blockID);
 
     public static void LoadCaveMap(string worldName)
     {
-        string filePath = GameIO.GetWorldDir(worldName) + "/cavemap.csv";
+        string filename = GameIO.GetWorldDir(worldName) + "/cavemap.csv";
 
-        caveMap = new HashSet<CaveBlock>();
-
-        using (var reader = new StreamReader(filePath))
-        {
-            string strPosition;
-            while ((strPosition = reader.ReadLine()) != null)
-            {
-                var coords = strPosition.Split(",");
-
-                short x = short.Parse(coords[0]);
-                short y = short.Parse(coords[1]);
-                short z = short.Parse(coords[2]);
-
-                caveMap.Add(new CaveBlock(x, y, z, 0b0));
-            }
-        }
-
-        Log.Out($"[Cave] {caveMap.Count} caveBlocks Loaded.");
+        caveMap = CaveBuilder.ReadCaveMap(filename);
     }
 
-    public static bool IsBlockInsideChunk(CaveBlock caveBlock, Vector3i chunkPos)
+    public static bool IsInsideChunk(Vector3i position, Vector3i chunkPos)
     {
-        if (caveBlock.x < chunkPos.x)
+        if (position.x < chunkPos.x)
             return false;
 
-        if (caveBlock.x > chunkPos.x + 15)
+        if (position.x > chunkPos.x + 15)
             return false;
 
-        if (caveBlock.z < chunkPos.z)
+        if (position.z < chunkPos.z)
             return false;
 
-        if (caveBlock.z > chunkPos.z + 15)
+        if (position.z > chunkPos.z + 15)
             return false;
 
         return true;
-    }
-
-    public static List<Vector3i> GetCaveBlocks(Vector3i chunkPos)
-    {
-        var result =
-            from pos in caveMap
-            where IsBlockInsideChunk(pos, chunkPos)
-            select pos - chunkPos;
-
-        return result.ToList();
     }
 
     public static void GenerateCave(Chunk chunk)
@@ -68,20 +41,43 @@ public static class CaveGenerator
             return;
         }
 
-        var chunkPos = chunk.GetWorldPos();
-        var blockPositions = GetCaveBlocks(chunkPos);
+        int worldSize = GameManager.Instance.World.ChunkCache.ChunkProvider.GetWorldSize().x;
+        int chunkWorldSize = worldSize / 16;
+        var chunkPos = chunk.ChunkPos + new Vector3i(chunkWorldSize / 2, 0, chunkWorldSize / 2);
+        var chunkWorldPos = chunk.GetWorldPos();
+        var HalfWorldSize = new Vector3i(worldSize / 2, 0, worldSize / 2);
 
-        Log.Out($"[Cave] {blockPositions.Count} caveBlock spawned in chunk {chunkPos}");
+        // var playerPos = new Vector3i(GameManager.Instance.World.GetPrimaryPlayer().position);
+        // if (!IsInsideChunk(playerPos, chunk.GetWorldPos()))
+        // {
+        //     return;
+        // }
+        // Log.Out($"[Cave] playerPos: {GameManager.Instance.World.GetPrimaryPlayer().position}");
+        // Log.Out($"[Cave] chunkWorld: {chunk.GetWorldPos()}");
+        // Log.Out($"[Cave] chunkWorldSize: {chunkWorldSize}");
+        // Log.Out($"[Cave] chunk.ChunkPos: {chunk.ChunkPos}");
+        // Log.Out($"[Cave] ChunkPos: {chunkPos}");
 
-        foreach (var caveBlock in blockPositions)
+        if (!caveMap.TryGetValue(chunkPos, out var blockPositions))
         {
+            // Log.Warning($"[Cave] chunk {chunkPos} not found in cavemap.");
+            return;
+        }
+
+        Log.Warning($"[Cave] {blockPositions.Count} caveBlock spawned in chunk {chunkPos}");
+
+        foreach (var block in blockPositions)
+        {
+            var caveBlock = block - chunkWorldPos - HalfWorldSize;
+
             var neighbors = new List<Vector3i>()
             {
                 new Vector3i(caveBlock.x, caveBlock.y, caveBlock.z),
                 new Vector3i(caveBlock.x + 1, caveBlock.y, caveBlock.z),
                 new Vector3i(caveBlock.x - 1, caveBlock.y, caveBlock.z),
                 new Vector3i(caveBlock.x, caveBlock.y + 1, caveBlock.z),
-                new Vector3i(caveBlock.x, caveBlock.y - 1, caveBlock.z),
+                new Vector3i(caveBlock.x, caveBlock.y + 2, caveBlock.z),
+                new Vector3i(caveBlock.x, caveBlock.y + 3, caveBlock.z),
                 new Vector3i(caveBlock.x, caveBlock.y, caveBlock.z + 1),
                 new Vector3i(caveBlock.x, caveBlock.y, caveBlock.z - 1),
             };

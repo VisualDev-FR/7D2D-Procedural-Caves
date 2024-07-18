@@ -303,13 +303,20 @@ public static class CaveViewer
 
                 foreach (var point in entry.Value)
                 {
+                    index++;
                     Log.Out(point.ToString());
-                    if (index++ > 100)
-                        return;
+
                 }
 
                 Log.Out("");
+
+                if (index > 100)
+                    break;
             }
+
+            var test = new Vector3i(43, 0, 111);
+
+            Log.Out($"contains key {test}: {caveMap.ContainsKey(test)}");
             return;
         }
 
