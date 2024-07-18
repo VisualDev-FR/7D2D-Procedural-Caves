@@ -73,18 +73,30 @@ public static class CaveGenerator
 
         Log.Out($"[Cave] {blockPositions.Count} caveBlock spawned in chunk {chunkPos}");
 
-        foreach (var pos in blockPositions)
+        foreach (var caveBlock in blockPositions)
         {
-            try
+            var neighbors = new List<Vector3i>()
             {
-                // var position = pos + CavePlanner.HalfWorldSize;
+                new Vector3i(caveBlock.x, caveBlock.y, caveBlock.z),
+                new Vector3i(caveBlock.x + 1, caveBlock.y, caveBlock.z),
+                new Vector3i(caveBlock.x - 1, caveBlock.y, caveBlock.z),
+                new Vector3i(caveBlock.x, caveBlock.y + 1, caveBlock.z),
+                new Vector3i(caveBlock.x, caveBlock.y - 1, caveBlock.z),
+                new Vector3i(caveBlock.x, caveBlock.y, caveBlock.z + 1),
+                new Vector3i(caveBlock.x, caveBlock.y, caveBlock.z - 1),
+            };
 
-                chunk.SetBlockRaw(pos.x, pos.y, pos.z, caveAirBlock);
-                chunk.SetDensity(pos.x, pos.y, pos.z, MarchingCubes.DensityAir);
-            }
-            catch (Exception e)
+            foreach (var pos in neighbors)
             {
-                Log.Error($"[Cave] (Chunk={chunkPos}, block={pos}) {e}");
+                try
+                {
+                    chunk.SetBlockRaw(pos.x, pos.y, pos.z, caveAirBlock);
+                    chunk.SetDensity(pos.x, pos.y, pos.z, MarchingCubes.DensityAir);
+                }
+                catch
+                {
+                    // Log.Error($"[Cave] (Chunk={chunkPos}, block={caveBlock}) {e}");
+                }
             }
         }
     }
