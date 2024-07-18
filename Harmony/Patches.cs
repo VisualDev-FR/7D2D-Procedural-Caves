@@ -6,8 +6,6 @@ using System;
 using System.Xml.Linq;
 using WorldGenerationEngineFinal;
 
-using Random = System.Random;
-
 
 public static class ProceduralCaveSystem
 {
@@ -195,8 +193,7 @@ public static class ProceduralCaveSystem
     {
         public static void Postfix(Chunk _chunk)
         {
-            // LegacyCaveSystem.Add2DCaveToChunk(_chunk);
-            // LegacyCaveSystem.Add3DCaveToChunk(_chunk);
+            CaveGenerator.GenerateCave(_chunk);
         }
     }
 
@@ -431,4 +428,16 @@ public static class ProceduralCaveSystem
             return true;
         }
     }
+
+
+    [HarmonyPatch(typeof(GameManager), "createWorld")]
+    public static class GameManager_createWorld
+    {
+        public static bool Prefix(string _sWorldName, string _sGameName, List<WallVolume> _wallVolumes, bool _fixedSizeCC = false)
+        {
+            CaveGenerator.LoadCaveMap(_sWorldName);
+            return true;
+        }
+    }
+
 }

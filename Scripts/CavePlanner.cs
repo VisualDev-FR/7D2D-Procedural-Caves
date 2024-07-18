@@ -9,6 +9,7 @@ using UnityEngine;
 using UnityEngine.Experimental.Rendering;
 using System.Collections;
 
+
 public static class CavePlanner
 {
     public static Dictionary<string, PrefabData> AllCavePrefabs = new Dictionary<string, PrefabData>();
@@ -267,7 +268,7 @@ public static class CavePlanner
 
         // caveMap = CaveTunneler.ThickenCaveMap(wiredCaveMap.ToHashSet(), obstacles);
 
-        caveMap  = wiredCaveMap;
+        caveMap = wiredCaveMap;
 
         Log.Out($"{caveMap.Count} cave blocks generated, timer={CaveUtils.TimeFormat(timer)}.");
 
@@ -329,3 +330,5 @@ public static class CavePlanner
         }
     }
 }
+
+

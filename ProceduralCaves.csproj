@@ -90,6 +90,8 @@
     <Compile Include="Scripts\CaveConfig.cs" />
     <Compile Include="Scripts\CaveSystemCLI.cs" />
     <Compile Include="Scripts\XUiC_CavesConfig.cs" />
+    <Compile Include="Scripts\CaveBlock.cs" />
+    <Compile Include="Scripts\CaveGenerator.cs" />
 
     <!-- Cave Builder -->
     <Compile Include="CaveBuilder\FastNoiseLite.cs" />
