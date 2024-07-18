@@ -252,12 +252,9 @@ public static class CavePlanner
 
         List<CavePrefab> cavePrefabs = PlaceCavePrefabs(100, addedCaveEntrances);
 
-        Log.Out($"[Cave] {cavePrefabs.Count} cave prefabs added.");
-
         yield return GenerateCavePreview(cavePrefabs, new HashSet<Vector3i>());
-        yield break;
 
-        Log.Out($"[Cave] {cavePrefabs.Count} placed prefabs.");
+        Log.Out($"[Cave] {cavePrefabs.Count} cave prefabs added.");
 
         // HashSet<Vector3i> obstacles = CaveBuilder.CollectPrefabObstacles(cavePrefabs);
         // HashSet<Vector3i> prefabBoundNoise = new HashSet<Vector3i>(); // CaveBuilder.CollectPrefabNoise(cavePrefabs);
@@ -274,11 +271,11 @@ public static class CavePlanner
 
             string message = $"Cave tunneling: {100.0f * index++ / edges.Count:F0}% ({index} / {edges.Count})";
 
-            Log.Out($"Tunneling {p1} -> {p2} == {p1 + HalfWorldSize} -> {p2 + HalfWorldSize}");
+            Log.Out($"Tunneling {p1} -> {p2}");
 
             yield return WorldBuilder.SetMessage(message);
 
-            HashSet<Vector3i> path = CaveTunneler.FindPath(p1 + HalfWorldSize, p2 + HalfWorldSize, cavePrefabs);
+            HashSet<Vector3i> path = CaveTunneler.FindPath(p1, p2, cavePrefabs);
 
             wiredCaveMap.UnionWith(path);
         }
@@ -319,12 +316,12 @@ public static class CavePlanner
             }
         }
 
-        // foreach (var block in caveMap)
-        // {
-        //     var p1 = block; // - HalfWorldSize;
-        //     uint index = (uint)(p1.x + p1.z * WorldSize);
-        //     pixels[index] = new Color32(255, 0, 0, 255);
-        // }
+        foreach (var block in caveMap)
+        {
+            var p1 = block; // - HalfWorldSize;
+            uint index = (uint)(p1.x + p1.z * WorldSize);
+            pixels[index] = new Color32(255, 0, 0, 255);
+        }
 
         var image = ImageConversion.EncodeArrayToPNG(pixels, GraphicsFormat.R8G8B8A8_UNorm, (uint)WorldSize, (uint)WorldSize, (uint)WorldSize * 4);
         SdFile.WriteAllBytes(filename, image);
