@@ -182,14 +182,17 @@ public static class CaveViewer
 
     public static void SaveCaveMap(HashSet<Vector3i> caveMap, string filename)
     {
-        using (var writer = new StreamWriter(filename))
-        {
-            foreach (var caveBlock in caveMap)
-            {
-                writer.WriteLine(caveBlock.ToString());
-            }
-            Logger.Info($"CaveMap saved '{filename}'.");
-        }
+        Log.Out("Exporting CaveMap");
+        CaveBuilder.ExportCaveMap(filename, caveMap);
+
+        // using (var writer = new StreamWriter(filename))
+        // {
+        //     foreach (var caveBlock in caveMap)
+        //     {
+        //         writer.WriteLine(caveBlock.ToString());
+        //     }
+        //     Logger.Info($"CaveMap saved '{filename}'.");
+        // }
     }
 
     public static void GenerateCaves(string[] args)
@@ -226,6 +229,8 @@ public static class CaveViewer
 
         var caveMap = wiredCaveMap.ToHashSet();
 
+        SaveCaveMap(caveMap, "cavemap.txt");
+
         Logger.Info("Start caves drawing");
 
         using (var b = new Bitmap(MAP_SIZE, MAP_SIZE))
@@ -242,7 +247,7 @@ public static class CaveViewer
             b.Save(@"cave.png", ImageFormat.Png);
         }
 
-        SaveCaveMap(caveMap, "cavemap.csv");
+
 
         Console.WriteLine($"{caveMap.Count} cave blocks generated, timer={CaveUtils.TimeFormat(timer)}.");
     }
@@ -277,6 +282,19 @@ public static class CaveViewer
 
             b.Save(@"prefab.png", ImageFormat.Png);
         }
+    }
+
+    public static void GenerateCaveMap()
+    {
+        var points = new HashSet<Vector3i>(){
+            new Vector3i(0, 0, 0),
+            new Vector3i(1, 0, 1),
+            new Vector3i(1, 0, 2),
+            new Vector3i(14, 0, 14),
+            new Vector3i(1, 0, 18),
+        };
+
+        CaveBuilder.ExportCaveMap("cavemap.txt", points);
     }
 
     static void ToWaveFront(List<Vector3i> positions, string filename, bool openFile = false)
@@ -360,6 +378,10 @@ public static class CaveViewer
 
             case "prefab":
                 GeneratePrefab(args);
+                break;
+
+            case "cavemap":
+                GenerateCaveMap();
                 break;
 
             default:

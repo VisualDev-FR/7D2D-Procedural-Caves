@@ -7,9 +7,12 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Runtime.Serialization;
 
 using Random = System.Random;
 using Debug = System.Diagnostics.Debug;
+using System.IO;
+using System.Collections.Specialized;
 
 
 public static class Logger
@@ -935,7 +938,7 @@ public static class CaveBuilder
 {
     public static int SEED = new Random().Next();
 
-    public static int worldSize = 6144;
+    public static int worldSize = 12000;
 
     public static int MIN_PREFAB_SIZE = 8;
 
@@ -1074,4 +1077,75 @@ public static class CaveBuilder
         return noiseMap;
     }
 
+    public static void ExportCaveMap(string filename, HashSet<Vector3i> caveMap)
+    {
+        SortedDictionary<Vector3i, List<string>> groupedCaveMap = GroupByChunk(caveMap);
+
+        using (var writer = new StreamWriter(filename))
+        {
+            foreach (var entry in groupedCaveMap)
+            {
+                if (entry.Value.Count == 0)
+                    continue;
+
+                writer.WriteLine(entry.Key.ToString());
+                writer.WriteLine(entry.Value.Count);
+                writer.WriteLine(string.Concat(Enumerable.Repeat("-", 10)));
+
+                Log.Out(entry.Key.ToString());
+
+                foreach (var position in entry.Value)
+                {
+                    writer.WriteLine(position);
+                }
+
+                writer.WriteLine("");
+            }
+        }
+    }
+
+    public static Vector3i GetChunkPosZX(Vector3i pos)
+    {
+        return new Vector3i(
+            pos.x / 16,
+            0,
+            pos.z / 16
+        );
+    }
+
+    public static SortedDictionary<Vector3i, List<string>> GroupByChunk(HashSet<Vector3i> caveMap)
+    {
+        var groupedCaveMap = new SortedDictionary<Vector3i, List<string>>(new VectorComparer());
+
+        foreach (var pos in caveMap)
+        {
+            Vector3i chunkPos = GetChunkPosZX(pos);
+
+            if (!groupedCaveMap.TryGetValue(chunkPos, out _))
+                groupedCaveMap[chunkPos] = new List<string>();
+
+            groupedCaveMap[chunkPos].Add(pos.ToString());
+        }
+
+        return groupedCaveMap;
+    }
+
+}
+
+public class VectorComparer : IComparer<Vector3i>
+{
+    public int Compare(Vector3i p1, Vector3i p2)
+    {
+        // int comparer = (p1.x * p1.x + p1.y * p1.y + p1.z * p1.z) - (p2.x * p2.x + p2.y * p2.y + p2.z * p2.z);
+
+        // if (comparer == 0)
+        //     return p2.x - p1.x;
+
+        // return comparer;
+
+        if (p2.x != p1.x)
+            return p1.x - p2.x;
+
+        return p1.y - p2.y;
+    }
 }

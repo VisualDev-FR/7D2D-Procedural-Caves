@@ -1,6 +1,5 @@
 obj/
 bin/
-.log
-*.png
-*.csv
-*.obj
+*
+!*.cs
+!*.bat
