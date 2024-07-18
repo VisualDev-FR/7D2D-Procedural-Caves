@@ -364,8 +364,6 @@ public static class PrefabManager_GetWildernessPrefab
         if (entrancesAdded >= 20)
             return true;
 
-        Log.Out($"[Cave] addedPrefabs = {entrancesAdded}");
-
         var prefabs = CavePlanner.GetCaveEntrancePrefabs();
 
         __result = prefabs[CavePlanner.rand.Next(prefabs.Count)];
@@ -395,16 +393,6 @@ public static class WorldBuilder_GenerateFromUI
         CavePlanner.Cleanup();
 
         yield return GenerateFromUI();
-
-        var addedCaveEntrances = CavePlanner.GetUsedCavePrefabs();
-
-        Log.Out($"[Cave] {addedCaveEntrances.Count} Cave entrance added.");
-
-        foreach (var prefab in addedCaveEntrances)
-        {
-            Log.Out($"[Cave] Cave entrance added at {prefab.boundingBoxPosition}");
-        }
-
         yield return CavePlanner.GenerateCaveMap();
     }
 

@@ -89,6 +89,8 @@ public static class CaveUtils
 
 public class CavePrefab
 {
+    public static FastTags<TagGroup.Poi> caveNodeTags = FastTags<TagGroup.Poi>.Parse("cavenode");
+
     public PrefabDataInstance prefabDataInstance;
 
     public Vector3i position;
@@ -97,11 +99,19 @@ public class CavePrefab
 
     public byte rotation;
 
+    public string Name => prefabDataInstance.prefab.Name;
+
     public List<Vector3i> nodes;
 
     public CavePrefab()
     {
         nodes = new List<Vector3i>();
+    }
+
+    public CavePrefab(Vector3i position)
+    {
+        nodes = new List<Vector3i>();
+        this.position = new Vector3i(position);
     }
 
     public CavePrefab(Random rand)
@@ -114,21 +124,19 @@ public class CavePrefab
         );
     }
 
-    public CavePrefab(PrefabDataInstance prefab)
+    public CavePrefab(PrefabDataInstance pdi)
     {
-        prefabDataInstance = prefab;
-        position = prefab.boundingBoxPosition;
-        size = prefab.boundingBoxSize;
-        rotation = prefab.rotation;
+        prefabDataInstance = pdi;
+        position = pdi.boundingBoxPosition + CavePlanner.HalfWorldSize;
+        size = pdi.boundingBoxSize;
+        rotation = pdi.rotation;
 
-        UpdateNodes(prefab);
+        UpdateNodes(pdi);
         // UpdateInnerPoints();
     }
 
     public void UpdateNodes(PrefabDataInstance prefab)
     {
-        var caveNodeTags = FastTags<TagGroup.Poi>.Parse("cavenode");
-
         nodes = new List<Vector3i>();
 
         foreach (var marker in prefab.prefab.POIMarkers)
@@ -136,8 +144,7 @@ public class CavePrefab
             if (!marker.tags.Test_AnySet(caveNodeTags))
                 continue;
 
-            // TODO: handle all points of the node
-            nodes.Add(marker.start + prefabDataInstance.boundingBoxPosition);
+            nodes.Add(marker.start + position);
         }
     }
 
@@ -826,6 +833,13 @@ public static class GraphSolver
     private static List<Edge> BuildPrefabGraph(List<CavePrefab> prefabs)
     {
         var prefabEdges = new Dictionary<int, List<Edge>>();
+        var graph = new HashSet<Edge>();
+
+        if (prefabs.Count < 2)
+        {
+            Log.Error("[Cave] At least two prefabs must be provided");
+            return graph.ToList();
+        }
 
         for (int i = 0; i < prefabs.Count; i++)
         {
@@ -847,14 +861,18 @@ public static class GraphSolver
             }
         }
 
-        Logger.Debug($"node count = {prefabEdges.Count * 4}");
-
-        var graph = new HashSet<Edge>();
+        Log.Out($"prefabs: {prefabs.Count}, prefabEdges: {prefabEdges.Count}");
 
         for (int i = 0; i < prefabs.Count; i++)
         {
             var relatedPrefabEdges = prefabEdges[i];
             var nodes = prefabs[i].nodes.ToHashSet();
+
+            if (nodes.Count == 0)
+            {
+                Log.Error($"[Cave] no cave node for {prefabs[i].Name}");
+                continue;
+            }
 
             Debug.Assert(relatedPrefabEdges.Count == prefabs.Count - 1);
 
