@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 public static class CaveViewer
 {
-    public static int MAP_SIZE = CaveBuilder.MAP_SIZE;
+    public static int MAP_SIZE = CaveBuilder.worldSize;
 
     public static Random Rand = CaveBuilder.rand;
 

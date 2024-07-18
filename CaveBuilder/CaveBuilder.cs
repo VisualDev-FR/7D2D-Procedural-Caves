@@ -194,7 +194,7 @@ public class CavePrefab
     {
         position = new Vector3i(
             rand.Next(mapOffset, mapSize - mapOffset - size.x),
-            rand.Next(mapOffset, 256),
+            rand.Next(2, 256),
             rand.Next(mapOffset, mapSize - mapOffset - size.z)
         );
 
@@ -582,13 +582,13 @@ public class Node
         if (position.x - CaveBuilder.radiationZoneMargin > 1)
             neighbors.Add(new Node(position.x - 1, position.y, position.z));
 
-        if (position.x + CaveBuilder.radiationZoneMargin < CaveBuilder.MAP_SIZE)
+        if (position.x + CaveBuilder.radiationZoneMargin < CaveBuilder.worldSize)
             neighbors.Add(new Node(position.x + 1, position.y, position.z));
 
         if (position.z - CaveBuilder.radiationZoneMargin > 1)
             neighbors.Add(new Node(position.x, position.y, position.z - 1));
 
-        if (position.z + CaveBuilder.radiationZoneMargin < CaveBuilder.MAP_SIZE)
+        if (position.z + CaveBuilder.radiationZoneMargin < CaveBuilder.worldSize)
             neighbors.Add(new Node(position.x, position.y, position.z + 1));
 
         if (position.y - CaveBuilder.cavePrefabBedRockMargin > 1)
@@ -921,19 +921,17 @@ public static class CaveBuilder
 {
     public static int SEED = new Random().Next();
 
-    public static int MAP_SIZE = 6144;
-
-    public static int PREFAB_Y = 5;
+    public static int worldSize = 6144;
 
     public static int MIN_PREFAB_SIZE = 8;
 
     public static int MAX_PREFAB_SIZE = 100;
 
-    public static int MAP_OFFSET = MAP_SIZE / 60;
+    public static int MAP_OFFSET = worldSize / 60;
 
     public static float POINT_WIDTH = 5;
 
-    public static int PREFAB_COUNT = MAP_SIZE / 5;
+    public static int PREFAB_COUNT = worldSize / 5;
 
     public static float NOISE_THRESHOLD = 0.5f;
 
@@ -1004,7 +1002,7 @@ public static class CaveBuilder
 
         while (maxTries-- > 0)
         {
-            prefab.SetRandomPosition(rand, MAP_SIZE, MAP_OFFSET);
+            prefab.SetRandomPosition(rand, worldSize, MAP_OFFSET);
 
             if (!prefab.OverLaps2D(others))
             {
