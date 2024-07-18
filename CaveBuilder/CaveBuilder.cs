@@ -124,10 +124,10 @@ public class CavePrefab
         );
     }
 
-    public CavePrefab(PrefabDataInstance pdi)
+    public CavePrefab(PrefabDataInstance pdi, Vector3i offset)
     {
         prefabDataInstance = pdi;
-        position = pdi.boundingBoxPosition + new Vector3i(CaveBuilder.worldSize / 2, 0, CaveBuilder.worldSize / 2);
+        position = pdi.boundingBoxPosition + offset;
         size = pdi.boundingBoxSize;
         rotation = pdi.rotation;
 

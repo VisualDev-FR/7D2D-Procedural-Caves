@@ -51,7 +51,7 @@ public static class CavePlanner
         var result =
             from PrefabDataInstance pdi in PrefabManager.UsedPrefabsWorld
             where pdi.prefab.Tags.Test_AnySet(caveTags)
-            select new CavePrefab(pdi);
+            select new CavePrefab(pdi, HalfWorldSize);
 
         return result.ToList();
     }
@@ -216,7 +216,7 @@ public static class CavePlanner
             if (pdi == null)
                 continue;
 
-            var cavePrefab = new CavePrefab(pdi);
+            var cavePrefab = new CavePrefab(pdi, HalfWorldSize);
 
             PrefabManager.AddUsedPrefabWorld(-1, pdi);
             cavePrefabs.Add(cavePrefab);
@@ -250,7 +250,7 @@ public static class CavePlanner
 
         yield return WorldBuilder.SetMessage("Spawning cave prefabs...", _logToConsole: true);
 
-        List<CavePrefab> cavePrefabs = PlaceCavePrefabs(100, addedCaveEntrances);
+        List<CavePrefab> cavePrefabs = PlaceCavePrefabs(2000, addedCaveEntrances);
 
         yield return GenerateCavePreview(cavePrefabs, new HashSet<Vector3i>());
 
