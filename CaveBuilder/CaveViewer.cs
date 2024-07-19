@@ -14,15 +14,15 @@ using System.Threading.Tasks;
 
 public static class CaveViewer
 {
-    public static int MAP_SIZE = CaveBuilder.worldSize;
+    public static int MAP_SIZE => CaveBuilder.worldSize;
 
-    public static Random Rand = CaveBuilder.rand;
+    public static Random Rand => CaveBuilder.rand;
 
-    public static int SEED = CaveBuilder.SEED;
+    public static int SEED => CaveBuilder.SEED;
 
-    public static int PREFAB_COUNT = CaveBuilder.PREFAB_COUNT;
+    public static int PREFAB_COUNT => CaveBuilder.PREFAB_COUNT;
 
-    public static float NOISE_THRESHOLD = CaveBuilder.NOISE_THRESHOLD;
+    public static float NOISE_THRESHOLD => CaveBuilder.NOISE_THRESHOLD;
 
     public static readonly Color BackgroundColor = Color.Black;
 
@@ -45,7 +45,7 @@ public static class CaveViewer
         {
             foreach (var prefab in prefabs)
             {
-                graph.DrawRectangle(pen, prefab.position.x, prefab.position.z, prefab.size.x, prefab.size.z);
+                graph.DrawRectangle(pen, prefab.position.x, prefab.position.z, prefab.Size.x, prefab.Size.z);
 
                 if (fill)
                     DrawPoints(b, prefab.GetInnerPoints().ToHashSet(), PrefabBoundsColor);
@@ -136,18 +136,16 @@ public static class CaveViewer
 
     public static void PathCommand(string[] args)
     {
-        int positionY = 10;
-
         var p1 = new CavePrefab()
         {
-            position = new Vector3i(10, positionY, 10),
-            size = new Vector3i(10, 10, 10),
+            position = new Vector3i(20, 20, 20),
+            Size = new Vector3i(10, 10, 10),
         };
 
         var p2 = new CavePrefab()
         {
-            position = new Vector3i(MAP_SIZE - 20, positionY, MAP_SIZE - 20),
-            size = new Vector3i(10, 100, 10),
+            position = new Vector3i(MAP_SIZE - 30, 50, MAP_SIZE - 30),
+            Size = new Vector3i(10, 10, 10),
         };
 
         var prefabs = new List<CavePrefab>() { p1, p2 };
@@ -162,22 +160,32 @@ public static class CaveViewer
 
         Logger.Info($"{p1.position} -> {p2.position} | Astar dist: {path.Count}, eucl dist: {CaveUtils.EuclidianDist(p1.position, p2.position)}, timer: {timer.ElapsedMilliseconds}ms");
 
-        using (var b = new Bitmap(MAP_SIZE, MAP_SIZE))
-        {
-            using (Graphics g = Graphics.FromImage(b))
-            {
-                g.Clear(BackgroundColor);
-                // DrawNoise(b, noise);
-                // DrawPoints(b, noiseMap, NoiseColor);
-                DrawPoints(b, path, TunnelsColor);
-                DrawPrefabs(b, g, prefabs);
+        // using (var b = new Bitmap(MAP_SIZE, MAP_SIZE))
+        // {
+        //     using (Graphics g = Graphics.FromImage(b))
+        //     {
+        //         g.Clear(BackgroundColor);
+        //         // DrawNoise(b, noise);
+        //         // DrawPoints(b, noiseMap, NoiseColor);
+        //         DrawPoints(b, path, TunnelsColor);
+        //         DrawPrefabs(b, g, prefabs);
 
-                b.SetPixel(p1.position.x, p1.position.z, NodeColor);
-                b.SetPixel(p2.position.x, p2.position.z, NodeColor);
-            }
+        //         b.SetPixel(p1.position.x, p1.position.z, NodeColor);
+        //         b.SetPixel(p2.position.x, p2.position.z, NodeColor);
+        //     }
 
-            b.Save(@"pathing.png", ImageFormat.Png);
-        }
+        //     b.Save(@"pathing.png", ImageFormat.Png);
+        // }
+
+        var voxels = (
+            from point in path
+            select new Voxell(point, WaveFrontMat.DarkRed)
+        ).ToList();
+
+        voxels.Add(new Voxell(p1.position, p1.Size, WaveFrontMat.DarkGreen));
+        voxels.Add(new Voxell(p2.position, p2.Size, WaveFrontMat.DarkGreen));
+
+        GenerateObjFile("path.obj", voxels, true);
     }
 
     public static void SaveCaveMap(HashSet<Vector3i> caveMap, string filename)
@@ -191,8 +199,10 @@ public static class CaveViewer
         var timer = new Stopwatch();
         timer.Start();
 
-        int prefabCounts = args.Length > 1 ? int.Parse(args[1]) : PREFAB_COUNT;
-        var prefabs = CaveBuilder.GetRandomPrefabs(prefabCounts);
+        if (args.Length > 1)
+            CaveBuilder.worldSize = int.Parse(args[1]);
+
+        var prefabs = CaveBuilder.GetRandomPrefabs(CaveBuilder.PREFAB_COUNT);
 
         Logger.Info("Start solving graph...");
 
@@ -249,17 +259,17 @@ public static class CaveViewer
         var prefab = new CavePrefab()
         {
             position = mapCenter,
-            size = new Vector3i(10, 10, 10),
+            Size = new Vector3i(10, 10, 10),
         };
 
         prefab.UpdateNodes(Rand);
 
         var voxels = (
-            from point in prefab.GetNoiseAround()
+            from point in CaveBuilder.ParseCircle(prefab.GetCenter(), 80)
             select new Voxell(point, WaveFrontMat.Orange)
         ).ToList();
 
-        voxels.Add(new Voxell(mapCenter, prefab.size, WaveFrontMat.DarkGreen));
+        voxels.Add(new Voxell(mapCenter, prefab.Size, WaveFrontMat.DarkGreen));
 
         GenerateObjFile("prefab.obj", voxels, true);
     }
@@ -329,19 +339,16 @@ public static class CaveViewer
     {
         var hexColor = args[1];
 
-        // Enlever le caractère '#' s'il est présent
         if (hexColor.StartsWith("#"))
         {
             hexColor = hexColor.Substring(1);
         }
 
-        // Vérifier que la longueur est correcte (6 caractères hexadécimaux)
         if (hexColor.Length != 6)
         {
             throw new ArgumentException("La couleur hexadécimale doit être de 6 caractères.");
         }
 
-        // Convertir les valeurs hexadécimales en entier
         float r = 1f * Convert.ToInt32(hexColor.Substring(0, 2), 16) / 255;
         float g = 1f * Convert.ToInt32(hexColor.Substring(2, 2), 16) / 255;
         float b = 1f * Convert.ToInt32(hexColor.Substring(4, 2), 16) / 255;

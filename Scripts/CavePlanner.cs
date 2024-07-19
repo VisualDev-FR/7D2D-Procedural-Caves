@@ -142,7 +142,7 @@ public static class CavePlanner
 
     public static bool OverLaps2D(Vector3i position, Vector3i size, CavePrefab other)
     {
-        var otherSize = GetRotatedSize(other.size, other.rotation);
+        var otherSize = GetRotatedSize(other.Size, other.rotation);
         var otherPos = other.position;
 
         if (position.x + size.x + overLapMargin < otherPos.x || otherPos.x + otherSize.x + overLapMargin < position.x)
@@ -298,7 +298,7 @@ public static class CavePlanner
 
         foreach (var prefab in prefabs)
         {
-            Log.Out($"{prefab.position} / {prefab.prefabDataInstance.boundingBoxPosition} / {prefab.size}");
+            Log.Out($"{prefab.position} / {prefab.prefabDataInstance.boundingBoxPosition} / {prefab.Size}");
 
             foreach (var point in prefab.Get2DEdges())
             {
