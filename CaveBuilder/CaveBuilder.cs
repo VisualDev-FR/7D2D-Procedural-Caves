@@ -451,8 +451,6 @@ public class CavePrefab
 
     public HashSet<Vector3i> GetNoiseAround()
     {
-        throw new NotImplementedException("Too high memory usage");
-
         var coveredPoints = new HashSet<Vector3i>();
         var noiseMap = new HashSet<Vector3i>();
 
@@ -468,12 +466,7 @@ public class CavePrefab
 
             noiseMap.UnionWith(CaveBuilder.ParseCircle(center, radius));
             coveredPoints.UnionWith(noiseMap);
-            // coveredPoints.IntersectWith(innerPoints);
-
-            // Logger.Debug($"{coveredPoints.Count}");
         }
-
-        // Logger.Debug($"{coveredPoints.Count}, size = {size}");
 
         return noiseMap;
     }
@@ -946,11 +939,6 @@ public static class CaveBuilder
 
     public static FastNoiseLite pathingNoise = ParsePerlinNoise();
 
-    public static int GetHeight(int x, int z)
-    {
-        return 255;
-    }
-
     public static HashSet<Vector3i> ParseCircle(Vector3i center, float radius)
     {
         var queue = new HashSet<Vector3i>() { center };
@@ -1024,34 +1012,6 @@ public static class CaveBuilder
         Logger.Info($"{prefabs.Count} / {PREFAB_COUNT} prefabs added");
 
         return prefabs;
-    }
-
-    public static HashSet<Vector3i> CollectPrefabObstacles(List<CavePrefab> prefabs)
-    {
-        throw new NotImplementedException("");
-
-        var obstacles = new HashSet<Vector3i>();
-
-        foreach (CavePrefab prefab in prefabs)
-        {
-            // obstacles.UnionWith(prefab.innerPoints);
-        }
-
-        return obstacles;
-    }
-
-    public static HashSet<Vector3i> CollectPrefabNoise(List<CavePrefab> prefabs)
-    {
-        var noiseMap = new HashSet<Vector3i>();
-
-        foreach (CavePrefab prefab in prefabs)
-        {
-            var noise = prefab.GetNoiseAround(rand);
-            Logger.Info($"{noise.Count} / {noiseMap.Count}");
-            noiseMap.UnionWith(noise);
-        }
-
-        return noiseMap;
     }
 
     public static void SaveCaveMap(string filename, HashSet<Vector3i> caveMap)
@@ -1179,6 +1139,7 @@ public static class CaveBuilder
     }
 
 }
+
 
 public class VectorComparer : IComparer<Vector3i>
 {

@@ -91,7 +91,7 @@ public static class CaveViewer
         }
     }
 
-    public static void GenerateGraph(string[] args)
+    public static void GraphCommand(string[] args)
     {
         int prefabCounts = args.Length > 1 ? int.Parse(args[1]) : PREFAB_COUNT;
 
@@ -118,7 +118,7 @@ public static class CaveViewer
         }
     }
 
-    public static void GenerateNoise(string[] args)
+    public static void NoiseCommand(string[] args)
     {
         var noise = CaveBuilder.ParsePerlinNoise();
 
@@ -134,7 +134,7 @@ public static class CaveViewer
         }
     }
 
-    public static void GeneratePath(string[] args)
+    public static void PathCommand(string[] args)
     {
         int positionY = 10;
 
@@ -186,7 +186,7 @@ public static class CaveViewer
         CaveBuilder.SaveCaveMap(filename, caveMap);
     }
 
-    public static void GenerateCaves(string[] args)
+    public static void CaveCommand(string[] args)
     {
         var timer = new Stopwatch();
         timer.Start();
@@ -243,9 +243,9 @@ public static class CaveViewer
         Console.WriteLine($"{caveMap.Count} cave blocks generated, timer={CaveUtils.TimeFormat(timer)}.");
     }
 
-    public static void GeneratePrefab(string[] args)
+    public static void PrefabCommand(string[] args)
     {
-        var mapCenter = new Vector3i(-10 + MAP_SIZE / 2, 0, -10 + MAP_SIZE / 2);
+        var mapCenter = new Vector3i(20, 20, 20);
         var prefab = new CavePrefab()
         {
             position = mapCenter,
@@ -254,24 +254,14 @@ public static class CaveViewer
 
         prefab.UpdateNodes(Rand);
 
-        using (var b = new Bitmap(MAP_SIZE, MAP_SIZE))
-        {
-            using (Pen pen = new Pen(PrefabBoundsColor, 1))
-            {
-                var noise = CaveBuilder.ParsePerlinNoise(SEED);
+        var voxels = (
+            from point in prefab.GetNoiseAround()
+            select new Voxell(point, WaveFrontMat.Orange)
+        ).ToList();
 
-                using (Graphics g = Graphics.FromImage(b))
-                {
-                    g.Clear(BackgroundColor);
+        voxels.Add(new Voxell(mapCenter, prefab.size, WaveFrontMat.DarkGreen));
 
-                    DrawPoints(b, prefab.GetNoiseAround(), NoiseColor);
-                    g.DrawRectangle(pen, prefab.position.x, prefab.position.z, prefab.size.x, prefab.size.z);
-                    DrawPoints(b, prefab.nodes.ToHashSet(), NodeColor);
-                }
-            }
-
-            b.Save(@"prefab.png", ImageFormat.Png);
-        }
+        GenerateObjFile("prefab.obj", voxels, true);
     }
 
     public static void ProfileCaveMap(string filename)
@@ -374,11 +364,30 @@ public static class CaveViewer
         using (StreamWriter writer = new StreamWriter(filename))
         {
             writer.WriteLine("mtllib materials.mtl");
-            writer.WriteLine(new Voxell(points[0]).ToWavefront(ref index, WaveFrontMat.DarkGreen));
-            writer.WriteLine(new Voxell(points[1]).ToWavefront(ref index, WaveFrontMat.DarkRed));
+            writer.WriteLine(new Voxell(points[0]).ToWavefront(ref index));
+            writer.WriteLine(new Voxell(points[1]).ToWavefront(ref index));
         }
 
         Log.Out($"index: {index}");
+    }
+
+    public static void GenerateObjFile(string filename, IEnumerable<Voxell> voxels, bool openFile = false)
+    {
+        int index = 0;
+
+        using (StreamWriter writer = new StreamWriter(filename))
+        {
+            writer.WriteLine("mtllib materials.mtl");
+
+            foreach (var voxel in voxels)
+            {
+                writer.WriteLine(voxel.ToWavefront(ref index));
+            }
+        }
+
+        if (openFile)
+            Process.Start("CMD.exe", $"/C {Path.GetFullPath(filename)}");
+
     }
 
     public static void Main(string[] args)
@@ -396,24 +405,24 @@ public static class CaveViewer
         switch (args[0])
         {
             case "graph":
-                GenerateGraph(args);
+                GraphCommand(args);
                 break;
 
             case "path":
-                GeneratePath(args);
+                PathCommand(args);
                 break;
 
             case "noise":
-                GenerateNoise(args);
+                NoiseCommand(args);
                 break;
 
             case "cave":
             case "caves":
-                GenerateCaves(args);
+                CaveCommand(args);
                 break;
 
             case "prefab":
-                GeneratePrefab(args);
+                PrefabCommand(args);
                 break;
 
             case "cavemap":
@@ -454,6 +463,8 @@ public class Voxell
 
     Vector3i size = Vector3i.one;
 
+    public string material = "";
+
     public int[,] Vertices
     {
         get
@@ -481,10 +492,23 @@ public class Voxell
         this.position = position;
     }
 
+    public Voxell(Vector3i position, string material)
+    {
+        this.position = position;
+        this.material = material;
+    }
+
     public Voxell(Vector3i position, Vector3i size)
     {
         this.position = position;
         this.size = size;
+    }
+
+    public Voxell(Vector3i position, Vector3i size, string material)
+    {
+        this.position = position;
+        this.size = size;
+        this.material = material;
     }
 
     public Voxell(Vector3i position, int sizeX, int sizeY, int sizeZ)
@@ -493,7 +517,7 @@ public class Voxell
         size = new Vector3i(sizeX, sizeY, sizeZ);
     }
 
-    public string ToWavefront(ref int vertexIndexOffset, string material)
+    public string ToWavefront(ref int vertexIndexOffset)
     {
         var vertIndices = new int[8];
         var result = new List<string>();
