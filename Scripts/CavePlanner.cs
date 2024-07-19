@@ -277,9 +277,11 @@ public static class CavePlanner
             wiredCaveMap.UnionWith(path);
         }
 
-        yield return GenerateCavePreview(cavePrefabs, wiredCaveMap);
 
-        caveMap = wiredCaveMap;
+        caveMap = CaveTunneler.ThickenCaveMap(wiredCaveMap);
+        // caveMap = wiredCaveMap;
+
+        yield return GenerateCavePreview(cavePrefabs, wiredCaveMap);
 
         Log.Out($"{caveMap.Count} cave blocks generated, timer={CaveUtils.TimeFormat(timer)}.");
 

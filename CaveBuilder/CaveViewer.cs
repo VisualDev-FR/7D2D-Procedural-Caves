@@ -218,7 +218,7 @@ public static class CaveViewer
 
         Logger.Info("Start caves thickening");
 
-        var caveMap = wiredCaveMap.ToHashSet();
+        var caveMap = CaveTunneler.ThickenCaveMap(wiredCaveMap.ToHashSet());
 
         SaveCaveMap(caveMap, "cavemap.txt");
 

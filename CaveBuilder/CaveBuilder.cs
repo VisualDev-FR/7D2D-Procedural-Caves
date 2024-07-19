@@ -86,6 +86,30 @@ public static class CaveUtils
         return (float)Math.Sqrt(SqrEuclidianDist(p1, p2));
     }
 
+    public static List<Vector3i> GetValidNeighbors(Vector3i position)
+    {
+        var neighbors = new List<Vector3i>();
+
+        if (position.x - CaveBuilder.radiationZoneMargin > 1)
+            neighbors.Add(new Vector3i(position.x - 1, position.y, position.z));
+
+        if (position.x + CaveBuilder.radiationZoneMargin < CaveBuilder.worldSize)
+            neighbors.Add(new Vector3i(position.x + 1, position.y, position.z));
+
+        if (position.z - CaveBuilder.radiationZoneMargin > 1)
+            neighbors.Add(new Vector3i(position.x, position.y, position.z - 1));
+
+        if (position.z + CaveBuilder.radiationZoneMargin < CaveBuilder.worldSize)
+            neighbors.Add(new Vector3i(position.x, position.y, position.z + 1));
+
+        if (position.y - CaveBuilder.cavePrefabBedRockMargin > 1)
+            neighbors.Add(new Vector3i(position.x, position.y - 1, position.z));
+
+        if (position.y + CaveBuilder.cavePrefabterrainMargin < WorldBuilder.Instance.GetHeight(position.x, position.z))
+            neighbors.Add(new Vector3i(position.x, position.y + 1, position.z));
+
+        return neighbors;
+    }
 }
 
 
@@ -587,23 +611,10 @@ public class Node
     {
         var neighbors = new List<Node>();
 
-        if (position.x - CaveBuilder.radiationZoneMargin > 1)
-            neighbors.Add(new Node(position.x - 1, position.y, position.z));
-
-        if (position.x + CaveBuilder.radiationZoneMargin < CaveBuilder.worldSize)
-            neighbors.Add(new Node(position.x + 1, position.y, position.z));
-
-        if (position.z - CaveBuilder.radiationZoneMargin > 1)
-            neighbors.Add(new Node(position.x, position.y, position.z - 1));
-
-        if (position.z + CaveBuilder.radiationZoneMargin < CaveBuilder.worldSize)
-            neighbors.Add(new Node(position.x, position.y, position.z + 1));
-
-        if (position.y - CaveBuilder.cavePrefabBedRockMargin > 1)
-            neighbors.Add(new Node(position.x, position.y - 1, position.z));
-
-        if (position.y + CaveBuilder.cavePrefabterrainMargin < WorldBuilder.Instance.GetHeight(position.x, position.z))
-            neighbors.Add(new Node(position.x, position.y + 1, position.z));
+        foreach (var pos in CaveUtils.GetValidNeighbors(position))
+        {
+            neighbors.Add(new Node(pos));
+        }
 
         return neighbors;
     }
@@ -775,7 +786,7 @@ public static class CaveTunneler
         return path;
     }
 
-    public static HashSet<Vector3i> ThickenCaveMap(HashSet<Vector3i> wiredCaveMap, HashSet<Vector3i> obstacles)
+    public static HashSet<Vector3i> ThickenCaveMap(HashSet<Vector3i> wiredCaveMap)
     {
         var caveMap = new HashSet<Vector3i>();
 
@@ -785,8 +796,6 @@ public static class CaveTunneler
 
             caveMap.UnionWith(circle);
         }
-
-        caveMap.ExceptWith(obstacles);
 
         return caveMap;
     }
@@ -961,12 +970,7 @@ public static class CaveBuilder
                 if (CaveUtils.SqrEuclidianDist(pos, center) >= radius)
                     continue;
 
-                queue.Add(new Vector3i(pos.x + 1, pos.y, pos.z));
-                queue.Add(new Vector3i(pos.x - 1, pos.y, pos.z));
-                queue.Add(new Vector3i(pos.x, pos.y, pos.z + 1));
-                queue.Add(new Vector3i(pos.x, pos.y, pos.z - 1));
-                queue.Add(new Vector3i(pos.x, pos.y + 1, pos.z));
-                queue.Add(new Vector3i(pos.x, pos.y - 1, pos.z));
+                queue.UnionWith(CaveUtils.GetValidNeighbors(pos));
             }
         }
 
