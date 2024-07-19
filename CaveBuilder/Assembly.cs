@@ -21,5 +21,10 @@ public static class WorldBuilder
     public static class Instance
     {
         public static int HalfWorldSize => CaveBuilder.worldSize / 2;
+
+        public static float GetHeight(int x, int y)
+        {
+            return 255;
+        }
     }
 }

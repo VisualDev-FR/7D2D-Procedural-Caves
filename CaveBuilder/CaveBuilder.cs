@@ -7,13 +7,11 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Runtime.Serialization;
+using WorldGenerationEngineFinal;
 
 using Random = System.Random;
 using Debug = System.Diagnostics.Debug;
 using System.IO;
-using System.Collections.Specialized;
-using UnityEngine;
 
 
 public static class Logger
@@ -604,35 +602,8 @@ public class Node
         if (position.y - CaveBuilder.cavePrefabBedRockMargin > 1)
             neighbors.Add(new Node(position.x, position.y - 1, position.z));
 
-        if (position.y + CaveBuilder.cavePrefabterrainMargin < CaveBuilder.GetHeight(position.x, position.z))
+        if (position.y + CaveBuilder.cavePrefabterrainMargin < WorldBuilder.Instance.GetHeight(position.x, position.z))
             neighbors.Add(new Node(position.x, position.y + 1, position.z));
-
-        // var neighborsPos = new List<Vector3i>()
-        // {
-        //     new Vector3i(position.x + 1, position.y, position.z),
-        //     new Vector3i(position.x - 1, position.y, position.z),
-        //     new Vector3i(position.x, position.y + 1, position.z),
-        //     new Vector3i(position.x, position.y - 1, position.z),
-        //     new Vector3i(position.x, position.y, position.z + 1),
-        //     new Vector3i(position.x, position.y, position.z - 1),
-        // };
-
-        // foreach (var position in neighborsPos)
-        // {
-        //     if (position.x < 0 || position.x >= CaveBuilder.MAP_SIZE - CaveBuilder.radiationZoneMargin)
-        //         continue;
-
-        //     if (position.z < 0 || position.z >= CaveBuilder.MAP_SIZE - CaveBuilder.radiationZoneMargin)
-        //         continue;
-
-        //     if (position.y >= CaveBuilder.GetHeight(position.x, position.z))
-        //         continue;
-
-        //     if (position.y <= CaveBuilder.cavePrefabBedRockMargin)
-        //         continue;
-
-        //     neighbors.Add(new Node(position));
-        // }
 
         return neighbors;
     }
@@ -1079,7 +1050,7 @@ public static class CaveBuilder
         return noiseMap;
     }
 
-    public static void ExportCaveMap(string filename, HashSet<Vector3i> caveMap)
+    public static void SaveCaveMap(string filename, HashSet<Vector3i> caveMap)
     {
         SortedDictionary<Vector3i, List<string>> groupedCaveMap = GroupByChunk(caveMap);
 
@@ -1095,25 +1066,12 @@ public static class CaveBuilder
                 writer.WriteLine($"{entry.Key.x}, {entry.Key.z}");
                 writer.WriteLine(entry.Value.Count);
 
-                Log.Out(entry.Key.ToString());
-
                 foreach (var position in entry.Value)
                 {
                     writer.WriteLine(position);
                 }
             }
         }
-    }
-
-    public static Vector3b ParseVector3b(string value)
-    {
-        var array = value.Split(',');
-
-        return new Vector3b(
-            byte.Parse(array[0]),
-            byte.Parse(array[1]),
-            byte.Parse(array[2])
-        );
     }
 
     public static Dictionary<Vector2s, Vector3bf[]> ReadCaveMap(string filename)

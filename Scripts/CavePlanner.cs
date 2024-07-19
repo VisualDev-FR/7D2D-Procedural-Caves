@@ -268,7 +268,7 @@ public static class CavePlanner
 
             string message = $"Cave tunneling: {100.0f * index++ / edges.Count:F0}% ({index} / {edges.Count})";
 
-            Log.Out($"Tunneling {p1} -> {p2}");
+            // Log.Out($"Tunneling {p1} -> {p2}");
 
             yield return WorldBuilder.SetMessage(message);
 
@@ -331,8 +331,6 @@ public static class CavePlanner
         Log.Out(filename);
         Log.Out($"caveMap size = {caveMap.Count}");
 
-        CaveBuilder.ExportCaveMap(filename, caveMap);
+        CaveBuilder.SaveCaveMap(filename, caveMap);
     }
 }
-
-

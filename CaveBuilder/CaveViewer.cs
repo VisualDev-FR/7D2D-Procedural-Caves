@@ -183,16 +183,7 @@ public static class CaveViewer
     public static void SaveCaveMap(HashSet<Vector3i> caveMap, string filename)
     {
         Log.Out("Exporting CaveMap");
-        CaveBuilder.ExportCaveMap(filename, caveMap);
-
-        // using (var writer = new StreamWriter(filename))
-        // {
-        //     foreach (var caveBlock in caveMap)
-        //     {
-        //         writer.WriteLine(caveBlock.ToString());
-        //     }
-        //     Logger.Info($"CaveMap saved '{filename}'.");
-        // }
+        CaveBuilder.SaveCaveMap(filename, caveMap);
     }
 
     public static void GenerateCaves(string[] args)
@@ -342,7 +333,7 @@ public static class CaveViewer
             new Vector3i(1, 0, 18),
         };
 
-        CaveBuilder.ExportCaveMap(filename, points);
+        CaveBuilder.SaveCaveMap(filename, points);
     }
 
     static void ToWaveFront(List<Vector3i> positions, string filename, bool openFile = false)
