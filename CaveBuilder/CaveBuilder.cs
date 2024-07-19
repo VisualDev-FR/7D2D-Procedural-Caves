@@ -13,6 +13,7 @@ using Random = System.Random;
 using Debug = System.Diagnostics.Debug;
 using System.IO;
 using System.Collections.Specialized;
+using UnityEngine;
 
 
 public static class Logger
@@ -203,7 +204,7 @@ public class CavePrefab
     {
         position = new Vector3i(
             rand.Next(mapOffset, mapSize - mapOffset - size.x),
-            rand.Next(2, 256),
+            rand.Next(2, 255),
             rand.Next(mapOffset, mapSize - mapOffset - size.z)
         );
 
@@ -705,6 +706,7 @@ public class HashedPriorityQueue<T>
     public int Count => _count;
 }
 
+
 public static class CaveTunneler
 {
     private static ConcurrentDictionary<Vector3i, bool> validPositions = new ConcurrentDictionary<Vector3i, bool>();
@@ -966,7 +968,7 @@ public static class CaveBuilder
 
     public static int GetHeight(int x, int z)
     {
-        return 256;
+        return 255;
     }
 
     public static HashSet<Vector3i> ParseCircle(Vector3i center, float radius)
@@ -1083,12 +1085,14 @@ public static class CaveBuilder
 
         using (var writer = new StreamWriter(filename))
         {
+            writer.WriteLine(groupedCaveMap.Count);
+
             foreach (var entry in groupedCaveMap)
             {
                 if (entry.Value.Count == 0)
                     continue;
 
-                writer.WriteLine(entry.Key.ToString());
+                writer.WriteLine($"{entry.Key.x}, {entry.Key.z}");
                 writer.WriteLine(entry.Value.Count);
 
                 Log.Out(entry.Key.ToString());
@@ -1101,34 +1105,35 @@ public static class CaveBuilder
         }
     }
 
-    public static Vector3i ParseVector(string value)
+    public static Vector3b ParseVector3b(string value)
     {
         var array = value.Split(',');
 
-        return new Vector3i(
-            int.Parse(array[0]),
-            int.Parse(array[1]),
-            int.Parse(array[2])
+        return new Vector3b(
+            byte.Parse(array[0]),
+            byte.Parse(array[1]),
+            byte.Parse(array[2])
         );
     }
 
-    public static Dictionary<Vector3i, List<Vector3i>> ReadCaveMap(string filename)
+    public static Dictionary<Vector2s, Vector3bf[]> ReadCaveMap(string filename)
     {
-        var caveMap = new Dictionary<Vector3i, List<Vector3i>>();
+        var caveMap = new Dictionary<Vector2s, Vector3bf[]>();
 
         using (var reader = new StreamReader(filename))
         {
-            while (!reader.EndOfStream)
+            int chunkCount = int.Parse(reader.ReadLine());
+
+            for (int i = 0; i < chunkCount; i++)
             {
-                var chunkPos = ParseVector(reader.ReadLine());
+                var chunkPos = new Vector2s(reader.ReadLine());
                 var blockCount = int.Parse(reader.ReadLine());
 
-                caveMap[chunkPos] = new List<Vector3i>();
+                caveMap[chunkPos] = new Vector3bf[blockCount];
 
-                for (int i = 0; i < blockCount; i++)
+                for (int j = 0; j < blockCount; j++)
                 {
-                    Vector3i blockPos = ParseVector(reader.ReadLine());
-                    caveMap[chunkPos].Add(blockPos);
+                    caveMap[chunkPos][j] = new Vector3bf(reader.ReadLine());
                 }
             }
         }
@@ -1139,9 +1144,9 @@ public static class CaveBuilder
     public static Vector3i GetChunkPosZX(Vector3i pos)
     {
         return new Vector3i(
-            pos.x / 16,
+            (pos.x / 16) - worldSize / 32,
             0,
-            pos.z / 16
+            (pos.z / 16) - worldSize / 32
         );
     }
 
@@ -1156,7 +1161,25 @@ public static class CaveBuilder
             if (!groupedCaveMap.ContainsKey(chunkPos))
                 groupedCaveMap[chunkPos] = new List<string>();
 
-            groupedCaveMap[chunkPos].Add(pos.ToString());
+            var transform = new Vector3i(
+                16 * (pos.x / 16),
+                0,
+                16 * (pos.z / 16)
+            );
+
+            var chunkRelativePos = pos - transform;
+
+            // groupedCaveMap[chunkPos].Add($"{pos} - {transform} = {relative_pos}");
+            groupedCaveMap[chunkPos].Add(chunkRelativePos.ToString());
+
+            if (chunkRelativePos.x < 0 || chunkRelativePos.x > 15)
+                throw new Exception($"{pos} - {transform} = {chunkRelativePos}");
+
+            if (chunkRelativePos.y < 0 || chunkRelativePos.y > 255)
+                throw new Exception($"{pos} - {transform} = {chunkRelativePos}");
+
+            if (chunkRelativePos.z < 0 || chunkRelativePos.z > 15)
+                throw new Exception($"{pos} - {transform} = {chunkRelativePos}");
         }
 
         return groupedCaveMap;
@@ -1174,3 +1197,4 @@ public class VectorComparer : IComparer<Vector3i>
         return p1.z - p2.z;
     }
 }
+

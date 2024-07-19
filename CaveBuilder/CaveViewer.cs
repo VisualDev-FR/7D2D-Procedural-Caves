@@ -288,7 +288,7 @@ public static class CaveViewer
     {
         string filename = "cavemap.txt";
 
-        if (args[1] == "read")
+        if (args.Length > 1)
         {
             var caveMap = CaveBuilder.ReadCaveMap(filename);
             int index = 0;
@@ -301,7 +301,7 @@ public static class CaveViewer
                 Log.Out(entry.Key.ToString());
                 Log.Out(string.Concat(Enumerable.Repeat("=", 10)));
 
-                foreach (var point in entry.Value)
+                foreach (Vector3bf point in entry.Value)
                 {
                     index++;
                     Log.Out(point.ToString());
@@ -314,9 +314,8 @@ public static class CaveViewer
                     break;
             }
 
-            var test = new Vector3i(43, 0, 111);
-
-            Log.Out($"contains key {test}: {caveMap.ContainsKey(test)}");
+            // var test = new Vector3s(43, 0, 111);
+            // Log.Out($"contains key {test}: {caveMap.ContainsKey(test)}");
             return;
         }
 
@@ -386,7 +385,9 @@ public static class CaveViewer
 
     public static void Main(string[] args)
     {
-        // Log.Out("1.2".Split('.').Length.ToString());
+        // var vec = new Vector3bf(15, 255, 1);
+        // Log.Out(vec.ToBinaryString());
+        // Log.Out(vec.ToString());
         // return;
 
         Logger.Info($"SEED .......... {SEED}");

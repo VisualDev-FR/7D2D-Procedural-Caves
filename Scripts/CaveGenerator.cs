@@ -5,14 +5,13 @@ using System;
 
 public static class CaveGenerator
 {
-    public static Dictionary<Vector3i, List<Vector3i>> caveMap;
+    public static Dictionary<Vector2s, Vector3bf[]> caveMap;
 
     private static BlockValue caveAirBlock = new BlockValue((uint)Block.GetBlockByName("air").blockID);
 
     public static void LoadCaveMap(string worldName)
     {
         string filename = GameIO.GetWorldDir(worldName) + "/cavemap.csv";
-
         caveMap = CaveBuilder.ReadCaveMap(filename);
     }
 
@@ -37,15 +36,11 @@ public static class CaveGenerator
     {
         if (chunk == null)
         {
-            Log.Out($"[Cave] Null chunk {chunk.ChunkPos}");
+            Log.Warning($"[Cave] Null chunk {chunk.ChunkPos}");
             return;
         }
 
-        int worldSize = GameManager.Instance.World.ChunkCache.ChunkProvider.GetWorldSize().x;
-        int chunkWorldSize = worldSize / 16;
-        var chunkPos = chunk.ChunkPos + new Vector3i(chunkWorldSize / 2, 0, chunkWorldSize / 2);
-        var chunkWorldPos = chunk.GetWorldPos();
-        var HalfWorldSize = new Vector3i(worldSize / 2, 0, worldSize / 2);
+        var chunkPos = new Vector2s(chunk.ChunkPos);
 
         // var playerPos = new Vector3i(GameManager.Instance.World.GetPrimaryPlayer().position);
         // if (!IsInsideChunk(playerPos, chunk.GetWorldPos()))
@@ -64,36 +59,19 @@ public static class CaveGenerator
             return;
         }
 
-        Log.Warning($"[Cave] {blockPositions.Count} caveBlock spawned in chunk {chunkPos}");
-
-        foreach (var block in blockPositions)
+        foreach (Vector3bf pos in blockPositions)
         {
-            var caveBlock = block - chunkWorldPos - HalfWorldSize;
-
-            var neighbors = new List<Vector3i>()
+            try
             {
-                new Vector3i(caveBlock.x, caveBlock.y, caveBlock.z),
-                new Vector3i(caveBlock.x + 1, caveBlock.y, caveBlock.z),
-                new Vector3i(caveBlock.x - 1, caveBlock.y, caveBlock.z),
-                new Vector3i(caveBlock.x, caveBlock.y + 1, caveBlock.z),
-                new Vector3i(caveBlock.x, caveBlock.y + 2, caveBlock.z),
-                new Vector3i(caveBlock.x, caveBlock.y + 3, caveBlock.z),
-                new Vector3i(caveBlock.x, caveBlock.y, caveBlock.z + 1),
-                new Vector3i(caveBlock.x, caveBlock.y, caveBlock.z - 1),
-            };
-
-            foreach (var pos in neighbors)
+                chunk.SetBlockRaw(pos.x, pos.y, pos.z, caveAirBlock);
+                chunk.SetDensity(pos.x, pos.y, pos.z, MarchingCubes.DensityAir);
+            }
+            catch (Exception e)
             {
-                try
-                {
-                    chunk.SetBlockRaw(pos.x, pos.y, pos.z, caveAirBlock);
-                    chunk.SetDensity(pos.x, pos.y, pos.z, MarchingCubes.DensityAir);
-                }
-                catch
-                {
-                    // Log.Error($"[Cave] (Chunk={chunkPos}, block={caveBlock}) {e}");
-                }
+                Log.Error($"[Cave] {e.GetType()} (Chunk={chunkPos}, block={pos})");
             }
         }
+
+        Log.Warning($"[Cave] {blockPositions.Length} caveBlock spawned in chunk {chunkPos}");
     }
 }

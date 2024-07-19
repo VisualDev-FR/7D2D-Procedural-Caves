@@ -96,6 +96,8 @@
     <!-- Cave Builder -->
     <Compile Include="CaveBuilder\FastNoiseLite.cs" />
     <Compile Include="CaveBuilder\CaveBuilder.cs" />
+    <Compile Include="CaveBuilder\Vector2s.cs" />
+    <Compile Include="CaveBuilder\Vector3bf.cs" />
 
   </ItemGroup>
   <ItemGroup />
