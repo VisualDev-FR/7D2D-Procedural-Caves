@@ -1141,6 +1141,37 @@ public static class CaveBuilder
         return caveMap;
     }
 
+    public static Dictionary<Vector3i, Vector3i[]> ReadCaveMap3i(string filename)
+    {
+        var caveMap = new Dictionary<Vector3i, Vector3i[]>();
+
+        using (var reader = new StreamReader(filename))
+        {
+            int chunkCount = int.Parse(reader.ReadLine());
+
+            for (int i = 0; i < chunkCount; i++)
+            {
+                var chunkPos2s = new Vector2s(reader.ReadLine());
+                var chunkPos = new Vector3i(chunkPos2s.x, 0, chunkPos2s.z);
+                var blockCount = int.Parse(reader.ReadLine());
+
+                caveMap[chunkPos] = new Vector3i[blockCount];
+
+                for (int j = 0; j < blockCount; j++)
+                {
+                    var array = reader.ReadLine().Split(',');
+                    caveMap[chunkPos][j] = new Vector3i(
+                        int.Parse(array[0]),
+                        int.Parse(array[1]),
+                        int.Parse(array[2])
+                    );
+                }
+            }
+        }
+
+        return caveMap;
+    }
+
     public static Vector3i GetChunkPosZX(Vector3i pos)
     {
         return new Vector3i(

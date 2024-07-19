@@ -284,38 +284,53 @@ public static class CaveViewer
         }
     }
 
+    public static void ProfileCaveMap(string filename)
+    {
+
+        long memoryBefore = GC.GetTotalMemory(true);
+
+        var caveMap = CaveBuilder.ReadCaveMap(filename);
+        int index = 0;
+
+        // var caveMap3i = CaveBuilder.ReadCaveMap3i(filename);
+
+        long memoryAfter = GC.GetTotalMemory(true);
+        long memoryUsed = memoryAfter - memoryBefore;
+
+        Log.Out($"Chunk count: {caveMap.Count}");
+
+        foreach (var entry in caveMap)
+        {
+
+            Log.Out(entry.Key.ToString());
+            Log.Out(string.Concat(Enumerable.Repeat("=", 10)));
+
+            foreach (Vector3bf point in entry.Value)
+            {
+                index++;
+                Log.Out(point.ToString());
+
+            }
+
+            Log.Out("");
+
+            if (index > 100)
+                break;
+        }
+
+        // Log.Out($"Memory before: {memoryBefore:N0} memory after {memoryAfter:N0}");
+        Log.Out($"Cave map size: {memoryUsed:N0} Bytes ({memoryUsed / 1_048_576.0:F1} MB)");
+
+        return;
+    }
+
     public static void GenerateCaveMap(string[] args)
     {
         string filename = "cavemap.txt";
 
         if (args.Length > 1)
         {
-            var caveMap = CaveBuilder.ReadCaveMap(filename);
-            int index = 0;
-
-            Log.Out($"Chunk count: {caveMap.Count}");
-
-            foreach (var entry in caveMap)
-            {
-
-                Log.Out(entry.Key.ToString());
-                Log.Out(string.Concat(Enumerable.Repeat("=", 10)));
-
-                foreach (Vector3bf point in entry.Value)
-                {
-                    index++;
-                    Log.Out(point.ToString());
-
-                }
-
-                Log.Out("");
-
-                if (index > 100)
-                    break;
-            }
-
-            // var test = new Vector3s(43, 0, 111);
-            // Log.Out($"contains key {test}: {caveMap.ContainsKey(test)}");
+            ProfileCaveMap(filename);
             return;
         }
 
