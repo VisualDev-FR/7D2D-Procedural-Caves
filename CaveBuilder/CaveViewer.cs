@@ -253,7 +253,6 @@ public static class CaveViewer
         };
 
         prefab.UpdateNodes(Rand);
-        // prefab.UpdateInnerPoints();
 
         using (var b = new Bitmap(MAP_SIZE, MAP_SIZE))
         {
@@ -336,57 +335,50 @@ public static class CaveViewer
         CaveBuilder.SaveCaveMap(filename, points);
     }
 
-    static void ToWaveFront(List<Vector3i> positions, string filename, bool openFile = false)
+    public static void HexToRgb(string[] args)
     {
-        float[,] vertices = new float[,]
+        var hexColor = args[1];
+
+        // Enlever le caractère '#' s'il est présent
+        if (hexColor.StartsWith("#"))
         {
-            {0f, 0f, 0f},
-            {1f, 0f, 0f},
-            {1f, 1f, 0f},
-            {0f, 1f, 0f},
-            {0f, 0f, 1f},
-            {1f, 0f, 1f},
-            {1f, 1f, 1f},
-            {0f, 1f, 1f}
+            hexColor = hexColor.Substring(1);
+        }
+
+        // Vérifier que la longueur est correcte (6 caractères hexadécimaux)
+        if (hexColor.Length != 6)
+        {
+            throw new ArgumentException("La couleur hexadécimale doit être de 6 caractères.");
+        }
+
+        // Convertir les valeurs hexadécimales en entier
+        float r = 1f * Convert.ToInt32(hexColor.Substring(0, 2), 16) / 255;
+        float g = 1f * Convert.ToInt32(hexColor.Substring(2, 2), 16) / 255;
+        float b = 1f * Convert.ToInt32(hexColor.Substring(4, 2), 16) / 255;
+
+        Console.WriteLine($"Kd {r:F2} {g:F2} {b:F2}".Replace(",", "."));
+    }
+
+    public static void GenerateObjFile(string[] args)
+    {
+
+        var filename = "example.obj";
+        var points = new List<Vector3i>()
+        {
+            new Vector3i(0, 0, 0),
+            new Vector3i(0, 2, 0),
         };
+
+        var index = 0;
 
         using (StreamWriter writer = new StreamWriter(filename))
         {
-            int vertexIndexOffset = 1;
-
-            for (int cubeIndex = 0; cubeIndex < positions.Count; cubeIndex++)
-            {
-                float x = positions[cubeIndex].x;
-                float y = positions[cubeIndex].y;
-                float z = positions[cubeIndex].z;
-
-                var cubeVerticesIndices = new int[vertices.GetLength(0)];
-
-                for (int i = 0; i < vertices.GetLength(0); i++)
-                {
-                    float vx = vertices[i, 0] + x;
-                    float vy = vertices[i, 1] + y;
-                    float vz = vertices[i, 2] + z;
-
-                    writer.WriteLine($"v {vx} {vy} {vz}");
-
-                    cubeVerticesIndices[i] = vertexIndexOffset;
-                    vertexIndexOffset++;
-                }
-
-                writer.WriteLine($"f {cubeVerticesIndices[0]} {cubeVerticesIndices[1]} {cubeVerticesIndices[2]} {cubeVerticesIndices[3]}"); // Face inférieure
-                writer.WriteLine($"f {cubeVerticesIndices[4]} {cubeVerticesIndices[5]} {cubeVerticesIndices[6]} {cubeVerticesIndices[7]}"); // Face supérieure
-                writer.WriteLine($"f {cubeVerticesIndices[0]} {cubeVerticesIndices[1]} {cubeVerticesIndices[5]} {cubeVerticesIndices[4]}"); // Face latérale
-                writer.WriteLine($"f {cubeVerticesIndices[1]} {cubeVerticesIndices[2]} {cubeVerticesIndices[6]} {cubeVerticesIndices[5]}"); // Face latérale
-                writer.WriteLine($"f {cubeVerticesIndices[2]} {cubeVerticesIndices[3]} {cubeVerticesIndices[7]} {cubeVerticesIndices[6]}"); // Face latérale
-                writer.WriteLine($"f {cubeVerticesIndices[3]} {cubeVerticesIndices[0]} {cubeVerticesIndices[4]} {cubeVerticesIndices[7]}"); // Face latérale
-            }
+            writer.WriteLine("mtllib materials.mtl");
+            writer.WriteLine(new Voxell(points[0]).ToWavefront(ref index, WaveFrontMat.DarkGreen));
+            writer.WriteLine(new Voxell(points[1]).ToWavefront(ref index, WaveFrontMat.DarkRed));
         }
 
-        Console.WriteLine($"{positions.Count} voxels generated to '{filename}'.");
-
-        if (openFile)
-            Process.Start("CMD.exe", $"/C {Path.GetFullPath("cave.obj")}");
+        Log.Out($"index: {index}");
     }
 
     public static void Main(string[] args)
@@ -428,10 +420,105 @@ public static class CaveViewer
                 GenerateCaveMap(args);
                 break;
 
+            case "obj":
+            case "wavefront":
+                GenerateObjFile(args);
+                break;
+
+            case "rgb":
+                HexToRgb(args);
+                break;
+
             default:
                 Console.WriteLine($"Invalid command: {args[0]}");
                 break;
         }
     }
 
+}
+
+public static class WaveFrontMat
+{
+    public static string None = "";
+
+    public static string DarkRed = "DarkRed";
+
+    public static string DarkGreen = "DarkGreen";
+
+    public static string Orange = "Orange";
+}
+
+public class Voxell
+{
+    Vector3i position;
+
+    Vector3i size = Vector3i.one;
+
+    public int[,] Vertices
+    {
+        get
+        {
+            int x = size.x;
+            int y = size.y;
+            int z = size.z;
+
+            return new int[,]
+            {
+                {0, 0, 0},
+                {x, 0, 0},
+                {x, y, 0},
+                {0, y, 0},
+                {0, 0, z},
+                {x, 0, z},
+                {x, y, z},
+                {0, y, z},
+            };
+        }
+    }
+
+    public Voxell(Vector3i position)
+    {
+        this.position = position;
+    }
+
+    public Voxell(Vector3i position, Vector3i size)
+    {
+        this.position = position;
+        this.size = size;
+    }
+
+    public Voxell(Vector3i position, int sizeX, int sizeY, int sizeZ)
+    {
+        this.position = position;
+        size = new Vector3i(sizeX, sizeY, sizeZ);
+    }
+
+    public string ToWavefront(ref int vertexIndexOffset, string material)
+    {
+        var vertIndices = new int[8];
+        var result = new List<string>();
+
+        for (int i = 0; i < Vertices.GetLength(0); i++)
+        {
+            int vx = Vertices[i, 0] + position.x;
+            int vy = Vertices[i, 1] + position.y;
+            int vz = Vertices[i, 2] + position.z;
+
+            result.Add($"v {vx} {vy} {vz}");
+
+            vertIndices[i] = ++vertexIndexOffset;
+        }
+
+        if (material != "")
+            result.Add($"usemtl {material}");
+
+        result.Add($"f {vertIndices[0]} {vertIndices[1]} {vertIndices[2]} {vertIndices[3]}");
+        result.Add($"f {vertIndices[4]} {vertIndices[5]} {vertIndices[6]} {vertIndices[7]}");
+        result.Add($"f {vertIndices[0]} {vertIndices[1]} {vertIndices[5]} {vertIndices[4]}");
+        result.Add($"f {vertIndices[1]} {vertIndices[2]} {vertIndices[6]} {vertIndices[5]}");
+        result.Add($"f {vertIndices[2]} {vertIndices[3]} {vertIndices[7]} {vertIndices[6]}");
+        result.Add($"f {vertIndices[3]} {vertIndices[0]} {vertIndices[4]} {vertIndices[7]}");
+
+        return string.Join("\n", result);
+    }
 }

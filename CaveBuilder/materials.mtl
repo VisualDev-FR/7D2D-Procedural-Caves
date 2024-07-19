@@ -1,0 +1,10 @@
+# materials.mtl
+
+newmtl DarkRed
+Kd 0.5 0.0 0.0
+
+newmtl DarkGreen
+Kd 0.01 0.45 0.02
+
+newmtl Orange
+Kd 0.78 0.47 0.23
