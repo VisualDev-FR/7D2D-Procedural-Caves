@@ -141,7 +141,7 @@ public class CavePrefab
 
     private Vector3i _size;
 
-    public Vector3i Size
+    public Vector3i size
     {
         get => _size;
 
@@ -179,7 +179,7 @@ public class CavePrefab
     public CavePrefab(Random rand)
     {
         nodes = new List<Vector3i>();
-        Size = new Vector3i(
+        size = new Vector3i(
             rand.Next(CaveBuilder.MIN_PREFAB_SIZE, CaveBuilder.MAX_PREFAB_SIZE),
             rand.Next(CaveBuilder.MIN_PREFAB_SIZE, CaveBuilder.MAX_PREFAB_SIZE),
             rand.Next(CaveBuilder.MIN_PREFAB_SIZE, CaveBuilder.MAX_PREFAB_SIZE)
@@ -190,7 +190,7 @@ public class CavePrefab
     {
         prefabDataInstance = pdi;
         position = pdi.boundingBoxPosition + offset;
-        Size = pdi.boundingBoxSize;
+        size = pdi.boundingBoxSize;
         rotation = pdi.rotation;
 
         UpdateNodes(pdi);
@@ -222,20 +222,20 @@ public class CavePrefab
         {
             nodes = new List<Vector3i>()
                 {
-                    position + new Vector3i(Size.x / 2 , 0, 0),
-                    position + new Vector3i(0, 0, Size.z / 2),
-                    position + new Vector3i(Size.x / 2, 0, Size.z),
-                    position + new Vector3i(Size.x , 0, Size.z / 2),
+                    position + new Vector3i(size.x / 2 , 0, 0),
+                    position + new Vector3i(0, 0, size.z / 2),
+                    position + new Vector3i(size.x / 2, 0, size.z),
+                    position + new Vector3i(size.x , 0, size.z / 2),
                 };
         }
         else
         {
             nodes = new List<Vector3i>()
                 {
-                    position + new Vector3i(rand.Next(Size.x) , 0, 0),
-                    position + new Vector3i(0, 0, rand.Next(Size.z)),
-                    position + new Vector3i(rand.Next(Size.x), 0, Size.z),
-                    position + new Vector3i(Size.x , 0, rand.Next(Size.z)),
+                    position + new Vector3i(rand.Next(size.x) , 0, 0),
+                    position + new Vector3i(0, 0, rand.Next(size.z)),
+                    position + new Vector3i(rand.Next(size.x), 0, size.z),
+                    position + new Vector3i(size.x , 0, rand.Next(size.z)),
                 };
         }
     }
@@ -244,11 +244,11 @@ public class CavePrefab
     {
         var innerPoints = new List<Vector3i>();
 
-        for (int x = position.x; x <= (position.x + Size.x); x++)
+        for (int x = position.x; x <= (position.x + size.x); x++)
         {
-            for (int y = position.y; y <= (position.y + Size.z); y++)
+            for (int y = position.y; y <= (position.y + size.z); y++)
             {
-                for (int z = position.z; z <= (position.z + Size.z); z++)
+                for (int z = position.z; z <= (position.z + size.z); z++)
                 {
                     innerPoints.Add(new Vector3i(x, y, z));
                 }
@@ -261,9 +261,9 @@ public class CavePrefab
     public void SetRandomPosition(Random rand, int mapSize, int mapOffset)
     {
         position = new Vector3i(
-            rand.Next(mapOffset, mapSize - mapOffset - Size.x),
+            rand.Next(mapOffset, mapSize - mapOffset - size.x),
             rand.Next(2, 255),
-            rand.Next(mapOffset, mapSize - mapOffset - Size.z)
+            rand.Next(mapOffset, mapSize - mapOffset - size.z)
         );
 
         UpdateNodes(rand);
@@ -273,10 +273,10 @@ public class CavePrefab
     {
         int overlapMargin = CaveBuilder.overLapMargin;
 
-        if (position.x + Size.x + overlapMargin < other.position.x || other.position.x + other.Size.x + overlapMargin < position.x)
+        if (position.x + size.x + overlapMargin < other.position.x || other.position.x + other.size.x + overlapMargin < position.x)
             return false;
 
-        if (position.z + Size.z + overlapMargin < other.position.z || other.position.z + other.Size.z + overlapMargin < position.z)
+        if (position.z + size.z + overlapMargin < other.position.z || other.position.z + other.size.z + overlapMargin < position.z)
             return false;
 
         return true;
@@ -299,13 +299,13 @@ public class CavePrefab
         if (point.x < position.x)
             return false;
 
-        if (point.x >= position.x + Size.x)
+        if (point.x >= position.x + size.x)
             return false;
 
         if (point.z < position.z)
             return false;
 
-        if (point.z >= position.z + Size.z)
+        if (point.z >= position.z + size.z)
             return false;
 
         return true;
@@ -319,9 +319,9 @@ public class CavePrefab
         int y0 = position.y;
         int z0 = position.z;
 
-        int x1 = x0 + Size.x;
-        int y1 = y0 + Size.z;
-        int z1 = z0 + Size.z;
+        int x1 = x0 + size.x;
+        int y1 = y0 + size.z;
+        int z1 = z0 + size.z;
 
         var p000 = new Vector3i(x0, y0, z0);
         var p001 = new Vector3i(x0, y0, z1);
@@ -351,8 +351,8 @@ public class CavePrefab
         int x0 = position.x;
         int z0 = position.z;
 
-        int x1 = x0 + Size.x;
-        int z1 = z0 + Size.z;
+        int x1 = x0 + size.x;
+        int z1 = z0 + size.z;
 
         for (int x = x0; x <= x1; x++)
         {
@@ -487,9 +487,9 @@ public class CavePrefab
         int y0 = position.y;
         int z0 = position.z;
 
-        int x1 = x0 + Size.x;
-        int y1 = y0 + Size.y;
-        int z1 = z0 + Size.z;
+        int x1 = x0 + size.x;
+        int y1 = y0 + size.y;
+        int z1 = z0 + size.z;
 
         for (int x = x0; x < x1; x++)
         {
@@ -529,7 +529,7 @@ public class CavePrefab
         if (pos.y < position.y)
             return false;
 
-        if (pos.y >= position.y + Size.z)
+        if (pos.y >= position.y + size.z)
             return false;
 
         return true;
@@ -595,9 +595,9 @@ public class CavePrefab
     public Vector3i GetCenter()
     {
         return new Vector3i(
-            position.x + Size.x / 2,
-            position.y + Size.y / 2,
-            position.z + Size.z / 2
+            position.x + size.x / 2,
+            position.y + size.y / 2,
+            position.z + size.z / 2
         );
     }
 
@@ -620,6 +620,26 @@ public class CavePrefab
         prefabDataInstance.rotation = rotation;
 
         return prefabDataInstance;
+    }
+
+    public List<Vector3i> GetOverlappingChunks()
+    {
+        var chunkPositions = new List<Vector3i>();
+
+        var x0chunk = position.x / 16;
+        var z0chunk = position.z / 16;
+        var x1Chunk = (position.x + size.x - 1) / 16;
+        var z1Chunk = (position.z + size.z - 1) / 16;
+
+        for (int x = x0chunk; x <= x1Chunk; x++)
+        {
+            for (int z = z0chunk; z <= z1Chunk; z++)
+            {
+                chunkPositions.Add(new Vector3i(x, 0, z));
+            }
+        }
+
+        return chunkPositions;
     }
 }
 
@@ -1038,7 +1058,7 @@ public static class CaveBuilder
 {
     public static int SEED = new Random().Next();
 
-    public static int worldSize = 100;
+    public static int worldSize = 6144;
 
     public static int MIN_PREFAB_SIZE = 8;
 
@@ -1137,6 +1157,26 @@ public static class CaveBuilder
         Logger.Info($"{prefabs.Count} / {PREFAB_COUNT} prefabs added");
 
         return prefabs;
+    }
+
+    public static Dictionary<Vector3i, List<CavePrefab>> GroupPrefabsByChunk(List<CavePrefab> prefabs)
+    {
+        var groupedPrefabs = new Dictionary<Vector3i, List<CavePrefab>>();
+
+        foreach (var prefab in prefabs)
+        {
+            var chunkPositions = prefab.GetOverlappingChunks();
+
+            foreach (var chunkPos in chunkPositions)
+            {
+                if (!groupedPrefabs.ContainsKey(chunkPos))
+                    groupedPrefabs[chunkPos] = new List<CavePrefab>();
+
+                groupedPrefabs[chunkPos].Add(prefab);
+            }
+        }
+
+        return groupedPrefabs;
     }
 
     public static void SaveCaveMap(string filename, HashSet<Vector3i> caveMap)

@@ -45,7 +45,7 @@ public static class CaveViewer
         {
             foreach (var prefab in prefabs)
             {
-                graph.DrawRectangle(pen, prefab.position.x, prefab.position.z, prefab.Size.x, prefab.Size.z);
+                graph.DrawRectangle(pen, prefab.position.x, prefab.position.z, prefab.size.x, prefab.size.z);
 
                 if (fill)
                     DrawPoints(b, prefab.GetInnerPoints().ToHashSet(), PrefabBoundsColor);
@@ -139,13 +139,13 @@ public static class CaveViewer
         var p1 = new CavePrefab()
         {
             position = new Vector3i(20, 20, 20),
-            Size = new Vector3i(10, 10, 10),
+            size = new Vector3i(10, 10, 10),
         };
 
         var p2 = new CavePrefab()
         {
             position = new Vector3i(MAP_SIZE - 30, 50, MAP_SIZE - 30),
-            Size = new Vector3i(10, 10, 10),
+            size = new Vector3i(20, 10, 20),
         };
 
         var prefabs = new List<CavePrefab>() { p1, p2 };
@@ -182,8 +182,8 @@ public static class CaveViewer
             select new Voxell(point, WaveFrontMat.DarkRed)
         ).ToList();
 
-        voxels.Add(new Voxell(p1.position, p1.Size, WaveFrontMat.DarkGreen));
-        voxels.Add(new Voxell(p2.position, p2.Size, WaveFrontMat.DarkGreen));
+        voxels.Add(new Voxell(p1.position, p1.size, WaveFrontMat.DarkGreen));
+        voxels.Add(new Voxell(p2.position, p2.size, WaveFrontMat.DarkGreen));
 
         GenerateObjFile("path.obj", voxels, true);
     }
@@ -203,6 +203,35 @@ public static class CaveViewer
             CaveBuilder.worldSize = int.Parse(args[1]);
 
         var prefabs = CaveBuilder.GetRandomPrefabs(CaveBuilder.PREFAB_COUNT);
+        var chunksDict = CaveBuilder.GroupPrefabsByChunk(prefabs);
+        var choice = chunksDict[chunksDict.Keys.ElementAt(CaveBuilder.rand.Next(chunksDict.Count))][0];
+
+        var voxels = new List<Voxell>();
+
+        using (var writer = new StreamWriter("chunks.txt"))
+        {
+            foreach (var entry in chunksDict)
+            {
+                writer.WriteLine(entry.Key.ToString());
+                writer.WriteLine(string.Concat(Enumerable.Repeat("-", 10)));
+
+                foreach (var prefab in entry.Value)
+                {
+                    if (prefab.position == choice.position)
+                        voxels.Add(new Voxell(entry.Key * 16, new Vector3i(15, 1, 15), WaveFrontMat.DarkRed));
+
+                    writer.WriteLine(prefab.position.ToString());
+                }
+
+                writer.WriteLine("");
+            }
+        }
+
+        voxels.Add(new Voxell(new Vector3i(choice.position.x, 10, choice.position.z), choice.size, WaveFrontMat.DarkGreen));
+
+        GenerateObjFile("chunks.obj", voxels, true);
+
+        return;
 
         Logger.Info("Start solving graph...");
 
@@ -259,7 +288,7 @@ public static class CaveViewer
         var prefab = new CavePrefab()
         {
             position = mapCenter,
-            Size = new Vector3i(10, 10, 10),
+            size = new Vector3i(10, 10, 10),
         };
 
         prefab.UpdateNodes(Rand);
@@ -269,7 +298,7 @@ public static class CaveViewer
             select new Voxell(point, WaveFrontMat.Orange)
         ).ToList();
 
-        voxels.Add(new Voxell(mapCenter, prefab.Size, WaveFrontMat.DarkGreen));
+        voxels.Add(new Voxell(mapCenter, prefab.size, WaveFrontMat.DarkGreen));
 
         GenerateObjFile("prefab.obj", voxels, true);
     }
