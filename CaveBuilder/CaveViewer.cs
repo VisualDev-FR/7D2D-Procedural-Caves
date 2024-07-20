@@ -183,7 +183,7 @@ public static class CaveViewer
         var voxels = (
             from point in path
             select new Voxell(point, WaveFrontMat.DarkRed)
-        ).ToList();
+        ).ToHashSet();
 
         voxels.Add(new Voxell(p1.position, p1.size, WaveFrontMat.DarkGreen));
         voxels.Add(new Voxell(p2.position, p2.size, WaveFrontMat.DarkGreen));
@@ -281,7 +281,7 @@ public static class CaveViewer
         var voxels = (
             from point in CaveBuilder.ParseCircle(prefab.GetCenter(), 80)
             select new Voxell(point, WaveFrontMat.Orange)
-        ).ToList();
+        ).ToHashSet();
 
         voxels.Add(new Voxell(mapCenter, prefab.size, WaveFrontMat.DarkGreen));
 
@@ -370,29 +370,7 @@ public static class CaveViewer
         Console.WriteLine($"Kd {r:F2} {g:F2} {b:F2}".Replace(",", "."));
     }
 
-    public static void GenerateObjFile(string[] args)
-    {
-
-        var filename = "example.obj";
-        var points = new List<Vector3i>()
-        {
-            new Vector3i(0, 0, 0),
-            new Vector3i(0, 2, 0),
-        };
-
-        var index = 0;
-
-        using (StreamWriter writer = new StreamWriter(filename))
-        {
-            writer.WriteLine("mtllib materials.mtl");
-            writer.WriteLine(new Voxell(points[0]).ToWavefront(ref index));
-            writer.WriteLine(new Voxell(points[1]).ToWavefront(ref index));
-        }
-
-        Log.Out($"index: {index}");
-    }
-
-    public static void GenerateObjFile(string filename, IEnumerable<Voxell> voxels, bool openFile = false)
+    public static void GenerateObjFile(string filename, HashSet<Voxell> voxels, bool openFile = false)
     {
         int index = 0;
 
@@ -402,7 +380,7 @@ public static class CaveViewer
 
             foreach (var voxel in voxels)
             {
-                writer.WriteLine(voxel.ToWavefront(ref index));
+                writer.WriteLine(voxel.ToWavefront(ref index, voxels));
             }
         }
 
@@ -450,11 +428,6 @@ public static class CaveViewer
                 CaveMapCommand(args);
                 break;
 
-            case "obj":
-            case "wavefront":
-                GenerateObjFile(args);
-                break;
-
             case "rgb":
                 HexToRgb(args);
                 break;
@@ -467,6 +440,7 @@ public static class CaveViewer
 
 }
 
+
 public static class WaveFrontMat
 {
     public static string None = "";
@@ -477,6 +451,7 @@ public static class WaveFrontMat
 
     public static string Orange = "Orange";
 }
+
 
 public class Voxell
 {
@@ -496,14 +471,14 @@ public class Voxell
 
             return new int[,]
             {
-                {0, 0, 0},
-                {x, 0, 0},
-                {x, y, 0},
-                {0, y, 0},
-                {0, 0, z},
-                {x, 0, z},
-                {x, y, z},
-                {0, y, z},
+                {0, 0, 0}, // 0
+                {x, 0, 0}, // 1
+                {x, y, 0}, // 2
+                {0, y, 0}, // 3
+                {0, 0, z}, // 4
+                {x, 0, z}, // 5
+                {x, y, z}, // 6
+                {0, y, z}, // 7
             };
         }
     }
@@ -538,8 +513,36 @@ public class Voxell
         size = new Vector3i(sizeX, sizeY, sizeZ);
     }
 
-    public string ToWavefront(ref int vertexIndexOffset)
+    public Voxell(int x, int y, int z)
     {
+        position = new Vector3i(x, y, z);
+    }
+
+    public bool[] GetNeighbors(HashSet<Voxell> others)
+    {
+        var result = new bool[6];
+        var neighbors = new List<Voxell>()
+        {
+            new Voxell(position.x + 1, position.y, position.z),
+            new Voxell(position.x - 1, position.y, position.z),
+            new Voxell(position.x, position.y + 1, position.z),
+            new Voxell(position.x, position.y - 1, position.z),
+            new Voxell(position.x, position.y, position.z + 1),
+            new Voxell(position.x, position.y, position.z - 1),
+        };
+
+        for (int i = 0; i < 6; i++)
+        {
+            result[i] = !others.Contains(neighbors[i]);
+        }
+
+        return result;
+    }
+
+    public string ToWavefront(ref int vertexIndexOffset, HashSet<Voxell> others)
+    {
+        var neighbors = GetNeighbors(others);
+
         var vertIndices = new int[8];
         var result = new List<string>();
 
@@ -557,13 +560,37 @@ public class Voxell
         if (material != "")
             result.Add($"usemtl {material}");
 
-        result.Add($"f {vertIndices[0]} {vertIndices[1]} {vertIndices[2]} {vertIndices[3]}");
-        result.Add($"f {vertIndices[4]} {vertIndices[5]} {vertIndices[6]} {vertIndices[7]}");
-        result.Add($"f {vertIndices[0]} {vertIndices[1]} {vertIndices[5]} {vertIndices[4]}");
-        result.Add($"f {vertIndices[1]} {vertIndices[2]} {vertIndices[6]} {vertIndices[5]}");
-        result.Add($"f {vertIndices[2]} {vertIndices[3]} {vertIndices[7]} {vertIndices[6]}");
-        result.Add($"f {vertIndices[3]} {vertIndices[0]} {vertIndices[4]} {vertIndices[7]}");
+        if (neighbors[0]) // normal: x + 1
+            result.Add($"f {vertIndices[1]} {vertIndices[2]} {vertIndices[6]} {vertIndices[5]}");
+
+        if (neighbors[1]) // normal: x - 1
+            result.Add($"f {vertIndices[3]} {vertIndices[0]} {vertIndices[4]} {vertIndices[7]}");
+
+        if (neighbors[2]) // normal: y + 1
+            result.Add($"f {vertIndices[2]} {vertIndices[3]} {vertIndices[7]} {vertIndices[6]}");
+
+        if (neighbors[3]) // normal: y - 1
+            result.Add($"f {vertIndices[0]} {vertIndices[1]} {vertIndices[5]} {vertIndices[4]}");
+
+        if (neighbors[4]) // normal: z + 1
+            result.Add($"f {vertIndices[4]} {vertIndices[5]} {vertIndices[6]} {vertIndices[7]}");
+
+        if (neighbors[5]) // normal: z - 1
+            result.Add($"f {vertIndices[0]} {vertIndices[1]} {vertIndices[2]} {vertIndices[3]}");
 
         return string.Join("\n", result);
     }
+
+    public override int GetHashCode()
+    {
+        return position.GetHashCode();
+    }
+
+    public override bool Equals(object obj)
+    {
+        var other = (Voxell)obj;
+
+        return GetHashCode() == other.GetHashCode();
+    }
+
 }
