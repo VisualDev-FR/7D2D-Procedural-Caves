@@ -37,9 +37,6 @@ public static class CaveViewer
             {
                 graph.DrawRectangle(pen, prefab.position.x, prefab.position.z, prefab.size.x, prefab.size.z);
 
-                if (fill)
-                    DrawPoints(b, prefab.GetInnerPoints().ToHashSet(), PrefabBoundsColor);
-
                 DrawPoints(b, new HashSet<Vector3i>(prefab.nodes), NodeColor);
             }
         }
@@ -259,9 +256,9 @@ public static class CaveViewer
         CaveBuilder.pathingNoise = new CaveNoise(
             seed: CaveBuilder.SEED,
             octaves: 1,
-            frequency: 0.05f,
+            frequency: 0.01f,
             threshold: 0.8f,
-            invert: true,
+            invert: false,
             noiseType: FastNoiseLite.NoiseType.OpenSimplex2S,
             fractalType: FastNoiseLite.FractalType.Ridged
         );
@@ -308,6 +305,7 @@ public static class CaveViewer
             {
                 g.Clear(BackgroundColor);
 
+                DrawNoise(b, CaveBuilder.pathingNoise);
                 DrawPoints(b, caveMap, TunnelsColor);
                 DrawPrefabs(b, g, cachedPrefabs.Prefabs);
             }
@@ -317,19 +315,19 @@ public static class CaveViewer
 
         Console.WriteLine($"{caveMap.Count:N0} cave blocks generated, timer={CaveUtils.TimeFormat(timer)}.");
 
-        var voxels = (
-            from block in caveMap
-            select new Voxell(block, WaveFrontMat.DarkRed)
-        ).ToHashSet();
+        // var voxels = (
+        //     from block in caveMap
+        //     select new Voxell(block, WaveFrontMat.DarkRed)
+        // ).ToHashSet();
 
-        var prefabVox = (
-            from block in cachedPrefabs.Prefabs
-            select new Voxell(block.position, block.size, WaveFrontMat.DarkGreen)
-        ).ToHashSet();
+        // var prefabVox = (
+        //     from block in cachedPrefabs.Prefabs
+        //     select new Voxell(block.position, block.size, WaveFrontMat.DarkGreen)
+        // ).ToHashSet();
 
-        voxels.UnionWith(prefabVox);
+        // voxels.UnionWith(prefabVox);
 
-        GenerateObjFile("cave.obj", voxels, false);
+        // GenerateObjFile("cave.obj", voxels, false);
     }
 
     public static void PrefabCommand(string[] args)

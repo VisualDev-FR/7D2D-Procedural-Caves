@@ -67,19 +67,19 @@ public static class CaveUtils
     {
         var neighbors = new List<Vector3i>();
 
-        if (position.x - CaveBuilder.radiationZoneMargin > 1)
+        if (position.x > CaveBuilder.radiationZoneMargin)
             neighbors.Add(new Vector3i(position.x - 1, position.y, position.z));
 
         if (position.x + CaveBuilder.radiationZoneMargin < CaveBuilder.worldSize)
             neighbors.Add(new Vector3i(position.x + 1, position.y, position.z));
 
-        if (position.z - CaveBuilder.radiationZoneMargin > 1)
+        if (position.z > CaveBuilder.radiationZoneMargin)
             neighbors.Add(new Vector3i(position.x, position.y, position.z - 1));
 
         if (position.z + CaveBuilder.radiationZoneMargin < CaveBuilder.worldSize)
             neighbors.Add(new Vector3i(position.x, position.y, position.z + 1));
 
-        if (position.y - CaveBuilder.cavePrefabBedRockMargin > 1)
+        if (position.y > CaveBuilder.cavePrefabBedRockMargin)
             neighbors.Add(new Vector3i(position.x, position.y - 1, position.z));
 
         if (position.y + CaveBuilder.cavePrefabterrainMargin < WorldBuilder.Instance.GetHeight(position.x, position.z))
@@ -107,15 +107,6 @@ public class CaveNoise
         noiseType: FastNoiseLite.NoiseType.Perlin,
         fractalType: FastNoiseLite.FractalType.None
     );
-
-    // {    new FastNoiseLite(seed == -1 ? CaveBuilder.seed : seed);
-
-    //     noise.SetNoiseType(FastNoiseLite.NoiseType.Perlin);
-    //         noise.SetFractalType(FastNoiseLite.FractalType.None);
-    //         noise.SetFractalGain(1);
-    //         noise.SetFractalOctaves(1);
-    //         noise.SetFrequency(0.1f);
-    //         }
 
     public CaveNoise(int seed, int octaves, float frequency, float threshold, bool invert, FastNoiseLite.NoiseType noiseType, FastNoiseLite.FractalType fractalType)
     {
@@ -281,30 +272,14 @@ public class CavePrefab
         }
     }
 
-    public List<Vector3i> GetInnerPoints()
+    public void SetRandomPosition(Random rand, int mapSize)
     {
-        var innerPoints = new List<Vector3i>();
+        int offset = CaveBuilder.radiationZoneMargin;
 
-        for (int x = position.x; x <= (position.x + size.x); x++)
-        {
-            for (int y = position.y; y <= (position.y + size.z); y++)
-            {
-                for (int z = position.z; z <= (position.z + size.z); z++)
-                {
-                    innerPoints.Add(new Vector3i(x, y, z));
-                }
-            }
-        }
-
-        return innerPoints;
-    }
-
-    public void SetRandomPosition(Random rand, int mapSize, int mapOffset)
-    {
         position = new Vector3i(
-            rand.Next(mapOffset, mapSize - mapOffset - size.x),
+            rand.Next(offset, mapSize - offset - size.x),
             rand.Next(5, 200),
-            rand.Next(mapOffset, mapSize - mapOffset - size.z)
+            rand.Next(offset, mapSize - offset - size.z)
         );
 
         UpdateNodes(rand);
@@ -922,10 +897,7 @@ public class PrefabCache
     public float MinDistToPrefab(Vector3i position)
     {
         float minDist = int.MaxValue;
-
         var prefabs = GetNearestPrefabs(position);
-
-        // Log.Out($"{position} {prefabs.Count}");
 
         foreach (var prefab in prefabs)
         {
@@ -991,16 +963,10 @@ public static class CaveTunneler
                 if (visited.Contains(neighbor))
                     continue;
 
-                // var prefabs = GetNeighborChunksPrefabs(position, prefabs);
                 float minDist = cachedPrefabs.MinDistToPrefab(neighbor.position);
-
-                // Log.Out(minDist.ToString());
 
                 if (minDist == 0)
                     continue;
-
-                // float noise = 0.5f * (1 + CaveBuilder.pathingNoise.GetNoise(neighbor.position.x, neighbor.position.y, neighbor.position.z));
-                // float factor = noise < CaveBuilder.NOISE_THRESHOLD ? .5f : 1f;
 
                 bool isCave = CaveBuilder.pathingNoise.IsCave(neighbor.position.x, neighbor.position.y, neighbor.position.z);
                 float factor = 1.0f;
@@ -1032,13 +998,44 @@ public static class CaveTunneler
         return path;
     }
 
+    public static HashSet<Vector3i> ThickenAroundPos(Vector3i center, int maxRadius)
+    {
+        var queue = new HashSet<Vector3i>() { center };
+        var visited = new HashSet<Vector3i>();
+
+        int sqrRadius = maxRadius * maxRadius;
+
+        while (queue.Count > 0)
+        {
+            foreach (var pos in queue.ToArray())
+            {
+                queue.Remove(pos);
+
+                if (visited.Contains(pos))
+                    continue;
+
+                visited.Add(pos);
+
+                if (CaveBuilder.pathingNoise.IsTerrain(pos.x, pos.y, pos.z))
+                    continue;
+
+                if (CaveUtils.SqrEuclidianDist(pos, center) >= sqrRadius)
+                    continue;
+
+                queue.UnionWith(CaveUtils.GetValidNeighbors(pos));
+            }
+        }
+
+        return visited;
+    }
+
     public static HashSet<Vector3i> ThickenCaveMap(HashSet<Vector3i> wiredCaveMap)
     {
         var caveMap = new HashSet<Vector3i>();
 
         foreach (var position in wiredCaveMap)
         {
-            var circle = CaveBuilder.ParseCircle(position, 2f);
+            var circle = CaveBuilder.ParseCircle(position, 10f);
 
             caveMap.UnionWith(circle);
         }
@@ -1172,17 +1169,15 @@ public static class CaveBuilder
 
     public static int MAX_PREFAB_SIZE = 100;
 
-    public static int MAP_OFFSET => worldSize / 60;
-
     public static float POINT_WIDTH = 5;
 
     public static int PREFAB_COUNT => worldSize / 5;
 
     public static Random rand = new Random(SEED);
 
-    public static int overLapMargin = 50;
+    public static int overLapMargin = 100;
 
-    public static int radiationZoneMargin = 10;
+    public static int radiationZoneMargin = worldSize / 60;
 
     public static int cavePrefabBedRockMargin = 2;
 
@@ -1235,7 +1230,7 @@ public static class CaveBuilder
 
         while (maxTries-- > 0)
         {
-            prefab.SetRandomPosition(rand, worldSize, MAP_OFFSET);
+            prefab.SetRandomPosition(rand, worldSize);
 
             if (!prefab.OverLaps2D(others))
             {
