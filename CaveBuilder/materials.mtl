@@ -22,3 +22,7 @@ d 0.5
 newmtl Orange
 Kd 0.78 0.47 0.23
 #d 0.5
+
+newmtl DarkGray
+Kd 0.33 0.33 0.32
+d 0.5

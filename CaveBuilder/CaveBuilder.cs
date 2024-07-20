@@ -90,6 +90,88 @@ public static class CaveUtils
 }
 
 
+public class CaveNoise
+{
+    public FastNoiseLite noise;
+
+    public bool invert;
+
+    public float threshold;
+
+    public static CaveNoise defaultNoise = new CaveNoise(
+        seed: CaveBuilder.SEED,
+        octaves: 1,
+        frequency: 0.1f,
+        threshold: 0.5f,
+        invert: true,
+        noiseType: FastNoiseLite.NoiseType.Perlin,
+        fractalType: FastNoiseLite.FractalType.None
+    );
+
+    // {    new FastNoiseLite(seed == -1 ? CaveBuilder.seed : seed);
+
+    //     noise.SetNoiseType(FastNoiseLite.NoiseType.Perlin);
+    //         noise.SetFractalType(FastNoiseLite.FractalType.None);
+    //         noise.SetFractalGain(1);
+    //         noise.SetFractalOctaves(1);
+    //         noise.SetFrequency(0.1f);
+    //         }
+
+    public CaveNoise(int seed, int octaves, float frequency, float threshold, bool invert, FastNoiseLite.NoiseType noiseType, FastNoiseLite.FractalType fractalType)
+    {
+        this.invert = invert;
+        this.threshold = threshold;
+
+        noise = new FastNoiseLite(seed != -1 ? seed : CaveBuilder.SEED);
+        noise.SetFractalType(fractalType);
+        noise.SetNoiseType(noiseType);
+        noise.SetFractalOctaves(octaves);
+        noise.SetFrequency(frequency);
+    }
+
+    public void SetSeed(int seed)
+    {
+        noise.SetSeed(seed);
+    }
+
+    public bool IsTerrain(int x, int y, int z)
+    {
+        if (invert)
+            return GetNormalizedNoise(x, y, z) > threshold;
+
+        return GetNormalizedNoise(x, y, z) < threshold;
+    }
+
+    public bool IsTerrain(int x, int z)
+    {
+        if (invert)
+            return GetNormalizedNoise(x, z) > threshold;
+
+        return GetNormalizedNoise(x, z) < threshold;
+    }
+
+    public bool IsCave(int x, int y, int z)
+    {
+        return !IsTerrain(x, y, z);
+    }
+
+    public bool IsCave(int x, int z)
+    {
+        return !IsTerrain(x, z);
+    }
+
+    public float GetNormalizedNoise(int x, int y, int z)
+    {
+        return 0.5f * (1 + noise.GetNoise(x, y, z));
+    }
+
+    public float GetNormalizedNoise(int x, int z)
+    {
+        return 0.5f * (1 + noise.GetNoise(x, z));
+    }
+}
+
+
 public class CavePrefab
 {
     public static FastTags<TagGroup.Poi> caveNodeTags = FastTags<TagGroup.Poi>.Parse("cavenode");
@@ -221,7 +303,7 @@ public class CavePrefab
     {
         position = new Vector3i(
             rand.Next(mapOffset, mapSize - mapOffset - size.x),
-            rand.Next(2, 255),
+            rand.Next(5, 200),
             rand.Next(mapOffset, mapSize - mapOffset - size.z)
         );
 
@@ -917,9 +999,13 @@ public static class CaveTunneler
                 if (minDist == 0)
                     continue;
 
-                float noise = 0.5f * (1 + CaveBuilder.pathingNoise.GetNoise(neighbor.position.x, neighbor.position.y, neighbor.position.z));
-                float factor = noise < CaveBuilder.NOISE_THRESHOLD ? .5f : 1f;
+                // float noise = 0.5f * (1 + CaveBuilder.pathingNoise.GetNoise(neighbor.position.x, neighbor.position.y, neighbor.position.z));
+                // float factor = noise < CaveBuilder.NOISE_THRESHOLD ? .5f : 1f;
 
+                bool isCave = CaveBuilder.pathingNoise.IsCave(neighbor.position.x, neighbor.position.y, neighbor.position.z);
+                float factor = 1.0f;
+
+                factor *= isCave ? 0.5f : 1f;
                 factor *= minDist < 20 ? 1 : .5f;
 
                 float tentativeGCost = currentNode.GCost + CaveUtils.SqrEuclidianDist(currentNode, neighbor) * factor;
@@ -1092,8 +1178,6 @@ public static class CaveBuilder
 
     public static int PREFAB_COUNT => worldSize / 5;
 
-    public static float NOISE_THRESHOLD = 0.5f;
-
     public static Random rand = new Random(SEED);
 
     public static int overLapMargin = 50;
@@ -1102,9 +1186,9 @@ public static class CaveBuilder
 
     public static int cavePrefabBedRockMargin = 2;
 
-    public static int cavePrefabterrainMargin = 5;
+    public static int cavePrefabterrainMargin = 10;
 
-    public static FastNoiseLite pathingNoise = ParsePerlinNoise();
+    public static CaveNoise pathingNoise = CaveNoise.defaultNoise;
 
     public static HashSet<Vector3i> ParseCircle(Vector3i center, float radius)
     {

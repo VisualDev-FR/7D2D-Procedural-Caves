@@ -22,7 +22,7 @@ public static class CaveViewer
 
     public static readonly Color PrefabBoundsColor = Color.Green;
 
-    public static readonly Color NoiseColor = Color.DarkGray;
+    public static readonly Color NoiseColor = Color.FromArgb(84, 84, 82);
 
     public static PointF ParsePointF(Vector3i point)
     {
@@ -67,15 +67,13 @@ public static class CaveViewer
         }
     }
 
-    public static void DrawNoise(Bitmap b, FastNoiseLite perlinNoise)
+    public static void DrawNoise(Bitmap b, CaveNoise noise)
     {
         for (int x = 0; x < CaveBuilder.worldSize; x++)
         {
             for (int z = 0; z < CaveBuilder.worldSize; z++)
             {
-                float noise = 0.5f * (perlinNoise.GetNoise(x, z) + 1);
-
-                if (noise < CaveBuilder.NOISE_THRESHOLD)
+                if (noise.IsCave(x, z))
                     b.SetPixel(x, z, NoiseColor);
             }
         }
@@ -110,25 +108,92 @@ public static class CaveViewer
 
     public static void NoiseCommand(string[] args)
     {
-        var noise = CaveBuilder.ParsePerlinNoise();
+        CaveBuilder.SEED = 12345;
+        CaveBuilder.worldSize = 100;
+
+        var noise = new CaveNoise(
+            seed: CaveBuilder.SEED,
+            octaves: 1,
+            frequency: 0.05f,
+            threshold: 0.8f,
+            invert: true,
+            noiseType: FastNoiseLite.NoiseType.OpenSimplex2S,
+            fractalType: FastNoiseLite.FractalType.Ridged
+        );
+
+        var prefabs = new List<CavePrefab>(){
+            new CavePrefab{
+                position = new Vector3i(10, 10, 10),
+                size = new Vector3i(10, 10, 10),
+            },
+            new CavePrefab{
+                position = new Vector3i(CaveBuilder.worldSize - 20, 10, CaveBuilder.worldSize - 20),
+                size = new Vector3i(10, 10, 10),
+            },
+        };
 
         using (var b = new Bitmap(CaveBuilder.worldSize, CaveBuilder.worldSize))
         {
             using (Graphics g = Graphics.FromImage(b))
             {
                 g.Clear(BackgroundColor);
-                DrawNoise(b, noise);
+
+                for (int x = 0; x < CaveBuilder.worldSize; x++)
+                {
+                    for (int z = 0; z < CaveBuilder.worldSize; z++)
+                    {
+                        if (noise.IsTerrain(x, z))
+                        {
+                            b.SetPixel(x, z, NoiseColor);
+                        }
+                    }
+                }
+
+                DrawPrefabs(b, g, prefabs);
             }
 
             b.Save(@"noise.png", ImageFormat.Png);
         }
     }
 
+    public static List<Voxell> CollectCaveNoise(CaveNoise noise, int worldSize, int height)
+    {
+        var noiseMap = new List<Voxell>();
+
+        for (int x = 0; x < worldSize; x++)
+        {
+            for (int z = 0; z < worldSize; z++)
+            {
+                for (int y = 0; y < height; y++)
+                {
+                    if (noise.IsCave(x, y, z))
+                        noiseMap.Add(new Voxell(x, y, z, WaveFrontMat.DarkGray));
+                }
+            }
+        }
+
+        return noiseMap;
+    }
+
     public static void PathCommand(string[] args)
     {
+        CaveBuilder.worldSize = 100;
+        // CaveBuilder.pathingNoise = new CaveNoise(
+        //     seed: CaveBuilder.seed,
+        //     octaves: 1,
+        //     frequency: 0.05f,
+        //     threshold: 0.8f,
+        //     invert: false,
+        //     noiseType: FastNoiseLite.NoiseType.OpenSimplex2S,
+        //     fractalType: FastNoiseLite.FractalType.Ridged
+        // );
+
+        if (args.Length > 1)
+            CaveBuilder.worldSize = int.Parse(args[1]);
+
         var p1 = new CavePrefab()
         {
-            position = new Vector3i(20, 20, 20),
+            position = new Vector3i(20, 5, 20),
             size = new Vector3i(10, 10, 10),
         };
 
@@ -153,32 +218,20 @@ public static class CaveViewer
 
         Log.Out($"{p1.position} -> {p2.position} | Astar dist: {path.Count}, eucl dist: {CaveUtils.EuclidianDist(p1.position, p2.position)}, timer: {timer.ElapsedMilliseconds}ms");
 
-        // using (var b = new Bitmap(MAP_SIZE, MAP_SIZE))
-        // {
-        //     using (Graphics g = Graphics.FromImage(b))
-        //     {
-        //         g.Clear(BackgroundColor);
-        //         // DrawNoise(b, noise);
-        //         // DrawPoints(b, noiseMap, NoiseColor);
-        //         DrawPoints(b, path, TunnelsColor);
-        //         DrawPrefabs(b, g, prefabs);
+        var prefabs = new HashSet<Voxell>(){
+            new Voxell(p1.position, p1.size, WaveFrontMat.DarkGreen) { force = true },
+            new Voxell(p2.position, p2.size, WaveFrontMat.DarkGreen) { force = true },
+        };
 
-        //         b.SetPixel(p1.position.x, p1.position.z, NodeColor);
-        //         b.SetPixel(p2.position.x, p2.position.z, NodeColor);
-        //     }
-
-        //     b.Save(@"pathing.png", ImageFormat.Png);
-        // }
-
-        var voxels = (
+        var cavemap = (
             from point in path
             select new Voxell(point, WaveFrontMat.DarkRed)
-        ).ToHashSet();
+        );
 
-        voxels.Add(new Voxell(p1.position, p1.size, WaveFrontMat.DarkGreen));
-        voxels.Add(new Voxell(p2.position, p2.size, WaveFrontMat.DarkGreen));
+        prefabs.UnionWith(cavemap);
+        // prefabs.UnionWith(CollectCaveNoise(CaveBuilder.pathingNoise, CaveBuilder.worldSize, 60));
 
-        GenerateObjFile("path.obj", voxels, true);
+        GenerateObjFile("path.obj", prefabs, true);
     }
 
     public static void SaveCaveMap(HashSet<Vector3i> caveMap, string filename)
@@ -202,6 +255,16 @@ public static class CaveViewer
     {
         var timer = new Stopwatch();
         timer.Start();
+
+        CaveBuilder.pathingNoise = new CaveNoise(
+            seed: CaveBuilder.SEED,
+            octaves: 1,
+            frequency: 0.05f,
+            threshold: 0.8f,
+            invert: true,
+            noiseType: FastNoiseLite.NoiseType.OpenSimplex2S,
+            fractalType: FastNoiseLite.FractalType.Ridged
+        );
 
         if (args.Length > 1)
             CaveBuilder.worldSize = int.Parse(args[1]);
@@ -252,10 +315,7 @@ public static class CaveViewer
             b.Save(@"cave.png", ImageFormat.Png);
         }
 
-        Console.WriteLine($"{caveMap.Count} cave blocks generated, timer={CaveUtils.TimeFormat(timer)}.");
-
-        // if (CaveBuilder.worldSize > 500)
-        //     return;
+        Console.WriteLine($"{caveMap.Count:N0} cave blocks generated, timer={CaveUtils.TimeFormat(timer)}.");
 
         var voxels = (
             from block in caveMap
@@ -458,6 +518,8 @@ public static class WaveFrontMat
     public static string DarkGreen = "DarkGreen";
 
     public static string Orange = "Orange";
+
+    public static string DarkGray = "DarkGray";
 }
 
 
@@ -488,7 +550,7 @@ public class Voxell
 
     Vector3i size = Vector3i.one;
 
-    public bool forceFaces = false;
+    public bool force;
 
     public string material = "";
 
@@ -559,9 +621,15 @@ public class Voxell
         position = new Vector3i(x, y, z);
     }
 
+    public Voxell(int x, int y, int z, string material)
+    {
+        position = new Vector3i(x, y, z);
+        this.material = material;
+    }
+
     public bool[] GetNeighbors(HashSet<Voxell> others)
     {
-        if (forceFaces)
+        if (force)
             return new bool[6] { true, true, true, true, true, true };
 
         var result = new bool[6];
@@ -691,7 +759,7 @@ public class Voxell
 
     public override int GetHashCode()
     {
-        return position.GetHashCode();
+        return position.GetHashCode() + size.GetHashCode();
     }
 
     public override bool Equals(object obj)

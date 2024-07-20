@@ -14,6 +14,11 @@ public static class Log
     {
         Console.WriteLine($"{"ERROR",-10} {message}");
     }
+
+    public static void Warning(string message)
+    {
+        Console.WriteLine($"{"WARNING",-10} {message}");
+    }
 }
 
 public static class WorldBuilder
