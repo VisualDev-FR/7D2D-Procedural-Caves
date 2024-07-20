@@ -14,16 +14,6 @@ using System.Threading.Tasks;
 
 public static class CaveViewer
 {
-    public static int MAP_SIZE => CaveBuilder.worldSize;
-
-    public static Random Rand => CaveBuilder.rand;
-
-    public static int SEED => CaveBuilder.SEED;
-
-    public static int PREFAB_COUNT => CaveBuilder.PREFAB_COUNT;
-
-    public static float NOISE_THRESHOLD => CaveBuilder.NOISE_THRESHOLD;
-
     public static readonly Color BackgroundColor = Color.Black;
 
     public static readonly Color TunnelsColor = Color.DarkRed;
@@ -79,13 +69,13 @@ public static class CaveViewer
 
     public static void DrawNoise(Bitmap b, FastNoiseLite perlinNoise)
     {
-        for (int x = 0; x < MAP_SIZE; x++)
+        for (int x = 0; x < CaveBuilder.worldSize; x++)
         {
-            for (int z = 0; z < MAP_SIZE; z++)
+            for (int z = 0; z < CaveBuilder.worldSize; z++)
             {
                 float noise = 0.5f * (perlinNoise.GetNoise(x, z) + 1);
 
-                if (noise < NOISE_THRESHOLD)
+                if (noise < CaveBuilder.NOISE_THRESHOLD)
                     b.SetPixel(x, z, NoiseColor);
             }
         }
@@ -93,7 +83,7 @@ public static class CaveViewer
 
     public static void GraphCommand(string[] args)
     {
-        int prefabCounts = args.Length > 1 ? int.Parse(args[1]) : PREFAB_COUNT;
+        int prefabCounts = args.Length > 1 ? int.Parse(args[1]) : CaveBuilder.PREFAB_COUNT;
 
         var prefabs = CaveBuilder.GetRandomPrefabs(prefabCounts);
 
@@ -103,7 +93,7 @@ public static class CaveViewer
 
         Log.Out("Start Drawing graph...");
 
-        using (var b = new Bitmap(MAP_SIZE, MAP_SIZE))
+        using (var b = new Bitmap(CaveBuilder.worldSize, CaveBuilder.worldSize))
         {
             using (Graphics g = Graphics.FromImage(b))
             {
@@ -122,7 +112,7 @@ public static class CaveViewer
     {
         var noise = CaveBuilder.ParsePerlinNoise();
 
-        using (var b = new Bitmap(MAP_SIZE, MAP_SIZE))
+        using (var b = new Bitmap(CaveBuilder.worldSize, CaveBuilder.worldSize))
         {
             using (Graphics g = Graphics.FromImage(b))
             {
@@ -144,7 +134,7 @@ public static class CaveViewer
 
         var p2 = new CavePrefab()
         {
-            position = new Vector3i(MAP_SIZE - 30, 50, MAP_SIZE - 30),
+            position = new Vector3i(CaveBuilder.worldSize - 30, 50, CaveBuilder.worldSize - 30),
             size = new Vector3i(20, 10, 20),
         };
 
@@ -248,7 +238,7 @@ public static class CaveViewer
 
         Log.Out("Start caves drawing");
 
-        using (var b = new Bitmap(MAP_SIZE, MAP_SIZE))
+        using (var b = new Bitmap(CaveBuilder.worldSize, CaveBuilder.worldSize))
         {
 
             using (Graphics g = Graphics.FromImage(b))
@@ -291,7 +281,7 @@ public static class CaveViewer
             size = new Vector3i(10, 10, 10),
         };
 
-        prefab.UpdateNodes(Rand);
+        prefab.UpdateNodes(CaveBuilder.rand);
 
         var voxels = (
             from point in CaveBuilder.ParseCircle(prefab.GetCenter(), 1000)
@@ -414,9 +404,9 @@ public static class CaveViewer
         // Log.Out(vec.ToString());
         // return;
 
-        Log.Out($"SEED .......... {SEED}");
-        Log.Out($"SIZE .......... {MAP_SIZE}");
-        Log.Out($"PREFAB_COUNT .. {PREFAB_COUNT}");
+        Log.Out($"SEED .......... {CaveBuilder.SEED}");
+        Log.Out($"SIZE .......... {CaveBuilder.worldSize}");
+        Log.Out($"PREFAB_COUNT .. {CaveBuilder.PREFAB_COUNT}");
         Log.Out("");
 
         switch (args[0])
