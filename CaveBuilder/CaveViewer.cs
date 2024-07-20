@@ -110,13 +110,15 @@ public static class CaveViewer
 
         var noise = new CaveNoise(
             seed: CaveBuilder.SEED,
-            octaves: 1,
-            frequency: 0.05f,
+            octaves: 2,
+            frequency: 0.01f,
             threshold: 0.8f,
             invert: true,
-            noiseType: FastNoiseLite.NoiseType.OpenSimplex2S,
-            fractalType: FastNoiseLite.FractalType.Ridged
+            noiseType: FastNoiseLite.NoiseType.Cellular,
+            fractalType: FastNoiseLite.FractalType.FBm
         );
+
+        noise.noise.SetCellularDistanceFunction(FastNoiseLite.CellularDistanceFunction.Euclidean);
 
         var prefabs = new List<CavePrefab>(){
             new CavePrefab{
@@ -128,6 +130,10 @@ public static class CaveViewer
                 size = new Vector3i(10, 10, 10),
             },
         };
+
+        var vox = CollectCaveNoise(noise, 50, 50).ToHashSet();
+
+        GenerateObjFile("noise.obj", vox, false);
 
         using (var b = new Bitmap(CaveBuilder.worldSize, CaveBuilder.worldSize))
         {
