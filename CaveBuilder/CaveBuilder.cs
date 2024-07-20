@@ -608,7 +608,7 @@ public class CavePrefab
 
     public override bool Equals(object obj)
     {
-        var other = (Vector3i)obj;
+        var other = (CavePrefab)obj;
 
         return GetHashCode() == other.GetHashCode();
     }
@@ -622,9 +622,9 @@ public class CavePrefab
         return prefabDataInstance;
     }
 
-    public List<Vector3i> GetOverlappingChunks()
+    public List<Vector2s> GetOverlappingChunks()
     {
-        var chunkPositions = new List<Vector3i>();
+        var chunkPositions = new List<Vector2s>();
 
         var x0chunk = position.x / 16;
         var z0chunk = position.z / 16;
@@ -635,7 +635,7 @@ public class CavePrefab
         {
             for (int z = z0chunk; z <= z1Chunk; z++)
             {
-                chunkPositions.Add(new Vector3i(x, 0, z));
+                chunkPositions.Add(new Vector2s(x, z));
             }
         }
 
@@ -823,6 +823,98 @@ public class HashedPriorityQueue<T>
 }
 
 
+public class PrefabCache
+{
+    public Dictionary<Vector2s, List<CavePrefab>> groupedPrefabs;
+
+    public List<CavePrefab> Prefabs;
+
+    public int Count => Prefabs.Count;
+
+    public PrefabCache()
+    {
+        Prefabs = new List<CavePrefab>();
+        groupedPrefabs = new Dictionary<Vector2s, List<CavePrefab>>();
+    }
+
+    public void AddPrefab(CavePrefab prefab)
+    {
+        Prefabs.Add(prefab);
+
+        var chunkPositions = prefab.GetOverlappingChunks();
+
+        foreach (var chunkPos in chunkPositions)
+        {
+            if (!groupedPrefabs.ContainsKey(chunkPos))
+                groupedPrefabs[chunkPos] = new List<CavePrefab>();
+
+            groupedPrefabs[chunkPos].Add(prefab);
+        }
+    }
+
+    public static IEnumerable<Vector2s> BrowseNeighborsChunks(int chunkX, int chunkZ, bool includeGiven = false)
+    {
+        if (includeGiven)
+            yield return new Vector2s(chunkX, chunkZ);
+
+        yield return new Vector2s(chunkX + 1, chunkZ);
+        yield return new Vector2s(chunkX - 1, chunkZ);
+        yield return new Vector2s(chunkX, chunkZ + 1);
+        yield return new Vector2s(chunkX, chunkZ - 1);
+        yield return new Vector2s(chunkX + 1, chunkZ - 1);
+        yield return new Vector2s(chunkX - 1, chunkZ - 1);
+        yield return new Vector2s(chunkX + 1, chunkZ + 1);
+        yield return new Vector2s(chunkX - 1, chunkZ + 1);
+    }
+
+    public HashSet<CavePrefab> GetNearestPrefabs(Vector3i position)
+    {
+        var nearestPrefabs = new HashSet<CavePrefab>();
+
+        int chunkX = position.x / 16;
+        int chunkZ = position.z / 16;
+
+        foreach (var chunkPos in BrowseNeighborsChunks(chunkX, chunkZ, includeGiven: true))
+        {
+            if (!groupedPrefabs.TryGetValue(chunkPos, out var chunkPrefabs))
+                continue;
+
+            foreach (var prefab in chunkPrefabs)
+            {
+                nearestPrefabs.Add(prefab);
+            }
+        }
+
+        return nearestPrefabs;
+    }
+
+    public float MinDistToPrefab(Vector3i position)
+    {
+        float minDist = int.MaxValue;
+
+        var prefabs = GetNearestPrefabs(position);
+
+        // Log.Out($"{position} {prefabs.Count}");
+
+        foreach (var prefab in prefabs)
+        {
+            if (prefab.Intersect3D(position))
+            {
+                return 0f;
+            }
+
+            float dist = CaveUtils.SqrEuclidianDist(position, prefab.GetCenter()) - prefab.BoundingRadiusSqr;
+
+            if (dist < minDist)
+            {
+                minDist = dist;
+            }
+        }
+
+        return minDist == 0 ? -1 : minDist;
+    }
+}
+
 public static class CaveTunneler
 {
     private static ConcurrentDictionary<Vector3i, bool> validPositions = new ConcurrentDictionary<Vector3i, bool>();
@@ -840,29 +932,7 @@ public static class CaveTunneler
         return path;
     }
 
-    private static float MinDistToPrefab(Vector3i position, List<CavePrefab> prefabs)
-    {
-        float minDist = int.MaxValue;
-
-        foreach (var prefab in prefabs)
-        {
-            if (prefab.Intersect3D(position))
-            {
-                return 0f;
-            }
-
-            float dist = CaveUtils.SqrEuclidianDist(position, prefab.GetCenter()) - prefab.BoundingRadiusSqr;
-
-            if (dist < minDist)
-            {
-                minDist = dist;
-            }
-        }
-
-        return minDist == 0 ? 1 : minDist;
-    }
-
-    public static HashSet<Vector3i> FindPath(Vector3i startPos, Vector3i targetPos, List<CavePrefab> prefabs)
+    public static HashSet<Vector3i> FindPath(Vector3i startPos, Vector3i targetPos, PrefabCache cachedPrefabs)
     {
         var startNode = new Node(startPos);
         var goalNode = new Node(targetPos);
@@ -890,7 +960,10 @@ public static class CaveTunneler
                 if (visited.Contains(neighbor))
                     continue;
 
-                float minDist = MinDistToPrefab(neighbor.position, prefabs);
+                // var prefabs = GetNeighborChunksPrefabs(position, prefabs);
+                float minDist = cachedPrefabs.MinDistToPrefab(neighbor.position);
+
+                // Log.Out(minDist.ToString());
 
                 if (minDist == 0)
                     continue;
@@ -1140,43 +1213,23 @@ public static class CaveBuilder
         return false;
     }
 
-    public static List<CavePrefab> GetRandomPrefabs(int count)
+    public static PrefabCache GetRandomPrefabs(int count)
     {
         Logger.Info("Start POIs placement...");
 
-        var prefabs = new List<CavePrefab>();
+        var prefabCache = new PrefabCache();
 
         for (int i = 0; i < count; i++)
         {
             var prefab = new CavePrefab(rand);
 
-            if (TryPlacePrefab(ref prefab, prefabs))
-                prefabs.Add(prefab);
+            if (TryPlacePrefab(ref prefab, prefabCache.Prefabs))
+                prefabCache.AddPrefab(prefab);
         }
 
-        Logger.Info($"{prefabs.Count} / {PREFAB_COUNT} prefabs added");
+        Logger.Info($"{prefabCache.Count} / {PREFAB_COUNT} prefabs added");
 
-        return prefabs;
-    }
-
-    public static Dictionary<Vector3i, List<CavePrefab>> GroupPrefabsByChunk(List<CavePrefab> prefabs)
-    {
-        var groupedPrefabs = new Dictionary<Vector3i, List<CavePrefab>>();
-
-        foreach (var prefab in prefabs)
-        {
-            var chunkPositions = prefab.GetOverlappingChunks();
-
-            foreach (var chunkPos in chunkPositions)
-            {
-                if (!groupedPrefabs.ContainsKey(chunkPos))
-                    groupedPrefabs[chunkPos] = new List<CavePrefab>();
-
-                groupedPrefabs[chunkPos].Add(prefab);
-            }
-        }
-
-        return groupedPrefabs;
+        return prefabCache;
     }
 
     public static void SaveCaveMap(string filename, HashSet<Vector3i> caveMap)

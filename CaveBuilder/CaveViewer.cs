@@ -99,7 +99,7 @@ public static class CaveViewer
 
         Logger.Info("Start solving MST Krustal...");
 
-        List<Edge> edges = GraphSolver.Resolve(prefabs);
+        List<Edge> edges = GraphSolver.Resolve(prefabs.Prefabs);
 
         Logger.Info("Start Drawing graph...");
 
@@ -109,7 +109,7 @@ public static class CaveViewer
             {
                 g.Clear(BackgroundColor);
                 DrawEdges(g, edges);
-                DrawPrefabs(b, g, prefabs);
+                DrawPrefabs(b, g, prefabs.Prefabs);
             }
 
             Logger.Info($"{edges.Count} Generated edges.");
@@ -148,7 +148,10 @@ public static class CaveViewer
             size = new Vector3i(20, 10, 20),
         };
 
-        var prefabs = new List<CavePrefab>() { p1, p2 };
+        var cachedPrefabs = new PrefabCache();
+
+        cachedPrefabs.AddPrefab(p1);
+        cachedPrefabs.AddPrefab(p2);
 
         // HashSet<Vector3i> obstacles = CaveBuilder.CollectPrefabObstacles(prefabs);
         // HashSet<Vector3i> noiseMap = CaveBuilder.CollectPrefabNoise(prefabs);
@@ -156,7 +159,7 @@ public static class CaveViewer
         var timer = new Stopwatch();
         timer.Start();
 
-        HashSet<Vector3i> path = CaveTunneler.FindPath(p1.position, p2.position, prefabs);
+        HashSet<Vector3i> path = CaveTunneler.FindPath(p1.position, p2.position, cachedPrefabs);
 
         Logger.Info($"{p1.position} -> {p2.position} | Astar dist: {path.Count}, eucl dist: {CaveUtils.EuclidianDist(p1.position, p2.position)}, timer: {timer.ElapsedMilliseconds}ms");
 
@@ -194,6 +197,17 @@ public static class CaveViewer
         CaveBuilder.SaveCaveMap(filename, caveMap);
     }
 
+    public static void test_prefabGrouping()
+    {
+        long memoryBefore = GC.GetTotalMemory(true);
+
+        PrefabCache prefabCache = CaveBuilder.GetRandomPrefabs(CaveBuilder.PREFAB_COUNT);
+
+        long memoryUsed = GC.GetTotalMemory(true) - memoryBefore;
+
+        Log.Out($"Cave map size: {memoryUsed:N0} Bytes ({memoryUsed / 1_048_576.0:F1} MB)");
+    }
+
     public static void CaveCommand(string[] args)
     {
         var timer = new Stopwatch();
@@ -202,40 +216,11 @@ public static class CaveViewer
         if (args.Length > 1)
             CaveBuilder.worldSize = int.Parse(args[1]);
 
-        var prefabs = CaveBuilder.GetRandomPrefabs(CaveBuilder.PREFAB_COUNT);
-        var chunksDict = CaveBuilder.GroupPrefabsByChunk(prefabs);
-        var choice = chunksDict[chunksDict.Keys.ElementAt(CaveBuilder.rand.Next(chunksDict.Count))][0];
-
-        var voxels = new List<Voxell>();
-
-        using (var writer = new StreamWriter("chunks.txt"))
-        {
-            foreach (var entry in chunksDict)
-            {
-                writer.WriteLine(entry.Key.ToString());
-                writer.WriteLine(string.Concat(Enumerable.Repeat("-", 10)));
-
-                foreach (var prefab in entry.Value)
-                {
-                    if (prefab.position == choice.position)
-                        voxels.Add(new Voxell(entry.Key * 16, new Vector3i(15, 1, 15), WaveFrontMat.DarkRed));
-
-                    writer.WriteLine(prefab.position.ToString());
-                }
-
-                writer.WriteLine("");
-            }
-        }
-
-        voxels.Add(new Voxell(new Vector3i(choice.position.x, 10, choice.position.z), choice.size, WaveFrontMat.DarkGreen));
-
-        GenerateObjFile("chunks.obj", voxels, true);
-
-        return;
+        var cachedPrefabs = CaveBuilder.GetRandomPrefabs(CaveBuilder.PREFAB_COUNT);
 
         Logger.Info("Start solving graph...");
 
-        List<Edge> edges = GraphSolver.Resolve(prefabs);
+        List<Edge> edges = GraphSolver.Resolve(cachedPrefabs.Prefabs);
 
         var wiredCaveMap = new ConcurrentBag<Vector3i>();
         int index = 0;
@@ -247,7 +232,7 @@ public static class CaveViewer
 
             Logger.Info($"Noise pathing: {100.0f * index++ / edges.Count:F0}% ({index} / {edges.Count}), dist={CaveUtils.SqrEuclidianDist(p1, p2)}");
 
-            HashSet<Vector3i> path = CaveTunneler.FindPath(p1, p2, prefabs);
+            HashSet<Vector3i> path = CaveTunneler.FindPath(p1, p2, cachedPrefabs);
 
             foreach (Vector3i node in path)
             {
@@ -271,7 +256,7 @@ public static class CaveViewer
                 g.Clear(BackgroundColor);
 
                 DrawPoints(b, caveMap, TunnelsColor);
-                DrawPrefabs(b, g, prefabs);
+                DrawPrefabs(b, g, cachedPrefabs.Prefabs);
             }
 
             b.Save(@"cave.png", ImageFormat.Png);
@@ -343,7 +328,7 @@ public static class CaveViewer
         return;
     }
 
-    public static void GenerateCaveMap(string[] args)
+    public static void CaveMapCommand(string[] args)
     {
         string filename = "cavemap.txt";
 
@@ -462,7 +447,7 @@ public static class CaveViewer
                 break;
 
             case "cavemap":
-                GenerateCaveMap(args);
+                CaveMapCommand(args);
                 break;
 
             case "obj":

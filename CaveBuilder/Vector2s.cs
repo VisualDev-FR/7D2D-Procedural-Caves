@@ -10,6 +10,12 @@ public struct Vector2s
         this.z = z;
     }
 
+    public Vector2s(int x, int z)
+    {
+        this.x = checked((short)x);
+        this.z = checked((short)z);
+    }
+
     public Vector2s(Vector3i other)
     {
         x = (short)other.x;
