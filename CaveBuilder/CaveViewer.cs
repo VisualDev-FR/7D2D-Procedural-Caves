@@ -279,11 +279,11 @@ public static class CaveViewer
         prefab.UpdateNodes(Rand);
 
         var voxels = (
-            from point in CaveBuilder.ParseCircle(prefab.GetCenter(), 80)
+            from point in CaveBuilder.ParseCircle(prefab.GetCenter(), 1000)
             select new Voxell(point, WaveFrontMat.Orange)
         ).ToHashSet();
 
-        voxels.Add(new Voxell(mapCenter, prefab.size, WaveFrontMat.DarkGreen));
+        // voxels.Add(new Voxell(mapCenter, prefab.size, WaveFrontMat.DarkGreen) { forceFaces = true });
 
         GenerateObjFile("prefab.obj", voxels, true);
     }
@@ -380,7 +380,10 @@ public static class CaveViewer
 
             foreach (var voxel in voxels)
             {
-                writer.WriteLine(voxel.ToWavefront(ref index, voxels));
+                string strVoxel = voxel.ToWavefront(ref index, voxels);
+
+                if (strVoxel != "")
+                    writer.WriteLine(strVoxel);
             }
         }
 
@@ -453,11 +456,34 @@ public static class WaveFrontMat
 }
 
 
+public struct VoxelFace
+{
+    public int[] vertIndices;
+
+    public VoxelFace(int[] values)
+    {
+        vertIndices = values;
+    }
+
+    public VoxelFace(int a, int b, int c, int d)
+    {
+        vertIndices = new int[4] { a, b, c, d };
+    }
+
+    public override string ToString()
+    {
+        return $"f {vertIndices[0]} {vertIndices[1]} {vertIndices[2]} {vertIndices[3]}";
+    }
+}
+
+
 public class Voxell
 {
     Vector3i position;
 
     Vector3i size = Vector3i.one;
+
+    public bool forceFaces = false;
 
     public string material = "";
 
@@ -471,17 +497,27 @@ public class Voxell
 
             return new int[,]
             {
-                {0, 0, 0}, // 0
-                {x, 0, 0}, // 1
-                {x, y, 0}, // 2
-                {0, y, 0}, // 3
-                {0, 0, z}, // 4
-                {x, 0, z}, // 5
-                {x, y, z}, // 6
-                {0, y, z}, // 7
+                {0, 0, 0},
+                {x, 0, 0},
+                {x, y, 0},
+                {0, y, 0},
+                {0, 0, z},
+                {x, 0, z},
+                {x, y, z},
+                {0, y, z},
             };
         }
     }
+
+    public static Dictionary<int, int[]> faceMapping = new Dictionary<int, int[]>()
+    {
+        { 0, new int[4]{ 1, 2, 6, 5 } }, // normal: x + 1
+        { 1, new int[4]{ 3, 0, 4, 7 } }, // normal: x - 1
+        { 2, new int[4]{ 2, 3, 7, 6 } }, // normal: y + 1
+        { 3, new int[4]{ 0, 1, 5, 4 } }, // normal: y - 1
+        { 4, new int[4]{ 4, 5, 6, 7 } }, // normal: z + 1
+        { 5, new int[4]{ 0, 1, 2, 3 } }, // normal: z - 1
+    };
 
     public Voxell(Vector3i position)
     {
@@ -520,6 +556,9 @@ public class Voxell
 
     public bool[] GetNeighbors(HashSet<Voxell> others)
     {
+        if (forceFaces)
+            return new bool[6] { true, true, true, true, true, true };
+
         var result = new bool[6];
         var neighbors = new List<Voxell>()
         {
@@ -539,44 +578,108 @@ public class Voxell
         return result;
     }
 
+    public bool ShouldAddVertice(int index, bool[] neighbors)
+    {
+        // 0 {0, 0, 0},
+        // 1 {x, 0, 0},
+        // 2 {x, y, 0},
+        // 3 {0, y, 0},
+        // 4 {0, 0, z},
+        // 5 {x, 0, z},
+        // 6 {x, y, z},
+        // 7 {0, y, z},
+
+        /*
+            0 | 0 1 2 3 | z - 1
+            1 | 4 5 6 7 | z + 1
+            2 | 0 1 5 4 | y - 1
+            3 | 1 2 6 5 | x + 1
+            4 | 2 3 7 6 | y + 1
+            5 | 3 0 4 7 | x - 1
+        */
+
+        if (index == 0)
+            return neighbors[0] || neighbors[2] || neighbors[5];
+
+        if (index == 1)
+            return neighbors[0] || neighbors[2] || neighbors[3];
+
+        if (index == 2)
+            return neighbors[0] || neighbors[3] || neighbors[4];
+
+        if (index == 3)
+            return neighbors[0] || neighbors[4] || neighbors[5];
+
+        if (index == 4)
+            return neighbors[1] || neighbors[4] || neighbors[5];
+
+        if (index == 5)
+            return neighbors[1] || neighbors[2] || neighbors[3];
+
+        if (index == 6)
+            return neighbors[1] || neighbors[3] || neighbors[4];
+
+        if (index == 7)
+            return neighbors[1] || neighbors[4] || neighbors[5];
+
+        return false;
+    }
+
     public string ToWavefront(ref int vertexIndexOffset, HashSet<Voxell> others)
     {
-        var neighbors = GetNeighbors(others);
+        var strVertices = new List<string>();
 
-        var vertIndices = new int[8];
-        var result = new List<string>();
-
-        for (int i = 0; i < Vertices.GetLength(0); i++)
+        for (int i = 0; i < 8; i++)
         {
             int vx = Vertices[i, 0] + position.x;
             int vy = Vertices[i, 1] + position.y;
             int vz = Vertices[i, 2] + position.z;
 
-            result.Add($"v {vx} {vy} {vz}");
-
-            vertIndices[i] = ++vertexIndexOffset;
+            strVertices.Add($"v {vx} {vy} {vz}");
         }
+
+        var faces = new List<VoxelFace>();
+        var usedVerticeIndexes = new Dictionary<int, int>();
+        var neighbors = GetNeighbors(others);
+        var result = new List<string>();
+
+        foreach (var entry in faceMapping)
+        {
+            int faceIndex = entry.Key;
+            int[] verticeIndexes = entry.Value;
+
+            if (!neighbors[faceIndex])
+                continue;
+
+            for (int i = 0; i < 4; i++)
+            {
+                int index = verticeIndexes[i];
+
+                if (!usedVerticeIndexes.ContainsKey(index))
+                {
+                    result.Add(strVertices[index] + $" # {vertexIndexOffset + 1}");
+                    usedVerticeIndexes[index] = ++vertexIndexOffset;
+                }
+            }
+
+            faces.Add(new VoxelFace(
+                usedVerticeIndexes[verticeIndexes[0]],
+                usedVerticeIndexes[verticeIndexes[1]],
+                usedVerticeIndexes[verticeIndexes[2]],
+                usedVerticeIndexes[verticeIndexes[3]]
+            ));
+        }
+
+        if (faces.Count == 0)
+            return "";
 
         if (material != "")
             result.Add($"usemtl {material}");
 
-        if (neighbors[0]) // normal: x + 1
-            result.Add($"f {vertIndices[1]} {vertIndices[2]} {vertIndices[6]} {vertIndices[5]}");
-
-        if (neighbors[1]) // normal: x - 1
-            result.Add($"f {vertIndices[3]} {vertIndices[0]} {vertIndices[4]} {vertIndices[7]}");
-
-        if (neighbors[2]) // normal: y + 1
-            result.Add($"f {vertIndices[2]} {vertIndices[3]} {vertIndices[7]} {vertIndices[6]}");
-
-        if (neighbors[3]) // normal: y - 1
-            result.Add($"f {vertIndices[0]} {vertIndices[1]} {vertIndices[5]} {vertIndices[4]}");
-
-        if (neighbors[4]) // normal: z + 1
-            result.Add($"f {vertIndices[4]} {vertIndices[5]} {vertIndices[6]} {vertIndices[7]}");
-
-        if (neighbors[5]) // normal: z - 1
-            result.Add($"f {vertIndices[0]} {vertIndices[1]} {vertIndices[2]} {vertIndices[3]}");
+        foreach (var face in faces)
+        {
+            result.Add(face.ToString());
+        }
 
         return string.Join("\n", result);
     }
