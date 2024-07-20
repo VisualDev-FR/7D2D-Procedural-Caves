@@ -97,11 +97,11 @@ public static class CaveViewer
 
         var prefabs = CaveBuilder.GetRandomPrefabs(prefabCounts);
 
-        Logger.Info("Start solving MST Krustal...");
+        Log.Out("Start solving MST Krustal...");
 
         List<Edge> edges = GraphSolver.Resolve(prefabs.Prefabs);
 
-        Logger.Info("Start Drawing graph...");
+        Log.Out("Start Drawing graph...");
 
         using (var b = new Bitmap(MAP_SIZE, MAP_SIZE))
         {
@@ -112,7 +112,7 @@ public static class CaveViewer
                 DrawPrefabs(b, g, prefabs.Prefabs);
             }
 
-            Logger.Info($"{edges.Count} Generated edges.");
+            Log.Out($"{edges.Count} Generated edges.");
 
             b.Save(@"graph.png", ImageFormat.Png);
         }
@@ -161,7 +161,7 @@ public static class CaveViewer
 
         HashSet<Vector3i> path = CaveTunneler.FindPath(p1.position, p2.position, cachedPrefabs);
 
-        Logger.Info($"{p1.position} -> {p2.position} | Astar dist: {path.Count}, eucl dist: {CaveUtils.EuclidianDist(p1.position, p2.position)}, timer: {timer.ElapsedMilliseconds}ms");
+        Log.Out($"{p1.position} -> {p2.position} | Astar dist: {path.Count}, eucl dist: {CaveUtils.EuclidianDist(p1.position, p2.position)}, timer: {timer.ElapsedMilliseconds}ms");
 
         // using (var b = new Bitmap(MAP_SIZE, MAP_SIZE))
         // {
@@ -218,7 +218,7 @@ public static class CaveViewer
 
         var cachedPrefabs = CaveBuilder.GetRandomPrefabs(CaveBuilder.PREFAB_COUNT);
 
-        Logger.Info("Start solving graph...");
+        Log.Out("Start solving graph...");
 
         List<Edge> edges = GraphSolver.Resolve(cachedPrefabs.Prefabs);
 
@@ -230,7 +230,7 @@ public static class CaveViewer
             Vector3i p1 = edge.node1;
             Vector3i p2 = edge.node2;
 
-            Logger.Info($"Noise pathing: {100.0f * index++ / edges.Count:F0}% ({index} / {edges.Count}), dist={CaveUtils.SqrEuclidianDist(p1, p2)}");
+            Log.Out($"Noise pathing: {100.0f * index++ / edges.Count:F0}% ({index} / {edges.Count}), dist={CaveUtils.SqrEuclidianDist(p1, p2)}");
 
             HashSet<Vector3i> path = CaveTunneler.FindPath(p1, p2, cachedPrefabs);
 
@@ -240,13 +240,13 @@ public static class CaveViewer
             }
         });
 
-        Logger.Info("Start caves thickening");
+        Log.Out("Start caves thickening");
 
         var caveMap = CaveTunneler.ThickenCaveMap(wiredCaveMap.ToHashSet());
 
         SaveCaveMap(caveMap, "cavemap.txt");
 
-        Logger.Info("Start caves drawing");
+        Log.Out("Start caves drawing");
 
         using (var b = new Bitmap(MAP_SIZE, MAP_SIZE))
         {
@@ -262,9 +262,24 @@ public static class CaveViewer
             b.Save(@"cave.png", ImageFormat.Png);
         }
 
-
-
         Console.WriteLine($"{caveMap.Count} cave blocks generated, timer={CaveUtils.TimeFormat(timer)}.");
+
+        // if (CaveBuilder.worldSize > 500)
+        //     return;
+
+        var voxels = (
+            from block in caveMap
+            select new Voxell(block, WaveFrontMat.DarkRed)
+        ).ToHashSet();
+
+        var prefabVox = (
+            from block in cachedPrefabs.Prefabs
+            select new Voxell(block.position, block.size, WaveFrontMat.DarkGreen)
+        ).ToHashSet();
+
+        voxels.UnionWith(prefabVox);
+
+        GenerateObjFile("cave.obj", voxels, false);
     }
 
     public static void PrefabCommand(string[] args)
@@ -399,10 +414,10 @@ public static class CaveViewer
         // Log.Out(vec.ToString());
         // return;
 
-        Logger.Info($"SEED .......... {SEED}");
-        Logger.Info($"SIZE .......... {MAP_SIZE}");
-        Logger.Info($"PREFAB_COUNT .. {PREFAB_COUNT}");
-        Logger.Blank();
+        Log.Out($"SEED .......... {SEED}");
+        Log.Out($"SIZE .......... {MAP_SIZE}");
+        Log.Out($"PREFAB_COUNT .. {PREFAB_COUNT}");
+        Log.Out("");
 
         switch (args[0])
         {

@@ -14,40 +14,6 @@ using Debug = System.Diagnostics.Debug;
 using System.IO;
 
 
-public static class Logger
-{
-    private static void Logging(string level, string message)
-    {
-        Console.WriteLine($"{level,-10} {message}");
-    }
-
-    public static void Blank()
-    {
-        Console.WriteLine("");
-    }
-
-    public static void Debug(string message)
-    {
-        Logging("DEBUG", message);
-    }
-
-    public static void Info(string message)
-    {
-        Logging("INFO", message);
-    }
-
-    public static void Warning(string message)
-    {
-        Logging("WARNING", message);
-    }
-
-    public static void Error(string message)
-    {
-        Logging("ERROR", message);
-    }
-}
-
-
 public static class CaveUtils
 {
     public static int FastMin(int a, int b)
@@ -121,13 +87,6 @@ public static class CaveUtils
 
         return neighbors;
     }
-}
-
-public struct Circle
-{
-    public int center;
-
-    public int radius;
 }
 
 
@@ -383,8 +342,6 @@ public class CavePrefab
         var perlinNoise = CaveBuilder.ParsePerlinNoise(rand.Next());
         var noiseMap = new HashSet<Vector3i>();
 
-        // Logger.Debug($"size = {size}");
-
         foreach (Edge diagonal in GetFaces())
         {
             Vector3i p1 = diagonal.node1;
@@ -394,8 +351,6 @@ public class CavePrefab
 
             if (p1.x == p2.x)
             {
-                // Logger.Debug($"normalX [{p1}] [{p2}] {normalDir}");
-
                 int yMin = CaveUtils.FastMin(p1.y, p2.y);
                 int yMax = CaveUtils.FastMax(p1.y, p2.y);
 
@@ -420,8 +375,6 @@ public class CavePrefab
             }
             else if (p1.y == p2.y)
             {
-                // Logger.Debug($"normalY [{p1}] [{p2}]");
-
                 int zMin = CaveUtils.FastMin(p1.z, p2.z);
                 int zMax = CaveUtils.FastMax(p1.z, p2.z);
 
@@ -446,8 +399,6 @@ public class CavePrefab
             }
             else if (p1.z == p2.z)
             {
-                // Logger.Debug($"normalZ [{p1}] [{p2}] {normalDir}");
-
                 int xMin = CaveUtils.FastMin(p1.x, p2.x);
                 int xMax = CaveUtils.FastMax(p1.x, p2.x);
 
@@ -473,8 +424,6 @@ public class CavePrefab
         }
 
         // noiseMap.ExceptWith(innerPoints);
-
-        // Logger.Debug($"noiseMap size = {noiseMap.Count}");
 
         return noiseMap;
     }
@@ -915,6 +864,7 @@ public class PrefabCache
     }
 }
 
+
 public static class CaveTunneler
 {
     private static ConcurrentDictionary<Vector3i, bool> validPositions = new ConcurrentDictionary<Vector3i, bool>();
@@ -956,7 +906,6 @@ public static class CaveTunneler
                 {
                     return ReconstructPath(currentNode);
                 }
-                // Logger.Debug($"{currentNode.position} {neighbor.position} ({obstacles.Contains(neighbor.position)})");
                 if (visited.Contains(neighbor))
                     continue;
 
@@ -991,7 +940,7 @@ public static class CaveTunneler
 
         if (path.Count == 0)
         {
-            Logger.Error($"No Path found from {startPos} to {targetPos}.");
+            Log.Warning($"No Path found from {startPos} to {targetPos}.");
         }
 
         return path;
@@ -1119,7 +1068,7 @@ public static class GraphSolver
 
         List<Edge> graph = BuildPrefabGraph(prefabs);
 
-        Logger.Info($"Graph resolved in {CaveUtils.TimeFormat(timer)}");
+        Log.Out($"Graph resolved in {CaveUtils.TimeFormat(timer)}");
 
         return graph;
     }
@@ -1131,7 +1080,7 @@ public static class CaveBuilder
 {
     public static int SEED = new Random().Next();
 
-    public static int worldSize = 6144;
+    public static int worldSize = 1000;
 
     public static int MIN_PREFAB_SIZE = 8;
 
@@ -1147,13 +1096,13 @@ public static class CaveBuilder
 
     public static Random rand = new Random(SEED);
 
-    public static int overLapMargin;
+    public static int overLapMargin = 50;
 
-    public static int radiationZoneMargin;
+    public static int radiationZoneMargin = 10;
 
-    public static int cavePrefabBedRockMargin;
+    public static int cavePrefabBedRockMargin = 2;
 
-    public static int cavePrefabterrainMargin;
+    public static int cavePrefabterrainMargin = 5;
 
     public static FastNoiseLite pathingNoise = ParsePerlinNoise();
 
@@ -1215,7 +1164,7 @@ public static class CaveBuilder
 
     public static PrefabCache GetRandomPrefabs(int count)
     {
-        Logger.Info("Start POIs placement...");
+        Log.Out("Start POIs placement...");
 
         var prefabCache = new PrefabCache();
 
@@ -1227,7 +1176,7 @@ public static class CaveBuilder
                 prefabCache.AddPrefab(prefab);
         }
 
-        Logger.Info($"{prefabCache.Count} / {PREFAB_COUNT} prefabs added");
+        Log.Out($"{prefabCache.Count} / {PREFAB_COUNT} prefabs added");
 
         return prefabCache;
     }
