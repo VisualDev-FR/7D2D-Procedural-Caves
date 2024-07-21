@@ -342,23 +342,23 @@ public static class CaveViewer
 
     public static void PrefabCommand(string[] args)
     {
+        CaveBuilder.rand = new Random();
+
         var rand = CaveBuilder.rand;
-        var mapCenter = new Vector3i(20, 20, 20);
         var prefab = new CavePrefab(0, rand);
 
-        prefab.UpdateNodes(CaveBuilder.rand);
-
         var voxels = new HashSet<Voxell>(){
-            new Voxell(mapCenter, prefab.size, WaveFrontMat.DarkGreen){ force = true },
+            new Voxell(prefab.position, prefab.size, WaveFrontMat.DarkGreen){ force = true },
         };
 
         foreach (var points in prefab.GetMarkerPoints())
         {
-            Log.Out(points.Count.ToString());
+            // Log.Out(points.Count.ToString());
             foreach (var point in points)
             {
                 voxels.Add(new Voxell(point, WaveFrontMat.Orange));
             }
+            // break;
         }
 
         GenerateObjFile("prefab.obj", voxels, true);

@@ -374,24 +374,26 @@ public class CavePrefab
         switch (rotation)
         {
             case 0:
-                sizeZ = 1;
-                px = -1;
+                pz = -1;
                 break;
 
             case 1:
-                sizeZ = 1;
-                px = size.x;
+                pz = size.z;
                 break;
 
             case 2:
+                px = -1;
                 break;
 
             case 3:
+                px = size.x;
                 break;
         }
 
         var markerPos = position + new Vector3i(px, py, pz);
         var markerSize = new Vector3i(sizeX, sizeY, sizeZ);
+
+        Log.Out($"{position} | {markerPos}");
 
         return new Prefab.Marker(markerPos, markerSize, markerType, groupName, tags);
     }
@@ -447,7 +449,7 @@ public class CavePrefab
             var marker = markers[i];
 
             // Log.Out(markers[i].size.ToString());
-            Log.Out($"{position + marker.start} | {position + marker.start + marker.size}");
+            // Log.Out($"{position + marker.start} | {position + marker.start + marker.size}");
 
             result[i] = CaveUtils.GetPointsInside(position + marker.start, position + marker.start + marker.size);
         }
