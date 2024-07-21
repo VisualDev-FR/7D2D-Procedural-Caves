@@ -256,7 +256,7 @@ public static class CavePlanner
 
         Log.Out($"[Cave] {cavePrefabs.Count} cave prefabs added.");
 
-        List<Edge> edges = GraphSolver.Resolve(cavePrefabs);
+        List<Edge> edges = Graph.Resolve(cavePrefabs);
 
         var wiredCaveMap = new HashSet<Vector3i>();
         int index = 0;

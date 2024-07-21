@@ -36,6 +36,72 @@ public class PlaneEquation
 }
 
 
+public struct Segment
+{
+    public Vector3i P1;
+    public Vector3i P2;
+
+    public Segment(Vector3i p1, Vector3i p2)
+    {
+        P1 = p1;
+        P2 = p2;
+    }
+
+    public Segment(int x0, int z0, int x1, int z1)
+    {
+        P1 = new Vector3i(x0, 0, z0);
+        P2 = new Vector3i(x1, 0, z1);
+    }
+
+    public bool Intersect(Segment other)
+    {
+        Vector3i p1 = P1, q1 = P2;
+        Vector3i p2 = other.P1, q2 = other.P2;
+
+        int o1 = Orientation(p1, q1, p2);
+        int o2 = Orientation(p1, q1, q2);
+        int o3 = Orientation(p2, q2, p1);
+        int o4 = Orientation(p2, q2, q1);
+
+        if (o1 != o2 && o3 != o4)
+            return true;
+
+        if (o1 == 0 && OnSegment(p1, p2, q1))
+            return true;
+
+        if (o2 == 0 && OnSegment(p1, q2, q1))
+            return true;
+
+        if (o3 == 0 && OnSegment(p2, p1, q2))
+            return true;
+
+        if (o4 == 0 && OnSegment(p2, q1, q2))
+            return true;
+
+        return false;
+    }
+
+    private static int Orientation(Vector3i p, Vector3i q, Vector3i r)
+    {
+        double val = (q.z - p.z) * (r.x - q.x) - (q.x - p.x) * (r.z - q.z);
+
+        if (val == 0)
+            return 0;
+
+        return (val > 0) ? 1 : 2;
+    }
+
+    private static bool OnSegment(Vector3i p, Vector3i q, Vector3i r)
+    {
+        if (q.x <= CaveUtils.FastMax(p.x, r.x) && q.x >= CaveUtils.FastMin(p.x, r.x) &&
+            q.z <= CaveUtils.FastMax(p.z, r.z) && q.z >= CaveUtils.FastMin(p.z, r.z))
+            return true;
+
+        return false;
+    }
+}
+
+
 public static class CaveUtils
 {
     public static int FastMin(int a, int b)
@@ -78,6 +144,22 @@ public static class CaveUtils
         float dz = p1.z - p2.z;
 
         return dx * dx + dy * dy + dz * dz;
+    }
+
+    public static float SqrEuclidianDist2D(Vector3i p1, Vector3i p2)
+    {
+        float dx = p1.x - p2.x;
+        float dz = p1.z - p2.z;
+
+        return dx * dx + dz * dz;
+    }
+
+    public static int FastAbs(int value)
+    {
+        if (value > 0)
+            return value;
+
+        return -value;
     }
 
     public static float EuclidianDist(Vector3i p1, Vector3i p2)
@@ -211,6 +293,8 @@ public class CavePrefab
         }
     }
 
+    public int id;
+
     public byte rotation;
 
     public int BoundingRadiusSqr { get; internal set; }
@@ -219,19 +303,15 @@ public class CavePrefab
 
     public List<Vector3i> nodes;
 
-    public CavePrefab()
+    public CavePrefab(int index)
     {
+        id = index;
         nodes = new List<Vector3i>();
     }
 
-    public CavePrefab(Vector3i position)
+    public CavePrefab(int index, Random rand)
     {
-        nodes = new List<Vector3i>();
-        this.position = new Vector3i(position);
-    }
-
-    public CavePrefab(Random rand)
-    {
+        id = index;
         nodes = new List<Vector3i>();
         size = new Vector3i(
             rand.Next(CaveBuilder.MIN_PREFAB_SIZE, CaveBuilder.MAX_PREFAB_SIZE),
@@ -240,8 +320,9 @@ public class CavePrefab
         );
     }
 
-    public CavePrefab(PrefabDataInstance pdi, Vector3i offset)
+    public CavePrefab(int index, PrefabDataInstance pdi, Vector3i offset)
     {
+        id = index;
         prefabDataInstance = pdi;
         position = pdi.boundingBoxPosition + offset;
         size = pdi.boundingBoxSize;
@@ -349,37 +430,32 @@ public class CavePrefab
         return true;
     }
 
-    public List<Edge> GetFaces()
+    public int CountIntersections(Segment segment)
     {
-        // a face is described his diagonal in one xyz plane.
+        int intersectionsCount = 0;
 
         int x0 = position.x;
-        int y0 = position.y;
         int z0 = position.z;
 
         int x1 = x0 + size.x;
-        int y1 = y0 + size.z;
         int z1 = z0 + size.z;
 
-        var p000 = new Vector3i(x0, y0, z0);
-        var p001 = new Vector3i(x0, y0, z1);
-        var p100 = new Vector3i(x1, y0, z0);
-        var p101 = new Vector3i(x1, y0, z1);
-        var p010 = new Vector3i(x0, y1, z0);
-        var p011 = new Vector3i(x0, y1, z1);
-        var p110 = new Vector3i(x1, y1, z0);
-        var p111 = new Vector3i(x1, y1, z1);
-
-        var faces = new List<Edge>(){
-            new Edge(p000, p011),
-            new Edge(p000, p101),
-            new Edge(p000, p110),
-            new Edge(p111, p100),
-            new Edge(p111, p010),
-            new Edge(p111, p001),
+        var edges = new List<Segment>(){
+            new Segment(x0, z0, x0, z1),
+            new Segment(x0, z0, x1, z0),
+            new Segment(x1, z1, x0, z1),
+            new Segment(x1, z1, x1, z0),
         };
 
-        return faces;
+        foreach (var edge in edges)
+        {
+            if (segment.Intersect(edge))
+            {
+                intersectionsCount++;
+            }
+        }
+
+        return intersectionsCount;
     }
 
     public List<Vector3i> Get2DEdges()
@@ -413,98 +489,6 @@ public class CavePrefab
         }
 
         return points;
-    }
-
-    public HashSet<Vector3i> GetNoiseAround(Random rand)
-    {
-        int maxNoiseSize = 10;
-        var perlinNoise = CaveBuilder.ParsePerlinNoise(rand.Next());
-        var noiseMap = new HashSet<Vector3i>();
-
-        foreach (Edge diagonal in GetFaces())
-        {
-            Vector3i p1 = diagonal.node1;
-            Vector3i p2 = diagonal.node2;
-
-            int normalDir = p1 == position ? -1 : 1;
-
-            if (p1.x == p2.x)
-            {
-                int yMin = CaveUtils.FastMin(p1.y, p2.y);
-                int yMax = CaveUtils.FastMax(p1.y, p2.y);
-
-                for (int y = yMin; y < yMax; y++)
-                {
-                    int zMin = CaveUtils.FastMin(p1.z, p2.z);
-                    int zMax = CaveUtils.FastMax(p1.z, p2.z);
-
-                    for (int z = zMin; z < zMax; z++)
-                    {
-                        float noise = 0.5f * normalDir * (1 + perlinNoise.GetNoise(p1.x, y, z));
-
-                        int xMin = CaveUtils.FastMin(p1.x, p1.x + (int)(maxNoiseSize * noise));
-                        int xMax = CaveUtils.FastMax(p1.x, p1.x + (int)(maxNoiseSize * noise));
-
-                        for (int x = xMin; x <= xMax; x++)
-                        {
-                            noiseMap.Add(new Vector3i(x, y, z));
-                        }
-                    }
-                }
-            }
-            else if (p1.y == p2.y)
-            {
-                int zMin = CaveUtils.FastMin(p1.z, p2.z);
-                int zMax = CaveUtils.FastMax(p1.z, p2.z);
-
-                for (int z = zMin; z < zMax; z++)
-                {
-                    int xMin = CaveUtils.FastMin(p1.x, p2.x);
-                    int xMax = CaveUtils.FastMax(p1.x, p2.x);
-
-                    for (int x = xMin; x < xMax; x++)
-                    {
-                        float noise = 0.5f * normalDir * (1 + perlinNoise.GetNoise(x, p1.y, z));
-
-                        int yMin = CaveUtils.FastMin(p1.y, p1.y + (int)(maxNoiseSize * noise));
-                        int yMax = CaveUtils.FastMax(p1.y, p1.y + (int)(maxNoiseSize * noise));
-
-                        for (int y = yMin; y < yMax; y++)
-                        {
-                            noiseMap.Add(new Vector3i(x, y, z));
-                        }
-                    }
-                }
-            }
-            else if (p1.z == p2.z)
-            {
-                int xMin = CaveUtils.FastMin(p1.x, p2.x);
-                int xMax = CaveUtils.FastMax(p1.x, p2.x);
-
-                for (int x = xMin; x < xMax; x++)
-                {
-                    int yMin = CaveUtils.FastMin(p1.y, p2.y);
-                    int yMax = CaveUtils.FastMax(p1.y, p2.y);
-
-                    for (int y = yMin; y < yMax; y++)
-                    {
-                        float noise = 0.5f * normalDir * (1 + perlinNoise.GetNoise(x, y, p1.z));
-
-                        int zMin = CaveUtils.FastMin(p1.z, p1.z + (int)(maxNoiseSize * noise));
-                        int zMax = CaveUtils.FastMax(p1.z, p1.z + (int)(maxNoiseSize * noise));
-
-                        for (int z = zMin; z < zMax; z++)
-                        {
-                            noiseMap.Add(new Vector3i(x, y, z));
-                        }
-                    }
-                }
-            }
-        }
-
-        // noiseMap.ExceptWith(innerPoints);
-
-        return noiseMap;
     }
 
     private List<Vector3i> GetBoundingPoints()
@@ -672,56 +656,125 @@ public class CavePrefab
 }
 
 
+public enum Direction
+{
+    North,
+    South,
+    East,
+    West,
+    None,
+}
+
+
+// public class Direction
+// {
+//     public static Direction North = new Direction(-1, 0);
+
+//     public static Direction South = new Direction(1, 0);
+
+//     public static Direction East = new Direction(0, 1);
+
+//     public static Direction West = new Direction(0, -1);
+
+//     public static Direction None = new Direction(0, 0);
+
+//     public Vector2i Vector { get; internal set; }
+
+//     public Direction(int x, int z)
+//     {
+//         Vector = new Vector2i(x, z);
+//     }
+// }
+
+
+public class GraphNode
+{
+    public Vector3i position;
+
+    public CavePrefab prefab;
+
+    public Direction direction;
+
+    public int PrefabID => prefab.id;
+
+    public GraphNode(Vector3i position, CavePrefab prefab)
+    {
+        this.position = position;
+        this.prefab = prefab;
+        direction = GetDirection();
+    }
+
+    private Direction GetDirection()
+    {
+        if (position.x == prefab.position.x)
+            return Direction.North;
+
+        if (position.x == prefab.position.x + prefab.size.x)
+            return Direction.South;
+
+        if (position.z == prefab.position.z)
+            return Direction.West;
+
+        if (position.z == prefab.position.z + prefab.size.z)
+            return Direction.East;
+
+        return Direction.None;
+    }
+
+    public override int GetHashCode()
+    {
+        return position.GetHashCode();
+    }
+
+    public override bool Equals(object obj)
+    {
+        GraphNode other = (GraphNode)obj;
+        return position.Equals(other.position);
+    }
+}
+
+
 public class Edge : IComparable<Edge>
 {
-    public int nodeIndex1;
-
-    public int nodeIndex2;
-
-    public int prefabIndex1;
-
-    public int prefabIndex2;
-
     public float Weight;
 
-    public Vector3i node1;
+    public GraphNode node1;
 
-    public Vector3i node2;
+    public GraphNode node2;
+
+    public CavePrefab Prefab1 => node1.prefab;
+
+    public CavePrefab Prefab2 => node2.prefab;
 
     public string HashPrefabs()
     {
-        int index1 = CaveUtils.FastMin(prefabIndex1, prefabIndex2);
-        int index2 = CaveUtils.FastMax(prefabIndex1, prefabIndex2);
+        int index1 = CaveUtils.FastMin(Prefab1.id, Prefab2.id);
+        int index2 = CaveUtils.FastMax(Prefab1.id, Prefab2.id);
 
         return $"{index1};{index2}";
     }
 
     private float GetWeight()
     {
-        return CaveUtils.SqrEuclidianDist(node1, node2);
+        // return CaveUtils.SqrEuclidianDist2D(node1, node2) / CaveUtils.FastAbs(node1.y - node2.y);
+        return CaveUtils.SqrEuclidianDist(node1.position, node2.position);
     }
 
-    public Edge(int index1, int index2, int prefab1, int prefab2, Vector3i _startPoint, Vector3i _endPoint)
+    public int GetOrientationWeight()
     {
-        nodeIndex1 = index1;
-        nodeIndex2 = index2;
-        prefabIndex1 = prefab1;
-        prefabIndex2 = prefab2;
-        node1 = _startPoint;
-        node2 = _endPoint;
-        Weight = GetWeight();
+        Vector3i p1 = node1.position;
+        Vector3i p2 = node2.position;
+
+        var segment = new Segment(p1, p2);
+
+        int result = Prefab1.CountIntersections(segment) + Prefab2.CountIntersections(segment);
+
+        Debug.Assert(result > 1);
+
+        return result;
     }
 
-    public Edge(int index1, int index2, Vector3i _startPoint, Vector3i _endPoint)
-    {
-        prefabIndex1 = index1;
-        prefabIndex2 = index2;
-        node1 = _startPoint;
-        node2 = _endPoint;
-        Weight = GetWeight();
-    }
-
-    public Edge(Vector3i node1, Vector3i node2)
+    public Edge(GraphNode node1, GraphNode node2)
     {
         this.node1 = node1;
         this.node2 = node2;
@@ -1068,44 +1121,113 @@ public static class CaveTunneler
 }
 
 
-public static class GraphSolver
+public class EdgeWeightComparer : IComparer<Edge>
 {
-    private static List<Edge> BuildPrefabGraph(List<CavePrefab> prefabs)
+    private readonly Graph _graph;
+
+    public EdgeWeightComparer(Graph graph)
+    {
+        _graph = graph;
+    }
+
+    public int Compare(Edge x, Edge y)
+    {
+        if (x == null || y == null)
+        {
+            throw new ArgumentException("Comparing null objects is not supported.");
+        }
+
+        return _graph.GetEdgeWeight(x).CompareTo(_graph.GetEdgeWeight(y));
+    }
+}
+
+
+public class Graph
+{
+    public List<Edge> Edges { get; set; }
+
+    public HashSet<GraphNode> Nodes { get; set; }
+
+    public Dictionary<string, int> prefabsConnections;
+
+    public Graph()
+    {
+        Edges = new List<Edge>();
+        Nodes = new HashSet<GraphNode>();
+        prefabsConnections = new Dictionary<string, int>();
+    }
+
+    public int GetEdgeWeight(Edge edge)
+    {
+        prefabsConnections.TryGetValue(edge.HashPrefabs(), out int occurences);
+
+        const float distCoef = .5f;
+        const float occurencesCoef = 1f;
+        const float IntersectionCoef = 5f;
+
+        double weight = Math.Pow(edge.Weight, distCoef);
+
+        weight *= Math.Pow(occurences + 1, occurencesCoef);
+        weight *= Math.Pow(edge.GetOrientationWeight(), IntersectionCoef);
+
+        return (int)weight;
+    }
+
+    public void AddPrefabConnection(Edge edge)
+    {
+        string hash = edge.HashPrefabs();
+
+        if (!prefabsConnections.ContainsKey(hash))
+            prefabsConnections[hash] = 0;
+
+        prefabsConnections[hash] += 1;
+
+        // Log.Out($"{hash}: {prefabsConnections[hash]}");
+    }
+
+    public void AddEdge(Edge edge)
+    {
+        Edges.Add(edge);
+        Nodes.Add(edge.node1);
+        Nodes.Add(edge.node2);
+    }
+
+    public List<Edge> GetEdgesFromNode(GraphNode node)
+    {
+        return Edges.Where(e => e.node1.Equals(node) || e.node2.Equals(node)).ToList();
+    }
+
+    private static Graph BuildPrimaryGraph(List<CavePrefab> prefabs)
     {
         var prefabEdges = new Dictionary<int, List<Edge>>();
-        var graph = new HashSet<Edge>();
-
-        if (prefabs.Count < 2)
-        {
-            Log.Error("[Cave] At least two prefabs must be provided");
-            return graph.ToList();
-        }
+        var graph = new Graph();
 
         for (int i = 0; i < prefabs.Count; i++)
         {
             for (int j = i + 1; j < prefabs.Count; j++)
             {
-                Vector3i p1 = prefabs[i].GetCenter();
-                Vector3i p2 = prefabs[j].GetCenter();
+                var prefab1 = prefabs[i];
+                var prefab2 = prefabs[j];
 
-                var edge = new Edge(i, j, p1, p2);
+                var node1 = new GraphNode(prefab1.GetCenter(), prefab1);
+                var node2 = new GraphNode(prefab2.GetCenter(), prefab2);
+                var edge = new Edge(node1, node2);
 
-                if (!prefabEdges.ContainsKey(i))
-                    prefabEdges.Add(i, new List<Edge>());
+                if (!prefabEdges.ContainsKey(prefab1.id))
+                    prefabEdges.Add(prefab1.id, new List<Edge>());
 
-                if (!prefabEdges.ContainsKey(j))
-                    prefabEdges.Add(j, new List<Edge>());
+                if (!prefabEdges.ContainsKey(prefab2.id))
+                    prefabEdges.Add(prefab2.id, new List<Edge>());
 
-                prefabEdges[i].Add(edge);
-                prefabEdges[j].Add(edge);
+                prefabEdges[prefab1.id].Add(edge);
+                prefabEdges[prefab2.id].Add(edge);
             }
         }
 
-        Log.Out($"prefabs: {prefabs.Count}, prefabEdges: {prefabEdges.Count}");
-
         for (int i = 0; i < prefabs.Count; i++)
         {
-            var relatedPrefabEdges = prefabEdges[i];
+            var prefab = prefabs[i];
+            var relatedPrefabEdges = prefabEdges[prefab.id];
             var nodes = prefabs[i].nodes.ToHashSet();
 
             if (nodes.Count == 0)
@@ -1118,51 +1240,56 @@ public static class GraphSolver
 
             relatedPrefabEdges.Sort();
 
-            var connectedNodes = new HashSet<Vector3i>();
-
-            for (int j = 0; j < relatedPrefabEdges.Count; j++)
+            for (int j = 0; j < nodes.Count; j++)
             {
-                if (nodes.Count == 0)
-                    break;
-
                 var relatedEdge = relatedPrefabEdges[j];
-                var edges = new List<Edge>();
 
-                var nodes1 = prefabs[relatedEdge.prefabIndex1].nodes;
-                var nodes2 = prefabs[relatedEdge.prefabIndex2].nodes;
+                var nodes1 = relatedEdge.Prefab1.nodes;
+                var nodes2 = relatedEdge.Prefab2.nodes;
 
                 foreach (var node1 in nodes1)
                 {
                     foreach (var node2 in nodes2)
                     {
-                        var edge = new Edge(node1, node2);
+                        var graphNode1 = new GraphNode(node1, relatedEdge.Prefab1);
+                        var graphNode2 = new GraphNode(node2, relatedEdge.Prefab2);
 
-                        edges.Add(edge);
+                        graph.AddEdge(new Edge(graphNode1, graphNode2));
                     }
                 }
-
-                edges.Sort();
-
-                var edgeNode1 = edges[0].node1;
-                var edgeNode2 = edges[0].node2;
-
-                if (connectedNodes.Contains(edgeNode1) || connectedNodes.Contains(edgeNode2))
-                    continue;
-
-                connectedNodes.Add(edgeNode1);
-                connectedNodes.Add(edgeNode2);
-
-                nodes.Remove(edgeNode1);
-                nodes.Remove(edgeNode2);
-
-                graph.Add(edges[0]);
-                continue;
             }
-
-            // break;
         }
 
-        return graph.ToList();
+        return graph;
+    }
+
+    public List<Edge> FindMST()
+    {
+        var graph = new List<Edge>();
+        var nodes = new HashSet<GraphNode>();
+
+        foreach (var node in Nodes)
+        {
+            if (nodes.Contains(node))
+                continue;
+
+            var relatedEdges = GetEdgesFromNode(node);
+
+            Debug.Assert(node.direction != Direction.None);
+
+            relatedEdges.Sort(new EdgeWeightComparer(this));
+
+            graph.Add(relatedEdges[0]);
+
+            nodes.Add(relatedEdges[0].node1);
+            nodes.Add(relatedEdges[0].node1);
+
+            AddPrefabConnection(relatedEdges[0]);
+
+            // Log.Out(prefabsConnections[relatedEdges[0].HashPrefabs()].ToString());
+        }
+
+        return graph;
     }
 
     public static List<Edge> Resolve(List<CavePrefab> prefabs)
@@ -1171,11 +1298,13 @@ public static class GraphSolver
 
         timer.Start();
 
-        List<Edge> graph = BuildPrefabGraph(prefabs);
+        // List<Edge> graph = BuildPrefabsGraph(prefabs);
+        Graph graph = BuildPrimaryGraph(prefabs);
+        var edges = graph.FindMST();
 
         Log.Out($"Graph resolved in {CaveUtils.TimeFormat(timer)}");
 
-        return graph;
+        return edges; // graph.Edges;
     }
 
 }
@@ -1185,7 +1314,7 @@ public static class CaveBuilder
 {
     public static int SEED = 1634735684; // new Random().Next();
 
-    public static int worldSize = 1000;
+    public static int worldSize = 2048;
 
     public static int MIN_PREFAB_SIZE = 8;
 
@@ -1271,7 +1400,7 @@ public static class CaveBuilder
 
         for (int i = 0; i < count; i++)
         {
-            var prefab = new CavePrefab(rand);
+            var prefab = new CavePrefab(prefabCache.Count + 1, rand);
 
             if (TryPlacePrefab(ref prefab, prefabCache.Prefabs))
                 prefabCache.AddPrefab(prefab);

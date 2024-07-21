@@ -57,8 +57,8 @@ public static class CaveViewer
             foreach (var edge in edges)
             {
                 graph.DrawCurve(pen, new PointF[2]{
-                ParsePointF(edge.node1),
-                ParsePointF(edge.node2),
+                ParsePointF(edge.node1.position),
+                ParsePointF(edge.node2.position),
             });
             }
         }
@@ -84,7 +84,7 @@ public static class CaveViewer
 
         Log.Out("Start solving MST Krustal...");
 
-        List<Edge> edges = GraphSolver.Resolve(prefabs.Prefabs);
+        List<Edge> edges = Graph.Resolve(prefabs.Prefabs);
 
         Log.Out("Start Drawing graph...");
 
@@ -121,11 +121,11 @@ public static class CaveViewer
         noise.noise.SetCellularDistanceFunction(FastNoiseLite.CellularDistanceFunction.Euclidean);
 
         var prefabs = new List<CavePrefab>(){
-            new CavePrefab{
+            new CavePrefab(0){
                 position = new Vector3i(10, 10, 10),
                 size = new Vector3i(10, 10, 10),
             },
-            new CavePrefab{
+            new CavePrefab(1){
                 position = new Vector3i(CaveBuilder.worldSize - 20, 10, CaveBuilder.worldSize - 20),
                 size = new Vector3i(10, 10, 10),
             },
@@ -194,13 +194,13 @@ public static class CaveViewer
         if (args.Length > 1)
             CaveBuilder.worldSize = int.Parse(args[1]);
 
-        var p1 = new CavePrefab()
+        var p1 = new CavePrefab(0)
         {
             position = new Vector3i(20, 5, 20),
             size = new Vector3i(10, 10, 10),
         };
 
-        var p2 = new CavePrefab()
+        var p2 = new CavePrefab(1)
         {
             position = new Vector3i(CaveBuilder.worldSize - 30, 50, CaveBuilder.worldSize - 30),
             size = new Vector3i(20, 10, 20),
@@ -276,15 +276,15 @@ public static class CaveViewer
 
         Log.Out("Start solving graph...");
 
-        List<Edge> edges = GraphSolver.Resolve(cachedPrefabs.Prefabs);
+        List<Edge> edges = Graph.Resolve(cachedPrefabs.Prefabs);
 
         var wiredCaveMap = new ConcurrentBag<Vector3i>();
         int index = 0;
 
         Parallel.ForEach(edges, edge =>
         {
-            Vector3i p1 = edge.node1;
-            Vector3i p2 = edge.node2;
+            Vector3i p1 = edge.node1.position;
+            Vector3i p2 = edge.node2.position;
 
             Log.Out($"Noise pathing: {100.0f * index++ / edges.Count:F0}% ({index} / {edges.Count}), dist={CaveUtils.SqrEuclidianDist(p1, p2)}");
 
@@ -339,7 +339,7 @@ public static class CaveViewer
     public static void PrefabCommand(string[] args)
     {
         var mapCenter = new Vector3i(20, 20, 20);
-        var prefab = new CavePrefab()
+        var prefab = new CavePrefab(0)
         {
             position = mapCenter,
             size = new Vector3i(10, 10, 10),
