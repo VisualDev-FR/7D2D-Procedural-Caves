@@ -183,10 +183,10 @@ public static class CaveUtils
         if (position.z + CaveBuilder.radiationZoneMargin < CaveBuilder.worldSize)
             neighbors.Add(new Vector3i(position.x, position.y, position.z + 1));
 
-        if (position.y > CaveBuilder.cavePrefabBedRockMargin)
+        if (position.y > CaveBuilder.bedRockMargin)
             neighbors.Add(new Vector3i(position.x, position.y - 1, position.z));
 
-        if (position.y + CaveBuilder.cavePrefabterrainMargin < WorldBuilder.Instance.GetHeight(position.x, position.z))
+        if (position.y + CaveBuilder.terrainMargin < WorldBuilder.Instance.GetHeight(position.x, position.z))
             neighbors.Add(new Vector3i(position.x, position.y + 1, position.z));
 
         return neighbors;
@@ -976,7 +976,7 @@ public class PrefabCache
 
         foreach (var prefab in prefabs)
         {
-            if (prefab.Intersect3D(position))
+            if (prefab.Intersect2D(position))
             {
                 return 0f;
             }
@@ -1110,7 +1110,7 @@ public static class CaveTunneler
 
         foreach (var position in wiredCaveMap)
         {
-            var circle = CaveBuilder.ParseCircle(position, 10f);
+            var circle = CaveBuilder.ParseCircle(position, 5f);
 
             caveMap.UnionWith(circle);
         }
@@ -1330,9 +1330,9 @@ public static class CaveBuilder
 
     public static int radiationZoneMargin = worldSize / 10;
 
-    public static int cavePrefabBedRockMargin = 2;
+    public static int bedRockMargin = 2;
 
-    public static int cavePrefabterrainMargin = 10;
+    public static int terrainMargin = 5;
 
     public static CaveNoise pathingNoise = CaveNoise.defaultNoise;
 
