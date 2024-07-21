@@ -8,5 +8,6 @@
     <PackageReference Include="System.Drawing.Common" Version="7.0.0" />
     <Reference Include="$(PATH_7D2D)\7DaysToDie_Data\Managed\Assembly-CSharp.dll" />
     <Reference Include="$(PATH_7D2D)\7DaysToDie_Data\Managed\UnityEngine.CoreModule.dll" />
+    <Reference Include="$(PATH_7D2D)\7DaysToDie_Data\Managed\netstandard.dll" />
   </ItemGroup>
 </Project>

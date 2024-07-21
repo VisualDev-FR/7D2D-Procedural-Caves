@@ -191,6 +191,33 @@ public static class CaveUtils
 
         return neighbors;
     }
+
+    public static Vector3i RandomVector3i(Random rand, int xMax, int yMax, int zMax)
+    {
+        int x = rand.Next(xMax);
+        int y = rand.Next(yMax);
+        int z = rand.Next(zMax);
+
+        return new Vector3i(x, y, z);
+    }
+
+    public static List<Vector3i> GetPointsInside(Vector3i p1, Vector3i p2)
+    {
+        var result = new List<Vector3i>();
+
+        for (int x = p1.x; x < p2.x; x++)
+        {
+            for (int y = p1.y; y < p2.y; y++)
+            {
+                for (int z = p1.z; z < p2.z; z++)
+                {
+                    result.Add(new Vector3i(x, y, z));
+                }
+            }
+        }
+
+        return result;
+    }
 }
 
 
@@ -303,6 +330,8 @@ public class CavePrefab
 
     public List<Vector3i> nodes;
 
+    public List<Prefab.Marker> markers;
+
     public CavePrefab(int index)
     {
         id = index;
@@ -313,11 +342,58 @@ public class CavePrefab
     {
         id = index;
         nodes = new List<Vector3i>();
+
         size = new Vector3i(
             rand.Next(CaveBuilder.MIN_PREFAB_SIZE, CaveBuilder.MAX_PREFAB_SIZE),
             rand.Next(CaveBuilder.MIN_PREFAB_SIZE, CaveBuilder.MAX_PREFAB_SIZE),
             rand.Next(CaveBuilder.MIN_PREFAB_SIZE, CaveBuilder.MAX_PREFAB_SIZE)
         );
+
+        markers = new List<Prefab.Marker>(){
+            RandomMarker(rand, 0, size.x - 2, size.y, 1),
+            RandomMarker(rand, 1, size.x - 2, size.y, 1),
+            RandomMarker(rand, 2, 1, size.y, size.z - 2),
+            RandomMarker(rand, 3, 1, size.y, size.z - 2),
+        };
+    }
+
+    private Prefab.Marker RandomMarker(Random rand, int rotation, int xMax, int yMax, int zMax)
+    {
+        var markerType = Prefab.Marker.MarkerTypes.None;
+        var tags = FastTags<TagGroup.Poi>.none;
+        var groupName = "";
+
+        int sizeX = rand.Next(1, xMax);
+        int sizeY = rand.Next(1, yMax);
+        int sizeZ = rand.Next(1, zMax);
+
+        int px = rand.Next(size.x - sizeX);
+        int py = rand.Next(size.y - sizeY);
+        int pz = rand.Next(size.z - sizeZ);
+
+        switch (rotation)
+        {
+            case 0:
+                sizeZ = 1;
+                px = -1;
+                break;
+
+            case 1:
+                sizeZ = 1;
+                px = size.x;
+                break;
+
+            case 2:
+                break;
+
+            case 3:
+                break;
+        }
+
+        var markerPos = position + new Vector3i(px, py, pz);
+        var markerSize = new Vector3i(sizeX, sizeY, sizeZ);
+
+        return new Prefab.Marker(markerPos, markerSize, markerType, groupName, tags);
     }
 
     public CavePrefab(int index, PrefabDataInstance pdi, Vector3i offset)
@@ -351,28 +427,32 @@ public class CavePrefab
         prefabDataInstance = new PrefabDataInstance(id, position, rotation, prefabData);
     }
 
-    public void UpdateNodes(Random rand = null)
+    public void UpdateNodes(Random rand)
     {
-        if (rand == null)
+        nodes = new List<Vector3i>()
         {
-            nodes = new List<Vector3i>()
-                {
-                    position + new Vector3i(size.x / 2 , 0, 0),
-                    position + new Vector3i(0, 0, size.z / 2),
-                    position + new Vector3i(size.x / 2, 0, size.z),
-                    position + new Vector3i(size.x , 0, size.z / 2),
-                };
-        }
-        else
+            position + new Vector3i(rand.Next(size.x) , 0, -1),
+            position + new Vector3i(-1, 0, rand.Next(size.z)),
+            position + new Vector3i(rand.Next(size.x), 0, size.z),
+            position + new Vector3i(size.x, 0, rand.Next(size.z)),
+        };
+    }
+
+    public List<List<Vector3i>> GetMarkerPoints()
+    {
+        var result = new List<Vector3i>[markers.Count];
+
+        for (int i = 0; i < markers.Count; i++)
         {
-            nodes = new List<Vector3i>()
-                {
-                    position + new Vector3i(rand.Next(size.x) , 0, 0),
-                    position + new Vector3i(0, 0, rand.Next(size.z)),
-                    position + new Vector3i(rand.Next(size.x), 0, size.z),
-                    position + new Vector3i(size.x , 0, rand.Next(size.z)),
-                };
+            var marker = markers[i];
+
+            // Log.Out(markers[i].size.ToString());
+            Log.Out($"{position + marker.start} | {position + marker.start + marker.size}");
+
+            result[i] = CaveUtils.GetPointsInside(position + marker.start, position + marker.start + marker.size);
         }
+
+        return result.ToList();
     }
 
     public void SetRandomPosition(Random rand, int mapSize)

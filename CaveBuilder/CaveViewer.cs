@@ -181,6 +181,7 @@ public static class CaveViewer
     public static void PathCommand(string[] args)
     {
         CaveBuilder.worldSize = 100;
+        CaveBuilder.radiationZoneMargin = 0;
         // CaveBuilder.pathingNoise = new CaveNoise(
         //     seed: CaveBuilder.seed,
         //     octaves: 1,
@@ -206,6 +207,9 @@ public static class CaveViewer
             size = new Vector3i(20, 10, 20),
         };
 
+        p1.UpdateNodes(CaveBuilder.rand);
+        p2.UpdateNodes(CaveBuilder.rand);
+
         var cachedPrefabs = new PrefabCache();
 
         cachedPrefabs.AddPrefab(p1);
@@ -218,6 +222,8 @@ public static class CaveViewer
         timer.Start();
 
         HashSet<Vector3i> path = CaveTunneler.FindPath(p1.position, p2.position, cachedPrefabs);
+
+        // path = CaveTunneler.ThickenCaveMap(path);
 
         Log.Out($"{p1.position} -> {p2.position} | Astar dist: {path.Count}, eucl dist: {CaveUtils.EuclidianDist(p1.position, p2.position)}, timer: {timer.ElapsedMilliseconds}ms");
 
@@ -336,21 +342,24 @@ public static class CaveViewer
 
     public static void PrefabCommand(string[] args)
     {
+        var rand = CaveBuilder.rand;
         var mapCenter = new Vector3i(20, 20, 20);
-        var prefab = new CavePrefab(0)
-        {
-            position = mapCenter,
-            size = new Vector3i(10, 10, 10),
-        };
+        var prefab = new CavePrefab(0, rand);
 
         prefab.UpdateNodes(CaveBuilder.rand);
 
-        var voxels = (
-            from point in CaveBuilder.ParseCircle(prefab.GetCenter(), 1000)
-            select new Voxell(point, WaveFrontMat.Orange)
-        ).ToHashSet();
+        var voxels = new HashSet<Voxell>(){
+            new Voxell(mapCenter, prefab.size, WaveFrontMat.DarkGreen){ force = true },
+        };
 
-        // voxels.Add(new Voxell(mapCenter, prefab.size, WaveFrontMat.DarkGreen) { forceFaces = true });
+        foreach (var points in prefab.GetMarkerPoints())
+        {
+            Log.Out(points.Count.ToString());
+            foreach (var point in points)
+            {
+                voxels.Add(new Voxell(point, WaveFrontMat.Orange));
+            }
+        }
 
         GenerateObjFile("prefab.obj", voxels, true);
     }
