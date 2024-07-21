@@ -1183,7 +1183,7 @@ public static class GraphSolver
 
 public static class CaveBuilder
 {
-    public static int SEED = new Random().Next();
+    public static int SEED = 1634735684; // new Random().Next();
 
     public static int worldSize = 1000;
 
@@ -1197,9 +1197,9 @@ public static class CaveBuilder
 
     public static Random rand = new Random(SEED);
 
-    public static int overLapMargin = 100;
+    public static int overLapMargin = 50;
 
-    public static int radiationZoneMargin = worldSize / 60;
+    public static int radiationZoneMargin = worldSize / 10;
 
     public static int cavePrefabBedRockMargin = 2;
 
