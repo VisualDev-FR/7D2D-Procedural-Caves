@@ -205,8 +205,8 @@ public class CaveNoise
     public static CaveNoise defaultNoise = new CaveNoise(
         seed: CaveBuilder.SEED,
         octaves: 1,
-        frequency: 0.1f,
-        threshold: 0.5f,
+        frequency: 0.15f,
+        threshold: 0.4f,
         invert: true,
         noiseType: FastNoiseLite.NoiseType.Perlin,
         fractalType: FastNoiseLite.FractalType.None

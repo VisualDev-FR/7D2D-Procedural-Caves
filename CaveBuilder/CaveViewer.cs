@@ -259,15 +259,15 @@ public static class CaveViewer
         var timer = new Stopwatch();
         timer.Start();
 
-        CaveBuilder.pathingNoise = new CaveNoise(
-            seed: CaveBuilder.SEED,
-            octaves: 1,
-            frequency: 0.01f,
-            threshold: 0.8f,
-            invert: false,
-            noiseType: FastNoiseLite.NoiseType.OpenSimplex2S,
-            fractalType: FastNoiseLite.FractalType.Ridged
-        );
+        // CaveBuilder.pathingNoise = new CaveNoise(
+        //     seed: CaveBuilder.SEED,
+        //     octaves: 1,
+        //     frequency: 0.01f,
+        //     threshold: 0.8f,
+        //     invert: false,
+        //     noiseType: FastNoiseLite.NoiseType.OpenSimplex2S,
+        //     fractalType: FastNoiseLite.FractalType.Ridged
+        // );
 
         if (args.Length > 1)
             CaveBuilder.worldSize = int.Parse(args[1]);
@@ -296,9 +296,7 @@ public static class CaveViewer
             }
         });
 
-        Log.Out("Start caves thickening");
-
-        var caveMap = CaveTunneler.ThickenCaveMap(wiredCaveMap.ToHashSet());
+        var caveMap = wiredCaveMap.ToHashSet(); // CaveTunneler.ThickenCaveMap(wiredCaveMap.ToHashSet());
 
         SaveCaveMap(caveMap, "cavemap.txt");
 
@@ -311,7 +309,7 @@ public static class CaveViewer
             {
                 g.Clear(BackgroundColor);
 
-                DrawNoise(b, CaveBuilder.pathingNoise);
+                // DrawNoise(b, CaveBuilder.pathingNoise);
                 DrawPoints(b, caveMap, TunnelsColor);
                 DrawPrefabs(b, g, cachedPrefabs.Prefabs);
             }
