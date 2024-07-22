@@ -10,7 +10,6 @@ using System.Runtime.CompilerServices;
 using WorldGenerationEngineFinal;
 
 using Random = System.Random;
-using Debug = System.Diagnostics.Debug;
 using System.IO;
 
 
@@ -104,6 +103,12 @@ public struct Segment
 
 public static class CaveUtils
 {
+    public static void Assert(bool condition)
+    {
+        if (!condition)
+            throw new Exception("Assertion error");
+    }
+
     public static int FastMin(int a, int b)
     {
         return a < b ? a : b;
@@ -348,13 +353,6 @@ public class CavePrefab
             rand.Next(CaveBuilder.MIN_PREFAB_SIZE, CaveBuilder.MAX_PREFAB_SIZE),
             rand.Next(CaveBuilder.MIN_PREFAB_SIZE, CaveBuilder.MAX_PREFAB_SIZE)
         );
-
-        markers = new List<Prefab.Marker>(){
-            RandomMarker(rand, 0, size.x - 2, size.y, 1),
-            RandomMarker(rand, 1, size.x - 2, size.y, 1),
-            RandomMarker(rand, 2, 1, size.y, size.z - 2),
-            RandomMarker(rand, 3, 1, size.y, size.z - 2),
-        };
     }
 
     private Prefab.Marker RandomMarker(Random rand, int rotation, int xMax, int yMax, int zMax)
@@ -393,8 +391,6 @@ public class CavePrefab
         var markerPos = position + new Vector3i(px, py, pz);
         var markerSize = new Vector3i(sizeX, sizeY, sizeZ);
 
-        Log.Out($"{position} | {markerPos}");
-
         return new Prefab.Marker(markerPos, markerSize, markerType, groupName, tags);
     }
 
@@ -431,13 +427,19 @@ public class CavePrefab
 
     public void UpdateNodes(Random rand)
     {
-        nodes = new List<Vector3i>()
-        {
-            position + new Vector3i(rand.Next(size.x) , 0, -1),
-            position + new Vector3i(-1, 0, rand.Next(size.z)),
-            position + new Vector3i(rand.Next(size.x), 0, size.z),
-            position + new Vector3i(size.x, 0, rand.Next(size.z)),
+        markers = new List<Prefab.Marker>(){
+            RandomMarker(rand, 0, size.x - 2, size.y, 1),
+            RandomMarker(rand, 1, size.x - 2, size.y, 1),
+            RandomMarker(rand, 2, 1, size.y, size.z - 2),
+            RandomMarker(rand, 3, 1, size.y, size.z - 2),
         };
+
+        nodes = new List<Vector3i>();
+
+        foreach (var marker in markers)
+        {
+            nodes.Add(marker.start + marker.size / 2);
+        }
     }
 
     public List<List<Vector3i>> GetMarkerPoints()
@@ -447,9 +449,6 @@ public class CavePrefab
         for (int i = 0; i < markers.Count; i++)
         {
             var marker = markers[i];
-
-            // Log.Out(markers[i].size.ToString());
-            // Log.Out($"{position + marker.start} | {position + marker.start + marker.size}");
 
             result[i] = CaveUtils.GetPointsInside(position + marker.start, position + marker.start + marker.size);
         }
@@ -851,9 +850,7 @@ public class Edge : IComparable<Edge>
 
         int result = Prefab1.CountIntersections(segment) + Prefab2.CountIntersections(segment);
 
-        Debug.Assert(result > 1);
-
-        return result;
+        return result + 1;
     }
 
     public Edge(GraphNode node1, GraphNode node2)
@@ -880,7 +877,6 @@ public class Edge : IComparable<Edge>
         return hash;
     }
 }
-
 
 public class Node
 {
@@ -1318,7 +1314,7 @@ public class Graph
                 continue;
             }
 
-            Debug.Assert(relatedPrefabEdges.Count == prefabs.Count - 1);
+            CaveUtils.Assert(relatedPrefabEdges.Count == prefabs.Count - 1);
 
             relatedPrefabEdges.Sort();
 
@@ -1357,7 +1353,7 @@ public class Graph
 
             var relatedEdges = GetEdgesFromNode(node);
 
-            Debug.Assert(node.direction != Direction.None);
+            // CaveUtils.Assert(node.direction != Direction.None);
 
             relatedEdges.Sort(new EdgeWeightComparer(this));
 
