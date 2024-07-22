@@ -473,7 +473,11 @@ public static class CaveViewer
         var timer = new Stopwatch();
         timer.Start();
 
-        var path = CaveTunneler.FindPath(p1.nodes[1], p2.nodes[2], cachedPrefabs);
+        var node1 = p1.nodes[1];
+        var node2 = p2.nodes[2];
+
+        var path = CaveTunneler.FindPath(node1, node2, cachedPrefabs);
+        var cavemap = CaveTunneler.ThickenTunnel(path, node1, node2);
 
         Log.Out($"{p1.position} -> {p2.position} | Astar dist: {path.Count}, eucl dist: {CaveUtils.EuclidianDist(p1.position, p2.position)}, timer: {timer.ElapsedMilliseconds}ms");
 
@@ -482,12 +486,10 @@ public static class CaveViewer
             new Voxell(p2.position, p2.size, WaveFrontMat.DarkGreen) { force = true },
         };
 
-        var cavemap = (
-            from point in path
-            select new Voxell(point, WaveFrontMat.DarkRed)
-        );
-
-        voxels.UnionWith(cavemap);
+        foreach (var block in cavemap)
+        {
+            voxels.Add(new Voxell(block, WaveFrontMat.DarkRed));
+        }
 
         foreach (var marker in p1.markers)
         {
@@ -498,6 +500,7 @@ public static class CaveViewer
         {
             voxels.Add(new Voxell(marker.start, marker.size, WaveFrontMat.Orange) { force = true });
         }
+
 
         GenerateObjFile("path.obj", voxels, true);
     }

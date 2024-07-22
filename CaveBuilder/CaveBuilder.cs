@@ -11,6 +11,7 @@ using WorldGenerationEngineFinal;
 
 using Random = System.Random;
 using System.IO;
+using System.Numerics;
 
 
 public class PlaneEquation
@@ -125,6 +126,17 @@ public static class CaveUtils
             return a;
 
         if (b > c)
+            return b;
+
+        return c;
+    }
+
+    public static int FastMin(int a, int b, int c)
+    {
+        if (a < b && a < c)
+            return a;
+
+        if (b < c)
             return b;
 
         return c;
@@ -414,7 +426,7 @@ public class CavePrefab
             if (!marker.tags.Test_AnySet(caveNodeTags))
                 continue;
 
-            nodes.Add(new GraphNode(marker.start + position, this));
+            nodes.Add(new GraphNode(marker, this));
         }
     }
 
@@ -438,7 +450,7 @@ public class CavePrefab
 
         foreach (var marker in markers)
         {
-            nodes.Add(new GraphNode(marker.start + marker.size / 2, this));
+            nodes.Add(new GraphNode(marker, this));
         }
     }
 
@@ -787,12 +799,22 @@ public class GraphNode
 
     public Direction direction;
 
+    public Prefab.Marker marker;
+
     public int PrefabID => prefab.id;
+
+    public GraphNode(Prefab.Marker marker, CavePrefab prefab)
+    {
+        this.marker = marker;
+        this.prefab = prefab;
+        position = marker.start + marker.size / 2;
+        direction = GetDirection();
+    }
 
     public GraphNode(Vector3i position, CavePrefab prefab)
     {
-        this.position = position;
         this.prefab = prefab;
+        this.position = position;
         direction = GetDirection();
     }
 
@@ -834,6 +856,11 @@ public class GraphNode
     public override string ToString()
     {
         return position.ToString();
+    }
+
+    public List<Vector3i> GetMarkerPoints()
+    {
+        return CaveUtils.GetPointsInside(marker.start, marker.start + marker.size);
     }
 
 }
@@ -1205,16 +1232,70 @@ public static class CaveTunneler
         return visited;
     }
 
-    public static HashSet<Vector3i> ThickenCaveMap(HashSet<Vector3i> wiredCaveMap)
+    public static List<Vector3i> FindPath(Vector3i start, HashSet<Vector3i> targets)
+    {
+        var queue = new Queue<Node>();
+        var visited = new HashSet<Node>();
+
+        queue.Enqueue(new Node(start));
+
+        while (queue.Count > 0)
+        {
+            Node currentNode = queue.Dequeue();
+
+            if (visited.Contains(currentNode))
+                continue;
+
+            visited.Add(currentNode);
+
+            if (targets.Contains(currentNode.position))
+            {
+                return ReconstructPath(currentNode);
+            }
+
+            foreach (Node neighbor in currentNode.GetNeighbors())
+            {
+                if (!visited.Contains(neighbor))
+                {
+                    neighbor.Parent = currentNode;
+                    queue.Enqueue(neighbor);
+                }
+            }
+        }
+
+        Log.Out("no path found to targets.");
+
+        return new List<Vector3i>();
+    }
+
+    public static HashSet<Vector3i> LinkPoints(Vector3i point, IEnumerable<Vector3i> others)
+    {
+        return new HashSet<Vector3i>();
+    }
+
+    public static HashSet<Vector3i> ThickenTunnel(List<Vector3i> path, GraphNode start, GraphNode target)
     {
         var caveMap = new HashSet<Vector3i>();
 
-        foreach (var position in wiredCaveMap)
-        {
-            var circle = CaveBuilder.ParseCircle(position, 5f);
+        caveMap.UnionWith(path);
+        var sphere1 = CaveBuilder.GetSphere(path.First(), 6f);
+        var sphere2 = CaveBuilder.GetSphere(path.Last(), 6f);
 
-            caveMap.UnionWith(circle);
-        }
+        caveMap.UnionWith(sphere1);
+        caveMap.UnionWith(sphere2);
+
+        caveMap.UnionWith(LinkPoints(start.Normal(5), start.GetMarkerPoints()));
+
+        // foreach (var position in path)
+        // {
+        //     var circle = CaveBuilder.ParseCircle(position, 5f);
+        //     caveMap.UnionWith(circle);
+        // }
+
+        // foreach (var block in start.GetMarkerPoints())
+        // {
+        //     caveMap.UnionWith(FindPath(block, caveMap));
+        // }
 
         return caveMap;
     }
@@ -1439,7 +1520,7 @@ public static class CaveBuilder
 
     public static CaveNoise pathingNoise = CaveNoise.defaultNoise;
 
-    public static HashSet<Vector3i> ParseCircle(Vector3i center, float radius)
+    public static HashSet<Vector3i> GetSphere(Vector3i center, float radius)
     {
         var queue = new HashSet<Vector3i>() { center };
         var visited = new HashSet<Vector3i>();
