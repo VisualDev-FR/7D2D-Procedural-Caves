@@ -294,13 +294,14 @@ public static class CaveViewer
 
     public static void DrawPrefabs(Bitmap b, Graphics graph, List<CavePrefab> prefabs, bool fill = false)
     {
+        // throw new NotImplementedException("obsolete, has to be updated.");
         using (var pen = new Pen(PrefabBoundsColor, 1))
         {
             foreach (var prefab in prefabs)
             {
                 graph.DrawRectangle(pen, prefab.position.x, prefab.position.z, prefab.size.x, prefab.size.z);
 
-                DrawPoints(b, new HashSet<Vector3i>(prefab.nodes), NodeColor);
+                // DrawPoints(b, new HashSet<Vector3i>(prefab.nodes), NodeColor);
             }
         }
     }
@@ -445,7 +446,7 @@ public static class CaveViewer
     {
         CaveBuilder.worldSize = 100;
         CaveBuilder.radiationZoneMargin = 0;
-        CaveBuilder.rand = new Random();
+        CaveBuilder.SEED = 1634735684;
 
         if (args.Length > 1)
             CaveBuilder.worldSize = int.Parse(args[1]);
@@ -472,7 +473,7 @@ public static class CaveViewer
         var timer = new Stopwatch();
         timer.Start();
 
-        HashSet<Vector3i> path = CaveTunneler.FindPath(p1.nodes[1], p2.nodes[2], cachedPrefabs);
+        var path = CaveTunneler.FindPath(p1.nodes[1], p2.nodes[2], cachedPrefabs);
 
         Log.Out($"{p1.position} -> {p2.position} | Astar dist: {path.Count}, eucl dist: {CaveUtils.EuclidianDist(p1.position, p2.position)}, timer: {timer.ElapsedMilliseconds}ms");
 
@@ -490,12 +491,12 @@ public static class CaveViewer
 
         foreach (var marker in p1.markers)
         {
-            voxels.Add(new Voxell(marker.start, marker.size, WaveFrontMat.Orange));
+            voxels.Add(new Voxell(marker.start, marker.size, WaveFrontMat.Orange) { force = true });
         }
 
         foreach (var marker in p2.markers)
         {
-            voxels.Add(new Voxell(marker.start, marker.size, WaveFrontMat.Orange));
+            voxels.Add(new Voxell(marker.start, marker.size, WaveFrontMat.Orange) { force = true });
         }
 
         GenerateObjFile("path.obj", voxels, true);
@@ -523,15 +524,7 @@ public static class CaveViewer
         var timer = new Stopwatch();
         timer.Start();
 
-        // CaveBuilder.pathingNoise = new CaveNoise(
-        //     seed: CaveBuilder.SEED,
-        //     octaves: 1,
-        //     frequency: 0.01f,
-        //     threshold: 0.8f,
-        //     invert: false,
-        //     noiseType: FastNoiseLite.NoiseType.OpenSimplex2S,
-        //     fractalType: FastNoiseLite.FractalType.Ridged
-        // );
+        CaveBuilder.worldSize = 2048;
 
         if (args.Length > 1)
             CaveBuilder.worldSize = int.Parse(args[1]);
@@ -547,12 +540,12 @@ public static class CaveViewer
 
         Parallel.ForEach(edges, edge =>
         {
-            Vector3i p1 = edge.node1.position;
-            Vector3i p2 = edge.node2.position;
+            var p1 = edge.node1;
+            var p2 = edge.node2;
 
-            Log.Out($"Noise pathing: {100.0f * index++ / edges.Count:F0}% ({index} / {edges.Count}), dist={CaveUtils.SqrEuclidianDist(p1, p2)}");
+            Log.Out($"Cave tunneling: {100.0f * ++index / edges.Count:F0}% ({index} / {edges.Count})");
 
-            HashSet<Vector3i> path = CaveTunneler.FindPath(p1, p2, cachedPrefabs);
+            var path = CaveTunneler.FindPath(p1, p2, cachedPrefabs);
 
             foreach (Vector3i node in path)
             {

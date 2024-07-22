@@ -24,8 +24,6 @@ public static class CavePlanner
 
     public static int WorldSize => WorldBuilder.WorldSize;
 
-    public static int RadiationSize => StreetTile.TileSize + CaveBuilder.radiationZoneMargin;
-
     public static int Seed => WorldBuilder.Seed + WorldSize;
 
     public static int entrancesAdded = 0;

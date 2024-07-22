@@ -176,16 +176,16 @@ public static class CaveUtils
     {
         var neighbors = new List<Vector3i>();
 
-        if (position.x > CaveBuilder.radiationZoneMargin)
+        if (position.x > 0)
             neighbors.Add(new Vector3i(position.x - 1, position.y, position.z));
 
-        if (position.x + CaveBuilder.radiationZoneMargin < CaveBuilder.worldSize)
+        if (position.x < CaveBuilder.worldSize)
             neighbors.Add(new Vector3i(position.x + 1, position.y, position.z));
 
-        if (position.z > CaveBuilder.radiationZoneMargin)
+        if (position.z > 0)
             neighbors.Add(new Vector3i(position.x, position.y, position.z - 1));
 
-        if (position.z + CaveBuilder.radiationZoneMargin < CaveBuilder.worldSize)
+        if (position.z < CaveBuilder.worldSize)
             neighbors.Add(new Vector3i(position.x, position.y, position.z + 1));
 
         if (position.y > CaveBuilder.bedRockMargin)
@@ -333,20 +333,20 @@ public class CavePrefab
 
     public string Name => prefabDataInstance.prefab.Name;
 
-    public List<Vector3i> nodes;
+    public List<GraphNode> nodes;
 
     public List<Prefab.Marker> markers;
 
     public CavePrefab(int index)
     {
         id = index;
-        nodes = new List<Vector3i>();
+        nodes = new List<GraphNode>();
     }
 
     public CavePrefab(int index, Random rand)
     {
         id = index;
-        nodes = new List<Vector3i>();
+        nodes = new List<GraphNode>();
 
         size = new Vector3i(
             rand.Next(CaveBuilder.MIN_PREFAB_SIZE, CaveBuilder.MAX_PREFAB_SIZE),
@@ -407,14 +407,14 @@ public class CavePrefab
 
     public void UpdateNodes(PrefabDataInstance prefab)
     {
-        nodes = new List<Vector3i>();
+        nodes = new List<GraphNode>();
 
         foreach (var marker in prefab.prefab.POIMarkers)
         {
             if (!marker.tags.Test_AnySet(caveNodeTags))
                 continue;
 
-            nodes.Add(marker.start + position);
+            nodes.Add(new GraphNode(marker.start + position, this));
         }
     }
 
@@ -434,11 +434,11 @@ public class CavePrefab
             RandomMarker(rand, 3, 1, size.y, size.z - 2),
         };
 
-        nodes = new List<Vector3i>();
+        nodes = new List<GraphNode>();
 
         foreach (var marker in markers)
         {
-            nodes.Add(marker.start + marker.size / 2);
+            nodes.Add(new GraphNode(marker.start + marker.size / 2, this));
         }
     }
 
@@ -458,11 +458,11 @@ public class CavePrefab
 
     public void SetRandomPosition(Random rand, int mapSize)
     {
-        int offset = CaveBuilder.radiationZoneMargin;
+        int offset = CaveBuilder.radiationSize + CaveBuilder.radiationZoneMargin;
 
         position = new Vector3i(
             rand.Next(offset, mapSize - offset - size.x),
-            rand.Next(5, 200),
+            rand.Next(CaveBuilder.bedRockMargin, 255 - size.y),
             rand.Next(offset, mapSize - offset - size.z)
         );
 
@@ -737,35 +737,46 @@ public class CavePrefab
 }
 
 
-public enum Direction
+public class Direction
 {
-    North,
-    South,
-    East,
-    West,
-    None,
+    public static Direction North = new Direction(-1, 0);
+
+    public static Direction South = new Direction(1, 0);
+
+    public static Direction East = new Direction(0, 1);
+
+    public static Direction West = new Direction(0, -1);
+
+    public static Direction None = new Direction(0, 0);
+
+    public Vector3i Vector { get; internal set; }
+
+    public Direction(int x, int z)
+    {
+        Vector = new Vector3i(x, 0, z);
+    }
+
+    public override bool Equals(object obj)
+    {
+        Direction other = (Direction)obj;
+        return Vector.GetHashCode() == other.GetHashCode();
+    }
+
+    public override int GetHashCode()
+    {
+        return Vector.GetHashCode();
+    }
+
+    public static bool operator ==(Direction dir1, Direction dir2)
+    {
+        return dir1.Vector == dir2.Vector;
+    }
+
+    public static bool operator !=(Direction dir1, Direction dir2)
+    {
+        return dir1.Vector != dir2.Vector;
+    }
 }
-
-
-// public class Direction
-// {
-//     public static Direction North = new Direction(-1, 0);
-
-//     public static Direction South = new Direction(1, 0);
-
-//     public static Direction East = new Direction(0, 1);
-
-//     public static Direction West = new Direction(0, -1);
-
-//     public static Direction None = new Direction(0, 0);
-
-//     public Vector2i Vector { get; internal set; }
-
-//     public Direction(int x, int z)
-//     {
-//         Vector = new Vector2i(x, z);
-//     }
-// }
 
 
 public class GraphNode
@@ -787,13 +798,13 @@ public class GraphNode
 
     private Direction GetDirection()
     {
-        if (position.x == prefab.position.x)
+        if (position.x == prefab.position.x - 1)
             return Direction.North;
 
         if (position.x == prefab.position.x + prefab.size.x)
             return Direction.South;
 
-        if (position.z == prefab.position.z)
+        if (position.z == prefab.position.z - 1)
             return Direction.West;
 
         if (position.z == prefab.position.z + prefab.size.z)
@@ -812,6 +823,19 @@ public class GraphNode
         GraphNode other = (GraphNode)obj;
         return position.Equals(other.position);
     }
+
+    public Vector3i Normal(int distance)
+    {
+        CaveUtils.Assert(direction != Direction.None);
+
+        return position + direction.Vector * distance;
+    }
+
+    public override string ToString()
+    {
+        return position.ToString();
+    }
+
 }
 
 
@@ -877,6 +901,7 @@ public class Edge : IComparable<Edge>
         return hash;
     }
 }
+
 
 public class Node
 {
@@ -1076,9 +1101,9 @@ public static class CaveTunneler
 {
     private static ConcurrentDictionary<Vector3i, bool> validPositions = new ConcurrentDictionary<Vector3i, bool>();
 
-    private static HashSet<Vector3i> ReconstructPath(Node currentNode)
+    private static List<Vector3i> ReconstructPath(Node currentNode)
     {
-        var path = new HashSet<Vector3i>();
+        var path = new List<Vector3i>();
 
         while (currentNode != null)
         {
@@ -1089,19 +1114,18 @@ public static class CaveTunneler
         return path;
     }
 
-    public static HashSet<Vector3i> FindPath(Vector3i startPos, Vector3i targetPos, PrefabCache cachedPrefabs)
+    public static List<Vector3i> FindPath(GraphNode start, GraphNode target, PrefabCache cachedPrefabs)
     {
-        var startNode = new Node(startPos);
-        var goalNode = new Node(targetPos);
+        var startNode = new Node(start.Normal(5));
+        var goalNode = new Node(target.Normal(5));
 
         var queue = new HashedPriorityQueue<Node>();
         var visited = new HashSet<Node>();
+        var index = 0;
 
         queue.Enqueue(startNode, float.MaxValue);
 
-        var path = new HashSet<Vector3i>();
-
-        while (queue.Count > 0)
+        while (queue.Count > 0 && index++ < 100_000)
         {
             Node currentNode = queue.Dequeue();
 
@@ -1109,6 +1133,8 @@ public static class CaveTunneler
 
             foreach (Node neighbor in currentNode.GetNeighbors())
             {
+                CaveUtils.Assert(neighbor.position.y >= CaveBuilder.bedRockMargin);
+
                 if (neighbor.position == goalNode.position)
                 {
                     return ReconstructPath(currentNode);
@@ -1143,12 +1169,9 @@ public static class CaveTunneler
             }
         }
 
-        if (path.Count == 0)
-        {
-            Log.Warning($"No Path found from {startPos} to {targetPos}.");
-        }
+        Log.Warning($"No Path found from {start} to {target} after {index} iterations");
 
-        return path;
+        return new List<Vector3i>();
     }
 
     public static HashSet<Vector3i> ThickenAroundPos(Vector3i center, int maxRadius)
@@ -1329,8 +1352,8 @@ public class Graph
                 {
                     foreach (var node2 in nodes2)
                     {
-                        var graphNode1 = new GraphNode(node1, relatedEdge.Prefab1);
-                        var graphNode2 = new GraphNode(node2, relatedEdge.Prefab2);
+                        var graphNode1 = node1; //new GraphNode(node1, relatedEdge.Prefab1);
+                        var graphNode2 = node2; //new GraphNode(node2, relatedEdge.Prefab2);
 
                         graph.AddEdge(new Edge(graphNode1, graphNode2));
                     }
@@ -1406,7 +1429,9 @@ public static class CaveBuilder
 
     public static int overLapMargin = 50;
 
-    public static int radiationZoneMargin = worldSize / 10;
+    public static int radiationZoneMargin = 20;
+
+    public static int radiationSize = StreetTile.TileSize;
 
     public static int bedRockMargin = 2;
 
@@ -1601,13 +1626,13 @@ public static class CaveBuilder
             groupedCaveMap[chunkPos].Add(chunkRelativePos.ToString());
 
             if (chunkRelativePos.x < 0 || chunkRelativePos.x > 15)
-                throw new Exception($"{pos} - {transform} = {chunkRelativePos}");
+                throw new Exception($"ChunkPos.x out of bound: {pos} - {transform} = {chunkRelativePos}");
 
             if (chunkRelativePos.y < 0 || chunkRelativePos.y > 255)
-                throw new Exception($"{pos} - {transform} = {chunkRelativePos}");
+                throw new Exception($"ChunkPos.y out of bound: {pos} - {transform} = {chunkRelativePos}");
 
             if (chunkRelativePos.z < 0 || chunkRelativePos.z > 15)
-                throw new Exception($"{pos} - {transform} = {chunkRelativePos}");
+                throw new Exception($"ChunkPos.z out of bound: {pos} - {transform} = {chunkRelativePos}");
         }
 
         return groupedCaveMap;
