@@ -863,6 +863,50 @@ public class GraphNode
         return CaveUtils.GetPointsInside(marker.start, marker.start + marker.size);
     }
 
+    public HashSet<Vector3i> GetSphere()
+    {
+        var center = position;
+        var radius = 2 * CaveUtils.FastMax(marker.size.x, marker.size.z, marker.size.y);
+
+        var queue = new HashSet<Vector3i>() { center };
+        var visited = new HashSet<Vector3i>();
+        var sphere = new HashSet<Vector3i>();
+        var markerEnd = marker.start + marker.size;
+
+        while (queue.Count > 0)
+        {
+            foreach (var pos in queue.ToArray())
+            {
+                queue.Remove(pos);
+
+                if (visited.Contains(pos))
+                    continue;
+
+                visited.Add(pos);
+
+                if (prefab.Intersect3D(pos))
+                    continue;
+
+                if (pos.y >= markerEnd.y || pos.y < marker.start.y)
+                    continue;
+
+                if (direction.Vector.x == 0 && (pos.x < marker.start.x || pos.x >= markerEnd.x))
+                    continue;
+
+                if (direction.Vector.z == 0 && (pos.z < marker.start.z || pos.z >= markerEnd.z))
+                    continue;
+
+                if (CaveUtils.SqrEuclidianDist(pos, center) >= radius)
+                    continue;
+
+                queue.UnionWith(CaveUtils.GetValidNeighbors(pos));
+                sphere.Add(pos);
+            }
+        }
+
+        return sphere;
+    }
+
 }
 
 
@@ -1232,7 +1276,7 @@ public static class CaveTunneler
         return visited;
     }
 
-    public static List<Vector3i> FindPath(Vector3i start, HashSet<Vector3i> targets)
+    public static List<Vector3i> FindPath(Vector3i start, Vector3i target)
     {
         var queue = new Queue<Node>();
         var visited = new HashSet<Node>();
@@ -1248,7 +1292,7 @@ public static class CaveTunneler
 
             visited.Add(currentNode);
 
-            if (targets.Contains(currentNode.position))
+            if (currentNode.position == target)
             {
                 return ReconstructPath(currentNode);
             }
@@ -1268,9 +1312,11 @@ public static class CaveTunneler
         return new List<Vector3i>();
     }
 
-    public static HashSet<Vector3i> LinkPoints(Vector3i point, IEnumerable<Vector3i> others)
+    public static HashSet<Vector3i> LinkPoints(Vector3i start, IEnumerable<Vector3i> others)
     {
-        return new HashSet<Vector3i>();
+        var points = new HashSet<Vector3i>();
+
+        return points;
     }
 
     public static HashSet<Vector3i> ThickenTunnel(List<Vector3i> path, GraphNode start, GraphNode target)
@@ -1281,21 +1327,17 @@ public static class CaveTunneler
         var sphere1 = CaveBuilder.GetSphere(path.First(), 6f);
         var sphere2 = CaveBuilder.GetSphere(path.Last(), 6f);
 
-        caveMap.UnionWith(sphere1);
-        caveMap.UnionWith(sphere2);
+        // caveMap.UnionWith(sphere1);
+        // caveMap.UnionWith(sphere2);
 
-        caveMap.UnionWith(LinkPoints(start.Normal(5), start.GetMarkerPoints()));
+        caveMap.UnionWith(start.GetSphere());
+        caveMap.UnionWith(target.GetSphere());
 
-        // foreach (var position in path)
-        // {
-        //     var circle = CaveBuilder.ParseCircle(position, 5f);
-        //     caveMap.UnionWith(circle);
-        // }
-
-        // foreach (var block in start.GetMarkerPoints())
-        // {
-        //     caveMap.UnionWith(FindPath(block, caveMap));
-        // }
+        foreach (var position in path)
+        {
+            var circle = CaveBuilder.GetSphere(position, 5f);
+            caveMap.UnionWith(circle);
+        }
 
         return caveMap;
     }
