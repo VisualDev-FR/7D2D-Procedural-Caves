@@ -13,6 +13,7 @@ if exist ".\%NAME%" rmdir ".\%NAME%" /s /q
 MKDIR .\%NAME%
 
 xcopy ProceduralCaves.dll %NAME%\ > nul
+xcopy ProceduralCaves.pdb %NAME%\ > nul
 xcopy README.md %NAME%\ > nul
 xcopy Caves %NAME%\Caves\ /s > nul
 xcopy Config %NAME%\Config\ /s > nul
