@@ -828,13 +828,13 @@ public class GraphNode
         if (marker.start.x == -1)
             return Direction.North;
 
-        if (marker.start.x == marker.size.x)
+        if (marker.start.x == prefab.size.x)
             return Direction.South;
 
         if (marker.start.z == -1)
             return Direction.West;
 
-        if (marker.start.z == marker.size.z)
+        if (marker.start.z == prefab.size.z)
             return Direction.East;
 
         return Direction.None;

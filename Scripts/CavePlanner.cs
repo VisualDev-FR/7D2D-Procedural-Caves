@@ -86,8 +86,8 @@ public static class CavePlanner
     {
         foreach (var marker in prefab.POIMarkers)
         {
-            bool isOnBound_x = marker.start.x == -1 || marker.start.x == marker.size.x;
-            bool isOnBound_z = marker.start.z == -1 || marker.start.z == marker.size.z;
+            bool isOnBound_x = marker.start.x == -1 || marker.start.x == prefab.size.x;
+            bool isOnBound_z = marker.start.z == -1 || marker.start.z == prefab.size.z;
 
             if (!isOnBound_x && !isOnBound_z)
             {
