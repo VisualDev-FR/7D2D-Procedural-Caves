@@ -104,10 +104,10 @@ public struct Segment
 
 public static class CaveUtils
 {
-    public static void Assert(bool condition)
+    public static void Assert(bool condition, string message = "")
     {
         if (!condition)
-            throw new Exception("Assertion error");
+            throw new Exception($"Assertion error: {message}");
     }
 
     public static int FastMin(int a, int b)
@@ -313,7 +313,11 @@ public class CaveNoise
 
 public class CavePrefab
 {
-    public static FastTags<TagGroup.Poi> caveNodeTags = FastTags<TagGroup.Poi>.Parse("cavenode");
+    public static FastTags<TagGroup.Poi> tagCaveNode = FastTags<TagGroup.Poi>.Parse("cavenode");
+
+    public static FastTags<TagGroup.Poi> tagCaveEntrance = FastTags<TagGroup.Poi>.Parse("entrance");
+
+    public static FastTags<TagGroup.Poi> tagCave = FastTags<TagGroup.Poi>.Parse("cave");
 
     public PrefabDataInstance prefabDataInstance;
 
@@ -414,6 +418,10 @@ public class CavePrefab
         size = pdi.boundingBoxSize;
         rotation = pdi.rotation;
 
+        CaveUtils.Assert(position.x > 0, $"offset: {offset}");
+        CaveUtils.Assert(position.y > 0, $"offset: {offset}");
+        CaveUtils.Assert(position.z > 0, $"offset: {offset}");
+
         UpdateNodes(pdi);
     }
 
@@ -421,20 +429,15 @@ public class CavePrefab
     {
         nodes = new List<GraphNode>();
 
+        CaveUtils.Assert(prefab.prefab.POIMarkers.Count > 0);
+
         foreach (var marker in prefab.prefab.POIMarkers)
         {
-            if (!marker.tags.Test_AnySet(caveNodeTags))
+            if (!marker.tags.Test_AnySet(tagCaveNode))
                 continue;
 
             nodes.Add(new GraphNode(marker, this));
         }
-    }
-
-    public CavePrefab(int id, PrefabData prefabData)
-    {
-        position = new Vector3i();
-        rotation = 0;
-        prefabDataInstance = new PrefabDataInstance(id, position, rotation, prefabData);
     }
 
     public void UpdateNodes(Random rand)
@@ -807,29 +810,31 @@ public class GraphNode
     {
         this.marker = marker;
         this.prefab = prefab;
-        position = marker.start + marker.size / 2;
+        position = prefab.position + marker.start + marker.size / 2;
         direction = GetDirection();
+
+        CaveUtils.Assert(direction != Direction.None, $"None direction: {prefab.Name}, marker: [{marker.start}]");
     }
 
     public GraphNode(Vector3i position, CavePrefab prefab)
     {
         this.prefab = prefab;
         this.position = position;
-        direction = GetDirection();
+        direction = Direction.None;
     }
 
     private Direction GetDirection()
     {
-        if (position.x == prefab.position.x - 1)
+        if (marker.start.x == -1)
             return Direction.North;
 
-        if (position.x == prefab.position.x + prefab.size.x)
+        if (marker.start.x == marker.size.x)
             return Direction.South;
 
-        if (position.z == prefab.position.z - 1)
+        if (marker.start.z == -1)
             return Direction.West;
 
-        if (position.z == prefab.position.z + prefab.size.z)
+        if (marker.start.z == marker.size.z)
             return Direction.East;
 
         return Direction.None;
@@ -871,7 +876,9 @@ public class GraphNode
         var queue = new HashSet<Vector3i>() { center };
         var visited = new HashSet<Vector3i>();
         var sphere = new HashSet<Vector3i>();
-        var markerEnd = marker.start + marker.size;
+        var markerEnd = prefab.position + marker.start + marker.size;
+
+        CaveUtils.Assert(!prefab.Intersect3D(center));
 
         while (queue.Count > 0)
         {
@@ -903,6 +910,8 @@ public class GraphNode
                 sphere.Add(pos);
             }
         }
+
+        Log.Out($"Create node sphere at {prefab.Name}, center={center}, radius={radius}, points={sphere.Count}");
 
         return sphere;
     }
@@ -1245,12 +1254,10 @@ public static class CaveTunneler
         return new List<Vector3i>();
     }
 
-    public static HashSet<Vector3i> ThickenAroundPos(Vector3i center, int maxRadius)
+    public static HashSet<Vector3i> GetSphere(Vector3i center, float radius)
     {
         var queue = new HashSet<Vector3i>() { center };
         var visited = new HashSet<Vector3i>();
-
-        int sqrRadius = maxRadius * maxRadius;
 
         while (queue.Count > 0)
         {
@@ -1261,12 +1268,15 @@ public static class CaveTunneler
                 if (visited.Contains(pos))
                     continue;
 
-                visited.Add(pos);
-
-                if (CaveBuilder.pathingNoise.IsTerrain(pos.x, pos.y, pos.z))
+                if (pos.y <= CaveBuilder.bedRockMargin)
                     continue;
 
-                if (CaveUtils.SqrEuclidianDist(pos, center) >= sqrRadius)
+                if (pos.y + CaveBuilder.terrainMargin >= WorldBuilder.Instance.GetHeight(pos.x, pos.z))
+                    continue;
+
+                visited.Add(pos);
+
+                if (CaveUtils.SqrEuclidianDist(pos, center) >= radius)
                     continue;
 
                 queue.UnionWith(CaveUtils.GetValidNeighbors(pos));
@@ -1276,66 +1286,16 @@ public static class CaveTunneler
         return visited;
     }
 
-    public static List<Vector3i> FindPath(Vector3i start, Vector3i target)
-    {
-        var queue = new Queue<Node>();
-        var visited = new HashSet<Node>();
-
-        queue.Enqueue(new Node(start));
-
-        while (queue.Count > 0)
-        {
-            Node currentNode = queue.Dequeue();
-
-            if (visited.Contains(currentNode))
-                continue;
-
-            visited.Add(currentNode);
-
-            if (currentNode.position == target)
-            {
-                return ReconstructPath(currentNode);
-            }
-
-            foreach (Node neighbor in currentNode.GetNeighbors())
-            {
-                if (!visited.Contains(neighbor))
-                {
-                    neighbor.Parent = currentNode;
-                    queue.Enqueue(neighbor);
-                }
-            }
-        }
-
-        Log.Out("no path found to targets.");
-
-        return new List<Vector3i>();
-    }
-
-    public static HashSet<Vector3i> LinkPoints(Vector3i start, IEnumerable<Vector3i> others)
-    {
-        var points = new HashSet<Vector3i>();
-
-        return points;
-    }
-
     public static HashSet<Vector3i> ThickenTunnel(List<Vector3i> path, GraphNode start, GraphNode target)
     {
         var caveMap = new HashSet<Vector3i>();
-
-        caveMap.UnionWith(path);
-        var sphere1 = CaveBuilder.GetSphere(path.First(), 6f);
-        var sphere2 = CaveBuilder.GetSphere(path.Last(), 6f);
-
-        // caveMap.UnionWith(sphere1);
-        // caveMap.UnionWith(sphere2);
 
         caveMap.UnionWith(start.GetSphere());
         caveMap.UnionWith(target.GetSphere());
 
         foreach (var position in path)
         {
-            var circle = CaveBuilder.GetSphere(position, 5f);
+            var circle = GetSphere(position, 6f);
             caveMap.UnionWith(circle);
         }
 
@@ -1433,9 +1393,9 @@ public class Graph
                 var prefab1 = prefabs[i];
                 var prefab2 = prefabs[j];
 
-                var node1 = new GraphNode(prefab1.GetCenter(), prefab1);
-                var node2 = new GraphNode(prefab2.GetCenter(), prefab2);
-                var edge = new Edge(node1, node2);
+                var prefabCenter1 = new GraphNode(prefab1.GetCenter(), prefab1);
+                var prefabCenter2 = new GraphNode(prefab2.GetCenter(), prefab2);
+                var edge = new Edge(prefabCenter1, prefabCenter2);
 
                 if (!prefabEdges.ContainsKey(prefab1.id))
                     prefabEdges.Add(prefab1.id, new List<Edge>());
@@ -1479,6 +1439,8 @@ public class Graph
                         var graphNode2 = node2; //new GraphNode(node2, relatedEdge.Prefab2);
 
                         graph.AddEdge(new Edge(graphNode1, graphNode2));
+
+                        // Log.Out($"Create edge between {graphNode1} and {graphNode2}");
                     }
                 }
             }
@@ -1524,9 +1486,12 @@ public class Graph
 
         // List<Edge> graph = BuildPrefabsGraph(prefabs);
         Graph graph = BuildPrimaryGraph(prefabs);
+
+        // Log.Out($"[Cave] primary graph: edges={graph.Edges.Count}, nodes={graph.Nodes.Count}");
+
         var edges = graph.FindMST();
 
-        Log.Out($"Graph resolved in {CaveUtils.TimeFormat(timer)}");
+        Log.Out($"Graph resolved in {CaveUtils.TimeFormat(timer)}, edges={edges.Count}");
 
         return edges; // graph.Edges;
     }
@@ -1561,32 +1526,6 @@ public static class CaveBuilder
     public static int terrainMargin = 5;
 
     public static CaveNoise pathingNoise = CaveNoise.defaultNoise;
-
-    public static HashSet<Vector3i> GetSphere(Vector3i center, float radius)
-    {
-        var queue = new HashSet<Vector3i>() { center };
-        var visited = new HashSet<Vector3i>();
-
-        while (queue.Count > 0)
-        {
-            foreach (var pos in queue.ToArray())
-            {
-                queue.Remove(pos);
-
-                if (visited.Contains(pos))
-                    continue;
-
-                visited.Add(pos);
-
-                if (CaveUtils.SqrEuclidianDist(pos, center) >= radius)
-                    continue;
-
-                queue.UnionWith(CaveUtils.GetValidNeighbors(pos));
-            }
-        }
-
-        return visited;
-    }
 
     public static FastNoiseLite ParsePerlinNoise(int seed = -1)
     {
@@ -1664,6 +1603,12 @@ public static class CaveBuilder
     public static Dictionary<Vector2s, Vector3bf[]> ReadCaveMap(string filename)
     {
         var caveMap = new Dictionary<Vector2s, Vector3bf[]>();
+
+        if (!File.Exists(filename))
+        {
+            Log.Warning($"[Cave] CaveBuilder.ReadCaveMap: File not found '{filename}'");
+            return caveMap;
+        }
 
         using (var reader = new StreamReader(filename))
         {

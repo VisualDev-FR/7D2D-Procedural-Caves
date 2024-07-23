@@ -318,9 +318,9 @@ public static class PrefabManager_LoadPrefabs
             if (prefabData == null || prefabData.Tags.IsEmpty)
                 Log.Warning("Could not load prefab data for " + location.Name);
 
-            if (prefabData.Tags.Test_AnySet(CavePlanner.caveTags))
+            if (prefabData.Tags.Test_AnySet(CavePrefab.tagCave))
             {
-                CavePlanner.AllCavePrefabs[location.Name.ToLower()] = prefabData;
+                CavePlanner.TryCacheCavePrefab(prefabData);
             }
             else if (!prefabData.Tags.Test_AnySet(filter))
             {
@@ -334,12 +334,9 @@ public static class PrefabManager_LoadPrefabs
             }
         }
 
-        if (CavePlanner.AllCavePrefabs.Count == 0)
-            Log.Error($"[Cave] No cave prefab was loaded.");
-
-        foreach (var prefab in CavePlanner.AllCavePrefabs.Values)
+        if (CavePlanner.AllPrefabsCount == 0)
         {
-            Log.Out($"[Cave] cave prefab found: {prefab.Name}");
+            Log.Error($"[Cave] No cave prefab was loaded.");
         }
 
         Log.Out($"LoadPrefabs {PrefabManager.AllPrefabDatas.Count} of {prefabs.Count} in {ms.ElapsedMilliseconds * 0.001f}");
@@ -359,16 +356,13 @@ public static class PrefabManager_GetWildernessPrefab
 {
     public static bool Prefix(FastTags<TagGroup.Poi> _withoutTags, FastTags<TagGroup.Poi> _markerTags, Vector2i minSize, Vector2i maxSize, Vector2i center, bool _isRetry, ref PrefabData __result)
     {
-        int entrancesAdded = CavePlanner.GetUsedCavePrefabs().Count;
+        if (CavePlanner.EntrancePrefabCount < 20)
+        {
+            __result = CavePlanner.SelectRandomEntrance();
+            return false;
+        }
 
-        if (entrancesAdded >= 20)
-            return true;
-
-        var prefabs = CavePlanner.GetCaveEntrancePrefabs();
-
-        __result = prefabs[CavePlanner.rand.Next(prefabs.Count)];
-
-        return false;
+        return true;
     }
 }
 
@@ -390,10 +384,12 @@ public static class WorldBuilder_GenerateFromUI
 
     public static IEnumerator GenerateFromUIPostFix()
     {
-        CavePlanner.Cleanup();
+        CavePlanner.Init();
 
         yield return GenerateFromUI();
         yield return CavePlanner.GenerateCaveMap();
+
+        yield return null;
     }
 
     public static bool Prefix(WorldBuilder __instance, ref IEnumerator __result)

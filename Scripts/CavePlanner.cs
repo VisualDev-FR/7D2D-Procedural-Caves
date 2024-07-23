@@ -8,41 +8,49 @@ using Random = System.Random;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
 using System.Collections;
+using System;
 
 
 public static class CavePlanner
 {
-    public static Dictionary<string, PrefabData> AllCavePrefabs = new Dictionary<string, PrefabData>();
+    private static Dictionary<string, PrefabData> allCavePrefabs = new Dictionary<string, PrefabData>();
 
-    public static FastTags<TagGroup.Poi> CaveEntranceTags = FastTags<TagGroup.Poi>.Parse("entrance");
+    private static List<string> entrancePrefabsNames = new List<string>();
 
-    public static FastTags<TagGroup.Poi> caveTags = FastTags<TagGroup.Poi>.Parse("cave");
+    public static int EntrancePrefabCount => entrancePrefabsNames.Count;
 
-    public static Random rand = CaveBuilder.rand;
+    public static int AllPrefabsCount => allCavePrefabs.Count;
 
-    public static WorldBuilder WorldBuilder => WorldBuilder.Instance;
+    private static Random rand = CaveBuilder.rand;
 
-    public static int WorldSize => WorldBuilder.WorldSize;
+    private static WorldBuilder WorldBuilder => WorldBuilder.Instance;
 
-    public static int Seed => WorldBuilder.Seed + WorldSize;
+    private static int WorldSize => WorldBuilder.WorldSize;
 
-    public static int entrancesAdded = 0;
+    private static int Seed => WorldBuilder.Seed + WorldSize;
 
-    public static int maxPlacementAttempts = 20;
+    private const int maxPlacementAttempts = 20;
 
-    public static Vector3i HalfWorldSize => new Vector3i(WorldBuilder.HalfWorldSize, 0, WorldBuilder.HalfWorldSize);
+    private static Vector3i HalfWorldSize => new Vector3i(WorldBuilder.HalfWorldSize, 0, WorldBuilder.HalfWorldSize);
 
-    public static List<PrefabData> entrancePrefabs = null;
+    private static HashSet<Vector3i> caveMap = null;
 
-    public static HashSet<Vector3i> caveMap = null;
+    public static PrefabData SelectRandomEntrance()
+    {
+        CaveUtils.Assert(entrancePrefabsNames.Count > 0, "Seems that no cave entrance was found.");
 
-    public static PrefabCache GetUsedCavePrefabs()
+        string prefabName = entrancePrefabsNames[rand.Next(entrancePrefabsNames.Count)];
+
+        return allCavePrefabs[prefabName];
+    }
+
+    private static PrefabCache GetUsedCavePrefabs()
     {
         var prefabs = new PrefabCache();
 
         foreach (var pdi in PrefabManager.UsedPrefabsWorld)
         {
-            if (pdi.prefab.Tags.Test_AnySet(caveTags))
+            if (pdi.prefab.Tags.Test_AnySet(CavePrefab.tagCave))
             {
                 prefabs.AddPrefab(new CavePrefab(prefabs.Count + 1, pdi, HalfWorldSize));
             }
@@ -54,18 +62,18 @@ public static class CavePlanner
     public static List<PrefabData> GetUndergroundPrefabs()
     {
         var result =
-            from prefab in AllCavePrefabs.Values
-            where prefab.Tags.Test_AnySet(caveTags) && !prefab.Tags.Test_AnySet(CaveEntranceTags)
+            from prefab in allCavePrefabs.Values
+            where prefab.Tags.Test_AnySet(CavePrefab.tagCave) && !prefab.Tags.Test_AnySet(CavePrefab.tagCaveEntrance)
             select prefab;
 
         return result.ToList();
     }
 
-    public static bool ContainsCaveNodes(PrefabData prefab)
+    public static bool ContainsCaveMarkers(PrefabData prefab)
     {
         foreach (var marker in prefab.POIMarkers)
         {
-            if (marker.tags.Test_AnySet(CavePrefab.caveNodeTags))
+            if (marker.tags.Test_AnySet(CavePrefab.tagCaveNode))
             {
                 return true;
             }
@@ -74,46 +82,65 @@ public static class CavePlanner
         return false;
     }
 
-    public static List<PrefabData> GetCaveEntrancePrefabs()
+    private static bool PrefabMarkersAreValid(PrefabData prefab)
     {
-        if (entrancePrefabs != null)
-            return entrancePrefabs;
-
-        var prefabDatas = new List<PrefabData>();
-
-        foreach (PrefabData prefabData in AllCavePrefabs.Values)
+        foreach (var marker in prefab.POIMarkers)
         {
-            if (!prefabData.Tags.Test_AnySet(CaveEntranceTags))
-                continue;
+            bool isOnBound_x = marker.start.x == -1 || marker.start.x == marker.size.x;
+            bool isOnBound_z = marker.start.z == -1 || marker.start.z == marker.size.z;
 
-            if (!ContainsCaveNodes(prefabData))
+            if (!isOnBound_x && !isOnBound_z)
             {
-                Log.Warning($"[Cave] skipping {prefabData.Name} because no cave node is specified.");
-                continue;
+                return false;
             }
-
-            prefabDatas.Add(prefabData);
         }
 
-        if (prefabDatas.Count == 0)
-            Log.Error($"No cave entrance found in installed prefabs.");
-
-        entrancePrefabs = prefabDatas;
-
-        return prefabDatas;
+        return true;
     }
 
-    public static void Cleanup()
+    private static bool IsCaveEntrance(PrefabData prefabData)
     {
-        entrancesAdded = 0;
-        entrancePrefabs = null;
+        return prefabData.Tags.Test_AnySet(CavePrefab.tagCaveEntrance);
+    }
+
+    public static void TryCacheCavePrefab(PrefabData prefabData)
+    {
+        if (!ContainsCaveMarkers(prefabData))
+        {
+            Log.Warning($"[Cave] skipping {prefabData.Name} because no cave marker was found.");
+            return;
+        }
+
+        if (!PrefabMarkersAreValid(prefabData))
+        {
+            Log.Warning($"[Cave] skipping {prefabData.Name} because at least one marker is invalid.");
+            return;
+        }
+
+        string prefabName = prefabData.Name.ToLower();
+
+        if (IsCaveEntrance(prefabData))
+        {
+            Log.Out($"[Cave] cache prefab {prefabName} as a cave entrance.");
+            entrancePrefabsNames.Add(prefabName);
+        }
+
+        Log.Out($"[Cave] caching prefab '{prefabName}'");
+
+        allCavePrefabs[prefabName] = prefabData;
+    }
+
+    public static void Init()
+    {
+        entrancePrefabsNames = new List<string>();
+        allCavePrefabs = new Dictionary<string, PrefabData>();
         caveMap = new HashSet<Vector3i>();
         CaveBuilder.rand = new Random(CaveBuilder.SEED);
     }
 
     private static int GetMinTerrainHeight(Vector3i position, Vector3i size)
     {
-        int minHeight = 257;
+        int minHeight = 1337;
 
         for (int x = position.x; x < position.x + size.x; x++)
         {
@@ -128,10 +155,12 @@ public static class CavePlanner
 
     private static Vector3i GetRandomPositionFor(Vector3i size)
     {
+        var offset = CaveBuilder.radiationSize + CaveBuilder.radiationZoneMargin;
+
         return new Vector3i(
-            _x: rand.Next(RadiationSize, WorldSize - RadiationSize - size.x),
+            _x: rand.Next(offset, WorldSize - offset - size.x),
             _y: 0,
-            _z: rand.Next(RadiationSize, WorldSize - RadiationSize - size.z)
+            _z: rand.Next(offset, WorldSize - offset - size.z)
         );
     }
 
@@ -200,10 +229,10 @@ public static class CavePlanner
         return null;
     }
 
-    public static PrefabCache PlaceCavePrefabs(int count, PrefabCache caveEntrances)
+    public static PrefabCache PlaceCavePrefabs(int count, PrefabCache prefabCache)
     {
         var availablePrefabs = GetUndergroundPrefabs();
-        var cavePrefabs = caveEntrances;
+        var cavePrefabs = prefabCache;
 
         for (int i = 0; i < count; i++)
         {
@@ -215,17 +244,21 @@ public static class CavePlanner
 
             var cavePrefab = new CavePrefab(cavePrefabs.Count + 1, pdi, HalfWorldSize);
 
-            PrefabManager.AddUsedPrefabWorld(-1, pdi);
             cavePrefabs.AddPrefab(cavePrefab);
+            PrefabManager.AddUsedPrefabWorld(-1, pdi);
 
             Log.Out($"[Cave] cave prefab {cavePrefab.Name} added at {cavePrefab.position}");
         }
+
+        Log.Out($"[Cave] {cavePrefabs.Count} cave prefabs added.");
 
         return cavePrefabs;
     }
 
     public static IEnumerator GenerateCaveMap()
     {
+        caveMap = new HashSet<Vector3i>();
+
         Log.Out($"[Cave] worldsize = {WorldSize}");
         Log.Out($"[Cave] Seed = {Seed}");
 
@@ -249,19 +282,16 @@ public static class CavePlanner
 
         PrefabCache cavePrefabs = PlaceCavePrefabs(CaveBuilder.PREFAB_COUNT, addedCaveEntrances);
 
-        yield return GenerateCavePreview(cavePrefabs, new HashSet<Vector3i>());
-
-        Log.Out($"[Cave] {cavePrefabs.Count} cave prefabs added.");
+        yield return GenerateCavePreview(cavePrefabs.Prefabs, caveMap);
 
         List<Edge> edges = Graph.Resolve(cavePrefabs.Prefabs);
 
-        var wiredCaveMap = new HashSet<Vector3i>();
         int index = 0;
 
         foreach (var edge in edges)
         {
-            Vector3i p1 = edge.node1.position;
-            Vector3i p2 = edge.node2.position;
+            GraphNode p1 = edge.node1;
+            GraphNode p2 = edge.node2;
 
             string message = $"Cave tunneling: {100.0f * index++ / edges.Count:F0}% ({index} / {edges.Count})";
 
@@ -269,23 +299,20 @@ public static class CavePlanner
 
             yield return WorldBuilder.SetMessage(message);
 
-            HashSet<Vector3i> path = CaveTunneler.FindPath(p1, p2, cavePrefabs);
+            var path = CaveTunneler.FindPath(p1, p2, cavePrefabs);
+            var tunnel = CaveTunneler.ThickenTunnel(path, p1, p2);
 
-            wiredCaveMap.UnionWith(path);
+            caveMap.UnionWith(tunnel);
         }
 
-
-        caveMap = CaveTunneler.ThickenCaveMap(wiredCaveMap);
-        // caveMap = wiredCaveMap;
-
-        yield return GenerateCavePreview(cavePrefabs, wiredCaveMap);
+        yield return GenerateCavePreview(cavePrefabs.Prefabs, caveMap);
 
         Log.Out($"{caveMap.Count} cave blocks generated, timer={CaveUtils.TimeFormat(timer)}.");
 
         yield return null;
     }
 
-    public static IEnumerator GenerateCavePreview(PrefabCache prefabs, HashSet<Vector3i> caveMap)
+    public static IEnumerator GenerateCavePreview(List<CavePrefab> prefabs, HashSet<Vector3i> caveMap)
     {
         string filename = @"C:\tools\DEV\7D2D_Modding\7D2D-Procedural-caves\CaveBuilder\graph.png";
 
@@ -293,28 +320,29 @@ public static class CavePlanner
 
         yield return WorldBuilder.SetMessage("Creating cave preview...", _logToConsole: true);
 
-        foreach (var prefab in prefabs.Prefabs)
+        foreach (var prefab in prefabs)
         {
-            Log.Out($"{prefab.position} / {prefab.prefabDataInstance.boundingBoxPosition} / {prefab.size}");
+            // Log.Out($"{prefab.position} / {prefab.prefabDataInstance.boundingBoxPosition} / {prefab.size}");
 
             foreach (var point in prefab.Get2DEdges())
             {
-                uint index = (uint)(point.x + point.z * WorldSize);
+                int index = point.x + point.z * WorldSize;
                 pixels[index] = new Color32(0, 255, 0, 255);
-            }
-
-            foreach (var point in prefab.nodes)
-            {
-                uint index = (uint)(point.x + point.z * WorldSize);
-                pixels[index] = new Color32(255, 0, 0, 255);
             }
         }
 
-        foreach (var block in caveMap)
+        foreach (var blockPos in caveMap)
         {
-            var p1 = block; // - HalfWorldSize;
-            uint index = (uint)(p1.x + p1.z * WorldSize);
-            pixels[index] = new Color32(255, 0, 0, 255);
+            var position = blockPos; // - HalfWorldSize;
+            int index = position.x + position.z * WorldSize;
+            try
+            {
+                pixels[index] = new Color32(255, 0, 0, 255);
+            }
+            catch (IndexOutOfRangeException)
+            {
+                Log.Error($"[Cave] IndexOutOfRangeException: index={index}, position={blockPos}, worldSize={WorldSize}");
+            }
         }
 
         var image = ImageConversion.EncodeArrayToPNG(pixels, GraphicsFormat.R8G8B8A8_UNorm, (uint)WorldSize, (uint)WorldSize, (uint)WorldSize * 4);

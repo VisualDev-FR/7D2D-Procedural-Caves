@@ -446,7 +446,8 @@ public static class CaveViewer
     {
         CaveBuilder.worldSize = 100;
         CaveBuilder.radiationZoneMargin = 0;
-        CaveBuilder.SEED = 1634735684;
+        CaveBuilder.rand = new Random();
+        // CaveBuilder.SEED = 1634735684;
 
         if (args.Length > 1)
             CaveBuilder.worldSize = int.Parse(args[1]);
@@ -527,7 +528,7 @@ public static class CaveViewer
         var timer = new Stopwatch();
         timer.Start();
 
-        CaveBuilder.worldSize = 2048;
+        CaveBuilder.worldSize = 6144;
 
         if (args.Length > 1)
             CaveBuilder.worldSize = int.Parse(args[1]);
@@ -549,8 +550,9 @@ public static class CaveViewer
             Log.Out($"Cave tunneling: {100.0f * ++index / edges.Count:F0}% ({index} / {edges.Count})");
 
             var path = CaveTunneler.FindPath(p1, p2, cachedPrefabs);
+            var cave = CaveTunneler.ThickenTunnel(path, p1, p2);
 
-            foreach (Vector3i node in path)
+            foreach (Vector3i node in cave)
             {
                 wiredCaveMap.Add(node);
             }
