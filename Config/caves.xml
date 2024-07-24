@@ -1,29 +1,15 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<configs>
-    <append xpath="">
-        <!-- <property name=9,Chiko_SCcave_11,Chiko_SCcave_12,Chiko_SCcave_13,Chiko_SCcave_14" /> -->
-        <property class="CavePrefavs">
+<config>
+    <property name="MaxPrefabPlacementAttempts" value="50" help="myPropertyHelp" />
+    <property name="RadiationMargin" value="50" help="myPropertyHelp" />
+    <property name="LightFactor" value="0.5" help="myPropertyHelp" />
 
-            <!-- filler prefabs -->
-            <property name="Chiko_SCcave_01" type="filler" />
-            <property name="Chiko_SCcave_02" type="filler" />
-            <property name="Chiko_SCcave_03" type="filler" />
-            <property name="Chiko_SCcave_04" type="filler" />
-            <property name="Chiko_SCcave_05" type="filler" />
-            <property name="Chiko_SCcave_06" type="filler" />
-            <property name="Chiko_SCcave_07" type="filler" />
-            <property name="Chiko_SCcave_08" type="filler" />
-            <property name="Chiko_SCcave_09" type="filler" />
-            <property name="Chiko_SCcave_11" type="filler" />
-            <property name="Chiko_SCcave_12" type="filler" />
-            <property name="Chiko_SCcave_13" type="filler" />
-            <property name="Chiko_SCcave_14" type="filler" />
-
-            <!-- poi prefabs -->
-            <property name="CaveBunker_01" type="poi" />
-
-            <!-- entrance prefabs -->
-            <property name="CaveEntrance_01" type="entrance" />
-          </property>
-    </append>
-</configs>
+    <property name="PathingNoise" help="myPropertyHelp">
+        <property name="noiseType" value="perlin" help="myPropertyHelp" />
+        <property name="fractalType" value="none" help="myPropertyHelp" />
+        <property name="octaves" value="1" help="myPropertyHelp" />
+        <property name="gain" value="0.5" help="myPropertyHelp" />
+        <property name="lacunarity" value="0.5" help="myPropertyHelp" />
+        <property name="frequency" value="0.05" help="myPropertyHelp" />
+        <property name="threshold" value="0.5" help="myPropertyHelp" />
+    </property>
+</config>
