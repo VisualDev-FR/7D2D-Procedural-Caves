@@ -1,6 +1,0 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
-<prefabs>
-  <decoration type="model" name="CaveBunker_01" position="0,10,0" rotation="0" />
-  <decoration type="model" name="CaveBunker_01" position="50,20,50" rotation="1" />
-  <decoration type="model" name="CaveBunker_01" position="0,30,50" rotation="2" />
-</prefabs>
