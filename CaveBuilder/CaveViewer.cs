@@ -492,14 +492,14 @@ public static class CaveViewer
             voxels.Add(new Voxell(block, WaveFrontMat.DarkRed));
         }
 
-        foreach (var marker in p1.markers)
+        foreach (var node in p1.nodes)
         {
-            voxels.Add(new Voxell(marker.start, marker.size, WaveFrontMat.Orange) { force = true });
+            voxels.Add(new Voxell(node.prefab.position + node.marker.start, node.marker.size, WaveFrontMat.Orange) { force = true });
         }
 
-        foreach (var marker in p2.markers)
+        foreach (var node in p2.nodes)
         {
-            voxels.Add(new Voxell(marker.start, marker.size, WaveFrontMat.Orange) { force = true });
+            voxels.Add(new Voxell(node.prefab.position + node.marker.start, node.marker.size, WaveFrontMat.Orange) { force = true });
         }
 
 

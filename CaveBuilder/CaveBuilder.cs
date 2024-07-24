@@ -354,7 +354,7 @@ public class CavePrefab
 
     public int BoundingRadiusSqr { get; internal set; }
 
-    public string Name => prefabDataInstance.prefab.Name;
+    public string Name => prefabDataInstance?.prefab.Name;
 
     public List<GraphNode> nodes;
 
@@ -411,10 +411,10 @@ public class CavePrefab
                 break;
         }
 
-        var markerPos = position + new Vector3i(px, py, pz);
+        var markerStart = new Vector3i(px, py, pz);
         var markerSize = new Vector3i(sizeX, sizeY, sizeZ);
 
-        return new Prefab.Marker(markerPos, markerSize, markerType, groupName, tags);
+        return new Prefab.Marker(markerStart, markerSize, markerType, groupName, tags);
     }
 
     public CavePrefab(int index, PrefabDataInstance pdi, Vector3i offset)
