@@ -104,6 +104,13 @@ public struct Segment
 
 public static class CaveUtils
 {
+    public static Stopwatch StartTimer()
+    {
+        var timer = new Stopwatch();
+        timer.Start();
+        return timer;
+    }
+
     public static void Assert(bool condition, string message = "")
     {
         if (!condition)
@@ -1504,6 +1511,8 @@ public static class CaveBuilder
     public static int SEED = 1634735684; // new Random().Next();
 
     public static int worldSize = 2048;
+
+    public static int RegionSize = 1024;
 
     public static int MIN_PREFAB_SIZE = 8;
 

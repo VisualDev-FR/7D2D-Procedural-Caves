@@ -10,37 +10,42 @@ public struct Vector3bf
     // uses only 16 bits, instead of using 24 bits by storing 3 bytes (only for memory optimization purpose)
     // wil be used to store the relative positions between a chunk and a caveBlock
 
-    private ushort data;
+    public ushort value { get; internal set; }
 
     public byte x
     {
-        get => (byte)(data & 0b0000_0000_0000_1111);
-        set => data = (ushort)((data & 0b1111_0000_0000_0000) | (value & 0b0000_0000_0000_1111));
+        get => (byte)(value & 0b0000_0000_0000_1111);
+        set => this.value = (ushort)((this.value & 0b1111_0000_0000_0000) | (value & 0b0000_0000_0000_1111));
     }
 
     public byte y
     {
-        get => (byte)((data >> 4) & 0b0000_0000_1111_1111);
-        set => data = (ushort)((data & 0b1111_0000_0000_1111) | ((value & 0b0000_0000_1111_1111) << 4));
+        get => (byte)((value >> 4) & 0b0000_0000_1111_1111);
+        set => this.value = (ushort)((this.value & 0b1111_0000_0000_1111) | ((value & 0b0000_0000_1111_1111) << 4));
     }
 
     public byte z
     {
-        get => (byte)((data >> 12) & 0b0000_0000_0000_1111);
-        set => data = (ushort)((data & 0b0000_1111_1111_1111) | ((value & 0b0000_0000_0000_1111) << 12));
+        get => (byte)((value >> 12) & 0b0000_0000_0000_1111);
+        set => this.value = (ushort)((this.value & 0b0000_1111_1111_1111) | ((value & 0b0000_0000_0000_1111) << 12));
     }
 
     public Vector3bf(byte _x, byte _y, byte _z)
     {
-        data = 0;
+        value = 0;
         x = _x;
         y = _y;
         z = _z;
     }
 
+    public Vector3bf(ushort value)
+    {
+        this.value = value;
+    }
+
     public Vector3bf(string value)
     {
-        data = 0;
+        this.value = 0;
 
         string[] array = value.Split(',');
 
@@ -56,7 +61,7 @@ public struct Vector3bf
 
     public string ToBinaryString()
     {
-        string binaryString = Convert.ToString(data, 2).PadLeft(16, '0');
+        string binaryString = Convert.ToString(value, 2).PadLeft(16, '0');
 
         binaryString = binaryString.Insert(4, "|");
         binaryString = binaryString.Insert(13, "|");
