@@ -11,7 +11,6 @@ using WorldGenerationEngineFinal;
 
 using Random = System.Random;
 using System.IO;
-using System.Numerics;
 
 
 public class PlaneEquation
@@ -813,6 +812,8 @@ public class GraphNode
 
     public int PrefabID => prefab.id;
 
+    public int Radius => 2 * CaveUtils.FastMax(marker.size.x, marker.size.z, marker.size.y);
+
     public GraphNode(Prefab.Marker marker, CavePrefab prefab)
     {
         this.marker = marker;
@@ -878,8 +879,6 @@ public class GraphNode
     public HashSet<Vector3i> GetSphere()
     {
         var center = position;
-        var radius = 2 * CaveUtils.FastMax(marker.size.x, marker.size.z, marker.size.y);
-
         var queue = new HashSet<Vector3i>() { center };
         var visited = new HashSet<Vector3i>();
         var sphere = new HashSet<Vector3i>();
@@ -912,7 +911,7 @@ public class GraphNode
                 if (direction.Vector.z == 0 && (pos.z < markerStart.z || pos.z >= markerEnd.z))
                     continue;
 
-                if (CaveUtils.SqrEuclidianDist(pos, center) >= radius)
+                if (CaveUtils.SqrEuclidianDist(pos, center) >= Radius)
                     continue;
 
                 queue.UnionWith(CaveUtils.GetValidNeighbors(pos));
@@ -920,7 +919,7 @@ public class GraphNode
             }
         }
 
-        Log.Out($"Create node sphere at {prefab.Name}, center={center}, radius={radius}, points={sphere.Count}");
+        Log.Out($"Create node sphere at {prefab.Name}, center={center}, radius={Radius}, points={sphere.Count}");
 
         return sphere;
     }
@@ -1295,6 +1294,20 @@ public static class CaveTunneler
         return visited;
     }
 
+    public static int GetTunnelRadius(int x, int yA, int yB, int xB)
+    {
+        const float pi = 3.14159f;
+        const float factorPi = 2.5f;
+        const float scalePi = 4f;
+        const float factor1 = 20f;
+
+        var scale1 = 2;
+        var linear = yA + x * (yB - yA) / xB;
+        var sinus = linear + factor1 * Math.Sin(scale1 * x * pi / xB) + factorPi * Math.Cos(scalePi * x * pi / xB);
+
+        return CaveUtils.FastMax(4, (int)sinus);
+    }
+
     public static HashSet<Vector3i> ThickenTunnel(List<Vector3i> path, GraphNode start, GraphNode target)
     {
         var caveMap = new HashSet<Vector3i>();
@@ -1302,11 +1315,20 @@ public static class CaveTunneler
         caveMap.UnionWith(start.GetSphere());
         caveMap.UnionWith(target.GetSphere());
 
-        foreach (var position in path)
+        int yA = start.Radius;
+        int yB = target.Radius;
+        int xB = path.Count;
+
+        for (int x = 0; x < path.Count; x++)
         {
-            var circle = GetSphere(position, 6f);
+            var tunnelRadius = GetTunnelRadius(x, yA, yB, xB);
+            var circle = GetSphere(path[x], tunnelRadius);
             caveMap.UnionWith(circle);
+
+            // Log.Out($"{x} {tunnelRadius}");
         }
+
+        // Log.Out($"path size = {path.Count}");
 
         return caveMap;
     }
@@ -1503,6 +1525,78 @@ public class Graph
         Log.Out($"Graph resolved in {CaveUtils.TimeFormat(timer)}, edges={edges.Count}");
 
         return edges; // graph.Edges;
+    }
+
+}
+
+
+public class VectorComparer : IComparer<Vector3i>
+{
+    public int Compare(Vector3i p1, Vector3i p2)
+    {
+        if (p2.x != p1.x)
+            return p1.x - p2.x;
+
+        return p1.z - p2.z;
+    }
+}
+
+
+public class FastNoise1D
+{
+    public static readonly float[] sin = {
+        0.00000f,  0.01745f,  0.03490f,  0.05234f,  0.06976f,  0.08716f,  0.10453f,  0.12187f,  0.13917f,  0.15643f,
+        0.17365f,  0.19081f,  0.20791f,  0.22495f,  0.24192f,  0.25882f,  0.27564f,  0.29237f,  0.30902f,  0.32557f,
+        0.34202f,  0.35837f,  0.37461f,  0.39073f,  0.40674f,  0.42262f,  0.43837f,  0.45399f,  0.46947f,  0.48481f,
+        0.50000f,  0.51504f,  0.52992f,  0.54464f,  0.55919f,  0.57358f,  0.58779f,  0.60182f,  0.61566f,  0.62932f,
+        0.64279f,  0.65606f,  0.66913f,  0.68200f,  0.69466f,  0.70711f,  0.71934f,  0.73135f,  0.74314f,  0.75471f,
+        0.76604f,  0.77715f,  0.78801f,  0.79864f,  0.80902f,  0.81915f,  0.82904f,  0.83867f,  0.84805f,  0.85717f,
+        0.86603f,  0.87462f,  0.88295f,  0.89101f,  0.89879f,  0.90631f,  0.91355f,  0.92050f,  0.92718f,  0.93358f,
+        0.93969f,  0.94552f,  0.95106f,  0.95630f,  0.96126f,  0.96593f,  0.97030f,  0.97437f,  0.97815f,  0.98163f,
+        0.98481f,  0.98769f,  0.99027f,  0.99255f,  0.99452f,  0.99619f,  0.99756f,  0.99863f,  0.99939f,  0.99985f,
+        1.00000f,  0.99985f,  0.99939f,  0.99863f,  0.99756f,  0.99619f,  0.99452f,  0.99255f,  0.99027f,  0.98769f,
+        0.98481f,  0.98163f,  0.97815f,  0.97437f,  0.97030f,  0.96593f,  0.96126f,  0.95630f,  0.95106f,  0.94552f,
+        0.93969f,  0.93358f,  0.92718f,  0.92050f,  0.91355f,  0.90631f,  0.89879f,  0.89101f,  0.88295f,  0.87462f,
+        0.86603f,  0.85717f,  0.84805f,  0.83867f,  0.82904f,  0.81915f,  0.80902f,  0.79864f,  0.78801f,  0.77715f,
+        0.76604f,  0.75471f,  0.74314f,  0.73135f,  0.71934f,  0.70711f,  0.69466f,  0.68200f,  0.66913f,  0.65606f,
+        0.64279f,  0.62932f,  0.61566f,  0.60182f,  0.58779f,  0.57358f,  0.55919f,  0.54464f,  0.52992f,  0.51504f,
+        0.50000f,  0.48481f,  0.46947f,  0.45399f,  0.43837f,  0.42262f,  0.40674f,  0.39073f,  0.37461f,  0.35837f,
+        0.34202f,  0.32557f,  0.30902f,  0.29237f,  0.27564f,  0.25882f,  0.24192f,  0.22495f,  0.20791f,  0.19081f,
+        0.17365f,  0.15643f,  0.13917f,  0.12187f,  0.10453f,  0.08716f,  0.06976f,  0.05234f,  0.03490f,  0.01745f,
+        0.00000f, -0.01745f, -0.03490f, -0.05234f, -0.06976f, -0.08716f, -0.10453f, -0.12187f, -0.13917f, -0.15643f,
+        -0.17365f, -0.19081f, -0.20791f, -0.22495f, -0.24192f, -0.25882f, -0.27564f, -0.29237f, -0.30902f, -0.32557f,
+        -0.34202f, -0.35837f, -0.37461f, -0.39073f, -0.40674f, -0.42262f, -0.43837f, -0.45399f, -0.46947f, -0.48481f,
+        -0.50000f, -0.51504f, -0.52992f, -0.54464f, -0.55919f, -0.57358f, -0.58779f, -0.60182f, -0.61566f, -0.62932f,
+        -0.64279f, -0.65606f, -0.66913f, -0.68200f, -0.69466f, -0.70711f, -0.71934f, -0.73135f, -0.74314f, -0.75471f,
+        -0.76604f, -0.77715f, -0.78801f, -0.79864f, -0.80902f, -0.81915f, -0.82904f, -0.83867f, -0.84805f, -0.85717f,
+        -0.86603f, -0.87462f, -0.88295f, -0.89101f, -0.89879f, -0.90631f, -0.91355f, -0.92050f, -0.92718f, -0.93358f,
+        -0.93969f, -0.94552f, -0.95106f, -0.95630f, -0.96126f, -0.96593f, -0.97030f, -0.97437f, -0.97815f, -0.98163f,
+        -0.98481f, -0.98769f, -0.99027f, -0.99255f, -0.99452f, -0.99619f, -0.99756f, -0.99863f, -0.99939f, -0.99985f,
+        -1.00000f, -0.99985f, -0.99939f, -0.99863f, -0.99756f, -0.99619f, -0.99452f, -0.99255f, -0.99027f, -0.98769f,
+        -0.98481f, -0.98163f, -0.97815f, -0.97437f, -0.97030f, -0.96593f, -0.96126f, -0.95630f, -0.95106f, -0.94552f,
+        -0.93969f, -0.93358f, -0.92718f, -0.92050f, -0.91355f, -0.90631f, -0.89879f, -0.89101f, -0.88295f, -0.87462f,
+        -0.86603f, -0.85717f, -0.84805f, -0.83867f, -0.82904f, -0.81915f, -0.80902f, -0.79864f, -0.78801f, -0.77715f,
+        -0.76604f, -0.75471f, -0.74314f, -0.73135f, -0.71934f, -0.70711f, -0.69466f, -0.68200f, -0.66913f, -0.65606f,
+        -0.64279f, -0.62932f, -0.61566f, -0.60182f, -0.58779f, -0.57358f, -0.55919f, -0.54464f, -0.52992f, -0.51504f,
+        -0.50000f, -0.48481f, -0.46947f, -0.45399f, -0.43837f, -0.42262f, -0.40674f, -0.39073f, -0.37461f, -0.35837f,
+        -0.34202f, -0.32557f, -0.30902f, -0.29237f, -0.27564f, -0.25882f, -0.24192f, -0.22495f, -0.20791f, -0.19081f,
+        -0.17365f, -0.15643f, -0.13917f, -0.12187f, -0.10453f, -0.08716f, -0.06976f, -0.05234f, -0.03490f, -0.01745f,
+    };
+
+    public static readonly int seed = 1337;
+
+    public static readonly float ScaleX = 1.0f;
+
+    public static readonly float ScalePi = 0.33f;
+
+    public const float PI = 3.14159f;
+
+    public double GetNoise(int x)
+    {
+        int scale1 = (int)(ScaleX * (x + seed)) % 360;
+        int scale2 = (int)(ScalePi * PI * (x + seed)) % 360;
+
+        return sin[scale1] * sin[scale2];
     }
 
 }
@@ -1718,16 +1812,3 @@ public static class CaveBuilder
     }
 
 }
-
-
-public class VectorComparer : IComparer<Vector3i>
-{
-    public int Compare(Vector3i p1, Vector3i p2)
-    {
-        if (p2.x != p1.x)
-            return p1.x - p2.x;
-
-        return p1.z - p2.z;
-    }
-}
-

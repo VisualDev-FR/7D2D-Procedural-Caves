@@ -27,3 +27,9 @@
 
 * [Perlin worms](https://www.google.com/search?q=perlin+worms)
 * [Voxel cave](https://www.google.com/search?q=voxel+cave)
+
+
+# Other:
+
+* [1D Perlin noise (topic)](https://stackoverflow.com/questions/8798771/perlin-noise-for-1d)
+* [1D Perlin noise (geogebra)](https://www.geogebra.org/graphing/yzgxvd8q)

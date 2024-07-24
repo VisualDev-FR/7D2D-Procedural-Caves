@@ -12,6 +12,13 @@ Cave generation:
     ☐ Cave generation menu
     ☐ Better procedural width
 
+Editor:
+    ☐ replace selection by terrain / by stone helper
+    ☐ place cave marker from selection
+    ☐ suggest cave tags
+    ☐ check cave markers placement
+    ☐ fill selection with procedural terrain
+
 Misc:
     ☐ live cave map
 

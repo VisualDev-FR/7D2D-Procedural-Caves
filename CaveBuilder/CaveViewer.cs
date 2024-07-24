@@ -444,9 +444,9 @@ public static class CaveViewer
 
     public static void PathCommand(string[] args)
     {
-        CaveBuilder.worldSize = 100;
+        CaveBuilder.worldSize = 200;
         CaveBuilder.radiationZoneMargin = 0;
-        CaveBuilder.SEED = 1634735684;
+        CaveBuilder.SEED = CaveBuilder.rand.Next(); // 1634735684;
 
         if (args.Length > 1)
             CaveBuilder.worldSize = int.Parse(args[1]);
