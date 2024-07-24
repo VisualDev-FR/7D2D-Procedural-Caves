@@ -883,7 +883,9 @@ public class GraphNode
         var queue = new HashSet<Vector3i>() { center };
         var visited = new HashSet<Vector3i>();
         var sphere = new HashSet<Vector3i>();
-        var markerEnd = prefab.position + marker.start + marker.size;
+
+        var markerStart = prefab.position + marker.start;
+        var markerEnd = markerStart + marker.size;
 
         CaveUtils.Assert(!prefab.Intersect3D(center));
 
@@ -901,13 +903,13 @@ public class GraphNode
                 if (prefab.Intersect3D(pos))
                     continue;
 
-                if (pos.y >= markerEnd.y || pos.y < marker.start.y)
+                if (pos.y < markerStart.y || pos.y >= markerEnd.y)
                     continue;
 
-                if (direction.Vector.x == 0 && (pos.x < marker.start.x || pos.x >= markerEnd.x))
+                if (direction.Vector.x == 0 && (pos.x < markerStart.x || pos.x >= markerEnd.x))
                     continue;
 
-                if (direction.Vector.z == 0 && (pos.z < marker.start.z || pos.z >= markerEnd.z))
+                if (direction.Vector.z == 0 && (pos.z < markerStart.z || pos.z >= markerEnd.z))
                     continue;
 
                 if (CaveUtils.SqrEuclidianDist(pos, center) >= radius)

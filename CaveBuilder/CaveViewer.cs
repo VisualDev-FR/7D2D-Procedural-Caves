@@ -446,8 +446,7 @@ public static class CaveViewer
     {
         CaveBuilder.worldSize = 100;
         CaveBuilder.radiationZoneMargin = 0;
-        CaveBuilder.rand = new Random();
-        // CaveBuilder.SEED = 1634735684;
+        CaveBuilder.SEED = 1634735684;
 
         if (args.Length > 1)
             CaveBuilder.worldSize = int.Parse(args[1]);
