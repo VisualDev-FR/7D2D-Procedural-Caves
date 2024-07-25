@@ -4,7 +4,7 @@ using UnityEngine;
 
 
 [HarmonyPatch(typeof(SpawnManagerBiomes), "Update")]
-public class CaveProjectSpawnmanagerBiomes
+public class SpawnManagerBiomes_Update
 {
     // We want to run our cave spawning class right under the main biome spawner.
     public static bool Prefix(SpawnManagerBiomes __instance, string _spawnerName, bool _bSpawnEnemyEntities, object _userData, ref List<Entity> ___spawnNearList, ref int ___lastClassId)

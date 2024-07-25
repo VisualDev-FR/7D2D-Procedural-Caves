@@ -1,11 +1,9 @@
-using System.Collections.Generic;
 using HarmonyLib;
-using UnityEngine;
 
 
 [HarmonyPatch(typeof(DynamicPrefabDecorator), "DecorateChunk")]
 [HarmonyPatch(new[] { typeof(World), typeof(Chunk), typeof(bool) })]
-public class CaveProjectDynamicPrefabDecorator
+public class DynamicPrefabDecorator_DecorateChunk
 {
     public static void Postfix(DynamicPrefabDecorator __instance, Chunk _chunk)
     {
