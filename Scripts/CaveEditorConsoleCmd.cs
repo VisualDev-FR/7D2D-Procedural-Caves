@@ -45,6 +45,12 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
             Mathf.Abs(selectionStart.z - selectionEnd.z) + 1
         );
 
+        if (size.x > 1 && size.z > 1)
+        {
+            Log.Error($"x and z can't be upper to 1");
+            return;
+        }
+
         var startPoint = selection.SelectionMin;
         var start = startPoint - prefabInstance.boundingBoxPosition;
 

@@ -111,7 +111,7 @@ public static class CaveUtils
         return timer;
     }
 
-    public static void Assert(bool condition, string message = "")
+    public static void Assert(bool condition, string message)
     {
         if (!condition)
             throw new Exception($"Assertion error: {message}");
@@ -436,7 +436,7 @@ public class CavePrefab
     {
         nodes = new List<GraphNode>();
 
-        CaveUtils.Assert(prefab.prefab.POIMarkers.Count > 0);
+        CaveUtils.Assert(prefab.prefab.POIMarkers.Count > 0, $"prefab {prefab.prefab.Name} has not cave marker.");
 
         foreach (var marker in prefab.prefab.POIMarkers)
         {
@@ -862,7 +862,7 @@ public class GraphNode
 
     public Vector3i Normal(int distance)
     {
-        CaveUtils.Assert(direction != Direction.None);
+        CaveUtils.Assert(direction != Direction.None, $"Direction sould not be None");
 
         return position + direction.Vector * distance;
     }
@@ -887,7 +887,7 @@ public class GraphNode
         var markerStart = prefab.position + marker.start;
         var markerEnd = markerStart + marker.size;
 
-        CaveUtils.Assert(!prefab.Intersect3D(center), $"Cave marker intersect with prefab {prefab.Name}");
+        CaveUtils.Assert(!prefab.Intersect3D(center), $"Marker {marker.start} intersect with prefab {prefab.Name}");
 
         while (queue.Count > 0)
         {
@@ -1477,7 +1477,7 @@ public class Graph
                 continue;
             }
 
-            CaveUtils.Assert(relatedPrefabEdges.Count == prefabs.Count - 1);
+            CaveUtils.Assert(relatedPrefabEdges.Count == prefabs.Count - 1, "An edge should be connected to all others.");
 
             relatedPrefabEdges.Sort();
 
