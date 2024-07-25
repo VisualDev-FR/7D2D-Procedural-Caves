@@ -93,6 +93,8 @@ public static class CavePlanner
             {
                 return false;
             }
+
+            // TODO: check 3D Intersection between prefab and markers
         }
 
         return true;

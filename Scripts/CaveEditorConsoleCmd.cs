@@ -39,7 +39,6 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
 
         var selectionStart = selection.SelectionStart;
         var selectionEnd = selection.SelectionEnd;
-
         var size = new Vector3i(
             Mathf.Abs(selectionStart.x - selectionEnd.x) + 1,
             Mathf.Abs(selectionStart.y - selectionEnd.y) + 1,
@@ -48,11 +47,6 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
 
         var startPoint = selection.SelectionMin;
         var start = startPoint - prefabInstance.boundingBoxPosition;
-
-        Log.Out($"{prefabInstance.boundingBoxPosition:10}: bbPosition");
-        Log.Out($"{startPoint:10}: StartPoint");
-        Log.Out($"{size:10}: size");
-        Log.Out($"{start:10}: start");
 
         prefabInstance.prefab.AddNewPOIMarker(
             _prefabInstanceName: prefabInstance.name,
@@ -77,6 +71,7 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
         if (_params.Count == 0)
         {
             Log.Out(getDescription());
+            return;
         }
 
         switch (_params[0].ToLower())

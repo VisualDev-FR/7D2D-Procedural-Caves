@@ -887,7 +887,7 @@ public class GraphNode
         var markerStart = prefab.position + marker.start;
         var markerEnd = markerStart + marker.size;
 
-        CaveUtils.Assert(!prefab.Intersect3D(center));
+        CaveUtils.Assert(!prefab.Intersect3D(center), $"Cave marker intersect with prefab {prefab.Name}");
 
         while (queue.Count > 0)
         {
