@@ -81,8 +81,13 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
 
     <!-- Harmony -->
-    <Compile Include="Harmony\Init.cs" />
-    <Compile Include="Harmony\Patches.cs" />
+    <Compile Include="Harmony\ModApi.cs" />
+    <Compile Include="Harmony\H_DynamicPrefabDecorator.cs" />
+    <Compile Include="Harmony\H_GameManager.cs" />
+    <Compile Include="Harmony\H_PrefabManager.cs" />
+    <Compile Include="Harmony\H_SpawnManagerBiomes.cs" />
+    <Compile Include="Harmony\H_TerrainGeneratorWithBiomeResource.cs" />
+    <Compile Include="Harmony\H_WorldBuilder.cs" />
 
     <!-- WorldGen -->
     <Compile Include="Scripts\CavePlanner.cs" />
