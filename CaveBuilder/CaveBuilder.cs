@@ -320,7 +320,7 @@ public class CaveNoise
 
 public class CavePrefab
 {
-    public static FastTags<TagGroup.Poi> tagCaveNode = FastTags<TagGroup.Poi>.Parse("cavenode");
+    public static FastTags<TagGroup.Poi> tagCaveMarker = FastTags<TagGroup.Poi>.Parse("cavenode");
 
     public static FastTags<TagGroup.Poi> tagCaveEntrance = FastTags<TagGroup.Poi>.Parse("entrance");
 
@@ -440,7 +440,7 @@ public class CavePrefab
 
         foreach (var marker in prefab.prefab.POIMarkers)
         {
-            if (!marker.tags.Test_AnySet(tagCaveNode))
+            if (!marker.tags.Test_AnySet(tagCaveMarker))
                 continue;
 
             nodes.Add(new GraphNode(marker, this));

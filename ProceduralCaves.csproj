@@ -90,8 +90,9 @@
     <Compile Include="Harmony\H_WorldBuilder.cs" />
 
     <!-- WorldGen -->
-    <Compile Include="Scripts\CavePlanner.cs" />
+    <Compile Include="Scripts\CaveEditorConsoleCmd.cs" />
     <Compile Include="Scripts\CaveGenerator.cs" />
+    <Compile Include="Scripts\CavePlanner.cs" />
 
     <!-- Cave Builder -->
     <Compile Include="CaveBuilder\FastNoiseLite.cs" />

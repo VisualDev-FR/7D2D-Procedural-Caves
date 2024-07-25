@@ -73,7 +73,7 @@ public static class CavePlanner
     {
         foreach (var marker in prefab.POIMarkers)
         {
-            if (marker.tags.Test_AnySet(CavePrefab.tagCaveNode))
+            if (marker.tags.Test_AnySet(CavePrefab.tagCaveMarker))
             {
                 return true;
             }
