@@ -11,6 +11,7 @@ using WorldGenerationEngineFinal;
 
 using Random = System.Random;
 using System.IO;
+using System.Xml.Schema;
 
 
 public class PlaneEquation
@@ -919,8 +920,6 @@ public class GraphNode
             }
         }
 
-        Log.Out($"Create node sphere at {prefab.Name}, center={center}, radius={Radius}, points={sphere.Count}");
-
         return sphere;
     }
 
@@ -1221,7 +1220,7 @@ public static class CaveTunneler
 
             foreach (Node neighbor in currentNode.GetNeighbors())
             {
-                CaveUtils.Assert(neighbor.position.y >= CaveBuilder.bedRockMargin);
+                CaveUtils.Assert(neighbor.position.y >= CaveBuilder.bedRockMargin, $"{currentNode.position} | {neighbor.position}");
 
                 if (neighbor.position == goalNode.position)
                 {
@@ -1294,18 +1293,49 @@ public static class CaveTunneler
         return visited;
     }
 
-    public static int GetTunnelRadius(int x, int yA, int yB, int xB)
+    public static int GetTunnelRadius_sinusoid(int x, int yA, int yB, int xB)
     {
         const float pi = 3.14159f;
         const float factorPi = 2.5f;
         const float scalePi = 4f;
-        const float factor1 = 20f;
+        const float factor1 = 100f;
 
         var scale1 = 2;
         var linear = yA + x * (yB - yA) / xB;
-        var sinus = linear + factor1 * Math.Sin(scale1 * x * pi / xB) + factorPi * Math.Cos(scalePi * x * pi / xB);
+        var radius = linear + factor1 * Math.Sin(scale1 * x * pi / xB) + factorPi * Math.Cos(scalePi * x * pi / xB);
 
-        return CaveUtils.FastMax(4, (int)sinus);
+        if (radius < 4)
+            return 4;
+
+        if (radius > 20)
+            return 20;
+
+        return (int)radius;
+    }
+
+    public static int GetTunnelRadius_parabolic(int x, int yA, int yB, int xB)
+    {
+        const float mini = 2f;
+
+        float x1 = 0;
+        float x2 = xB;
+        float x3 = xB / 2;
+
+        float y1 = yA;
+        float y2 = yB;
+        float y3 = mini;
+
+
+        float a = ((y1 - y2) * (x3 - x2) - (y2 - y3) * (x2 - x1)) / ((x1 * x1 - x2 * x2) * (x3 - x2) - (x2 * x2 - x3 * x3) * (x2 - x1));
+        float b = (y1 - y2 - a * (x1 * x1 - x2 * x2)) / (x1 - x2);
+        float c = y1 - a * x1 * x1 - b * x1;
+
+        float radius = a * x * x + b * x + c;
+
+        if (radius < mini)
+            return 4;
+
+        return (int)radius;
     }
 
     public static HashSet<Vector3i> ThickenTunnel(List<Vector3i> path, GraphNode start, GraphNode target)
@@ -1321,14 +1351,10 @@ public static class CaveTunneler
 
         for (int x = 0; x < path.Count; x++)
         {
-            var tunnelRadius = GetTunnelRadius(x, yA, yB, xB);
+            var tunnelRadius = GetTunnelRadius_parabolic(x, yA, yB, xB);
             var circle = GetSphere(path[x], tunnelRadius);
             caveMap.UnionWith(circle);
-
-            // Log.Out($"{x} {tunnelRadius}");
         }
-
-        // Log.Out($"path size = {path.Count}");
 
         return caveMap;
     }
@@ -1602,6 +1628,79 @@ public class FastNoise1D
 }
 
 
+public struct CaveBlockPos
+{
+    public Vector2s ChunkPos { get; internal set; }
+
+    public Vector3bf BlockPos { get; internal set; }
+
+    public int x => (16 * ChunkPos.x) + BlockPos.x;
+
+    public int y => BlockPos.y;
+
+    public int z => (16 * ChunkPos.z) + BlockPos.z;
+
+    public CaveBlockPos(Vector3i position)
+    {
+        short chunk_x = (short)(position.x / 16);
+        short chunk_z = (short)(position.z / 16);
+
+        ChunkPos = new Vector2s(chunk_x, chunk_z);
+
+        BlockPos = new Vector3bf(
+            (byte)(position.x % 16),
+            (byte)position.y,
+            (byte)(position.z % 16)
+        );
+    }
+
+    public CaveBlockPos(int x, int y, int z)
+    {
+        short chunk_x = (short)(x / 16);
+        short chunk_z = (short)(z / 16);
+
+        ChunkPos = new Vector2s(chunk_x, chunk_z);
+
+        BlockPos = new Vector3bf(
+            (byte)(x % 16),
+            (byte)y,
+            (byte)(z % 16)
+        );
+    }
+
+    public Vector3i ToVector3i()
+    {
+        return new Vector3i(x, y, z);
+    }
+
+    public override int GetHashCode()
+    {
+        return ChunkPos.GetHashCode() + BlockPos.GetHashCode();
+    }
+
+    public override bool Equals(object obj)
+    {
+        var other = (CaveBlockPos)obj;
+        return this == other;
+    }
+
+    public static bool operator ==(CaveBlockPos p1, CaveBlockPos p2)
+    {
+        return p1.x == p2.x && p1.y == p2.y && p1.z == p2.z;
+    }
+
+    public static bool operator !=(CaveBlockPos p1, CaveBlockPos p2)
+    {
+        return !(p1 == p2);
+    }
+
+    public override string ToString()
+    {
+        return $"{x},{y},{z}";
+    }
+}
+
+
 public static class CaveBuilder
 {
     public static int SEED = 1634735684; // new Random().Next();
@@ -1609,6 +1708,8 @@ public static class CaveBuilder
     public static int worldSize = 2048;
 
     public static int RegionSize = 1024;
+
+    public static int regionGridSize = worldSize / RegionSize;
 
     public static int MIN_PREFAB_SIZE = 8;
 

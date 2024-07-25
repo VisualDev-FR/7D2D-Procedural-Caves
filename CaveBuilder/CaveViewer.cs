@@ -6,7 +6,7 @@ using System.IO;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Collections.Generic;
-using System.Collections.Concurrent;
+using ConcurrentCollections;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
@@ -306,7 +306,7 @@ public static class CaveViewer
         }
     }
 
-    public static void DrawPoints(Bitmap bitmap, HashSet<Vector3i> points, Color color)
+    public static void DrawPoints(Bitmap bitmap, IEnumerable<Vector3i> points, Color color)
     {
         foreach (var point in points)
         {
@@ -446,7 +446,7 @@ public static class CaveViewer
     {
         CaveBuilder.worldSize = 200;
         CaveBuilder.radiationZoneMargin = 0;
-        CaveBuilder.SEED = CaveBuilder.rand.Next(); // 1634735684;
+        CaveBuilder.SEED = CaveBuilder.rand.Next(); // 1634735684; //
 
         if (args.Length > 1)
             CaveBuilder.worldSize = int.Parse(args[1]);
@@ -501,14 +501,7 @@ public static class CaveViewer
             voxels.Add(new Voxell(node.prefab.position + node.marker.start, node.marker.size, WaveFrontMat.Orange) { force = true });
         }
 
-
         GenerateObjFile("path.obj", voxels, true);
-    }
-
-    public static void SaveCaveMap(HashSet<Vector3i> caveMap, string filename)
-    {
-        Log.Out("Exporting CaveMap");
-        CaveBuilder.SaveCaveMap(filename, caveMap);
     }
 
     public static void test_prefabGrouping()
@@ -527,7 +520,7 @@ public static class CaveViewer
         var timer = new Stopwatch();
         timer.Start();
 
-        CaveBuilder.worldSize = 6144;
+        CaveBuilder.worldSize = 2048;
 
         if (args.Length > 1)
             CaveBuilder.worldSize = int.Parse(args[1]);
@@ -538,7 +531,7 @@ public static class CaveViewer
 
         List<Edge> edges = Graph.Resolve(cachedPrefabs.Prefabs);
 
-        var wiredCaveMap = new ConcurrentBag<Vector3i>();
+        var wiredCaveMap = new ConcurrentHashSet<Vector3i>();
         int index = 0;
 
         Parallel.ForEach(edges, edge =>
@@ -546,7 +539,7 @@ public static class CaveViewer
             var p1 = edge.node1;
             var p2 = edge.node2;
 
-            Log.Out($"Cave tunneling: {100.0f * ++index / edges.Count:F0}% ({index} / {edges.Count})");
+            Log.Out($"Cave tunneling: {100.0f * ++index / edges.Count:F0}% ({index} / {edges.Count}) {wiredCaveMap.Count:N0}");
 
             var path = CaveTunneler.FindPath(p1, p2, cachedPrefabs);
             var cave = CaveTunneler.ThickenTunnel(path, p1, p2);
@@ -557,9 +550,7 @@ public static class CaveViewer
             }
         });
 
-        var caveMap = wiredCaveMap.ToHashSet(); // CaveTunneler.ThickenCaveMap(wiredCaveMap.ToHashSet());
-
-        SaveCaveMap(caveMap, "cavemap.txt");
+        var caveMap = wiredCaveMap.ToArray(); // CaveTunneler.ThickenCaveMap(wiredCaveMap.ToHashSet());
 
         Log.Out("Start caves drawing");
 
@@ -578,8 +569,12 @@ public static class CaveViewer
             b.Save(@"cave.png", ImageFormat.Png);
         }
 
-        Console.WriteLine($"{caveMap.Count:N0} cave blocks generated, timer={CaveUtils.TimeFormat(timer)}.");
+        Console.WriteLine($"{caveMap.Length:N0} cave blocks generated, timer={CaveUtils.TimeFormat(timer)}.");
+    }
 
+    public static void CaveMapToWaveFront()
+    {
+        throw new NotImplementedException();
         // var voxels = (
         //     from block in caveMap
         //     select new Voxell(block, WaveFrontMat.DarkRed)

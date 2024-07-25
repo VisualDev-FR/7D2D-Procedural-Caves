@@ -35,4 +35,29 @@ public class GraphNodeTests
         Assert.IsTrue(dir1 == dir2);
         Assert.AreEqual(dir1, dir2);
     }
+
+    [TestMethod]
+    public void Test_CaveBlockPosNeighbors()
+    {
+        var block = new CaveBlockPos(10, 10, 10);
+
+        foreach (var pos in CaveUtils.GetValidNeighbors(block.ToVector3i()))
+        {
+            Assert.IsTrue(pos.x == 9 || pos.x == 11 || pos.x == 10, $"{pos}");
+            Assert.IsTrue(pos.y == 9 || pos.y == 11 || pos.y == 10, $"{pos}");
+            Assert.IsTrue(pos.z == 9 || pos.z == 11 || pos.z == 10, $"{pos}");
+        }
+    }
+
+    [TestMethod]
+    public void Test_CaveBlockPosEquals()
+    {
+        var p1 = new CaveBlockPos(0, 1, 2);
+        var p2 = new CaveBlockPos(0, 1, 2);
+        Assert.AreEqual(p1, p2, $"{p1} | {p2}");
+
+        p1 = new CaveBlockPos(0, 1, 2);
+        p2 = new CaveBlockPos(0, 2, 2);
+        Assert.AreNotEqual(p1, p2, $"{p1.BlockPos}({p1.BlockPos.GetHashCode()}) | {p2.BlockPos}({p2.BlockPos.GetHashCode()})");
+    }
 }
