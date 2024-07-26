@@ -19,9 +19,9 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
                 * <empty>: set all water blocks of the selection to air.
                 * <fill>: set all air blocks of the selection to water.
             - selectall, sa: add all the prefab volume to the selection box.
+            - room: create an empty room of selected item in the selection box.
 
             Incoming:
-            - room: create an empty room of stone terrain in the selection box.
             - save: special save method which will store all air blocks as caveAir blocks.
             - check: create a report of the requirements for getting a valid cave prefab.
             - tags <type>: Add the required tags to get a valid cave prefab. Type is optional an accept the following keywords:
@@ -203,6 +203,86 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
         selection.SelectionActive = true;
     }
 
+    private void RoomCommand()
+    {
+        var selection = BlockToolSelection.Instance;
+        var isActive = selection.SelectionActive;
+
+        if (!isActive)
+        {
+            Log.Error("The selection is empty.");
+            return;
+        }
+
+        EntityPlayerLocal primaryPlayer = GameManager.Instance.World.GetPrimaryPlayer();
+        ItemValue holdingItemItemValue = primaryPlayer.inventory.holdingItemItemValue;
+        BlockValue blockValue = holdingItemItemValue.ToBlockValue();
+
+        if (blockValue.isair)
+        {
+            Log.Error($"Invalid selected item: '{holdingItemItemValue.ItemClass.Name}'");
+            return;
+        }
+
+        Block block = blockValue.Block;
+        BlockPlacement.Result _bpResult = new BlockPlacement.Result(0, Vector3.zero, Vector3i.zero, blockValue);
+        block.OnBlockPlaceBefore(GameManager.Instance.World, ref _bpResult, primaryPlayer, GameManager.Instance.World.GetGameRandom());
+        blockValue = _bpResult.blockValue;
+
+        List<BlockChangeInfo> list = new List<BlockChangeInfo>();
+
+        var _gm = GameManager.Instance;
+        var _density = blockValue.Block.shape.IsTerrain() ? MarchingCubes.DensityTerrain : MarchingCubes.DensityAir;
+        var _textureFull = holdingItemItemValue.Texture;
+
+        var start = selection.m_selectionStartPoint;
+        var end = selection.m_SelectionEndPoint;
+
+        if (start.y < 0 || end.y < 0)
+        {
+            Log.Error("Start position height must be over 0.");
+            return;
+        }
+
+        int y = start.y;
+        while (true)
+        {
+            int x = start.x;
+            while (true)
+            {
+                int z = start.z;
+                while (true)
+                {
+                    var position = new Vector3i(x, y, z);
+
+                    BlockChangeInfo blockChangeInfo = new BlockChangeInfo(position, blockValue, _density)
+                    {
+                        textureFull = _textureFull,
+                        bChangeTexture = true
+                    };
+
+                    bool bound_x = x == start.x || x == end.x;
+                    bool bound_y = y == start.y || y == end.y;
+                    bool bound_z = z == start.z || z == end.z;
+
+                    if (bound_x || bound_y || bound_z)
+                    {
+                        list.Add(blockChangeInfo);
+                    }
+
+                    if (z == end.z) break;
+                    z += Math.Sign(end.z - start.z);
+                }
+                if (x == end.x) break;
+                x += Math.Sign(end.x - start.x);
+            }
+            if (y == end.y) break;
+            y += Math.Sign(end.y - start.y);
+        }
+
+        _gm.SetBlocksRPC(list);
+    }
+
     private void NotImplementedCommand(string commandName)
     {
         Log.Error($"Not implemented command: '{commandName}'");
@@ -277,7 +357,7 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
                 break;
 
             case "room":
-                NotImplementedCommand(command);
+                RoomCommand();
                 break;
 
             case "extend":
