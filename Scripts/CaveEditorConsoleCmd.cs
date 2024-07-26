@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -26,6 +27,7 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
             - stalactite <height>: Creates a procedural stalactite of the specified height at the start position of the selection.
             - extend <x> <y> <z>: extend the selection of x blocks in the x direction, etc ...
             - selectall, sa: add all the prefab volume to the selection.
+            - removewater, rw: set all water blocks of the selection to block air.
         ";
     }
 
@@ -34,7 +36,46 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
         return getDescription();
     }
 
-    private void AddCaveMarkerToSelection()
+    private static void CubeRPC(GameManager _gm, int _clrIdx, Vector3i start, Vector3i end, BlockValue _blockValue, sbyte _density, int _Fillmode, long _textureFull = 0L)
+    /* copied and refactored from BlockTools.CubeRPC */
+    {
+        List<BlockChangeInfo> list = new List<BlockChangeInfo>();
+
+        int y = start.y;
+        while (true)
+        {
+            int x = start.x;
+            while (true)
+            {
+                int z = start.z;
+                while (true)
+                {
+                    var position = new Vector3i(x, y, z);
+                    var block = _gm.World.GetBlock(position);
+
+                    BlockChangeInfo blockChangeInfo = new BlockChangeInfo(position, _blockValue, _density)
+                    {
+                        textureFull = _textureFull,
+                        bChangeTexture = true
+                    };
+
+                    if (block.Block.shape.IsTerrain())
+                        list.Add(blockChangeInfo);
+
+                    if (z == end.z) break;
+                    z += Math.Sign(end.z - start.z);
+                }
+                if (x == end.x) break;
+                x += Math.Sign(end.x - start.x);
+            }
+            if (y == end.y) break;
+            y += Math.Sign(end.y - start.y);
+        }
+
+        _gm.SetBlocksRPC(list);
+    }
+
+    private void CaveMarkerCommand()
     {
         var selection = BlockToolSelection.Instance;
         var isActive = selection.SelectionActive;
@@ -85,9 +126,30 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
         SelectionBoxManager.Instance.Deactivate();
     }
 
-    private void ReplaceTerrainWithSelectedItem()
+    private void ReplaceTerrainCommand()
     {
-        Log.Error("Not Implemented.");
+        var selection = BlockToolSelection.Instance;
+
+        var SelectionClrIdx = selection.SelectionClrIdx;
+        var m_selectionStartPoint = selection.m_selectionStartPoint;
+        var m_SelectionEndPoint = selection.m_SelectionEndPoint;
+
+        EntityPlayerLocal primaryPlayer = GameManager.Instance.World.GetPrimaryPlayer();
+        ItemValue holdingItemItemValue = primaryPlayer.inventory.holdingItemItemValue;
+        BlockValue blockValue = holdingItemItemValue.ToBlockValue();
+
+        if (blockValue.isair)
+        {
+            Log.Error($"Invalid filler block: '{holdingItemItemValue.ItemClass.Name}'");
+            return;
+        }
+
+        Block block = blockValue.Block;
+        BlockPlacement.Result _bpResult = new BlockPlacement.Result(0, Vector3.zero, Vector3i.zero, blockValue);
+        block.OnBlockPlaceBefore(GameManager.Instance.World, ref _bpResult, primaryPlayer, GameManager.Instance.World.GetGameRandom());
+        blockValue = _bpResult.blockValue;
+        blockValue.rotation = (primaryPlayer.inventory.holdingItemData is ItemClassBlock.ItemBlockInventoryData) ? ((ItemClassBlock.ItemBlockInventoryData)primaryPlayer.inventory.holdingItemData).rotation : blockValue.rotation;
+        CubeRPC(GameManager.Instance, SelectionClrIdx, m_selectionStartPoint, m_SelectionEndPoint, blockValue, blockValue.Block.shape.IsTerrain() ? MarchingCubes.DensityTerrain : MarchingCubes.DensityAir, 0, holdingItemItemValue.Texture);
     }
 
     private void NotImplementedCommand(string commandName)
@@ -117,13 +179,13 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
             case "mark":
             case "cavemarker":
             case "cm":
-                AddCaveMarkerToSelection();
+                CaveMarkerCommand();
                 break;
 
             case "replace":
             case "replaceterrain":
             case "rt":
-                ReplaceTerrainWithSelectedItem();
+                ReplaceTerrainCommand();
                 break;
 
             case "save":
@@ -169,6 +231,11 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
 
             case "selectall":
             case "sa":
+                NotImplementedCommand(command);
+                break;
+
+            case "removewater":
+            case "rw":
                 NotImplementedCommand(command);
                 break;
 
