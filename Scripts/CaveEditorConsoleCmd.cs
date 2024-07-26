@@ -18,10 +18,10 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
             - setwater, sw:
                 * <empty>: set all water blocks of the selection to air.
                 * <fill>: set all air blocks of the selection to water.
+            - selectall, sa: add all the prefab volume to the selection box.
 
             Incoming:
-            - selectall, sa: add all the prefab volume to the selection.
-            - fillwater: auto fill terrain with water, with selection as start.
+            - room: create an empty room of stone terrain in the selection box.
             - save: special save method which will store all air blocks as caveAir blocks.
             - check: create a report of the requirements for getting a valid cave prefab.
             - tags <type>: Add the required tags to get a valid cave prefab. Type is optional an accept the following keywords:
@@ -32,6 +32,7 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
             - tunnel <marker1> <marker2>: Create a tunnel between two specified cave markers.
             - stalactite <height>: Creates a procedural stalactite of the specified height at the start position of the selection.
             - extend <x> <y> <z>: extend the selection of x blocks in the x direction, etc ...
+            - fillwater: auto fill terrain with water, with selection as start.
         ";
     }
 
@@ -40,7 +41,7 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
         return getDescription();
     }
 
-    private static IEnumerable<Vector3i> GetSelectionPositions()
+    private static IEnumerable<Vector3i> BrowseSelectionPositions()
     {
         var selection = BlockToolSelection.Instance;
 
@@ -145,7 +146,7 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
         var _density = blockValue.Block.shape.IsTerrain() ? MarchingCubes.DensityTerrain : MarchingCubes.DensityAir;
         var _textureFull = holdingItemItemValue.Texture;
 
-        foreach (var position in GetSelectionPositions())
+        foreach (var position in BrowseSelectionPositions())
         {
             var worldBlock = _gm.World.GetBlock(position);
 
@@ -175,7 +176,7 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
         var _gm = GameManager.Instance;
         var waterValue = args[1].ToLower() == "fill" ? WaterValue.Full : WaterValue.Empty;
 
-        foreach (var position in GetSelectionPositions())
+        foreach (var position in BrowseSelectionPositions())
         {
             var worldBlock = _gm.World.GetBlock(position);
 
@@ -186,6 +187,20 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
         }
 
         _gm.SetWaterRPC(package);
+    }
+
+    private void SelectAllCommand()
+    {
+        var selection = BlockToolSelection.Instance;
+        var prefabInstanceId = PrefabEditModeManager.Instance.prefabInstanceId;
+        var prefabInstance = PrefabSleeperVolumeManager.Instance.GetPrefabInstance(prefabInstanceId);
+
+        var bbPos = prefabInstance.boundingBoxPosition;
+        var bbSize = prefabInstance.boundingBoxSize;
+
+        selection.SelectionStart = bbPos;
+        selection.SelectionEnd = bbPos + bbSize - Vector3i.one;
+        selection.SelectionActive = true;
     }
 
     private void NotImplementedCommand(string commandName)
@@ -261,13 +276,17 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
                 NotImplementedCommand(command);
                 break;
 
+            case "room":
+                NotImplementedCommand(command);
+                break;
+
             case "extend":
                 NotImplementedCommand(command);
                 break;
 
             case "selectall":
             case "sa":
-                NotImplementedCommand(command);
+                SelectAllCommand();
                 break;
 
             case "setwater":
