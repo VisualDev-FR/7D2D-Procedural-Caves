@@ -15,23 +15,24 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
         return @"Cave prefab editor helpers:
             - marker: Add a cave marker into the selection.
             - replaceterrain, rt: Replace all terrain blocks in the selection with the selected item.
-            - setwater, sw:
-                * <empty>: set all water blocks of the selection to air.
-                * <fill>: set all air blocks of the selection to water.
             - selectall, sa: add all the prefab volume to the selection box.
             - room: create an empty room of selected item in the selection box.
+            - setwater, sw [mode]:
+                * 'empty': set all water blocks of the selection to air.
+                * 'fill': set all air blocks of the selection to water.
 
             Incoming:
+            - create [name]: creates a new prefab and tag it with the required informations for the cave system
             - save: special save method which will store all air blocks as caveAir blocks.
             - check: create a report of the requirements for getting a valid cave prefab.
-            - tags <type>: Add the required tags to get a valid cave prefab. Type is optional an accept the following keywords:
-                * entrance -> the prefab is a cave entrance
-                * underwater -> the prefab is an underwater entrance
-            - procfill: Create a procedural cave volume into the selection (min selection size = 20x20x20).
+            - tags [type]: Add the required tags to get a valid cave prefab. Type is optional an accept the following keywords:
+                * 'entrance' -> the prefab is a cave entrance
+                * 'underwater' -> the prefab is an underwater entrance
+            - bubble: Create a procedural volume into the selection box (min selection size = 10x10x10).
             - decorate: Decorate terrain with items specfied in config files.
-            - tunnel <marker1> <marker2>: Create a tunnel between two specified cave markers.
-            - stalactite <height>: Creates a procedural stalactite of the specified height at the start position of the selection.
-            - extend <x> <y> <z>: extend the selection of x blocks in the x direction, etc ...
+            - tunnel [marker1] [marker2]: Create a tunnel between two specified cave markers.
+            - stalactite [height] Creates a procedural stalactite of the specified height at the start position of the selection.
+            - extend [x] [y] [z]: extend the selection of x blocks in the x direction, etc ...
             - fillwater: auto fill terrain with water, with selection as start.
         ";
     }
