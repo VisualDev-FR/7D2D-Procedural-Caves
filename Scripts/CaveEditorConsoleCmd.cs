@@ -29,6 +29,11 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
         ";
     }
 
+    public override string getHelp()
+    {
+        return getDescription();
+    }
+
     private void AddCaveMarkerToSelection()
     {
         var selection = BlockToolSelection.Instance;
@@ -83,11 +88,6 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
         Log.Error("Not Implemented.");
     }
 
-    public override string GetHelp()
-    {
-        return getDescription();
-    }
-
     public override void Execute(List<string> _params, CommandSenderInfo _senderInfo)
     {
         if (!PrefabEditModeManager.Instance.IsActive())
@@ -115,6 +115,38 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
             case "replaceterrain":
             case "rt":
                 ReplaceTerrainWithSelectedItem();
+                break;
+
+            case "save":
+                break;
+
+            case "check":
+                break;
+
+            case "tag":
+            case "tags":
+                break;
+
+            case "procfill":
+                break;
+
+            case "water":
+            case "fillwater":
+            case "waterfill":
+                break;
+
+            case "decorate":
+                break;
+
+            case "tunnel":
+                break;
+
+            case "stalactite":
+            case "stalagmite":
+            case "stal":
+                break;
+
+            case "extend":
                 break;
 
             default:

@@ -1,12 +1,10 @@
 @echo off
 
-set NAME=ProceduralCaves
-
-call "%~dp0\compile.cmd"
+call "%~dp0\compile.cmd" %1
 
 if ERRORLEVEL 1 exit /b 1
 
-set MOD_PATH="%PATH_7D2D%\Mods\%NAME%"
+set MOD_PATH="%PATH_7D2D%\Mods\%MOD_NAME%"
 
 if exist %MOD_PATH% RMDIR /s /q %MOD_PATH%
 
@@ -15,7 +13,7 @@ xcopy Config\cavePrefabs.xml "%PATH_7D2D%\Data\Worlds\Navezgane\" >nul 2>&1
 
 cd %MOD_PATH%\..
 
-7z.exe x "%~dp0..\%NAME%.zip" > nul
+7z.exe x "%~dp0..\%ZIP_NAME%.zip" > nul
 
 taskkill /IM 7DaysToDie.exe /F >nul 2>&1
 
