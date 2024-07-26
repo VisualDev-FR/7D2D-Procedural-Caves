@@ -8,9 +8,6 @@ set MOD_PATH="%PATH_7D2D%\Mods\%MOD_NAME%"
 
 if exist %MOD_PATH% RMDIR /s /q %MOD_PATH%
 
-DEL "%PATH_7D2D%\Data\Worlds\Navezgane\cavePrefabs.xml" >nul 2>&1
-xcopy Config\cavePrefabs.xml "%PATH_7D2D%\Data\Worlds\Navezgane\" >nul 2>&1
-
 cd %MOD_PATH%\..
 
 7z.exe x "%~dp0..\%ZIP_NAME%.zip" > nul
@@ -21,9 +18,9 @@ cd "%PATH_7D2D%"
 
 start "" "%PATH_7D2D%\7DaysToDie" -noeac
 
-del /Q "%APPDATA%\7DaysToDie\Saves\Navezgane\Caves\Region"
-del /Q "%APPDATA%\7DaysToDie\Saves\Old Honihebu County\Caves\Region"
-del /Q "%APPDATA%\7DaysToDie\Saves\Old Honihebu County\Entrances\Region"
+del /Q "%APPDATA%\7DaysToDie\Saves\Navezgane\Caves\Region" >nul 2>&1
+del /Q "%APPDATA%\7DaysToDie\Saves\Old Honihebu County\Caves\Region" >nul 2>&1
+del /Q "%APPDATA%\7DaysToDie\Saves\Old Honihebu County\Entrances\Region" >nul 2>&1
 
 @REM RMDIR "%APPDATA%\7DaysToDie\GeneratedWorlds\Old Honihebu County" /s /q
 

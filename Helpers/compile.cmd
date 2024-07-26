@@ -20,11 +20,9 @@ echo %ZIP_NAME% >> ".\%MOD_NAME%\version.txt"
 
 xcopy ProceduralCaves.dll %MOD_NAME%\ > nul
 xcopy ProceduralCaves.pdb %MOD_NAME%\ > nul
+xcopy Helpers\installer.cmd %MOD_NAME%\ > nul
 xcopy README.md %MOD_NAME%\ > nul
-xcopy Caves %MOD_NAME%\Caves\ /s > nul
 xcopy Config %MOD_NAME%\Config\ /s > nul
-xcopy Prefabs %MOD_NAME%\Prefabs\ /s > nul
-xcopy version.txt %MOD_NAME%\ > nul
 xcopy ModInfo.xml %MOD_NAME%\ > nul
 
 7z.exe a "%ZIP_NAME%.zip" %MOD_NAME% > nul
