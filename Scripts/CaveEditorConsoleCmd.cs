@@ -15,19 +15,23 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
         return @"Cave prefab editor helpers:
             - marker: Add a cave marker into the selection.
             - replaceterrain, rt: Replace all terrain blocks in the selection with the selected item.
+            - setwater, sw:
+                * <empty>: set all water blocks of the selection to air.
+                * <fill>: set all air blocks of the selection to water.
+
+            Incoming:
+            - selectall, sa: add all the prefab volume to the selection.
+            - fillwater: auto fill terrain with water, with selection as start.
             - save: special save method which will store all air blocks as caveAir blocks.
             - check: create a report of the requirements for getting a valid cave prefab.
             - tags <type>: Add the required tags to get a valid cave prefab. Type is optional an accept the following keywords:
                 * entrance -> the prefab is a cave entrance
                 * underwater -> the prefab is an underwater entrance
             - procfill: Create a procedural cave volume into the selection (min selection size = 20x20x20).
-            - water: auto fill terrain with water, with selection as start.
             - decorate: Decorate terrain with items specfied in config files.
             - tunnel <marker1> <marker2>: Create a tunnel between two specified cave markers.
             - stalactite <height>: Creates a procedural stalactite of the specified height at the start position of the selection.
             - extend <x> <y> <z>: extend the selection of x blocks in the x direction, etc ...
-            - selectall, sa: add all the prefab volume to the selection.
-            - removewater, rw: set all water blocks of the selection to block air.
         ";
     }
 
@@ -36,10 +40,12 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
         return getDescription();
     }
 
-    private static void CubeRPC(GameManager _gm, int _clrIdx, Vector3i start, Vector3i end, BlockValue _blockValue, sbyte _density, int _Fillmode, long _textureFull = 0L)
-    /* copied and refactored from BlockTools.CubeRPC */
+    private static IEnumerable<Vector3i> GetSelectionPositions()
     {
-        List<BlockChangeInfo> list = new List<BlockChangeInfo>();
+        var selection = BlockToolSelection.Instance;
+
+        var start = selection.m_selectionStartPoint;
+        var end = selection.m_SelectionEndPoint;
 
         int y = start.y;
         while (true)
@@ -50,17 +56,7 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
                 int z = start.z;
                 while (true)
                 {
-                    var position = new Vector3i(x, y, z);
-                    var block = _gm.World.GetBlock(position);
-
-                    BlockChangeInfo blockChangeInfo = new BlockChangeInfo(position, _blockValue, _density)
-                    {
-                        textureFull = _textureFull,
-                        bChangeTexture = true
-                    };
-
-                    if (block.Block.shape.IsTerrain())
-                        list.Add(blockChangeInfo);
+                    yield return new Vector3i(x, y, z);
 
                     if (z == end.z) break;
                     z += Math.Sign(end.z - start.z);
@@ -72,7 +68,7 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
             y += Math.Sign(end.y - start.y);
         }
 
-        _gm.SetBlocksRPC(list);
+        yield break;
     }
 
     private void CaveMarkerCommand()
@@ -128,12 +124,6 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
 
     private void ReplaceTerrainCommand()
     {
-        var selection = BlockToolSelection.Instance;
-
-        var SelectionClrIdx = selection.SelectionClrIdx;
-        var m_selectionStartPoint = selection.m_selectionStartPoint;
-        var m_SelectionEndPoint = selection.m_SelectionEndPoint;
-
         EntityPlayerLocal primaryPlayer = GameManager.Instance.World.GetPrimaryPlayer();
         ItemValue holdingItemItemValue = primaryPlayer.inventory.holdingItemItemValue;
         BlockValue blockValue = holdingItemItemValue.ToBlockValue();
@@ -148,8 +138,54 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
         BlockPlacement.Result _bpResult = new BlockPlacement.Result(0, Vector3.zero, Vector3i.zero, blockValue);
         block.OnBlockPlaceBefore(GameManager.Instance.World, ref _bpResult, primaryPlayer, GameManager.Instance.World.GetGameRandom());
         blockValue = _bpResult.blockValue;
-        blockValue.rotation = (primaryPlayer.inventory.holdingItemData is ItemClassBlock.ItemBlockInventoryData) ? ((ItemClassBlock.ItemBlockInventoryData)primaryPlayer.inventory.holdingItemData).rotation : blockValue.rotation;
-        CubeRPC(GameManager.Instance, SelectionClrIdx, m_selectionStartPoint, m_SelectionEndPoint, blockValue, blockValue.Block.shape.IsTerrain() ? MarchingCubes.DensityTerrain : MarchingCubes.DensityAir, 0, holdingItemItemValue.Texture);
+
+        List<BlockChangeInfo> list = new List<BlockChangeInfo>();
+
+        var _gm = GameManager.Instance;
+        var _density = blockValue.Block.shape.IsTerrain() ? MarchingCubes.DensityTerrain : MarchingCubes.DensityAir;
+        var _textureFull = holdingItemItemValue.Texture;
+
+        foreach (var position in GetSelectionPositions())
+        {
+            var worldBlock = _gm.World.GetBlock(position);
+
+            BlockChangeInfo blockChangeInfo = new BlockChangeInfo(position, blockValue, _density)
+            {
+                textureFull = _textureFull,
+                bChangeTexture = true
+            };
+
+            if (worldBlock.Block.shape.IsTerrain())
+                list.Add(blockChangeInfo);
+        }
+
+        _gm.SetBlocksRPC(list);
+    }
+
+    private void SetWaterCommand(List<string> args)
+    {
+        if (args.Count < 2)
+        {
+            Log.Error("Missing argument: 'fill' or 'empty'");
+            return;
+        }
+
+        NetPackageWaterSet package = NetPackageManager.GetPackage<NetPackageWaterSet>();
+
+        var _gm = GameManager.Instance;
+        var waterValue = args[1].ToLower() == "fill" ? WaterValue.Full : WaterValue.Empty;
+
+        foreach (var position in GetSelectionPositions())
+        {
+            var worldBlock = _gm.World.GetBlock(position);
+
+            if (WaterUtils.CanWaterFlowThrough(worldBlock))
+            {
+                package.AddChange(position, waterValue);
+            }
+        }
+
+        _gm.SetWaterRPC(package);
     }
 
     private void NotImplementedCommand(string commandName)
@@ -234,9 +270,9 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
                 NotImplementedCommand(command);
                 break;
 
-            case "removewater":
-            case "rw":
-                NotImplementedCommand(command);
+            case "setwater":
+            case "sw":
+                SetWaterCommand(_params);
                 break;
 
             default:
