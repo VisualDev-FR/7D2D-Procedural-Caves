@@ -85,6 +85,7 @@
 
     <!-- WorldGen -->
     <Compile Include="Scripts\CaveEditorConsoleCmd.cs" />
+    <Compile Include="Scripts\StalactiteGenerator.cs" />
 
     <!-- Cave Builder -->
     <Compile Include="CaveBuilder\FastNoiseLite.cs" />

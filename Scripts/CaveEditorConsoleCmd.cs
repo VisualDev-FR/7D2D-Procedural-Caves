@@ -18,22 +18,20 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
             - replaceterrain, rt: Replace all terrain blocks in the selection with the selected item.
             - selectall, sa: add all the prefab volume to the selection box.
             - room: create an empty room of selected item in the selection box.
+            - stalactite [height] Creates a procedural stalactite of the specified height at the start position of the selection box.
             - setwater, sw [mode]:
                 * 'empty': set all water blocks of the selection to air.
                 * 'fill': set all air blocks of the selection to water.
-
-            Incoming:
-            - save: special save method.
-            - test: run a testing session with tunneling around the markers
             - tags [type]: Add the required tags to get a valid cave prefab. Type is optional an accept the following keywords:
                 * 'entrance' -> the prefab is a cave entrance
-                * 'underwater' -> the prefab is an underwater entrance
+
+            Incoming:
+            - test: run a testing session with tunneling around the markers
             - invert: show negative view of the terrain
             - check: create a report of the requirements for getting a valid cave prefab.
-            - bubble: Create a procedural volume into the selection box (min selection size = 10x10x10).
+            - procedural, proc [type]: Create a procedural volume into the selection box (min selection size = 10x10x10).
             - decorate: Decorate terrain with items specfied in config files.
             - tunnel [marker1] [marker2]: Create a tunnel between two specified cave markers.
-            - stalactite [height] Creates a procedural stalactite of the specified height at the start position of the selection.
             - extend [x] [y] [z]: extend the selection of x blocks in the x direction, etc ...
         ";
     }
@@ -43,7 +41,7 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
         return getDescription();
     }
 
-    private static IEnumerable<Vector3i> BrowseSelectionPositions()
+    public static IEnumerable<Vector3i> BrowseSelectionPositions()
     {
         var selection = BlockToolSelection.Instance;
 
@@ -74,17 +72,25 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
         yield break;
     }
 
-    private static PrefabInstance GetCurrentPrefab()
+    public static PrefabInstance GetCurrentPrefab()
     {
         var prefabInstanceId = PrefabEditModeManager.Instance.prefabInstanceId;
         return PrefabSleeperVolumeManager.Instance.GetPrefabInstance(prefabInstanceId);
     }
 
-    private static BlockValue GetSelectedItem()
+    public static BlockValue? GetSelectedItem(bool allowAir = false)
     {
         EntityPlayerLocal primaryPlayer = GameManager.Instance.World.GetPrimaryPlayer();
         ItemValue holdingItemItemValue = primaryPlayer.inventory.holdingItemItemValue;
-        return holdingItemItemValue.ToBlockValue();
+        BlockValue blockValue = holdingItemItemValue.ToBlockValue();
+
+        if (blockValue.isair && !allowAir)
+        {
+            Log.Error($"Invalid selected item: '{holdingItemItemValue.ItemClass.Name}'");
+            return null;
+        }
+
+        return blockValue;
     }
 
     private void CaveMarkerCommand()
@@ -339,6 +345,34 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
         Log.Out($"cave prefab tag success: '{prefabInstance.prefab.tags}'");
     }
 
+    private void StalactiteCommand(List<string> args)
+    {
+        var selection = BlockToolSelection.Instance;
+        var start = selection.SelectionStart;
+
+        if (!selection.SelectionActive)
+        {
+            Log.Error("Selection box is empty");
+            return;
+        }
+
+        if (args.Count == 1)
+        {
+            StalactiteGenerator.Generate(start);
+        }
+        else if (int.TryParse(args[1], out var height))
+        {
+            StalactiteGenerator.Generate(start, height);
+        }
+        else
+        {
+            Log.Error($"Invalid height: '{args[1]}'");
+            return;
+        }
+
+        // SelectionBoxManager.Instance.Deactivate();
+    }
+
     private void NotImplementedCommand(string commandName)
     {
         Log.Error($"Not implemented command: '{commandName}'");
@@ -405,7 +439,7 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
             case "stalactite":
             case "stalagmite":
             case "stal":
-                NotImplementedCommand(command);
+                StalactiteCommand(_params);
                 break;
 
             case "room":
