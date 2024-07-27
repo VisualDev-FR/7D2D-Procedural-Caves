@@ -15,13 +15,16 @@ public static class StalactiteGenerator
 
     public static void Generate(Vector3i start, int height)
     {
+        if (height == 0)
+            return;
+
         var end = new Vector3i(start.x, start.y + height, start.z);
 
-        BlockValue? blockValue = CaveEditorConsoleCmd.GetSelectedItem(allowAir: false);
+        BlockValue? selectedBlock = CaveEditorConsoleCmd.GetSelectedBlock(allowAir: false);
 
-        if (blockValue.HasValue)
+        if (selectedBlock.HasValue)
         {
-            Generate(start, end, blockValue.Value);
+            Generate(start, end, selectedBlock.Value);
         }
     }
 
@@ -37,7 +40,6 @@ public static class StalactiteGenerator
         List<BlockChangeInfo> list = new List<BlockChangeInfo>();
 
         int _density = -128;
-        int totalHeight = (int)Utils.FastAbs(end.y - start.y);
 
         for (int y = start.y; y != end.y; y += Math.Sign(end.y - start.y))
         {

@@ -26,6 +26,7 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
                 * 'entrance' -> the prefab is a cave entrance
 
             Incoming:
+            - replaceground, rg: replace all terrain blocks inside the selection box, which have air above them with the selected item.
             - test: run a testing session with tunneling around the markers
             - invert: show negative view of the terrain
             - check: create a report of the requirements for getting a valid cave prefab.
@@ -78,7 +79,7 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
         return PrefabSleeperVolumeManager.Instance.GetPrefabInstance(prefabInstanceId);
     }
 
-    public static BlockValue? GetSelectedItem(bool allowAir = false)
+    public static BlockValue? GetSelectedBlock(bool allowAir = false)
     {
         EntityPlayerLocal primaryPlayer = GameManager.Instance.World.GetPrimaryPlayer();
         ItemValue holdingItemItemValue = primaryPlayer.inventory.holdingItemItemValue;
@@ -164,18 +165,14 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
         List<BlockChangeInfo> list = new List<BlockChangeInfo>();
 
         var _gm = GameManager.Instance;
-        var _density = blockValue.Block.shape.IsTerrain() ? MarchingCubes.DensityTerrain : MarchingCubes.DensityAir;
-        var _textureFull = holdingItemItemValue.Texture;
 
         foreach (var position in BrowseSelectionPositions())
         {
             var worldBlock = _gm.World.GetBlock(position);
+            var clusterIndex = _gm.World.ChunkCache.ClusterIdx;
+            var _density = _gm.World.GetDensity(clusterIndex, position);
 
-            BlockChangeInfo blockChangeInfo = new BlockChangeInfo(position, blockValue, _density)
-            {
-                textureFull = _textureFull,
-                bChangeTexture = true
-            };
+            BlockChangeInfo blockChangeInfo = new BlockChangeInfo(position, blockValue, _density);
 
             if (worldBlock.Block.shape.IsTerrain())
                 list.Add(blockChangeInfo);
@@ -369,8 +366,6 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
             Log.Error($"Invalid height: '{args[1]}'");
             return;
         }
-
-        // SelectionBoxManager.Instance.Deactivate();
     }
 
     private void NotImplementedCommand(string commandName)
