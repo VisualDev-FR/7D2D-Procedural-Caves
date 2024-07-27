@@ -168,7 +168,7 @@ public static class CavePlanner
 
     public static bool OverLaps2D(Vector3i position, Vector3i size, CavePrefab other)
     {
-        var otherSize = GetRotatedSize(other.size, other.rotation);
+        var otherSize = CaveUtils.GetRotatedSize(other.size, other.rotation);
         var otherPos = other.position;
 
         int overlapMargin = CaveBuilder.overLapMargin;
@@ -195,14 +195,6 @@ public static class CavePlanner
         return false;
     }
 
-    public static Vector3i GetRotatedSize(Vector3i Size, int rotation)
-    {
-        if (rotation == 0 || rotation == 2)
-            return new Vector3i(Size);
-
-        return new Vector3i(Size.z, Size.y, Size.x);
-    }
-
     private static PrefabDataInstance TrySpawnCavePrefab(PrefabData prefabData, PrefabCache others)
     {
         int attempts = maxPlacementAttempts;
@@ -211,11 +203,11 @@ public static class CavePlanner
         {
             int rotation = 0; // rand.Next(4);
 
-            Vector3i rotatedSize = GetRotatedSize(prefabData.size, rotation);
+            Vector3i rotatedSize = CaveUtils.GetRotatedSize(prefabData.size, rotation);
             Vector3i position = GetRandomPositionFor(rotatedSize);
 
             var minTerrainHeight = GetMinTerrainHeight(position, rotatedSize);
-            var canBePlacedUnderTerrain = minTerrainHeight >= (prefabData.size.y + CaveBuilder.bedRockMargin + CaveBuilder.terrainMargin);
+            var canBePlacedUnderTerrain = minTerrainHeight > (prefabData.size.y + CaveBuilder.bedRockMargin + CaveBuilder.terrainMargin);
 
             if (!canBePlacedUnderTerrain)
                 continue;

@@ -242,6 +242,15 @@ public static class CaveUtils
 
         return result;
     }
+
+    public static Vector3i GetRotatedSize(Vector3i Size, int rotation)
+    {
+        if (rotation == 0 || rotation == 2)
+            return new Vector3i(Size);
+
+        return new Vector3i(Size.z, Size.y, Size.x);
+    }
+
 }
 
 
@@ -420,10 +429,10 @@ public class CavePrefab
     public CavePrefab(int index, PrefabDataInstance pdi, Vector3i offset)
     {
         id = index;
+        rotation = pdi.rotation;
         prefabDataInstance = pdi;
         position = pdi.boundingBoxPosition + offset;
-        size = pdi.boundingBoxSize;
-        rotation = pdi.rotation;
+        size = CaveUtils.GetRotatedSize(pdi.boundingBoxSize, rotation);
 
         CaveUtils.Assert(position.x > 0, $"offset: {offset}");
         CaveUtils.Assert(position.y > 0, $"offset: {offset}");
@@ -438,7 +447,7 @@ public class CavePrefab
 
         CaveUtils.Assert(prefab.prefab.POIMarkers.Count > 0, $"prefab {prefab.prefab.Name} has not cave marker.");
 
-        foreach (var marker in prefab.prefab.POIMarkers)
+        foreach (var marker in prefab.prefab.RotatePOIMarkers(true, rotation))
         {
             if (!marker.tags.Test_AnySet(tagCaveMarker))
                 continue;
@@ -728,15 +737,6 @@ public class CavePrefab
         return GetHashCode() == other.GetHashCode();
     }
 
-    public PrefabDataInstance ToPrefabDataInstance(int y)
-    {
-        position.y = y;
-        prefabDataInstance.boundingBoxPosition = position;
-        prefabDataInstance.rotation = rotation;
-
-        return prefabDataInstance;
-    }
-
     public List<Vector2s> GetOverlappingChunks()
     {
         var chunkPositions = new List<Vector2s>();
@@ -822,7 +822,7 @@ public class GraphNode
         position = prefab.position + marker.start + marker.size / 2;
         direction = GetDirection();
 
-        CaveUtils.Assert(direction != Direction.None, $"None direction: {prefab.Name}, marker: [{marker.start}]");
+        CaveUtils.Assert(direction != Direction.None, $"None direction: {prefab.Name}, marker start: [{marker.start}], prefab size:[{prefab.size}]");
     }
 
     public GraphNode(Vector3i position, CavePrefab prefab)
