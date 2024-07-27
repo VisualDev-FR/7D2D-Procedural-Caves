@@ -19,6 +19,7 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
             - selectall, sa: add all the prefab volume to the selection box.
             - room: create an empty room of selected item in the selection box.
             - stalactite [height] Creates a procedural stalactite of the specified height at the start position of the selection box.
+            - replaceground, rg: replace all terrain blocks inside the selection box, which have air above them with the selected item.
             - setwater, sw [mode]:
                 * 'empty': set all water blocks of the selection to air.
                 * 'fill': set all air blocks of the selection to water.
@@ -26,7 +27,6 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
                 * 'entrance' -> the prefab is a cave entrance
 
             Incoming:
-            - replaceground, rg: replace all terrain blocks inside the selection box, which have air above them with the selected item.
             - test: run a testing session with tunneling around the markers
             - invert: show negative view of the terrain
             - check: create a report of the requirements for getting a valid cave prefab.
@@ -175,6 +175,43 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
             BlockChangeInfo blockChangeInfo = new BlockChangeInfo(position, blockValue, _density);
 
             if (worldBlock.Block.shape.IsTerrain())
+                list.Add(blockChangeInfo);
+        }
+
+        _gm.SetBlocksRPC(list);
+    }
+
+    private void ReplaceGroundCommand()
+    {
+        EntityPlayerLocal primaryPlayer = GameManager.Instance.World.GetPrimaryPlayer();
+        ItemValue holdingItemItemValue = primaryPlayer.inventory.holdingItemItemValue;
+        BlockValue blockValue = holdingItemItemValue.ToBlockValue();
+
+        if (blockValue.isair)
+        {
+            Log.Error($"Invalid filler block: '{holdingItemItemValue.ItemClass.Name}'");
+            return;
+        }
+
+        Block block = blockValue.Block;
+        BlockPlacement.Result _bpResult = new BlockPlacement.Result(0, Vector3.zero, Vector3i.zero, blockValue);
+        block.OnBlockPlaceBefore(GameManager.Instance.World, ref _bpResult, primaryPlayer, GameManager.Instance.World.GetGameRandom());
+        blockValue = _bpResult.blockValue;
+
+        List<BlockChangeInfo> list = new List<BlockChangeInfo>();
+
+        var _gm = GameManager.Instance;
+
+        foreach (var position in BrowseSelectionPositions())
+        {
+            var worldBlock = _gm.World.GetBlock(position);
+            var upperBlock = _gm.World.GetBlock(position + Vector3i.up);
+            var clusterIndex = _gm.World.ChunkCache.ClusterIdx;
+            var _density = _gm.World.GetDensity(clusterIndex, position);
+
+            BlockChangeInfo blockChangeInfo = new BlockChangeInfo(position, blockValue, _density);
+
+            if (worldBlock.Block.shape.IsTerrain() && upperBlock.isair)
                 list.Add(blockChangeInfo);
         }
 
@@ -398,10 +435,14 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
                 CaveMarkerCommand();
                 break;
 
-            case "replace":
             case "replaceterrain":
             case "rt":
                 ReplaceTerrainCommand();
+                break;
+
+            case "replaceground":
+            case "rg":
+                ReplaceGroundCommand();
                 break;
 
             case "check":
