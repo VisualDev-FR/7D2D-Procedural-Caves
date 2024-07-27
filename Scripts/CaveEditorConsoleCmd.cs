@@ -80,6 +80,13 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
         return PrefabSleeperVolumeManager.Instance.GetPrefabInstance(prefabInstanceId);
     }
 
+    private static BlockValue GetSelectedItem()
+    {
+        EntityPlayerLocal primaryPlayer = GameManager.Instance.World.GetPrimaryPlayer();
+        ItemValue holdingItemItemValue = primaryPlayer.inventory.holdingItemItemValue;
+        return holdingItemItemValue.ToBlockValue();
+    }
+
     private void CaveMarkerCommand()
     {
         var selection = BlockToolSelection.Instance;
@@ -199,6 +206,8 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
 
     private void SelectAllCommand()
     {
+        PrefabEditModeManager.Instance.updatePrefabBounds();
+
         var selection = BlockToolSelection.Instance;
         var prefabInstanceId = PrefabEditModeManager.Instance.prefabInstanceId;
         var prefabInstance = PrefabSleeperVolumeManager.Instance.GetPrefabInstance(prefabInstanceId);
@@ -301,6 +310,35 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
         prefabInstance.prefab.Tags = CavePrefab.tagCave;
     }
 
+    private void TagsCommand(List<string> args)
+    {
+        var prefabInstance = GetCurrentPrefab();
+
+        if (!prefabInstance.prefab.editorGroups.Contains("cave"))
+        {
+            prefabInstance.prefab.editorGroups.Add("cave");
+        }
+
+        prefabInstance.prefab.Tags |= CavePrefab.tagCave;
+
+        if (args.Count == 2)
+        {
+
+            switch (args[1].ToLower())
+            {
+                case "entrance":
+                    prefabInstance.prefab.Tags |= CavePrefab.tagCaveEntrance;
+                    break;
+
+                default:
+                    Log.Warning($"invalid tag: '{args[1]}'");
+                    break;
+            }
+        }
+
+        Log.Out($"cave prefab tag success: '{prefabInstance.prefab.tags}'");
+    }
+
     private void NotImplementedCommand(string commandName)
     {
         Log.Error($"Not implemented command: '{commandName}'");
@@ -337,17 +375,13 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
                 ReplaceTerrainCommand();
                 break;
 
-            case "save":
-                NotImplementedCommand(command);
-                break;
-
             case "check":
                 NotImplementedCommand(command);
                 break;
 
             case "tag":
             case "tags":
-                NotImplementedCommand(command);
+                TagsCommand(_params);
                 break;
 
             case "procfill":
