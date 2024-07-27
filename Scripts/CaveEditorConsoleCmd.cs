@@ -13,6 +13,7 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
     public override string getDescription()
     {
         return @"Cave prefab editor helpers:
+            - create: creates a new empty prefab with the required tags
             - marker: Add a cave marker into the selection.
             - replaceterrain, rt: Replace all terrain blocks in the selection with the selected item.
             - selectall, sa: add all the prefab volume to the selection box.
@@ -22,9 +23,8 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
                 * 'fill': set all air blocks of the selection to water.
 
             Incoming:
+            - save: special save method.
             - test: run a testing session with tunneling around the markers
-            - create [name]: creates a new prefab and tag it with the required informations for the cave system
-            - save: special save method which will store all air blocks as caveAir blocks.
             - tags [type]: Add the required tags to get a valid cave prefab. Type is optional an accept the following keywords:
                 * 'entrance' -> the prefab is a cave entrance
                 * 'underwater' -> the prefab is an underwater entrance
@@ -72,6 +72,12 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
         }
 
         yield break;
+    }
+
+    private static PrefabInstance GetCurrentPrefab()
+    {
+        var prefabInstanceId = PrefabEditModeManager.Instance.prefabInstanceId;
+        return PrefabSleeperVolumeManager.Instance.GetPrefabInstance(prefabInstanceId);
     }
 
     private void CaveMarkerCommand()
@@ -285,6 +291,16 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
         _gm.SetBlocksRPC(list);
     }
 
+    private void CreateCommand()
+    {
+        PrefabEditModeManager.Instance.NewVoxelPrefab();
+
+        var prefabInstance = GetCurrentPrefab();
+
+        prefabInstance.prefab.editorGroups.Add("cave");
+        prefabInstance.prefab.Tags = CavePrefab.tagCave;
+    }
+
     private void NotImplementedCommand(string commandName)
     {
         Log.Error($"Not implemented command: '{commandName}'");
@@ -374,6 +390,10 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
             case "setwater":
             case "sw":
                 SetWaterCommand(_params);
+                break;
+
+            case "create":
+                CreateCommand();
                 break;
 
             default:
