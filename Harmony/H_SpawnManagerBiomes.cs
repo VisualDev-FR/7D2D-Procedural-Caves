@@ -6,9 +6,9 @@ using UnityEngine;
 [HarmonyPatch(typeof(SpawnManagerBiomes), "Update")]
 public class SpawnManagerBiomes_Update
 {
-    // We want to run our cave spawning class right under the main biome spawner.
     public static bool Prefix(SpawnManagerBiomes __instance, string _spawnerName, bool _bSpawnEnemyEntities, object _userData, ref List<Entity> ___spawnNearList, ref int ___lastClassId)
     {
+        // TODO:
         // if (!GameUtils.IsPlaytesting())
         // {
         //     SpawnUpdate(_spawnerName, _bSpawnEnemyEntities, _userData as ChunkAreaBiomeSpawnData,
@@ -17,9 +17,6 @@ public class SpawnManagerBiomes_Update
 
         return true;
     }
-    // This method is a modified version of vanilla, doing the same checks and balances.
-    // However, we do use the player position a bit more, and we change which biome spawning group we
-    // will use, when below the terrain.
 
     public static void SpawnUpdate(string _spawnerName, bool _bSpawnEnemyEntities, ChunkAreaBiomeSpawnData _chunkBiomeSpawnData, ref List<Entity> spawnNearList, ref int lastClassId)
     {

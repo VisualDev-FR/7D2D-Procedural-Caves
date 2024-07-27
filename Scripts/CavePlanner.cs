@@ -35,6 +35,14 @@ public static class CavePlanner
 
     private static HashSet<Vector3i> caveMap = null;
 
+    public static void Init()
+    {
+        entrancePrefabsNames = new List<string>();
+        allCavePrefabs = new Dictionary<string, PrefabData>();
+        caveMap = new HashSet<Vector3i>();
+        CaveBuilder.rand = new Random(CaveBuilder.SEED);
+    }
+
     public static PrefabData SelectRandomEntrance()
     {
         CaveUtils.Assert(entrancePrefabsNames.Count > 0, "Seems that no cave entrance was found.");
@@ -130,14 +138,6 @@ public static class CavePlanner
         Log.Out($"[Cave] caching prefab '{prefabName}'");
 
         allCavePrefabs[prefabName] = prefabData;
-    }
-
-    public static void Init()
-    {
-        entrancePrefabsNames = new List<string>();
-        allCavePrefabs = new Dictionary<string, PrefabData>();
-        caveMap = new HashSet<Vector3i>();
-        CaveBuilder.rand = new Random(CaveBuilder.SEED);
     }
 
     private static int GetMinTerrainHeight(Vector3i position, Vector3i size)
@@ -297,8 +297,6 @@ public static class CavePlanner
 
             string message = $"Cave tunneling: {100.0f * index++ / edges.Count:F0}% ({index} / {edges.Count})";
 
-            Log.Out($"Tunneling {p1} -> {p2}");
-
             yield return WorldBuilder.SetMessage(message);
 
             var path = CaveTunneler.FindPath(p1, p2, cavePrefabs);
@@ -307,6 +305,7 @@ public static class CavePlanner
             caveMap.UnionWith(tunnel);
         }
 
+        yield return WorldBuilder.SetMessage("Creating cave preview...", _logToConsole: true);
         yield return GenerateCavePreview(cavePrefabs.Prefabs, caveMap);
 
         Log.Out($"{caveMap.Count} cave blocks generated, timer={CaveUtils.TimeFormat(timer)}.");
@@ -320,12 +319,8 @@ public static class CavePlanner
 
         var pixels = Enumerable.Repeat(new Color32(0, 0, 0, 255), WorldSize * WorldSize).ToArray();
 
-        yield return WorldBuilder.SetMessage("Creating cave preview...", _logToConsole: true);
-
         foreach (var prefab in prefabs)
         {
-            // Log.Out($"{prefab.position} / {prefab.prefabDataInstance.boundingBoxPosition} / {prefab.size}");
-
             foreach (var point in prefab.Get2DEdges())
             {
                 int index = point.x + point.z * WorldSize;
@@ -335,7 +330,7 @@ public static class CavePlanner
 
         foreach (var blockPos in caveMap)
         {
-            var position = blockPos; // - HalfWorldSize;
+            var position = blockPos;
             int index = position.x + position.z * WorldSize;
             try
             {

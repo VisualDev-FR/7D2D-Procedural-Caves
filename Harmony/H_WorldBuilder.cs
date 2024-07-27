@@ -14,6 +14,7 @@ public static class WorldBuilder_GenerateFromUI
         worldBuilder.IsCanceled = false;
         worldBuilder.IsFinished = false;
         worldBuilder.totalMS = new MicroStopwatch(_bStart: true);
+
         yield return worldBuilder.SetMessage("Starting");
         yield return new WaitForSeconds(0.1f);
         yield return worldBuilder.GenerateData();
@@ -43,9 +44,7 @@ public static class WorldBuilder_saveRawHeightmap
 {
     public static bool Prefix()
     {
-        Log.Out("start WorldBuilder_saveRawHeightmap postfix");
         CavePlanner.SaveCaveMap();
-
         return true;
     }
 }

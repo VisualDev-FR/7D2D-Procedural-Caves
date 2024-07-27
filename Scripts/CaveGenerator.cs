@@ -36,28 +36,14 @@ public static class CaveGenerator
     {
         if (chunk == null)
         {
-            Log.Warning($"[Cave] Null chunk {chunk.ChunkPos}");
+            Log.Warning($"[Cave] Null chunk at {chunk.ChunkPos}");
             return;
         }
 
         var chunkPos = new Vector2s(chunk.ChunkPos);
 
-        // var playerPos = new Vector3i(GameManager.Instance.World.GetPrimaryPlayer().position);
-        // if (!IsInsideChunk(playerPos, chunk.GetWorldPos()))
-        // {
-        //     return;
-        // }
-        // Log.Out($"[Cave] playerPos: {GameManager.Instance.World.GetPrimaryPlayer().position}");
-        // Log.Out($"[Cave] chunkWorld: {chunk.GetWorldPos()}");
-        // Log.Out($"[Cave] chunkWorldSize: {chunkWorldSize}");
-        // Log.Out($"[Cave] chunk.ChunkPos: {chunk.ChunkPos}");
-        // Log.Out($"[Cave] ChunkPos: {chunkPos}");
-
         if (!caveMap.TryGetValue(chunkPos, out var blockPositions))
-        {
-            // Log.Warning($"[Cave] chunk {chunkPos} not found in cavemap.");
             return;
-        }
 
         foreach (Vector3bf pos in blockPositions)
         {
