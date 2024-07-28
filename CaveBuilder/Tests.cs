@@ -1,3 +1,4 @@
+using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 [TestClass]
@@ -10,7 +11,7 @@ public class GraphNodeTests
         var prefab = new CavePrefab(0)
         {
             position = new Vector3i(0, 0, 0),
-            size = new Vector3i(10, 10, 10),
+            Size = new Vector3i(10, 10, 10),
         };
 
         var node1 = new GraphNode(new Vector3i(-1, 0, 5), prefab);
@@ -37,9 +38,9 @@ public class GraphNodeTests
     }
 
     [TestMethod]
-    public void Test_CaveBlockPosNeighbors()
+    public void Test_CaveBlockNeighbors()
     {
-        var block = new CaveBlockPos(10, 10, 10);
+        var block = new CaveBlock(10, 10, 10);
 
         foreach (var pos in CaveUtils.GetValidNeighbors(block.ToVector3i()))
         {
@@ -50,14 +51,38 @@ public class GraphNodeTests
     }
 
     [TestMethod]
-    public void Test_CaveBlockPosEquals()
+    public void Test_CaveBlockEquals()
     {
-        var p1 = new CaveBlockPos(0, 1, 2);
-        var p2 = new CaveBlockPos(0, 1, 2);
+        var p1 = new CaveBlock(0, 1, 2);
+        var p2 = new CaveBlock(0, 1, 2);
         Assert.AreEqual(p1, p2, $"{p1} | {p2}");
 
-        p1 = new CaveBlockPos(0, 1, 2);
-        p2 = new CaveBlockPos(0, 2, 2);
+        p1 = new CaveBlock(0, 1, 2);
+        p2 = new CaveBlock(0, 2, 2);
         Assert.AreNotEqual(p1, p2, $"{p1.BlockPos}({p1.BlockPos.GetHashCode()}) | {p2.BlockPos}({p2.BlockPos.GetHashCode()})");
+    }
+
+    [TestMethod]
+    public void Test_Vect3iEquald()
+    {
+        Vector3i v1 = null;
+        Vector3i v2 = null;
+
+        Assert.AreEqual(null, v1);
+        Assert.IsTrue(v1 == null);
+        Assert.AreEqual(v1, v2);
+        Assert.IsTrue(v1 == v2);
+    }
+
+
+    public static void Test_prefabGrouping()
+    {
+        long memoryBefore = GC.GetTotalMemory(true);
+
+        PrefabCache prefabCache = CaveBuilder.GetRandomPrefabs(CaveBuilder.PREFAB_COUNT);
+
+        long memoryUsed = GC.GetTotalMemory(true) - memoryBefore;
+
+        Log.Out($"Cave map size: {memoryUsed:N0} Bytes ({memoryUsed / 1_048_576.0:F1} MB)");
     }
 }

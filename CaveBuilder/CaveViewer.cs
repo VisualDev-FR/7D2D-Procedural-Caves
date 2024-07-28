@@ -6,273 +6,9 @@ using System.IO;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Collections.Generic;
-using ConcurrentCollections;
 using System.Diagnostics;
-using System.Linq;
 using System.Threading.Tasks;
-
-
-public static class WaveFrontMat
-{
-    public static string None = "";
-
-    public static string DarkRed = "DarkRed";
-
-    public static string DarkGreen = "DarkGreen";
-
-    public static string Orange = "Orange";
-
-    public static string DarkGray = "DarkGray";
-}
-
-
-public struct VoxelFace
-{
-    public int[] vertIndices;
-
-    public VoxelFace(int[] values)
-    {
-        vertIndices = values;
-    }
-
-    public VoxelFace(int a, int b, int c, int d)
-    {
-        vertIndices = new int[4] { a, b, c, d };
-    }
-
-    public override string ToString()
-    {
-        return $"f {vertIndices[0]} {vertIndices[1]} {vertIndices[2]} {vertIndices[3]}";
-    }
-}
-
-
-public class Voxell
-{
-    Vector3i position;
-
-    Vector3i size = Vector3i.one;
-
-    public bool force;
-
-    public string material = "";
-
-    public int[,] Vertices
-    {
-        get
-        {
-            int x = size.x;
-            int y = size.y;
-            int z = size.z;
-
-            return new int[,]
-            {
-                {0, 0, 0},
-                {x, 0, 0},
-                {x, y, 0},
-                {0, y, 0},
-                {0, 0, z},
-                {x, 0, z},
-                {x, y, z},
-                {0, y, z},
-            };
-        }
-    }
-
-    public static Dictionary<int, int[]> faceMapping = new Dictionary<int, int[]>()
-    {
-        { 0, new int[4]{ 1, 2, 6, 5 } }, // normal: x + 1
-        { 1, new int[4]{ 3, 0, 4, 7 } }, // normal: x - 1
-        { 2, new int[4]{ 2, 3, 7, 6 } }, // normal: y + 1
-        { 3, new int[4]{ 0, 1, 5, 4 } }, // normal: y - 1
-        { 4, new int[4]{ 4, 5, 6, 7 } }, // normal: z + 1
-        { 5, new int[4]{ 0, 1, 2, 3 } }, // normal: z - 1
-    };
-
-    public Voxell(Vector3i position)
-    {
-        this.position = position;
-    }
-
-    public Voxell(Vector3i position, string material)
-    {
-        this.position = position;
-        this.material = material;
-    }
-
-    public Voxell(Vector3i position, Vector3i size)
-    {
-        this.position = position;
-        this.size = size;
-    }
-
-    public Voxell(Vector3i position, Vector3i size, string material)
-    {
-        this.position = position;
-        this.size = size;
-        this.material = material;
-    }
-
-    public Voxell(Vector3i position, int sizeX, int sizeY, int sizeZ)
-    {
-        this.position = position;
-        size = new Vector3i(sizeX, sizeY, sizeZ);
-    }
-
-    public Voxell(int x, int y, int z)
-    {
-        position = new Vector3i(x, y, z);
-    }
-
-    public Voxell(int x, int y, int z, string material)
-    {
-        position = new Vector3i(x, y, z);
-        this.material = material;
-    }
-
-    public bool[] GetNeighbors(HashSet<Voxell> others)
-    {
-        if (force)
-            return new bool[6] { true, true, true, true, true, true };
-
-        var result = new bool[6];
-        var neighbors = new List<Voxell>()
-        {
-            new Voxell(position.x + 1, position.y, position.z),
-            new Voxell(position.x - 1, position.y, position.z),
-            new Voxell(position.x, position.y + 1, position.z),
-            new Voxell(position.x, position.y - 1, position.z),
-            new Voxell(position.x, position.y, position.z + 1),
-            new Voxell(position.x, position.y, position.z - 1),
-        };
-
-        for (int i = 0; i < 6; i++)
-        {
-            result[i] = !others.Contains(neighbors[i]);
-        }
-
-        return result;
-    }
-
-    public bool ShouldAddVertice(int index, bool[] neighbors)
-    {
-        // 0 {0, 0, 0},
-        // 1 {x, 0, 0},
-        // 2 {x, y, 0},
-        // 3 {0, y, 0},
-        // 4 {0, 0, z},
-        // 5 {x, 0, z},
-        // 6 {x, y, z},
-        // 7 {0, y, z},
-
-        /*
-            0 | 0 1 2 3 | z - 1
-            1 | 4 5 6 7 | z + 1
-            2 | 0 1 5 4 | y - 1
-            3 | 1 2 6 5 | x + 1
-            4 | 2 3 7 6 | y + 1
-            5 | 3 0 4 7 | x - 1
-        */
-
-        if (index == 0)
-            return neighbors[0] || neighbors[2] || neighbors[5];
-
-        if (index == 1)
-            return neighbors[0] || neighbors[2] || neighbors[3];
-
-        if (index == 2)
-            return neighbors[0] || neighbors[3] || neighbors[4];
-
-        if (index == 3)
-            return neighbors[0] || neighbors[4] || neighbors[5];
-
-        if (index == 4)
-            return neighbors[1] || neighbors[4] || neighbors[5];
-
-        if (index == 5)
-            return neighbors[1] || neighbors[2] || neighbors[3];
-
-        if (index == 6)
-            return neighbors[1] || neighbors[3] || neighbors[4];
-
-        if (index == 7)
-            return neighbors[1] || neighbors[4] || neighbors[5];
-
-        return false;
-    }
-
-    public string ToWavefront(ref int vertexIndexOffset, HashSet<Voxell> others)
-    {
-        var strVertices = new List<string>();
-
-        for (int i = 0; i < 8; i++)
-        {
-            int vx = Vertices[i, 0] + position.x;
-            int vy = Vertices[i, 1] + position.y;
-            int vz = Vertices[i, 2] + position.z;
-
-            strVertices.Add($"v {vx} {vy} {vz}");
-        }
-
-        var faces = new List<VoxelFace>();
-        var usedVerticeIndexes = new Dictionary<int, int>();
-        var neighbors = GetNeighbors(others);
-        var result = new List<string>();
-
-        foreach (var entry in faceMapping)
-        {
-            int faceIndex = entry.Key;
-            int[] verticeIndexes = entry.Value;
-
-            if (!neighbors[faceIndex])
-                continue;
-
-            for (int i = 0; i < 4; i++)
-            {
-                int index = verticeIndexes[i];
-
-                if (!usedVerticeIndexes.ContainsKey(index))
-                {
-                    result.Add(strVertices[index] + $" # {vertexIndexOffset + 1}");
-                    usedVerticeIndexes[index] = ++vertexIndexOffset;
-                }
-            }
-
-            faces.Add(new VoxelFace(
-                usedVerticeIndexes[verticeIndexes[0]],
-                usedVerticeIndexes[verticeIndexes[1]],
-                usedVerticeIndexes[verticeIndexes[2]],
-                usedVerticeIndexes[verticeIndexes[3]]
-            ));
-        }
-
-        if (faces.Count == 0)
-            return "";
-
-        if (material != "")
-            result.Add($"usemtl {material}");
-
-        foreach (var face in faces)
-        {
-            result.Add(face.ToString());
-        }
-
-        return string.Join("\n", result);
-    }
-
-    public override int GetHashCode()
-    {
-        return position.GetHashCode() + size.GetHashCode();
-    }
-
-    public override bool Equals(object obj)
-    {
-        var other = (Voxell)obj;
-
-        return GetHashCode() == other.GetHashCode();
-    }
-
-}
+using System.Linq;
 
 
 public static class CaveViewer
@@ -292,14 +28,19 @@ public static class CaveViewer
         return new PointF(point.x, point.z);
     }
 
-    public static void DrawPrefabs(Bitmap b, Graphics graph, List<CavePrefab> prefabs, bool fill = false)
+    public static PointF ParsePointF(Vector3 point)
+    {
+        return new PointF(point.x, point.z);
+    }
+
+    public static void DrawPrefabs(Graphics graph, List<CavePrefab> prefabs)
     {
         // throw new NotImplementedException("obsolete, has to be updated.");
         using (var pen = new Pen(PrefabBoundsColor, 1))
         {
             foreach (var prefab in prefabs)
             {
-                graph.DrawRectangle(pen, prefab.position.x, prefab.position.z, prefab.size.x, prefab.size.z);
+                graph.DrawRectangle(pen, prefab.position.x, prefab.position.z, prefab.Size.x, prefab.Size.z);
 
                 // DrawPoints(b, new HashSet<Vector3i>(prefab.nodes), NodeColor);
             }
@@ -342,15 +83,27 @@ public static class CaveViewer
 
     public static void GraphCommand(string[] args)
     {
+        CaveBuilder.worldSize = 6144;
+        // CaveBuilder.radiationSize = 0;
+        // CaveBuilder.radiationZoneMargin = 0;
+        // CaveBuilder.PREFAB_COUNT = 1000;
+
         int prefabCounts = args.Length > 1 ? int.Parse(args[1]) : CaveBuilder.PREFAB_COUNT;
 
-        var prefabs = CaveBuilder.GetRandomPrefabs(prefabCounts);
+        PrefabCache cachedPrefabs = CaveBuilder.GetRandomPrefabs(prefabCounts);
+        List<Edge> edges = Graph.Resolve(cachedPrefabs.Prefabs);
 
-        Log.Out("Start solving MST Krustal...");
+        var voxels = new HashSet<Voxell>();
 
-        List<Edge> edges = Graph.Resolve(prefabs.Prefabs);
+        foreach (var prefab in cachedPrefabs.Prefabs)
+        {
+            voxels.Add(new Voxell(prefab.position, prefab.Size, WaveFrontMaterial.DarkGreen) { force = true });
 
-        Log.Out("Start Drawing graph...");
+            foreach (var node in prefab.nodes)
+            {
+                voxels.Add(new Voxell(node.prefab.position + node.marker.start, node.marker.size, WaveFrontMaterial.Orange) { force = true });
+            }
+        }
 
         using (var b = new Bitmap(CaveBuilder.worldSize, CaveBuilder.worldSize))
         {
@@ -358,95 +111,42 @@ public static class CaveViewer
             {
                 g.Clear(BackgroundColor);
                 DrawEdges(g, edges);
-                DrawPrefabs(b, g, prefabs.Prefabs);
+                DrawPrefabs(g, cachedPrefabs.Prefabs);
             }
 
             Log.Out($"{edges.Count} Generated edges.");
 
             b.Save(@"graph.png", ImageFormat.Png);
         }
-    }
 
-    public static void NoiseCommand(string[] args)
-    {
-        CaveBuilder.SEED = 12345;
-        CaveBuilder.worldSize = 100;
+        // return;
+        // int index = 0;
 
-        var noise = new CaveNoise(
-            seed: CaveBuilder.SEED,
-            octaves: 2,
-            frequency: 0.01f,
-            threshold: 0.8f,
-            invert: true,
-            noiseType: FastNoiseLite.NoiseType.Cellular,
-            fractalType: FastNoiseLite.FractalType.FBm
-        );
+        // using (StreamWriter writer = new StreamWriter("graph.obj"))
+        // {
+        //     writer.WriteLine("mtllib materials.mtl");
 
-        noise.noise.SetCellularDistanceFunction(FastNoiseLite.CellularDistanceFunction.Euclidean);
+        //     foreach (var voxel in voxels)
+        //     {
+        //         string strVoxel = voxel.ToWavefront(ref index, voxels);
 
-        var prefabs = new List<CavePrefab>(){
-            new CavePrefab(0){
-                position = new Vector3i(10, 10, 10),
-                size = new Vector3i(10, 10, 10),
-            },
-            new CavePrefab(1){
-                position = new Vector3i(CaveBuilder.worldSize - 20, 10, CaveBuilder.worldSize - 20),
-                size = new Vector3i(10, 10, 10),
-            },
-        };
+        //         if (strVoxel != "")
+        //             writer.WriteLine(strVoxel);
+        //     }
 
-        var vox = CollectCaveNoise(noise, 50, 50).ToHashSet();
+        //     foreach (var tetra in edges)
+        //     {
+        //         string strTetra = tetra.ToWaveFront(ref index);
 
-        GenerateObjFile("noise.obj", vox, false);
-
-        using (var b = new Bitmap(CaveBuilder.worldSize, CaveBuilder.worldSize))
-        {
-            using (Graphics g = Graphics.FromImage(b))
-            {
-                g.Clear(BackgroundColor);
-
-                for (int x = 0; x < CaveBuilder.worldSize; x++)
-                {
-                    for (int z = 0; z < CaveBuilder.worldSize; z++)
-                    {
-                        if (noise.IsTerrain(x, z))
-                        {
-                            b.SetPixel(x, z, NoiseColor);
-                        }
-                    }
-                }
-
-                DrawPrefabs(b, g, prefabs);
-            }
-
-            b.Save(@"noise.png", ImageFormat.Png);
-        }
-    }
-
-    public static List<Voxell> CollectCaveNoise(CaveNoise noise, int worldSize, int height)
-    {
-        var noiseMap = new List<Voxell>();
-
-        for (int x = 0; x < worldSize; x++)
-        {
-            for (int z = 0; z < worldSize; z++)
-            {
-                for (int y = 0; y < height; y++)
-                {
-                    if (noise.IsCave(x, y, z))
-                        noiseMap.Add(new Voxell(x, y, z, WaveFrontMat.DarkGray));
-                }
-            }
-        }
-
-        return noiseMap;
+        //         writer.WriteLine(strTetra);
+        //     }
+        // }
     }
 
     public static void PathCommand(string[] args)
     {
         CaveBuilder.worldSize = 200;
         CaveBuilder.radiationZoneMargin = 0;
-        CaveBuilder.SEED = CaveBuilder.rand.Next(); // 1634735684; //
 
         if (args.Length > 1)
             CaveBuilder.worldSize = int.Parse(args[1]);
@@ -454,17 +154,17 @@ public static class CaveViewer
         var p1 = new CavePrefab(0)
         {
             position = new Vector3i(20, 5, 20),
-            size = new Vector3i(10, 10, 10),
+            Size = new Vector3i(10, 10, 10),
         };
 
         var p2 = new CavePrefab(1)
         {
-            position = new Vector3i(CaveBuilder.worldSize - 30, 50, CaveBuilder.worldSize - 30),
-            size = new Vector3i(20, 10, 20),
+            position = new Vector3i(20, 5, CaveBuilder.worldSize - 30),
+            Size = new Vector3i(20, 10, 20),
         };
 
-        p1.UpdateNodes(CaveBuilder.rand);
-        p2.UpdateNodes(CaveBuilder.rand);
+        p1.UpdateMarkers(CaveBuilder.rand);
+        p2.UpdateMarkers(CaveBuilder.rand);
 
         var cachedPrefabs = new PrefabCache();
         cachedPrefabs.AddPrefab(p1);
@@ -474,102 +174,182 @@ public static class CaveViewer
         timer.Start();
 
         var node1 = p1.nodes[1];
-        var node2 = p2.nodes[2];
+        var node2 = p2.nodes[0];
 
-        var path = CaveTunneler.FindPath(node1, node2, cachedPrefabs);
-        var cavemap = CaveTunneler.ThickenTunnel(path, node1, node2);
+        Log.Out($"prefab   {node2.prefab.position}");
+        Log.Out($"start    {node2.marker.start}");
+        Log.Out($"size     {node2.marker.size}");
+        Log.Out($"result   {node2.position}\n");
 
-        Log.Out($"{p1.position} -> {p2.position} | Astar dist: {path.Count}, eucl dist: {CaveUtils.EuclidianDist(p1.position, p2.position)}, timer: {timer.ElapsedMilliseconds}ms");
+        var tunnel = CaveTunneler.GenerateTunnel(node1, node2, cachedPrefabs);
+
+        Log.Out($"{p1.position} -> {p2.position} | Astar dist: {tunnel.Count}, eucl dist: {CaveUtils.EuclidianDist(p1.position, p2.position)}, timer: {timer.ElapsedMilliseconds}ms");
 
         var voxels = new HashSet<Voxell>(){
-            new Voxell(p1.position, p1.size, WaveFrontMat.DarkGreen) { force = true },
-            new Voxell(p2.position, p2.size, WaveFrontMat.DarkGreen) { force = true },
+            new Voxell(p1.position, p1.Size, WaveFrontMaterial.DarkGreen) { force = true },
+            new Voxell(p2.position, p2.Size, WaveFrontMaterial.DarkGreen) { force = true },
         };
 
-        foreach (var block in cavemap)
+        foreach (var block in tunnel)
         {
-            voxels.Add(new Voxell(block, WaveFrontMat.DarkRed));
+            if (block.isWater)
+            {
+                voxels.Add(new Voxell(block.position, WaveFrontMaterial.LightBlue) { force = true });
+            }
+            else
+            {
+                voxels.Add(new Voxell(block.position, WaveFrontMaterial.DarkRed));
+
+            }
         }
 
         foreach (var node in p1.nodes)
         {
-            voxels.Add(new Voxell(node.prefab.position + node.marker.start, node.marker.size, WaveFrontMat.Orange) { force = true });
+            foreach (var point in node.GetMarkerPoints())
+            {
+                voxels.Add(new Voxell(point, WaveFrontMaterial.Orange) { force = true });
+            }
         }
 
         foreach (var node in p2.nodes)
         {
-            voxels.Add(new Voxell(node.prefab.position + node.marker.start, node.marker.size, WaveFrontMat.Orange) { force = true });
+            foreach (var point in node.GetMarkerPoints())
+            {
+                voxels.Add(new Voxell(point, WaveFrontMaterial.Orange) { force = true });
+            }
         }
 
-        GenerateObjFile("path.obj", voxels, true);
+        GenerateObjFile("path.obj", voxels, false);
     }
 
-    public static void test_prefabGrouping()
+    public static void SphereCommand(string[] args)
     {
-        long memoryBefore = GC.GetTotalMemory(true);
+        var timer = CaveUtils.StartTimer();
+        var voxels = new HashSet<Voxell>();
 
-        PrefabCache prefabCache = CaveBuilder.GetRandomPrefabs(CaveBuilder.PREFAB_COUNT);
+        for (int i = 1; i < 15; i++)
+        {
+            int radius = i;
+            int pos = i * radius * 3;
 
-        long memoryUsed = GC.GetTotalMemory(true) - memoryBefore;
+            var position = new Vector3i(pos, 20, 20);
+            var caveBlock = new CaveBlock(position);
+            var sphere = CaveTunneler.GetSphere(caveBlock, radius);
 
-        Log.Out($"Cave map size: {memoryUsed:N0} Bytes ({memoryUsed / 1_048_576.0:F1} MB)");
+            foreach (var block in sphere)
+            {
+                voxels.Add(new Voxell(block.position));
+            }
+        }
+
+        Log.Out($"{voxels.Count} voxels generated, timer = {CaveUtils.TimeFormat(timer)}");
+
+        GenerateObjFile("sphere.obj", voxels, false);
+    }
+
+    public static void RoomCommand(string[] args)
+    {
+        const int vecSize = 50;
+
+        var timer = CaveUtils.StartTimer();
+        var position = new Vector3i(0, 0, 0);
+        var size = new Vector3i(vecSize, 10, vecSize);
+        var seed = new Random().Next();
+        var terrain = CavePrefabGenerator.GenerateTunnels(position, size);
+
+        var voxels = terrain.Select((pos) => new Voxell(pos)).ToHashSet();
+
+        voxels.Add(new Voxell(position, size, WaveFrontMaterial.DarkGreen) { force = true });
+
+        Log.Out($"{voxels.Count} voxels generated, timer = {CaveUtils.TimeFormat(timer)}");
+
+        GenerateObjFile("room.obj", voxels, false);
     }
 
     public static void CaveCommand(string[] args)
     {
-        var timer = new Stopwatch();
-        timer.Start();
-
-        CaveBuilder.worldSize = 2048;
+        CaveBuilder.worldSize = 1024;
 
         if (args.Length > 1)
             CaveBuilder.worldSize = int.Parse(args[1]);
 
+        var timer = CaveUtils.StartTimer();
         var cachedPrefabs = CaveBuilder.GetRandomPrefabs(CaveBuilder.PREFAB_COUNT);
 
         Log.Out("Start solving graph...");
 
         List<Edge> edges = Graph.Resolve(cachedPrefabs.Prefabs);
 
-        var wiredCaveMap = new ConcurrentHashSet<Vector3i>();
+        int caveBlockCount = 0;
         int index = 0;
 
-        Parallel.ForEach(edges, edge =>
+        long memoryBefore = GC.GetTotalMemory(true);
+
+        object lockObject = new object();
+
+        var cavemap = new HashSet<Vector3i>();
+
+        using (var multistream = new MultiStream("cavemap", create: true))
         {
-            var p1 = edge.node1;
-            var p2 = edge.node2;
-
-            Log.Out($"Cave tunneling: {100.0f * ++index / edges.Count:F0}% ({index} / {edges.Count}) {wiredCaveMap.Count:N0}");
-
-            var path = CaveTunneler.FindPath(p1, p2, cachedPrefabs);
-            var cave = CaveTunneler.ThickenTunnel(path, p1, p2);
-
-            foreach (Vector3i node in cave)
+            using (var b = new Bitmap(CaveBuilder.worldSize, CaveBuilder.worldSize))
             {
-                wiredCaveMap.Add(node);
+                using (Graphics g = Graphics.FromImage(b))
+                {
+                    g.Clear(BackgroundColor);
+
+                    Parallel.ForEach(edges, edge =>
+                    {
+                        var p1 = edge.node1;
+                        var p2 = edge.node2;
+
+                        Log.Out($"Cave tunneling: {100.0f * ++index / edges.Count:F0}% ({index} / {edges.Count}) {caveBlockCount:N0}");
+
+                        var tunnel = CaveTunneler.GenerateTunnel(p1, p2, cachedPrefabs);
+
+                        foreach (CaveBlock caveBlock in tunnel)
+                        {
+                            var position = caveBlock.position;
+
+                            int region_x = position.x / CaveBuilder.RegionSize;
+                            int region_z = position.z / CaveBuilder.RegionSize;
+                            int regionID = region_x + region_z * CaveBuilder.regionGridSize;
+
+                            lock (lockObject)
+                            {
+                                cavemap.Add(position);
+                                b.SetPixel(position.x, position.z, TunnelsColor);
+                                var writer = multistream.GetWriter($"region_{regionID}.bin");
+                                caveBlock.ToBinaryStream(writer);
+                                caveBlockCount++;
+                            }
+                        }
+                    });
+
+                    DrawPrefabs(g, cachedPrefabs.Prefabs);
+                    b.Save(@"cave.png", ImageFormat.Png);
+                }
             }
-        });
-
-        var caveMap = wiredCaveMap.ToArray(); // CaveTunneler.ThickenCaveMap(wiredCaveMap.ToHashSet());
-
-        Log.Out("Start caves drawing");
-
-        using (var b = new Bitmap(CaveBuilder.worldSize, CaveBuilder.worldSize))
-        {
-
-            using (Graphics g = Graphics.FromImage(b))
-            {
-                g.Clear(BackgroundColor);
-
-                // DrawNoise(b, CaveBuilder.pathingNoise);
-                DrawPoints(b, caveMap, TunnelsColor);
-                DrawPrefabs(b, g, cachedPrefabs.Prefabs);
-            }
-
-            b.Save(@"cave.png", ImageFormat.Png);
         }
 
-        Console.WriteLine($"{caveMap.Length:N0} cave blocks generated, timer={CaveUtils.TimeFormat(timer)}.");
+        Console.WriteLine($"{caveBlockCount:N0} cave blocks generated, timer={CaveUtils.TimeFormat(timer)}, memory={(GC.GetTotalMemory(true) - memoryBefore) / 1_048_576.0:F1}MB.");
+
+        if (CaveBuilder.worldSize > 1024)
+            return;
+
+        var voxels = cavemap.Select((pos) => new Voxell(pos, WaveFrontMaterial.DarkRed)).ToHashSet();
+
+        foreach (var prefab in cachedPrefabs.Prefabs)
+        {
+            voxels.Add(new Voxell(prefab.position, prefab.Size, WaveFrontMaterial.DarkGreen) { force = true });
+
+            foreach (var marker in prefab.markers)
+            {
+                voxels.Add(new Voxell(prefab.position + marker.start, marker.size, WaveFrontMaterial.Orange) { force = true });
+            }
+        }
+
+
+        GenerateObjFile("cave.obj", voxels, false);
     }
 
     public static void CaveMapToWaveFront()
@@ -592,13 +372,15 @@ public static class CaveViewer
 
     public static void PrefabCommand(string[] args)
     {
+        if (args[0] == "") { }
+
         CaveBuilder.rand = new Random();
 
         var rand = CaveBuilder.rand;
         var prefab = new CavePrefab(0, rand);
 
         var voxels = new HashSet<Voxell>(){
-            new Voxell(prefab.position, prefab.size, WaveFrontMat.DarkGreen){ force = true },
+            new Voxell(prefab.position, prefab.Size, WaveFrontMaterial.DarkGreen){ force = true },
         };
 
         foreach (var points in prefab.GetMarkerPoints())
@@ -606,73 +388,12 @@ public static class CaveViewer
             // Log.Out(points.Count.ToString());
             foreach (var point in points)
             {
-                voxels.Add(new Voxell(point, WaveFrontMat.Orange));
+                voxels.Add(new Voxell(point, WaveFrontMaterial.Orange));
             }
             // break;
         }
 
         GenerateObjFile("prefab.obj", voxels, true);
-    }
-
-    public static void ProfileCaveMap(string filename)
-    {
-
-        long memoryBefore = GC.GetTotalMemory(true);
-
-        var caveMap = CaveBuilder.ReadCaveMap(filename);
-        int index = 0;
-
-        // var caveMap3i = CaveBuilder.ReadCaveMap3i(filename);
-
-        long memoryAfter = GC.GetTotalMemory(true);
-        long memoryUsed = memoryAfter - memoryBefore;
-
-        Log.Out($"Chunk count: {caveMap.Count}");
-
-        foreach (var entry in caveMap)
-        {
-
-            Log.Out(entry.Key.ToString());
-            Log.Out(string.Concat(Enumerable.Repeat("=", 10)));
-
-            foreach (Vector3bf point in entry.Value)
-            {
-                index++;
-                Log.Out(point.ToString());
-
-            }
-
-            Log.Out("");
-
-            if (index > 100)
-                break;
-        }
-
-        // Log.Out($"Memory before: {memoryBefore:N0} memory after {memoryAfter:N0}");
-        Log.Out($"Cave map size: {memoryUsed:N0} Bytes ({memoryUsed / 1_048_576.0:F1} MB)");
-
-        return;
-    }
-
-    public static void CaveMapCommand(string[] args)
-    {
-        string filename = "cavemap.txt";
-
-        if (args.Length > 1)
-        {
-            ProfileCaveMap(filename);
-            return;
-        }
-
-        var points = new HashSet<Vector3i>(){
-            new Vector3i(0, 0, 0),
-            new Vector3i(1, 0, 1),
-            new Vector3i(1, 0, 2),
-            new Vector3i(14, 0, 14),
-            new Vector3i(1, 0, 18),
-        };
-
-        CaveBuilder.SaveCaveMap(filename, points);
     }
 
     public static void HexToRgb(string[] args)
@@ -720,11 +441,6 @@ public static class CaveViewer
 
     public static void Main(string[] args)
     {
-        // var vec = new Vector3bf(15, 255, 1);
-        // Log.Out(vec.ToBinaryString());
-        // Log.Out(vec.ToString());
-        // return;
-
         Log.Out($"SEED .......... {CaveBuilder.SEED}");
         Log.Out($"SIZE .......... {CaveBuilder.worldSize}");
         Log.Out($"PREFAB_COUNT .. {CaveBuilder.PREFAB_COUNT}");
@@ -740,10 +456,6 @@ public static class CaveViewer
                 PathCommand(args);
                 break;
 
-            case "noise":
-                NoiseCommand(args);
-                break;
-
             case "cave":
             case "caves":
                 CaveCommand(args);
@@ -753,12 +465,16 @@ public static class CaveViewer
                 PrefabCommand(args);
                 break;
 
-            case "cavemap":
-                CaveMapCommand(args);
-                break;
-
             case "rgb":
                 HexToRgb(args);
+                break;
+
+            case "sphere":
+                SphereCommand(args);
+                break;
+
+            case "room":
+                RoomCommand(args);
                 break;
 
             default:
@@ -766,5 +482,4 @@ public static class CaveViewer
                 break;
         }
     }
-
 }

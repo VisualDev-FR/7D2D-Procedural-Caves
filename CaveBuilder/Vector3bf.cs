@@ -68,4 +68,18 @@ public struct Vector3bf
 
         return binaryString;
     }
+
+    public override int GetHashCode()
+    {
+        return value;
+    }
+
+    public override bool Equals(object obj)
+    {
+        if (obj is Vector3bf other)
+        {
+            return value == other.value;
+        }
+        return false;
+    }
 }

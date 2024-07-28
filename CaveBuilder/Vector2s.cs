@@ -46,6 +46,6 @@ public struct Vector2s
 
     public override int GetHashCode()
     {
-        return x ^ (z << 2);
+        return x + z * 1031;
     }
 }
