@@ -183,7 +183,7 @@ public class CavePrefab
             rand.Next(offset, mapSize - offset - Size.z)
         );
 
-        position.y = rand.Next(CaveBuilder.bedRockMargin, WorldBuilder.Instance.GetHeight(position.x, position.y) - Size.y);
+        position.y = rand.Next(CaveBuilder.bedRockMargin, (int)(WorldBuilder.Instance.GetHeight(position.x, position.y) - Size.y));
 
         UpdateMarkers(rand);
     }

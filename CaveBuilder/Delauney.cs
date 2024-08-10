@@ -151,13 +151,13 @@ public class DelauneyTriangle
         var p0 = Vertices[0];
         var p1 = Vertices[1];
         var p2 = Vertices[2];
-        var dA = p0.X * p0.X + p0.Y * p0.Y;
-        var dB = p1.X * p1.X + p1.Y * p1.Y;
-        var dC = p2.X * p2.X + p2.Y * p2.Y;
+        var dA = p0.X * p0.X + p0.Z * p0.Z;
+        var dB = p1.X * p1.X + p1.Z * p1.Z;
+        var dC = p2.X * p2.X + p2.Z * p2.Z;
 
-        var aux1 = (dA * (p2.Y - p1.Y) + dB * (p0.Y - p2.Y) + dC * (p1.Y - p0.Y));
+        var aux1 = dA * (p2.Z - p1.Z) + dB * (p0.Z - p2.Z) + dC * (p1.Z - p0.Z);
         var aux2 = -(dA * (p2.X - p1.X) + dB * (p0.X - p2.X) + dC * (p1.X - p0.X));
-        var div = (2 * (p0.X * (p2.Y - p1.Y) + p1.X * (p0.Y - p2.Y) + p2.X * (p1.Y - p0.Y)));
+        var div = 2 * (p0.X * (p2.Z - p1.Z) + p1.X * (p0.Z - p2.Z) + p2.X * (p1.Z - p0.Z));
 
         if (div == 0)
         {
@@ -166,13 +166,13 @@ public class DelauneyTriangle
 
         var center = new DelauneyPoint(aux1 / div, 0, aux2 / div, null);
         Circumcenter = center;
-        RadiusSquared = (center.X - p0.X) * (center.X - p0.X) + (center.Y - p0.Y) * (center.Y - p0.Y);
+        RadiusSquared = (center.X - p0.X) * (center.X - p0.X) + (center.Z - p0.Z) * (center.Z - p0.Z);
     }
 
     private bool IsCounterClockwise(DelauneyPoint point1, DelauneyPoint point2, DelauneyPoint point3)
     {
-        var result = (point2.X - point1.X) * (point3.Y - point1.Y) -
-            (point3.X - point1.X) * (point2.Y - point1.Y);
+        var result = (point2.X - point1.X) * (point3.Z - point1.Z) -
+            (point3.X - point1.X) * (point2.Z - point1.Z);
         return result > 0;
     }
 
@@ -185,7 +185,7 @@ public class DelauneyTriangle
     public bool IsPointInsideCircumcircle(DelauneyPoint point)
     {
         var d_squared = (point.X - Circumcenter.X) * (point.X - Circumcenter.X) +
-            (point.Y - Circumcenter.Y) * (point.Y - Circumcenter.Y);
+            (point.Z - Circumcenter.Z) * (point.Z - Circumcenter.Z);
         return d_squared < RadiusSquared;
     }
 }
@@ -208,9 +208,9 @@ public class DelauneyPoint
 
     public readonly CavePrefab prefab;
 
-    public float X => position.x;
+    public float X => position.X;
 
-    public float Y => position.z;
+    public float Z => position.Z;
 
     public HashSet<DelauneyTriangle> AdjacentTriangles { get; } = new HashSet<DelauneyTriangle>();
 
@@ -230,17 +230,17 @@ public class DelauneyPoint
     public override string ToString()
     {
         // Simple way of seeing what's going on in the debugger when investigating weirdness
-        return $"{nameof(DelauneyPoint)} {_instanceId} {X:0.##}@{Y:0.##}";
+        return $"{nameof(DelauneyPoint)} {_instanceId} {X:0.##}@{Z:0.##}";
     }
 
     public Vector3i ToVector3i(int y)
     {
-        return new Vector3i((int)X, y, (int)Y);
+        return new Vector3i((int)X, y, (int)Z);
     }
 
     public GraphNode ToGraphNode()
     {
-        var pos = new Vector3i((int)position.x, (int)position.y, (int)position.z);
+        var pos = new Vector3i((int)position.X, (int)position.Y, (int)position.Z);
         return new GraphNode(pos, prefab);
     }
 }
@@ -270,7 +270,7 @@ public class DelauneyEdge
 
     public override int GetHashCode()
     {
-        int hCode = (int)Point1.X ^ (int)Point1.Y ^ (int)Point2.X ^ (int)Point2.Y;
+        int hCode = (int)Point1.X ^ (int)Point1.Z ^ (int)Point2.X ^ (int)Point2.Z;
         return hCode.GetHashCode();
     }
 }

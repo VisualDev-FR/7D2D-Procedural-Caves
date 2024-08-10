@@ -154,6 +154,8 @@ public static class CaveUtils
         {
             Vector3i neighbor = position + offset;
 
+            CaveUtils.Assert(neighbor != null, "null neighbor");
+
             if (PositionIsValid(neighbor))
             {
                 validNeighbors.Add(neighbor);

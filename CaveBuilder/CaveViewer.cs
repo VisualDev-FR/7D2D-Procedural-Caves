@@ -28,11 +28,6 @@ public static class CaveViewer
         return new PointF(point.x, point.z);
     }
 
-    public static PointF ParsePointF(Vector3 point)
-    {
-        return new PointF(point.x, point.z);
-    }
-
     public static void DrawPrefabs(Graphics graph, List<CavePrefab> prefabs)
     {
         // throw new NotImplementedException("obsolete, has to be updated.");
@@ -219,7 +214,7 @@ public static class CaveViewer
             }
         }
 
-        GenerateObjFile("path.obj", voxels, false);
+        GenerateObjFile("path.obj", voxels, true);
     }
 
     public static void SphereCommand(string[] args)
@@ -263,7 +258,7 @@ public static class CaveViewer
 
         Log.Out($"{voxels.Count} voxels generated, timer = {CaveUtils.TimeFormat(timer)}");
 
-        GenerateObjFile("room.obj", voxels, false);
+        GenerateObjFile("room.obj", voxels, true);
     }
 
     public static void CaveCommand(string[] args)

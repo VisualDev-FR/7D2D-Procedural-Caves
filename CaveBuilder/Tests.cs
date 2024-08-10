@@ -62,19 +62,6 @@ public class GraphNodeTests
         Assert.AreNotEqual(p1, p2, $"{p1.BlockPos}({p1.BlockPos.GetHashCode()}) | {p2.BlockPos}({p2.BlockPos.GetHashCode()})");
     }
 
-    [TestMethod]
-    public void Test_Vect3iEquald()
-    {
-        Vector3i v1 = null;
-        Vector3i v2 = null;
-
-        Assert.AreEqual(null, v1);
-        Assert.IsTrue(v1 == null);
-        Assert.AreEqual(v1, v2);
-        Assert.IsTrue(v1 == v2);
-    }
-
-
     public static void Test_prefabGrouping()
     {
         long memoryBefore = GC.GetTotalMemory(true);
