@@ -149,7 +149,7 @@ public static class CaveTunneler
         return sphere;
     }
 
-    public static int GetTunnelRadius_sinusoid(int x, int yA, int yB, int xB)
+    private static int GetTunnelRadius_sinusoid(int x, int yA, int yB, int xB)
     {
         const float pi = 3.14159f;
         const float factorPi = 2.5f;
@@ -169,7 +169,7 @@ public static class CaveTunneler
         return (int)radius;
     }
 
-    public static int GetTunnelRadius_parabolic(int x, int yA, int yB, int xB)
+    private static int GetTunnelRadius_parabolic(int x, int yA, int yB, int xB)
     {
         const float mini = 1f;
 
@@ -193,7 +193,7 @@ public static class CaveTunneler
         return (int)radius;
     }
 
-    public static HashSet<CaveBlock> ThickenTunnel(List<CaveBlock> path, GraphNode start, GraphNode target)
+    private static HashSet<CaveBlock> ThickenTunnel(List<CaveBlock> path, GraphNode start, GraphNode target)
     {
         var caveMap = path.ToHashSet();
 
@@ -213,7 +213,7 @@ public static class CaveTunneler
         return caveMap;
     }
 
-    public static List<Vector3i> GetVerticalSections(List<Vector3i> path)
+    private static List<Vector3i> GetVerticalSections(List<Vector3i> path)
     {
         var result = new List<Vector3i>();
 
@@ -234,7 +234,7 @@ public static class CaveTunneler
         return result;
     }
 
-    public static List<CaveBlock> GetWaterBlocks(List<CaveBlock> path)
+    private static List<CaveBlock> GetWaterBlocks(List<CaveBlock> path)
     {
         var result = new List<CaveBlock>();
         var queue = new HashSet<CaveBlock>() { path.First() };

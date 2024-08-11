@@ -96,8 +96,27 @@
     <Compile Include="Scripts\StalactiteGenerator.cs" />
 
     <!-- Cave Builder -->
-    <Compile Include="CaveBuilder\FastNoiseLite.cs" />
+    <Compile Include="CaveBuilder\AstarNode.cs" />
+    <Compile Include="CaveBuilder\CaveBlock.cs" />
     <Compile Include="CaveBuilder\CaveBuilder.cs" />
+    <Compile Include="CaveBuilder\CaveChunkProvider.cs" />
+    <Compile Include="CaveBuilder\CaveNoise.cs" />
+    <Compile Include="CaveBuilder\CavePrefab.cs" />
+    <Compile Include="CaveBuilder\CavePrefabGenerator.cs" />
+    <Compile Include="CaveBuilder\CaveRegion.cs" />
+    <Compile Include="CaveBuilder\CaveTunneler.cs" />
+    <Compile Include="CaveBuilder\CaveUtils.cs" />
+    <Compile Include="CaveBuilder\Delauney.cs" />
+    <Compile Include="CaveBuilder\Direction.cs" />
+    <Compile Include="CaveBuilder\FastNoiseLite.cs" />
+    <Compile Include="CaveBuilder\Graph.cs" />
+    <Compile Include="CaveBuilder\GraphEdge.cs" />
+    <Compile Include="CaveBuilder\GraphNode.cs" />
+    <Compile Include="CaveBuilder\HashedPriorityQueue.cs" />
+    <Compile Include="CaveBuilder\MultiStream.cs" />
+    <Compile Include="CaveBuilder\PrefabCache.cs" />
+    <Compile Include="CaveBuilder\PrefabTunneler.cs" />
+    <Compile Include="CaveBuilder\Segment.cs" />
     <Compile Include="CaveBuilder\Vector2s.cs" />
     <Compile Include="CaveBuilder\Vector3bf.cs" />
 

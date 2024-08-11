@@ -7,7 +7,7 @@ public static class GameManager_createWorld
 {
     public static bool Prefix(string _sWorldName, string _sGameName, List<WallVolume> _wallVolumes, bool _fixedSizeCC = false)
     {
-        CaveGenerator.LoadCaveMap(_sWorldName);
+        CaveGenerator.Init(_sWorldName);
         return true;
     }
 }

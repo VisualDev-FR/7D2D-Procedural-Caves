@@ -26,6 +26,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using UnityEngine;
 
 
 public class DelaunayTriangulator
@@ -208,9 +209,9 @@ public class DelauneyPoint
 
     public readonly CavePrefab prefab;
 
-    public float X => position.X;
+    public float X => position.x;
 
-    public float Z => position.Z;
+    public float Z => position.z;
 
     public HashSet<DelauneyTriangle> AdjacentTriangles { get; } = new HashSet<DelauneyTriangle>();
 
@@ -227,12 +228,6 @@ public class DelauneyPoint
         this.prefab = prefab;
     }
 
-    public override string ToString()
-    {
-        // Simple way of seeing what's going on in the debugger when investigating weirdness
-        return $"{nameof(DelauneyPoint)} {_instanceId} {X:0.##}@{Z:0.##}";
-    }
-
     public Vector3i ToVector3i(int y)
     {
         return new Vector3i((int)X, y, (int)Z);
@@ -240,7 +235,7 @@ public class DelauneyPoint
 
     public GraphNode ToGraphNode()
     {
-        var pos = new Vector3i((int)position.X, (int)position.Y, (int)position.Z);
+        var pos = new Vector3i((int)position.x, (int)position.x, (int)position.x);
         return new GraphNode(pos, prefab);
     }
 }

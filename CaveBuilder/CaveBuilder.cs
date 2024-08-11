@@ -14,7 +14,11 @@ public static class CaveBuilder
 
     public static int RegionSize = 512;
 
+    public static int ChunkSize = 16;
+
     public static int regionGridSize = worldSize / RegionSize;
+
+    public static int chunkGridSize = RegionSize / ChunkSize;
 
     public static int MIN_PREFAB_SIZE = 8;
 

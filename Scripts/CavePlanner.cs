@@ -10,36 +10,37 @@ using UnityEngine.Experimental.Rendering;
 using System.Collections;
 using System;
 
+using Path = System.IO.Path;
+
 
 public static class CavePlanner
 {
     private static Dictionary<string, PrefabData> allCavePrefabs = new Dictionary<string, PrefabData>();
 
+    public static int AllPrefabsCount => allCavePrefabs.Count;
+
     private static List<string> entrancePrefabsNames = new List<string>();
 
     public static int EntrancePrefabCount => entrancePrefabsNames.Count;
-
-    public static int AllPrefabsCount => allCavePrefabs.Count;
 
     private static Random rand = CaveBuilder.rand;
 
     private static WorldBuilder WorldBuilder => WorldBuilder.Instance;
 
-    private static int WorldSize => WorldBuilder.WorldSize;
+    private static int WorldSize => WorldBuilder.Instance.WorldSize;
 
-    private static int Seed => WorldBuilder.Seed + WorldSize;
+    private static int Seed => WorldBuilder.Instance.Seed + WorldSize;
 
     private const int maxPlacementAttempts = 20;
 
     private static Vector3i HalfWorldSize => new Vector3i(WorldBuilder.HalfWorldSize, 0, WorldBuilder.HalfWorldSize);
 
-    private static HashSet<Vector3i> caveMap = null;
+    private static readonly string CaveTempDir = $"{GameIO.GetUserGameDataDir()}/temp";
 
     public static void Init()
     {
         entrancePrefabsNames = new List<string>();
         allCavePrefabs = new Dictionary<string, PrefabData>();
-        caveMap = new HashSet<Vector3i>();
         CaveBuilder.rand = new Random(CaveBuilder.SEED);
     }
 
@@ -168,7 +169,7 @@ public static class CavePlanner
 
     public static bool OverLaps2D(Vector3i position, Vector3i size, CavePrefab other)
     {
-        var otherSize = CaveUtils.GetRotatedSize(other.size, other.rotation);
+        var otherSize = CaveUtils.GetRotatedSize(other.Size, other.rotation);
         var otherPos = other.position;
 
         int overlapMargin = CaveBuilder.overLapMargin;
@@ -251,14 +252,10 @@ public static class CavePlanner
 
     public static IEnumerator GenerateCaveMap()
     {
-        caveMap = new HashSet<Vector3i>();
-
         Log.Out($"[Cave] worldsize = {WorldSize}");
         Log.Out($"[Cave] Seed = {Seed}");
 
         PrefabCache addedCaveEntrances = GetUsedCavePrefabs();
-
-        Log.Out($"[Cave] {addedCaveEntrances.Count} Cave entrance added.");
 
         foreach (var prefab in addedCaveEntrances.Prefabs)
         {
@@ -274,38 +271,49 @@ public static class CavePlanner
 
         yield return WorldBuilder.SetMessage("Spawning cave prefabs...", _logToConsole: true);
 
-        PrefabCache cavePrefabs = PlaceCavePrefabs(CaveBuilder.PREFAB_COUNT, addedCaveEntrances);
+        PrefabCache cachedPrefabs = PlaceCavePrefabs(CaveBuilder.PREFAB_COUNT, addedCaveEntrances);
 
-        yield return GenerateCavePreview(cavePrefabs.Prefabs, caveMap);
+        List<Edge> edges = Graph.Resolve(cachedPrefabs.Prefabs);
 
-        List<Edge> edges = Graph.Resolve(cavePrefabs.Prefabs);
-
+        int caveBlockCount = 0;
         int index = 0;
 
-        foreach (var edge in edges)
+        using (var multistream = new MultiStream($"{CaveTempDir}/cavemap", create: true))
         {
-            GraphNode p1 = edge.node1;
-            GraphNode p2 = edge.node2;
+            foreach (var edge in edges)
+            {
+                GraphNode p1 = edge.node1;
+                GraphNode p2 = edge.node2;
 
-            string message = $"Cave tunneling: {100.0f * index++ / edges.Count:F0}% ({index} / {edges.Count})";
+                string message = $"Cave tunneling: {100.0f * index++ / edges.Count:F0}% ({index} / {edges.Count})";
 
-            yield return WorldBuilder.SetMessage(message);
+                yield return WorldBuilder.SetMessage(message);
 
-            var path = CaveTunneler.FindPath(p1, p2, cavePrefabs);
-            var tunnel = CaveTunneler.ThickenTunnel(path, p1, p2);
+                var tunnel = CaveTunneler.GenerateTunnel(p1, p2, cachedPrefabs);
 
-            caveMap.UnionWith(tunnel);
+                foreach (CaveBlock caveBlock in tunnel)
+                {
+                    var position = caveBlock.position;
+
+                    int region_x = position.x / CaveBuilder.RegionSize;
+                    int region_z = position.z / CaveBuilder.RegionSize;
+                    int regionID = region_x + region_z * CaveBuilder.regionGridSize;
+
+                    var writer = multistream.GetWriter($"region_{regionID}.bin");
+                    caveBlock.ToBinaryStream(writer);
+                    caveBlockCount++;
+                }
+            }
         }
 
         yield return WorldBuilder.SetMessage("Creating cave preview...", _logToConsole: true);
-        yield return GenerateCavePreview(cavePrefabs.Prefabs, caveMap);
 
-        Log.Out($"{caveMap.Count} cave blocks generated, timer={CaveUtils.TimeFormat(timer)}.");
+        Log.Out($"{caveBlockCount} cave blocks generated, timer={CaveUtils.TimeFormat(timer)}.");
 
         yield return null;
     }
 
-    public static IEnumerator GenerateCavePreview(List<CavePrefab> prefabs, HashSet<Vector3i> caveMap)
+    public static IEnumerator GenerateCavePreview(List<CavePrefab> prefabs, HashSet<CaveBlock> caveMap)
     {
         string filename = @"C:\tools\DEV\7D2D_Modding\7D2D-Procedural-caves\CaveBuilder\graph.png";
 
@@ -342,11 +350,28 @@ public static class CavePlanner
 
     public static void SaveCaveMap()
     {
-        string filename = WorldBuilder.WorldPath + "cavemap.csv";
+        string source = $"{CaveTempDir}/cavemap";
+        string destination = $"{WorldBuilder.WorldPath}/cavemap";
 
-        Log.Out(filename);
-        Log.Out($"caveMap size = {caveMap.Count}");
+        if (!Directory.Exists(source))
+            return;
 
-        CaveBuilder.SaveCaveMap(filename, caveMap);
+        if (!Directory.Exists(destination))
+            Directory.CreateDirectory(destination);
+
+        try
+        {
+            foreach (string filePath in Directory.GetFiles(source))
+            {
+                string fileName = Path.GetFileName(filePath);
+                string destPath = Path.Combine(destination, fileName);
+
+                File.Move(filePath, destPath);
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Error($"An error occured: {ex.Message}");
+        }
     }
 }
