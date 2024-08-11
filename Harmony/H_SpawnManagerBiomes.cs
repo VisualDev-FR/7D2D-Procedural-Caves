@@ -1,6 +1,9 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using HarmonyLib;
 using UnityEngine;
+using WorldGenerationEngineFinal;
 
 
 [HarmonyPatch(typeof(SpawnManagerBiomes), "Update")]
@@ -8,12 +11,10 @@ public class SpawnManagerBiomes_Update
 {
     public static bool Prefix(SpawnManagerBiomes __instance, string _spawnerName, bool _bSpawnEnemyEntities, object _userData, ref List<Entity> ___spawnNearList, ref int ___lastClassId)
     {
-        // TODO:
-        // if (!GameUtils.IsPlaytesting())
-        // {
-        //     SpawnUpdate(_spawnerName, _bSpawnEnemyEntities, _userData as ChunkAreaBiomeSpawnData,
-        //         ref ___spawnNearList, ref ___lastClassId);
-        // }
+        if (!GameUtils.IsPlaytesting())
+        {
+            SpawnUpdate(_spawnerName, _bSpawnEnemyEntities, _userData as ChunkAreaBiomeSpawnData, ref ___spawnNearList, ref ___lastClassId);
+        }
 
         return true;
     }
@@ -67,19 +68,14 @@ public class SpawnManagerBiomes_Update
         // Don't allow above ground spawning.
         var playerPosition = new Vector3i(playerPos);
         float terrainHeight = GameManager.Instance.World.GetTerrainHeight(playerPosition.x, playerPosition.z);
-        if (playerPosition.y > terrainHeight)
+
+        if (playerPosition.y > terrainHeight || !rectOverlaps)
             return;
 
-        var maxDistance = new Vector3(60, 20, 60);
-        if (!rectOverlaps || !GameManager.Instance.World.FindRandomSpawnPointNearPositionUnderground(playerPosition, 16, out int x, out int y, out int z, maxDistance))
-        {
-            return;
-        }
-
-        var spawnPosition = new Vector3(x, y, z);
+        var spawnPosition = GetZombieSpawnPosition(playerPosition);
 
         // Mob is above terrain; ignore.
-        if (spawnPosition.y > terrainHeight)
+        if (spawnPosition == Vector3.zero)
             return;
 
         var biome = GameManager.Instance.World.Biomes.GetBiome(_chunkBiomeSpawnData.biomeId);
@@ -155,10 +151,27 @@ public class SpawnManagerBiomes_Update
             return;
 
         var biomeSpawnEntityGroupData3 = biomeSpawnEntityGroupList.list[index];
-        var randomFromGroup = EntityGroups.GetRandomFromGroup(biomeSpawnEntityGroupData3.entityGroupRefName, ref lastClassId);
+        var entityID = EntityGroups.GetRandomFromGroup(biomeSpawnEntityGroupData3.entityGroupRefName, ref lastClassId);
         _chunkBiomeSpawnData.IncEntitiesSpawned(entityGroupName);
 
-        SpawnEntity(randomFromGroup, spawnPosition, _chunkBiomeSpawnData, entityGroupName);
+        Log.Out($"[Caves] Spawning: {entityID} at {spawnPosition}, playerPos={playerPosition}");
+
+        SpawnEntity(entityID, spawnPosition, _chunkBiomeSpawnData, entityGroupName);
+    }
+
+    public static Vector3 GetZombieSpawnPosition(Vector3 playerPosition)
+    {
+        GameRandom random = GameRandomManager.instance.CreateGameRandom(playerPosition.GetHashCode());
+        List<CaveBlock> spawnPositions = CaveGenerator.caveBlocksProvider.GetSpawnPositions(playerPosition);
+
+        if (spawnPositions.Count == 0)
+            return Vector3.zero;
+
+        CaveBlock caveblock = spawnPositions[random.Next(spawnPositions.Count)];
+
+        Vector3 spawnPosition = caveblock.ToWorldPos();
+
+        return spawnPosition;
     }
 
     private static void SpawnEntity(int id, Vector3 spawnPosition, ChunkAreaBiomeSpawnData _chunkBiomeSpawnData, string entityGroupName)
@@ -167,10 +180,10 @@ public class SpawnManagerBiomes_Update
         entity.SetSpawnerSource(EnumSpawnerSource.Dynamic, _chunkBiomeSpawnData.chunk.Key, entityGroupName);
 
         var myEntity = entity as EntityAlive;
+
         if (myEntity)
             myEntity.SetSleeper();
 
-        Log.Out($"[Caves] Spawning: {myEntity.entityId} at {spawnPosition}");
         GameManager.Instance.World.SpawnEntityInWorld(entity);
         GameManager.Instance.World.DebugAddSpawnedEntity(entity);
     }

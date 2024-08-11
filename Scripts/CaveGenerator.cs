@@ -2,7 +2,7 @@ using System;
 
 public static class CaveGenerator
 {
-    private static CaveChunkProvider caveChunkProvider;
+    public static CaveBlocksProvider caveBlocksProvider;
 
     private static BlockValue caveAir = new BlockValue((uint)Block.GetBlockByName("air").blockID);
 
@@ -12,7 +12,7 @@ public static class CaveGenerator
 
     public static void Init(string worldName)
     {
-        caveChunkProvider = new CaveChunkProvider(worldName);
+        caveBlocksProvider = new CaveBlocksProvider(worldName);
     }
 
     public static bool IsInsideChunk(Vector3i position, Vector3i chunkPos)
@@ -40,7 +40,7 @@ public static class CaveGenerator
             return;
         }
 
-        var blockPositions = caveChunkProvider.GetCaveChunk(chunk);
+        var blockPositions = caveBlocksProvider.GetCaveBlocks(chunk);
 
         if (blockPositions == null)
             return;

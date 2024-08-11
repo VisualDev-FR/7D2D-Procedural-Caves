@@ -30,7 +30,7 @@ public class CaveRegion
         }
     }
 
-    public HashSet<CaveBlock> GetChunk(Vector2s chunkPos)
+    public HashSet<CaveBlock> GetCaveBlocks(Vector2s chunkPos)
     {
         if (CaveChunks.TryGetValue(chunkPos, out var positions))
         {

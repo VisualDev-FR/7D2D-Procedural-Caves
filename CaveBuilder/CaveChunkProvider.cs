@@ -1,13 +1,15 @@
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using UnityEngine;
 
-public class CaveChunkProvider
+public class CaveBlocksProvider
 {
     public string cavemapDir;
 
     public Dictionary<int, CaveRegion> regions;
 
-    public CaveChunkProvider(string worldName)
+    public CaveBlocksProvider(string worldName)
     {
         regions = new Dictionary<int, CaveRegion>();
         cavemapDir = $"{GameIO.GetWorldDir(worldName)}/cavemap";
@@ -61,9 +63,8 @@ public class CaveChunkProvider
         );
     }
 
-    public HashSet<CaveBlock> GetCaveChunk(Chunk chunk)
+    public HashSet<CaveBlock> GetCaveBlocks(Vector2s chunkPos)
     {
-        var chunkPos = GetChunkPos(chunk);
         var regionID = GetRegionID(chunkPos);
         var caveRegion = GetRegion(regionID);
 
@@ -72,6 +73,59 @@ public class CaveChunkProvider
             return null;
         }
 
-        return caveRegion.GetChunk(chunkPos);
+        return caveRegion.GetCaveBlocks(chunkPos);
+    }
+
+    public HashSet<CaveBlock> GetCaveBlocks(Chunk chunk)
+    {
+        var chunkPos = GetChunkPos(chunk);
+        return GetCaveBlocks(chunkPos);
+    }
+
+    public static List<CaveBlock> FilterFloorBlocks(HashSet<CaveBlock> blocks)
+    {
+        HashSet<Vector3> positions = blocks.Select(block => block.BlockPos.ToVector3()).ToHashSet();
+        List<CaveBlock> result = new List<CaveBlock>();
+
+        foreach (var block in blocks)
+        {
+            var upper = block.BlockPos.ToVector3() + Vector3.up;
+            var lower = block.BlockPos.ToVector3() + Vector3.down;
+
+            if (!positions.Contains(lower) && positions.Contains(upper))
+            {
+                result.Add(block);
+            }
+        }
+
+        return result;
+    }
+
+    public List<CaveBlock> GetSpawnPositions(Vector3 worldPosition)
+    {
+        var caveBlocks = new HashSet<CaveBlock>();
+        var chunkPos = new Vector2s(
+            (int)worldPosition.x / 16 + CaveBuilder.worldSize / 32,
+            (int)worldPosition.z / 16 + CaveBuilder.worldSize / 32
+        );
+
+        for (int dx = -1; dx <= 1; dx++)
+        {
+            for (int dz = -1; dz <= 1; dz++)
+            {
+                if (dx == 0 && dz == 0)
+                    continue;
+
+                var neighborChunkPos = new Vector2s(chunkPos.x + dx, chunkPos.z + dz);
+                var blocks = GetCaveBlocks(neighborChunkPos);
+
+                if (blocks == null)
+                    continue;
+
+                caveBlocks.UnionWith(FilterFloorBlocks(blocks));
+            }
+        }
+
+        return caveBlocks.ToList();
     }
 }

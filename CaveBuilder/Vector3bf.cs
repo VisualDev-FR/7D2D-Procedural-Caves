@@ -1,6 +1,7 @@
 #pragma warning disable IDE1006
 
 using System;
+using UnityEngine;
 
 public struct Vector3bf
 {
@@ -57,6 +58,11 @@ public struct Vector3bf
     public override string ToString()
     {
         return $"{x},{y},{z}";
+    }
+
+    public Vector3 ToVector3()
+    {
+        return new Vector3(x, y, z);
     }
 
     public string ToBinaryString()

@@ -1,4 +1,5 @@
 using System.IO;
+using UnityEngine;
 
 public struct CaveBlock
 {
@@ -92,6 +93,17 @@ public struct CaveBlock
     public static bool operator !=(CaveBlock p1, CaveBlock p2)
     {
         return !(p1 == p2);
+    }
+
+    public Vector3 ToWorldPos()
+    {
+        Vector3 chunkPos = new Vector3(
+            ChunkPos.x - CaveBuilder.worldSize / 32,
+            0,
+            ChunkPos.z - CaveBuilder.worldSize / 32
+        );
+
+        return 16 * chunkPos + BlockPos.ToVector3();
     }
 
     public override string ToString()
