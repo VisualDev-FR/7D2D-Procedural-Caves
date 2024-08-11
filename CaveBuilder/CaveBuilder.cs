@@ -38,7 +38,7 @@ public static class CaveBuilder
 
     public static int bedRockMargin = 2;
 
-    public static int terrainMargin = 5;
+    public static int terrainMargin = 2;
 
     public static CaveNoise pathingNoise = CaveNoise.defaultNoise;
 

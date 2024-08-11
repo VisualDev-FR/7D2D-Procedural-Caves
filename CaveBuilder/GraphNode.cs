@@ -24,9 +24,7 @@ public class GraphNode
         CaveUtils.Assert(marker != null, $"null marker");
         CaveUtils.Assert(marker.size != null, $"null marker size");
 
-        Radius = CaveUtils.FastMin(CaveUtils.FastMax(marker.size.x, marker.size.z), marker.size.y) / 2;
-
-        Log.Warning("Invalid node placement to be fixed");
+        Radius = CaveUtils.FastMax(1, CaveUtils.FastMin(CaveUtils.FastMax(marker.size.x, marker.size.z), marker.size.y) / 2);
 
         // TODO: find a way to ensure that the node is in the marker volume
         position = new Vector3i(
@@ -138,11 +136,11 @@ public class GraphNode
                 if (pos.y < markerStart.y || pos.y >= markerEnd.y)
                     continue;
 
-                // if (direction.Vector.x == 0 && (pos.x < markerStart.x || pos.x >= markerEnd.x))
-                //     continue;
+                if (direction.Vector.x == 0 && (pos.x < markerStart.x || pos.x >= markerEnd.x))
+                    continue;
 
-                // if (direction.Vector.z == 0 && (pos.z < markerStart.z || pos.z >= markerEnd.z))
-                //     continue;
+                if (direction.Vector.z == 0 && (pos.z < markerStart.z || pos.z >= markerEnd.z))
+                    continue;
 
                 if (CaveUtils.SqrEuclidianDist(pos, center) >= sqrRadius)
                     continue;

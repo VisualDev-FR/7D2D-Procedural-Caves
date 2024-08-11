@@ -67,8 +67,6 @@ public class CaveChunkProvider
         var regionID = GetRegionID(chunkPos);
         var caveRegion = GetRegion(regionID);
 
-        Log.Out($"chunk=[{chunk.ChunkPos.x}, {chunk.ChunkPos.z}] -> [{chunkPos.x}, {chunkPos.z}]: regionID={regionID}");
-
         if (caveRegion == null)
         {
             return null;

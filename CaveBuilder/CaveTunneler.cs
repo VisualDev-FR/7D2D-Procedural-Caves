@@ -39,13 +39,17 @@ public static class CaveTunneler
 
             foreach (AstarNode neighbor in currentNode.GetNeighbors())
             {
-                // CaveUtils.Assert(neighbor.position.y >= CaveBuilder.bedRockMargin, $"{currentNode.position} | {neighbor.position}");
-
                 if (neighbor.position == goalNode.position)
                 {
                     neighbor.Parent = currentNode;
                     return ReconstructPath(neighbor);
                 }
+
+                if (neighbor.position.y < CaveBuilder.bedRockMargin + 1)
+                    continue;
+
+                if (neighbor.position.y + CaveBuilder.terrainMargin + 1 > WorldBuilder.Instance.GetHeight(neighbor.position.x, neighbor.position.z))
+                    continue;
 
                 if (visited.Contains(neighbor))
                     continue;
@@ -119,27 +123,12 @@ public static class CaveTunneler
                 if (pos.y + CaveBuilder.terrainMargin >= WorldBuilder.Instance.GetHeight(pos.x, pos.z))
                     continue;
 
-                sphere.Add(caveBlock);
-
-                int dx = center.position.x - pos.x;
-                int dy = center.position.y - pos.y;
-                int dz = center.position.z - pos.z;
-                int dx1 = center.position.x + dx;
-                int dy1 = center.position.y + dy;
-                int dz1 = center.position.z + dz;
-
-                sphere.Add(new CaveBlock(dx1, pos.y, pos.z));
-                sphere.Add(new CaveBlock(pos.x, dy1, pos.z));
-                sphere.Add(new CaveBlock(pos.x, pos.y, dz1));
-                sphere.Add(new CaveBlock(dx1, dy1, pos.z));
-                sphere.Add(new CaveBlock(dx1, pos.y, dz1));
-                sphere.Add(new CaveBlock(pos.x, dy1, dz1));
-                sphere.Add(new CaveBlock(dx1, dy1, dz1));
+                sphere.Add(new CaveBlock(pos));
 
                 if (CaveUtils.SqrEuclidianDist(pos, center.position) >= sqrRadius)
                     continue;
 
-                foreach (var offset in offsets)
+                foreach (var offset in CaveUtils.neighborsOffsets)
                 {
                     queue.Add(pos + offset);
                 }
