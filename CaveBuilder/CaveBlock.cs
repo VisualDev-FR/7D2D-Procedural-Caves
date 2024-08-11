@@ -99,6 +99,41 @@ public struct CaveBlock
         return $"{x},{y},{z}";
     }
 
+    // public static SortedDictionary<Vector3i, List<string>> GroupByChunk(HashSet<Vector3i> caveMap)
+    // {
+    //     var groupedCaveMap = new SortedDictionary<Vector3i, List<string>>(new VectorComparer());
+
+    //     foreach (var pos in caveMap)
+    //     {
+    //         Vector3i chunkPos = GetChunkPosZX(pos);
+
+    //         if (!groupedCaveMap.ContainsKey(chunkPos))
+    //             groupedCaveMap[chunkPos] = new List<string>();
+
+    //         var transform = new Vector3i(
+    //             16 * (pos.x / 16),
+    //             0,
+    //             16 * (pos.z / 16)
+    //         );
+
+    //         var chunkRelativePos = pos - transform;
+
+    //         // groupedCaveMap[chunkPos].Add($"{pos} - {transform} = {relative_pos}");
+    //         groupedCaveMap[chunkPos].Add(chunkRelativePos.ToString());
+
+    //         if (chunkRelativePos.x < 0 || chunkRelativePos.x > 15)
+    //             throw new Exception($"ChunkPos.x out of bound: {pos} - {transform} = {chunkRelativePos}");
+
+    //         if (chunkRelativePos.y < 0 || chunkRelativePos.y > 255)
+    //             throw new Exception($"ChunkPos.y out of bound: {pos} - {transform} = {chunkRelativePos}");
+
+    //         if (chunkRelativePos.z < 0 || chunkRelativePos.z > 15)
+    //             throw new Exception($"ChunkPos.z out of bound: {pos} - {transform} = {chunkRelativePos}");
+    //     }
+
+    //     return groupedCaveMap;
+    // }
+
     public void ToBinaryStream(BinaryWriter writer)
     {
         writer.Write(ChunkPos.x);

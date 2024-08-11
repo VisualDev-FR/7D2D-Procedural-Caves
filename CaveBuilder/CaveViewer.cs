@@ -434,6 +434,21 @@ public static class CaveViewer
 
     }
 
+    public static void RegionCommand(string[] args)
+    {
+        string dirname = @"C:\Users\menan\AppData\Roaming\7DaysToDie\GeneratedWorlds\Old Honihebu County\cavemap";
+
+        for (int i = 0; i < 16; i++)
+        {
+            string filename = $"{dirname}/region_{i}.bin";
+
+            var timer = CaveUtils.StartTimer();
+            var region = new CaveRegion(filename);
+
+            Log.Out($"{i}: ChunkCount={region.ChunkCount}, timer={timer.ElapsedMilliseconds}ms");
+        }
+    }
+
     public static void Main(string[] args)
     {
         Log.Out($"SEED .......... {CaveBuilder.SEED}");
@@ -470,6 +485,10 @@ public static class CaveViewer
 
             case "room":
                 RoomCommand(args);
+                break;
+
+            case "region":
+                RegionCommand(args);
                 break;
 
             default:

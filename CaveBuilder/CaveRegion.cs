@@ -3,13 +3,13 @@ using System.IO;
 
 public class CaveRegion
 {
-    private readonly Dictionary<Vector2s, List<Vector3bf>> CaveChunks;
+    private readonly Dictionary<Vector2s, HashSet<CaveBlock>> CaveChunks;
 
     public int ChunkCount => CaveChunks.Count;
 
     public CaveRegion(string filename)
     {
-        CaveChunks = new Dictionary<Vector2s, List<Vector3bf>>();
+        CaveChunks = new Dictionary<Vector2s, HashSet<CaveBlock>>();
 
         using (var stream = new FileStream(filename, FileMode.Open))
         {
@@ -17,28 +17,21 @@ public class CaveRegion
             {
                 while (stream.Position < stream.Length)
                 {
-                    short chunk_x = reader.ReadInt16();
-                    short chunk_z = reader.ReadInt16();
-                    ushort bitfield = reader.ReadUInt16();
+                    var caveBlock = new CaveBlock(reader);
 
-                    var chunkPos = new Vector2s(chunk_x, chunk_z);
-                    var blockPos = new Vector3bf(bitfield);
-
-                    if (!CaveChunks.ContainsKey(chunkPos))
+                    if (!CaveChunks.ContainsKey(caveBlock.ChunkPos))
                     {
-                        CaveChunks[chunkPos] = new List<Vector3bf>();
+                        CaveChunks[caveBlock.ChunkPos] = new HashSet<CaveBlock>();
                     }
 
-                    CaveChunks[chunkPos].Add(blockPos);
+                    CaveChunks[caveBlock.ChunkPos].Add(caveBlock);
                 }
             }
         }
     }
 
-    public List<Vector3bf> GetChunk(Chunk chunk)
+    public HashSet<CaveBlock> GetChunk(Vector2s chunkPos)
     {
-        var chunkPos = new Vector2s(chunk.ChunkPos);
-
         if (CaveChunks.TryGetValue(chunkPos, out var positions))
         {
             return positions;

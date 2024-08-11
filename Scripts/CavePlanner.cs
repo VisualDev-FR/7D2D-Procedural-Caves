@@ -308,7 +308,7 @@ public static class CavePlanner
 
         yield return WorldBuilder.SetMessage("Creating cave preview...", _logToConsole: true);
 
-        Log.Out($"{caveBlockCount} cave blocks generated, timer={CaveUtils.TimeFormat(timer)}.");
+        Log.Out($"{caveBlockCount:N0} cave blocks generated, timer={CaveUtils.TimeFormat(timer)}.");
 
         yield return null;
     }

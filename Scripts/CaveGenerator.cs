@@ -45,8 +45,10 @@ public static class CaveGenerator
         if (blockPositions == null)
             return;
 
-        foreach (Vector3bf pos in blockPositions)
+        foreach (CaveBlock block in blockPositions)
         {
+            var pos = block.BlockPos;
+
             try
             {
                 chunk.SetBlockRaw(pos.x, pos.y, pos.z, caveAir);
@@ -54,7 +56,7 @@ public static class CaveGenerator
             }
             catch (Exception e)
             {
-                Log.Error($"[Cave] {e.GetType()} (Chunk={chunk.ChunkPos}, block={pos})");
+                Log.Error($"[Cave] {e.GetType()} (Chunk={block.ChunkPos}, block={block.BlockPos})");
             }
         }
     }
