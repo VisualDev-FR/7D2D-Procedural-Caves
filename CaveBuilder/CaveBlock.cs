@@ -1,7 +1,7 @@
 using System.IO;
 using UnityEngine;
 
-public struct CaveBlock
+public class CaveBlock
 {
     public Vector2s ChunkPos { get; internal set; }
 

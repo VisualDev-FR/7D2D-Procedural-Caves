@@ -109,10 +109,7 @@ public static class CaveTunneler
             {
                 queue.Remove(pos);
 
-                var caveBlock = new CaveBlock(pos)
-                {
-                    isWater = center.isWater && pos.y < center.y && sqrRadius < 16
-                };
+                var caveBlock = new CaveBlock(pos);
 
                 if (sphere.Contains(caveBlock))
                     continue;
@@ -123,7 +120,7 @@ public static class CaveTunneler
                 if (pos.y + CaveBuilder.terrainMargin >= WorldBuilder.Instance.GetHeight(pos.x, pos.z))
                     continue;
 
-                sphere.Add(new CaveBlock(pos));
+                sphere.Add(caveBlock);
 
                 if (CaveUtils.SqrEuclidianDist(pos, center.position) >= sqrRadius)
                     continue;
@@ -223,50 +220,75 @@ public static class CaveTunneler
         return result;
     }
 
-    private static List<CaveBlock> GetWaterBlocks(List<CaveBlock> path)
+    private static void SetWaterBlocks(List<CaveBlock> path)
     {
-        var result = new List<CaveBlock>();
         var queue = new HashSet<CaveBlock>() { path.First() };
         var visited = new HashSet<CaveBlock>();
-        var hashPath = path.ToHashSet();
-        var index = 0;
+        var waterQueue = new List<CaveBlock>();
         var waterLevel = path.First().y;
-        var currentLevel = path.First().y;
 
-        while (queue.Count > 0 && index++ < 100_000)
+        var i = 0;
+        while (i++ < path.Count - 1)
         {
-            var currentNode = queue.First();
-
-            visited.Add(currentNode);
-            queue.Remove(currentNode);
-
-            foreach (var position in CaveUtils.GetValidNeighbors(currentNode.position))
+            if (path[i - 1].position.y > path[i].position.y)
             {
-                var neighbor = new CaveBlock(position);
+                waterQueue = new List<CaveBlock>() { path[i] };
 
-                if (visited.Contains(neighbor) || !hashPath.Contains(neighbor))
-                    continue;
+                while (i++ < path.Count - 1)
+                {
+                    if (path[i - 1].position.y < path[i].position.y)
+                    {
+                        waterQueue.ForEach(block => block.SetWater(true));
+                        break;
+                    }
+                    else if (path[i - 1].position.y > path[i].position.y)
+                    {
+                        break;
+                    }
 
-                if (neighbor.y < currentNode.y)
-                    waterLevel -= 1;
-
-                if (neighbor.y > currentNode.y)
-                    waterLevel += 1;
-
-                if (waterLevel > currentLevel)
-                    currentLevel = waterLevel;
-
-                neighbor.SetWater(waterLevel < currentLevel);
-
-                result.Add(neighbor);
-
-                queue.Add(neighbor);
-                visited.Add(neighbor);
+                    waterQueue.Add(path[i]);
+                }
             }
+        }
+    }
 
+    private static void SetTunnelWater(HashSet<CaveBlock> caveblocks)
+    {
+        var tunnelPositions = caveblocks.Select(block => block.position).ToHashSet();
+        var queue = new Queue<Vector3i>(
+            from block in caveblocks
+            where block.isWater
+            select block.position + Vector3i.down
+        );
+
+        var visited = new HashSet<Vector3i>();
+        var waterPositions = new HashSet<Vector3i>();
+        var offsets = CaveUtils.neighborsOffsets.Where(offset => offset.y <= 0).ToArray();
+
+        while (queue.Count > 0)
+        {
+            var pos = queue.Dequeue();
+
+            if (visited.Contains(pos) || !tunnelPositions.Contains(pos))
+                continue;
+
+            visited.Add(pos);
+            waterPositions.Add(pos);
+
+            foreach (var offset in offsets)
+            {
+                var neighborPos = pos + offset;
+                if (!visited.Contains(neighborPos) && tunnelPositions.Contains(neighborPos))
+                {
+                    queue.Enqueue(neighborPos);
+                }
+            }
         }
 
-        return result;
+        foreach (var block in caveblocks)
+        {
+            block.SetWater(waterPositions.Contains(block.position));
+        }
     }
 
     public static HashSet<CaveBlock> GenerateTunnel(GraphNode start, GraphNode target, PrefabCache cachedPrefabs)
@@ -281,8 +303,14 @@ public static class CaveTunneler
         markers2.Remove(p2);
 
         var path = FindPath(p1, p2, cachedPrefabs);
+
+        if (path.Count == 0)
+            return new HashSet<CaveBlock>();
+
+        SetWaterBlocks(path);
+        // return path.ToHashSet();
         var tunnel = ThickenTunnel(path, start, target);
-        // var tunnel = JoinMarkers(path.ToHashSet(), markers1, markers2);
+        SetTunnelWater(tunnel);
 
         return tunnel;
     }

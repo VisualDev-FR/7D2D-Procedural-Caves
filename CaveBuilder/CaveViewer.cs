@@ -165,9 +165,6 @@ public static class CaveViewer
         cachedPrefabs.AddPrefab(p1);
         cachedPrefabs.AddPrefab(p2);
 
-        var timer = new Stopwatch();
-        timer.Start();
-
         var node1 = p1.nodes[1];
         var node2 = p2.nodes[0];
 
@@ -176,6 +173,7 @@ public static class CaveViewer
         Log.Out($"size     {node2.marker.size}");
         Log.Out($"result   {node2.position}\n");
 
+        var timer = CaveUtils.StartTimer();
         var tunnel = CaveTunneler.GenerateTunnel(node1, node2, cachedPrefabs);
 
         Log.Out($"{p1.position} -> {p2.position} | Astar dist: {tunnel.Count}, eucl dist: {CaveUtils.EuclidianDist(p1.position, p2.position)}, timer: {timer.ElapsedMilliseconds}ms");
