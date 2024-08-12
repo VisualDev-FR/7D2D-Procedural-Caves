@@ -1,50 +1,74 @@
 ﻿<configs>
 	<append xpath="/blocks">
-		<block name="ConfigFeatureBlock">
-			<property name="Extends" value="terrDesertGround"/>
-			<property class="CaveConfiguration" >
-				<!-- General cave parameters -->
-				<property name="Logging" value="true"/>
-				<property name="invert" value="true"/>
-				<property name="CaveThreshold" value="0.20"/>
-				<property name="seed" value="0"/>
-				<!-- 2D noise -->
-				<property name="FractalTypeZX" value="Ridged" />
-				<property name="NoiseTypeZX" value="OpenSimplex2" />
-				<property name="OctavesZX" value="1"/>
-				<property name="LacunarityZX" value="1"/>
-				<property name="GainZX" value="0.5"/>
-				<property name="FrequencyZX" value="0.02"/>
-				<!-- Heightmap noise -->
-				<property name="FractalTypeY" value="FBm" />
-				<property name="NoiseTypeY" value="Perlin" />
-				<property name="OctavesY" value="2"/>
-				<property name="LacunarityY" value="0.5"/>
-				<property name="GainY" value="0.5"/>
-				<property name="FrequencyY" value="0.02"/>
-
-				<!-- <property name="DeepCavePrefabs" value="Chiko_SCcave_08,Chiko_SCcave_09,Chiko_SCcave_11,Chiko_SCcave_12,Chiko_SCcave_13,Chiko_SCcave_14" /> -->
-				<!-- <property name="CavePOIs" value="myPrefab,Chiko_SCcave_01,Chiko_SCcave_02,Chiko_SCcave_03,Chiko_SCcave_04,Chiko_SCcave_05,Chiko_SCcave_06,Chiko_SCcave_07,Chiko_SCcave_08,Chiko_SCcave_09,Chiko_SCcave_11,Chiko_SCcave_12,Chiko_SCcave_13,Chiko_SCcave_14" /> -->
-				<property name="CavePOIs" value="CaveBunker_01,Chiko_SCcave_01" />
-
-			</property>
-		</block>
-		<!-- Cave air block -->
-		<block name="caveBlock02">
+		<block name="caveAir">
 			<property name="Extends" value="air"/>
 			<property name="StabilityFull" value="true"/>
 		</block>
+
 		<block name="cntCaveFloorRandomLootHelper">
 			<property name="Extends" value="cntWastelandRandomLootHelper"/>
 			<property name="CreativeMode" value="Dev"/>
 		</block>
+
 		<block name="cntCaveCeilingRandomLootHelper">
 			<property name="Extends" value="cntWastelandRandomLootHelper"/>
 			<property name="CreativeMode" value="Dev"/>
 		</block>
+
 		<block name="cntDeepCaveFloorRandomLootHelper">
 			<property name="Extends" value="cntWastelandRandomLootHelper"/>
 			<property name="CreativeMode" value="Dev"/>
+		</block>
+
+		<!-- A20 Stalactites / stalagmites -->
+		<block name="stalactite01">
+			<property name="Material" value="MoreStone"/>
+			<property name="Shape" value="Ext3dModel"/>
+			<property name="Texture" value="293"/>
+			<property name="Mesh" value="models"/>
+			<property name="ImposterDontBlock" value="true"/>
+			<property name="Collide" value="movement,melee"/>
+			<property name="Model" value="OutdoorDecor/stalactite01" param1="main_mesh"/>
+			<drop event="Harvest" name="resourcePotassiumNitratePowder" count="21" tag="oreWoodHarvest"/>
+			<drop event="Destroy" count="0"/>
+			<drop event="Fall" name="resourcePotassiumNitratePowder" count="21" prob="0.4" stick_chance="0"/>
+			<property name="FilterTags" value="MC_outdoor,SC_terrain"/>
+		</block>
+
+		<block name="stalactite02">
+			<property name="Extends" value="stalactite01"/>
+			<property name="Model" value="OutdoorDecor/stalactite02" param1="main_mesh"/>
+		</block>
+
+		<block name="stalactite03">
+			<property name="Extends" value="stalactite01"/>
+			<property name="Model" value="OutdoorDecor/stalactite03" param1="main_mesh"/>
+		</block>
+
+		<block name="stalactite04">
+			<property name="Extends" value="stalactite01"/>
+			<property name="Model" value="OutdoorDecor/stalactite04" param1="main_mesh"/>
+		</block>
+
+		<block name="stalagmite01">
+			<property name="Extends" value="stalactite01"/>
+			<property name="Texture" value="1"/>
+			<property name="Model" value="OutdoorDecor/stalagmite01" param1="main_mesh"/>
+		</block>
+
+		<block name="stalagmite02">
+			<property name="Extends" value="stalagmite01"/>
+			<property name="Model" value="OutdoorDecor/stalagmite02" param1="main_mesh"/>
+		</block>
+
+		<block name="stalagmite03">
+			<property name="Extends" value="stalagmite01"/>
+			<property name="Model" value="OutdoorDecor/stalagmite03" param1="main_mesh"/>
+		</block>
+
+		<block name="stalagmite04">
+			<property name="Extends" value="stalagmite01"/>
+			<property name="Model" value="OutdoorDecor/stalagmite04" param1="main_mesh"/>
 		</block>
 	</append>
 </configs>
