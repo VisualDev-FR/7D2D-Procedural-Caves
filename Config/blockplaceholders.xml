@@ -137,23 +137,23 @@
 
       <block name="plantShrub" prob=".001"/>
       <block name="plantShrubDead" prob=".001"/>
-      <block name="plantShrubSnow" prob=".001"/>
+      <block name="plantShrubSnow" prob=".001" />
 
       <block name="plantedTreeGrassSeed01" prob=".001"/>
-      <block name="treeSnowyGrassDiagonal" prob=".001"/> <!-- snow -->
-      <block name="treeBrownGrassDiagonal" prob=".001"/> <!-- desert, wasteland -->
-      <block name="treeTallGrassDiagonal" prob=".001"/> <!-- forest -->
-      <block name="treeForestGrassDiagonal" prob=".001"/> <!-- forest -->
-      <block name="treeGreenBrownGrassDiagonal" prob=".001"/> <!-- forest -->
-      <block name="treeDesertShrub" prob=".001"/> <!-- forest -->
-      <block name="forestFlower" prob=".001"/> <!-- forest -->
+      <block name="treeSnowyGrassDiagonal" prob=".001" />
+      <block name="treeBrownGrassDiagonal" prob=".001"/>
+      <block name="treeTallGrassDiagonal" prob=".001"/>
+      <block name="treeForestGrassDiagonal" prob=".001"/>
+      <block name="treeGreenBrownGrassDiagonal" prob=".001"/>
+      <block name="treeDesertShrub" prob=".001" />
+      <block name="forestFlower" prob=".001"/>
 
-      <block name="treeCactus01" prob=".001"/>
-      <block name="treeCactus02" prob=".001"/>
-      <block name="treeCactus03" prob=".001"/>
-      <block name="treeCactus04" prob=".001"/>
-      <block name="treeCactus05" prob=".001"/>
-      <block name="treeCactus06" prob=".001"/>
+      <block name="treeCactus01" prob=".001" />
+      <block name="treeCactus02" prob=".001" />
+      <block name="treeCactus03" prob=".001" />
+      <block name="treeCactus04" prob=".001" />
+      <block name="treeCactus05" prob=".001" />
+      <block name="treeCactus06" prob=".001" />
 
       <block name="plantedCottonDead" prob=".001"/>
       <block name="plantedYuccaDead" prob=".001"/>
@@ -178,30 +178,30 @@
       <block name="bodyBagYellowFlies" prob=".0001"/>
 
       <block name="decoCowSkull" prob=".001"/>
+      <block name="goreHumanSkull" prob=".001"/>
       <block name="goreBlockAnimal" prob=".001"/>
-      <block name="goreBlockHumanCorpse" prob=".0001"/>
+      <block name="goreBlockHumanCorpse" prob=".001"/>
       <block name="goreBlockHumanCorpse1" prob=".001"/>
       <block name="goreBlockHumanCorpse2" prob=".001"/>
       <block name="goreBlockHumanCorpse2Offset" prob=".001"/>
       <block name="goreBlockHumanCorpse3" prob=".001"/>
       <block name="goreBlockHumanBones" prob=".001"/>
-      <block name="goreHumanSkull" prob=".001"/>
 
-      <block name="corpseHangingLog1White" prob=".0001"/>
-      <block name="corpseHangingLog1Brown" prob=".0001"/>
-      <block name="corpseHangingLog1Red" prob=".0001"/>
-      <block name="corpseHangingLog1Green" prob=".0001"/>
-      <block name="corpseHangingLog1Blue" prob=".0001"/>
-      <block name="corpseHangingLog2White" prob=".0001"/>
-      <block name="corpseHangingLog2Brown" prob=".0001"/>
-      <block name="corpseHangingLog2Green" prob=".0001"/>
-      <block name="corpseHangingLog2Blue" prob=".0001"/>
-      <block name="corpseHangingLog2Grey" prob=".0001"/>
-      <block name="corpseHangingLog3White" prob=".0001"/>
-      <block name="corpseHangingLog3Brown" prob=".0001"/>
-      <block name="corpseHangingLog3Red" prob=".0001"/>
-      <block name="corpseHangingLog3Green" prob=".0001"/>
-      <block name="corpseHangingLog3Grey" prob=".0001"/>
+      <block name="corpseHangingLog1White" prob=".00001"/>
+      <block name="corpseHangingLog1Brown" prob=".00001"/>
+      <block name="corpseHangingLog1Red" prob=".00001"/>
+      <block name="corpseHangingLog1Green" prob=".00001"/>
+      <block name="corpseHangingLog1Blue" prob=".00001"/>
+      <block name="corpseHangingLog2White" prob=".00001"/>
+      <block name="corpseHangingLog2Brown" prob=".00001"/>
+      <block name="corpseHangingLog2Green" prob=".00001"/>
+      <block name="corpseHangingLog2Blue" prob=".00001"/>
+      <block name="corpseHangingLog2Grey" prob=".00001"/>
+      <block name="corpseHangingLog3White" prob=".00001"/>
+      <block name="corpseHangingLog3Brown" prob=".00001"/>
+      <block name="corpseHangingLog3Red" prob=".00001"/>
+      <block name="corpseHangingLog3Green" prob=".00001"/>
+      <block name="corpseHangingLog3Grey" prob=".00001"/>
 
       <!-- Other -->
       <block name="sandBagPile01" prob=".001"/>
@@ -221,7 +221,6 @@
       <block name="coneConstruction" prob=".001"/>
       <block name="modularFireWoodStackC" prob=".001"/>
       <block name="emberPileFireplaceLogsLightPOI" prob=".001"/>
-      <block name="campfire" prob=".001"/>
       <block name="cntCollapsedCampfire" prob=".001"/>
       <block name="hubCapNoMine" prob=".001"/>
 

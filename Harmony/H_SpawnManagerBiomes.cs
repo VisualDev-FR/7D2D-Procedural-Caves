@@ -13,19 +13,19 @@ public class SpawnManagerBiomes_Update
     {
         if (!GameUtils.IsPlaytesting())
         {
-            SpawnUpdate(_spawnerName, _bSpawnEnemyEntities, _userData as ChunkAreaBiomeSpawnData, ref ___spawnNearList, ref ___lastClassId);
+            return SpawnUpdate(_spawnerName, _bSpawnEnemyEntities, _userData as ChunkAreaBiomeSpawnData, ref ___spawnNearList, ref ___lastClassId);
         }
 
         return true;
     }
 
-    public static void SpawnUpdate(string _spawnerName, bool _bSpawnEnemyEntities, ChunkAreaBiomeSpawnData _chunkBiomeSpawnData, ref List<Entity> spawnNearList, ref int lastClassId)
+    public static bool SpawnUpdate(string _spawnerName, bool _bSpawnEnemyEntities, ChunkAreaBiomeSpawnData _chunkBiomeSpawnData, ref List<Entity> spawnNearList, ref int lastClassId)
     {
         var deepCaveThreshold = 30;
 
         if (_chunkBiomeSpawnData == null)
         {
-            return;
+            return true;
         }
         if (_bSpawnEnemyEntities)
         {
@@ -41,7 +41,7 @@ public class SpawnManagerBiomes_Update
 
         if (!_bSpawnEnemyEntities && GameStats.GetInt(EnumGameStats.AnimalCount) >= GamePrefs.GetInt(EnumGamePrefs.MaxSpawnedAnimals))
         {
-            return;
+            return true;
         }
         var rectOverlaps = false;
         var players = GameManager.Instance.World.GetPlayers();
@@ -63,25 +63,24 @@ public class SpawnManagerBiomes_Update
 
         // No valid player position.
         if (playerPos == Vector3.zero)
-            return;
+            return true;
 
         // Don't allow above ground spawning.
         var playerPosition = new Vector3i(playerPos);
         float terrainHeight = GameManager.Instance.World.GetTerrainHeight(playerPosition.x, playerPosition.z);
 
         if (playerPosition.y > terrainHeight || !rectOverlaps)
-            return;
+            return true;
 
         var spawnPosition = GetZombieSpawnPosition(playerPosition);
 
-        // Mob is above terrain; ignore.
         if (spawnPosition == Vector3.zero)
-            return;
+            return false;
 
         var biome = GameManager.Instance.World.Biomes.GetBiome(_chunkBiomeSpawnData.biomeId);
         if (biome == null)
         {
-            return;
+            return false;
         }
 
         // Customize which spawning.xml entry to we want to use for spawns.
@@ -95,7 +94,7 @@ public class SpawnManagerBiomes_Update
         }
 
         if (biomeSpawnEntityGroupList == null)
-            return;
+            return false;
 
         var edaytime = GameManager.Instance.World.IsDaytime() ? EDaytime.Day : EDaytime.Night;
         var gameRandom = GameManager.Instance.World.GetGameRandom();
@@ -140,7 +139,7 @@ public class SpawnManagerBiomes_Update
         }
 
         if (index < 0)
-            return;
+            return false;
 
         var bb = new Bounds(spawnPosition, new Vector3(4f, 2.5f, 4f));
         GameManager.Instance.World.GetEntitiesInBounds(typeof(Entity), bb, spawnNearList);
@@ -148,7 +147,7 @@ public class SpawnManagerBiomes_Update
         spawnNearList.Clear();
 
         if (count > 0)
-            return;
+            return false;
 
         var biomeSpawnEntityGroupData3 = biomeSpawnEntityGroupList.list[index];
         var entityID = EntityGroups.GetRandomFromGroup(biomeSpawnEntityGroupData3.entityGroupRefName, ref lastClassId);
@@ -157,6 +156,8 @@ public class SpawnManagerBiomes_Update
         Log.Out($"[Caves] Spawning: {entityID} at {spawnPosition}, playerPos={playerPosition}");
 
         SpawnEntity(entityID, spawnPosition, _chunkBiomeSpawnData, entityGroupName);
+
+        return false;
     }
 
     public static Vector3 GetZombieSpawnPosition(Vector3 playerPosition)
@@ -177,6 +178,12 @@ public class SpawnManagerBiomes_Update
     private static void SpawnEntity(int id, Vector3 spawnPosition, ChunkAreaBiomeSpawnData _chunkBiomeSpawnData, string entityGroupName)
     {
         var entity = EntityFactory.CreateEntity(id, spawnPosition);
+
+        if (entity == null)
+        {
+            Log.Error($"[Cave] null entity for id '{id}'");
+            return;
+        }
         entity.SetSpawnerSource(EnumSpawnerSource.Dynamic, _chunkBiomeSpawnData.chunk.Key, entityGroupName);
 
         var myEntity = entity as EntityAlive;
