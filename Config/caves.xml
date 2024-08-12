@@ -1,4 +1,4 @@
-<config>
+<configs>
     <property name="MaxPrefabPlacementAttempts" value="50" help="myPropertyHelp" />
     <property name="RadiationMargin" value="50" help="myPropertyHelp" />
     <property name="LightFactor" value="0.5" help="myPropertyHelp" />
@@ -12,4 +12,4 @@
         <property name="frequency" value="0.05" help="myPropertyHelp" />
         <property name="threshold" value="0.5" help="myPropertyHelp" />
     </property>
-</config>
+</configs>

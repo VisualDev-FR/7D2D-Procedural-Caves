@@ -21,7 +21,8 @@
 		</block>
 
 		<!-- A20 Stalactites / stalagmites -->
-		<block name="stalactite01">
+
+		<!-- <block name="stalactite01">
 			<property name="Material" value="MoreStone"/>
 			<property name="Shape" value="Ext3dModel"/>
 			<property name="Texture" value="293"/>
@@ -69,6 +70,6 @@
 		<block name="stalagmite04">
 			<property name="Extends" value="stalagmite01"/>
 			<property name="Model" value="OutdoorDecor/stalagmite04" param1="main_mesh"/>
-		</block>
+		</block> -->
 	</append>
 </configs>

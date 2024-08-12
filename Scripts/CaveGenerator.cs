@@ -1,4 +1,7 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
 
 public static class CaveGenerator
 {
@@ -15,23 +18,6 @@ public static class CaveGenerator
         caveBlocksProvider = new CaveBlocksProvider(worldName);
     }
 
-    public static bool IsInsideChunk(Vector3i position, Vector3i chunkPos)
-    {
-        if (position.x < chunkPos.x)
-            return false;
-
-        if (position.x > chunkPos.x + 15)
-            return false;
-
-        if (position.z < chunkPos.z)
-            return false;
-
-        if (position.z > chunkPos.z + 15)
-            return false;
-
-        return true;
-    }
-
     public static void GenerateCave(Chunk chunk)
     {
         if (chunk == null)
@@ -40,14 +26,19 @@ public static class CaveGenerator
             return;
         }
 
-        var blockPositions = caveBlocksProvider.GetCaveBlocks(chunk);
 
-        if (blockPositions == null)
+        GameRandom random = Utils.RandomFromSeedOnPos(chunk.ChunkPos.x, chunk.ChunkPos.z, GameManager.Instance.World.Seed);
+        Vector3i chunkWorldPos = chunk.GetWorldPos();
+
+        HashSet<CaveBlock> caveBlocks = caveBlocksProvider.GetCaveBlocks(chunk);
+        HashSet<Vector3> positions = caveBlocks?.Select(block => block.BlockPos.ToVector3()).ToHashSet();
+
+        if (caveBlocks == null)
             return;
 
-        foreach (CaveBlock block in blockPositions)
+        foreach (CaveBlock caveBlock in caveBlocks)
         {
-            var pos = block.BlockPos;
+            var pos = caveBlock.BlockPos;
 
             try
             {
@@ -56,63 +47,29 @@ public static class CaveGenerator
             }
             catch (Exception e)
             {
-                Log.Error($"[Cave] {e.GetType()} (Chunk={block.ChunkPos}, block={block.BlockPos})");
+                Log.Error($"[Cave] {e.GetType()} (Chunk={caveBlock.ChunkPos}, block={caveBlock.BlockPos})");
             }
-        }
-    }
 
-    public static void AddDecorationsToCave(Chunk chunk)
-    {
-        if (chunk == null)
-            return;
+            var under = pos.ToVector3() + new Vector3(0, -1, 0);
+            var above = pos.ToVector3() + new Vector3(0, +1, 0);
 
-        var chunkPos = chunk.GetWorldPos();
+            bool isFloor = !positions.Contains(under);
+            bool isCeiling = !positions.Contains(above);
 
-        GameRandom random = Utils.RandomFromSeedOnPos(chunk.ChunkPos.x, chunk.ChunkPos.z, GameManager.Instance.World.Seed);
+            var worldX = chunkWorldPos.x + pos.x;
+            var worldZ = chunkWorldPos.z + pos.z;
 
-        for (var chunkX = 1; chunkX < 15; chunkX++)
-        {
-            for (var chunkZ = 1; chunkZ < 15; chunkZ++)
+            if (isFloor)
             {
-                var worldX = chunkPos.x + chunkX;
-                var worldZ = chunkPos.z + chunkZ;
-
-                var tHeight = chunk.GetTerrainHeight(chunkX, chunkZ);
-
-                // One test world, we blew through a threshold.
-                if (tHeight > 250)
-                    tHeight = 240;
-
-                // Move from the bottom up, leaving the last few blocks untouched.
-                //for (int y = tHeight; y > 5; y--)
-                for (var chunkY = 5; chunkY < tHeight - 2; chunkY++)
-                {
-                    var b = chunk.GetBlock(chunkX, chunkY, chunkZ);
-
-                    if (b.type != caveAir.type)
-                        continue;
-
-                    var under = chunk.GetBlock(chunkX, chunkY - 1, chunkZ);
-                    var above = chunk.GetBlock(chunkX, chunkY + 1, chunkZ);
-
-                    BlockValue bottomBlock;
-                    // Check the floor for possible decoration
-                    if (under.Block.shape.IsTerrain())
-                    {
-                        bottomBlock = BlockPlaceholderMap.Instance.Replace(bottomCaveDecoration, random, worldX, worldZ);
-
-                        chunk.SetBlock(GameManager.Instance.World, chunkX, chunkY, chunkZ, bottomBlock);
-                        continue;
-                    }
-
-                    // Check the ceiling to see if its a ceiling decoration
-                    if (!above.Block.shape.IsTerrain())
-                        continue;
-
-                    bottomBlock = BlockPlaceholderMap.Instance.Replace(topCaveDecoration, random, worldX, worldZ);
-                    chunk.SetBlock(GameManager.Instance.World, chunkX, chunkY, chunkZ, bottomBlock);
-                }
+                BlockValue blockValue = BlockPlaceholderMap.Instance.Replace(bottomCaveDecoration, random, worldX, worldZ);
+                chunk.SetBlockRaw(pos.x, pos.y, pos.z, blockValue);
+            }
+            else if (isCeiling)
+            {
+                BlockValue blockValue = BlockPlaceholderMap.Instance.Replace(topCaveDecoration, random, worldX, worldZ);
+                chunk.SetBlockRaw(pos.x, pos.y, pos.z, blockValue);
             }
         }
     }
+
 }
