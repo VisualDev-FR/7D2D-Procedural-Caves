@@ -100,6 +100,7 @@
     <Compile Include="CaveBuilder\CaveBlock.cs" />
     <Compile Include="CaveBuilder\CaveBuilder.cs" />
     <Compile Include="CaveBuilder\CaveChunkProvider.cs" />
+    <Compile Include="CaveBuilder\CaveMap.cs" />
     <Compile Include="CaveBuilder\CaveNoise.cs" />
     <Compile Include="CaveBuilder\CavePrefab.cs" />
     <Compile Include="CaveBuilder\CavePrefabGenerator.cs" />

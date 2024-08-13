@@ -342,9 +342,6 @@ public static class CaveTunneler
             {
                 cavemap.SetWater(hashcode, true);
             }
-
-            // if(hashcodes.Count > 1000)
-            //     break;
         }
     }
 

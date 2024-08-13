@@ -275,40 +275,61 @@ public static class CavePlanner
 
         List<Edge> edges = Graph.Resolve(cachedPrefabs.Prefabs);
 
-        int caveBlockCount = 0;
+        var localMinimas = new HashSet<CaveBlock>();
+        var cavemap = new CaveMap();
         int index = 0;
 
-        using (var multistream = new MultiStream($"{CaveTempDir}/cavemap", create: true))
+        foreach (var edge in edges)
         {
-            foreach (var edge in edges)
+            string message = $"Cave tunneling: {100.0f * index++ / edges.Count:F0}% ({index} / {edges.Count})";
+
+            yield return WorldBuilder.SetMessage(message);
+
+            var start = edge.node1;
+            var target = edge.node2;
+
+            var markers1 = start.GetMarkerPoints();
+            var markers2 = target.GetMarkerPoints();
+
+            var p1 = start.Normal(CaveUtils.FastMax(5, start.Radius));
+            var p2 = target.Normal(CaveUtils.FastMax(5, target.Radius));
+
+            markers1.Remove(p1);
+            markers2.Remove(p2);
+
+            var path = CaveTunneler.FindPath(p1, p2, cachedPrefabs);
+            // return path.ToHashSet();
+
+            if (path.Count == 0)
+                continue;
+
+            localMinimas.UnionWith(CaveTunneler.FindLocalMinimas(path));
+            var tunnel = CaveTunneler.ThickenTunnel(path, start, target);
+
+            cavemap.UnionWith(tunnel);
+        }
+
+        foreach (var waterStart in localMinimas)
+        {
+            HashSet<int> hashcodes = CaveTunneler.ExpandWater(waterStart, cavemap, cachedPrefabs);
+
+            string message = $"Water processing: {100.0f * ++index / localMinimas.Count:F0}% ({index} / {localMinimas.Count})";
+
+            yield return WorldBuilder.SetMessage(message);
+
+            foreach (var hashcode in hashcodes)
             {
-                GraphNode p1 = edge.node1;
-                GraphNode p2 = edge.node2;
-
-                string message = $"Cave tunneling: {100.0f * index++ / edges.Count:F0}% ({index} / {edges.Count})";
-
-                yield return WorldBuilder.SetMessage(message);
-
-                var tunnel = CaveTunneler.GenerateTunnel(p1, p2, cachedPrefabs);
-
-                foreach (CaveBlock caveBlock in tunnel)
-                {
-                    var position = caveBlock.position;
-
-                    int region_x = position.x / CaveBuilder.RegionSize;
-                    int region_z = position.z / CaveBuilder.RegionSize;
-                    int regionID = region_x + region_z * CaveBuilder.regionGridSize;
-
-                    var writer = multistream.GetWriter($"region_{regionID}.bin");
-                    caveBlock.ToBinaryStream(writer);
-                    caveBlockCount++;
-                }
+                cavemap.SetWater(hashcode, true);
             }
         }
 
+        yield return WorldBuilder.SetMessage("Saving cavemap...");
+
+        cavemap.Save($"{CaveTempDir}/cavemap");
+
         yield return WorldBuilder.SetMessage("Creating cave preview...", _logToConsole: true);
 
-        Log.Out($"{caveBlockCount:N0} cave blocks generated, timer={CaveUtils.TimeFormat(timer)}.");
+        Log.Out($"{cavemap.Count:N0} cave blocks generated, timer={CaveUtils.TimeFormat(timer)}.");
 
         yield return null;
     }

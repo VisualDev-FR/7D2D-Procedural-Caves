@@ -122,6 +122,7 @@ public class CavePrefab
     public void UpdateMarkers(PrefabDataInstance prefab)
     {
         nodes = new List<GraphNode>();
+        markers = new List<Prefab.Marker>();
 
         CaveUtils.Assert(prefab.prefab.POIMarkers.Count > 0, $"prefab {prefab.prefab.Name} has not cave marker.");
 
@@ -130,6 +131,7 @@ public class CavePrefab
             if (!marker.tags.Test_AnySet(tagCaveMarker))
                 continue;
 
+            markers.Add(marker);
             nodes.Add(new GraphNode(marker, this));
         }
     }

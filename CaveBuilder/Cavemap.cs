@@ -50,6 +50,24 @@ public class CaveMap : IEnumerable<CaveBlock>
         caveblocks[hashcode].isWater = true;
     }
 
+    public void Save(string dirname)
+    {
+        using (var multistream = new MultiStream(dirname, create: true))
+        {
+            foreach (CaveBlock caveBlock in caveblocks.Values)
+            {
+                var position = caveBlock.position;
+
+                int region_x = position.x / CaveBuilder.RegionSize;
+                int region_z = position.z / CaveBuilder.RegionSize;
+                int regionID = region_x + region_z * CaveBuilder.regionGridSize;
+
+                var writer = multistream.GetWriter($"region_{regionID}.bin");
+                caveBlock.ToBinaryStream(writer);
+            }
+        }
+    }
+
     public IEnumerator<CaveBlock> GetEnumerator()
     {
         return caveblocks.Values.GetEnumerator();
