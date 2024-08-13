@@ -174,9 +174,9 @@ public static class CaveUtils
         return new Vector3i(x, y, z);
     }
 
-    public static List<Vector3i> GetPointsInside(Vector3i p1, Vector3i p2)
+    public static HashSet<Vector3i> GetPointsInside(Vector3i p1, Vector3i p2)
     {
-        var result = new List<Vector3i>();
+        var result = new HashSet<Vector3i>();
 
         for (int x = p1.x; x < p2.x; x++)
         {
@@ -198,6 +198,37 @@ public static class CaveUtils
             return new Vector3i(Size.x, Size.y, Size.z);
 
         return new Vector3i(Size.z, Size.y, Size.x);
+    }
+
+    public static bool Intersect2D(Vector3i point, Vector3i position, Vector3i size)
+    {
+        if (point.x < position.x)
+            return false;
+
+        if (point.x >= position.x + size.x)
+            return false;
+
+        if (point.z < position.z)
+            return false;
+
+        if (point.z >= position.z + size.z)
+            return false;
+
+        return true;
+    }
+
+    public static bool Intersect3D(Vector3i point, Vector3i position, Vector3i size)
+    {
+        if (!Intersect2D(point, position, size))
+            return false;
+
+        if (point.y < position.y)
+            return false;
+
+        if (point.y >= position.y + size.z)
+            return false;
+
+        return true;
     }
 
 }

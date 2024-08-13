@@ -16,6 +16,8 @@ public class GraphNode
 
     public int Radius;
 
+    public int sqrRadius;
+
     public GraphNode(Prefab.Marker marker, CavePrefab prefab)
     {
         this.marker = marker;
@@ -25,6 +27,7 @@ public class GraphNode
         CaveUtils.Assert(marker.size != null, $"null marker size");
 
         Radius = CaveUtils.FastMax(1, CaveUtils.FastMin(CaveUtils.FastMax(marker.size.x, marker.size.z), marker.size.y) / 2);
+        sqrRadius = Radius * Radius;
 
         // TODO: find a way to ensure that the node is in the marker volume
         position = new Vector3i(

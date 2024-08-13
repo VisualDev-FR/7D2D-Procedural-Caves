@@ -74,21 +74,21 @@ public static class CaveGenerator
             }
         }
 
-        // HashSet<CaveBlock> waterBlocks = caveBlocks.Where(block => block.isWater).ToHashSet();
-        // foreach (CaveBlock waterBlock in waterBlocks)
-        // {
-        //     var blockPos = waterBlock.BlockPos;
+        HashSet<CaveBlock> waterBlocks = caveBlocks.Where(block => block.isWater).ToHashSet();
+        foreach (CaveBlock waterBlock in waterBlocks)
+        {
+            var blockPos = waterBlock.BlockPos;
 
-        //     try
-        //     {
-        //         // chunk.SetWaterRaw(blockPos.x, blockPos.y, blockPos.z, WaterValue.Full);
-        //         chunk.SetBlockRaw(blockPos.x, blockPos.y, blockPos.z, concreteBlock);
-        //     }
-        //     catch (Exception e)
-        //     {
-        //         Log.Error($"[Cave] {e.GetType()} (Chunk={waterBlock.ChunkPos}, block={waterBlock.BlockPos})");
-        //     }
-        // }
+            try
+            {
+                chunk.SetWaterRaw(blockPos.x, blockPos.y, blockPos.z, WaterValue.Full);
+                // chunk.SetBlockRaw(blockPos.x, blockPos.y, blockPos.z, concreteBlock);
+            }
+            catch (Exception e)
+            {
+                Log.Error($"[Cave] {e.GetType()} (Chunk={waterBlock.ChunkPos}, block={waterBlock.BlockPos})");
+            }
+        }
 
     }
 

@@ -159,18 +159,19 @@ public class CavePrefab
         }
     }
 
-    public List<List<Vector3i>> GetMarkerPoints()
+    public HashSet<Vector3i> GetMarkerPoints()
     {
-        var result = new List<Vector3i>[markers.Count];
+        var result = new HashSet<Vector3i>();
 
         for (int i = 0; i < markers.Count; i++)
         {
             var marker = markers[i];
+            var markerPoints = CaveUtils.GetPointsInside(position + marker.start, position + marker.start + marker.size);
 
-            result[i] = CaveUtils.GetPointsInside(position + marker.start, position + marker.start + marker.size);
+            result.UnionWith(markerPoints);
         }
 
-        return result.ToList();
+        return result;
     }
 
     public void SetRandomPosition(Random rand, int mapSize)
@@ -225,6 +226,20 @@ public class CavePrefab
             return false;
 
         if (point.z >= position.z + Size.z)
+            return false;
+
+        return true;
+    }
+
+    public bool Intersect3D(Vector3i pos)
+    {
+        if (!Intersect2D(pos))
+            return false;
+
+        if (pos.y < position.y)
+            return false;
+
+        if (pos.y >= position.y + Size.z)
             return false;
 
         return true;
@@ -333,20 +348,6 @@ public class CavePrefab
         return points.ToList();
     }
 
-    public bool Intersect3D(Vector3i pos)
-    {
-        if (!Intersect2D(pos))
-            return false;
-
-        if (pos.y < position.y)
-            return false;
-
-        if (pos.y >= position.y + Size.z)
-            return false;
-
-        return true;
-    }
-
     public HashSet<Vector3i> CreateBoundNoise(Vector3i center, int radius)
     {
         var queue = new HashSet<Vector3i>() { center };
@@ -443,5 +444,13 @@ public class CavePrefab
         }
 
         return chunkPositions;
+    }
+
+    public bool IntersectMarker(Vector3i pos)
+    {
+        if (pos.x != position.x - 1 && pos.x != position.x + Size.x && pos.z != position.z - 1 && pos.z != position.z + Size.z)
+            return false;
+
+        return GetMarkerPoints().Contains(pos);
     }
 }

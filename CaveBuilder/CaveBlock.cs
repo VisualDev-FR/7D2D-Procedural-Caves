@@ -73,7 +73,13 @@ public class CaveBlock
 
     public override int GetHashCode()
     {
-        return ChunkPos.GetHashCode() + BlockPos.GetHashCode();
+        return GetHashCode(x, y, z);
+    }
+
+    public static int GetHashCode(int x, int y, int z)
+    {
+        // see Vector3i.GetHashCode()
+        return x * 8976890 + y * 981131 + z;
     }
 
     public override bool Equals(object obj)
@@ -145,6 +151,11 @@ public class CaveBlock
 
     //     return groupedCaveMap;
     // }
+
+    public int Index()
+    {
+        return position.x + CaveBuilder.worldSize * position.z;
+    }
 
     public void ToBinaryStream(BinaryWriter writer)
     {

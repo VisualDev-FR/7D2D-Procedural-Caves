@@ -142,6 +142,7 @@ public static class CaveViewer
     {
         CaveBuilder.worldSize = 200;
         CaveBuilder.radiationZoneMargin = 0;
+        // CaveBuilder.rand = new Random();
 
         if (args.Length > 1)
             CaveBuilder.worldSize = int.Parse(args[1]);
@@ -154,13 +155,14 @@ public static class CaveViewer
 
         var p2 = new CavePrefab(1)
         {
-            position = new Vector3i(20, 5, CaveBuilder.worldSize - 30),
+            position = new Vector3i(20, 50, CaveBuilder.worldSize - 30),
             Size = new Vector3i(20, 10, 20),
         };
 
         p1.UpdateMarkers(CaveBuilder.rand);
         p2.UpdateMarkers(CaveBuilder.rand);
 
+        var densityMap = new byte[CaveBuilder.worldSize * CaveBuilder.worldSize];
         var cachedPrefabs = new PrefabCache();
         cachedPrefabs.AddPrefab(p1);
         cachedPrefabs.AddPrefab(p2);
@@ -174,7 +176,7 @@ public static class CaveViewer
         Log.Out($"result   {node2.position}\n");
 
         var timer = CaveUtils.StartTimer();
-        var tunnel = CaveTunneler.GenerateTunnel(node1, node2, cachedPrefabs);
+        var tunnel = CaveTunneler.GenerateTunnel(node1, node2, cachedPrefabs, densityMap);
 
         Log.Out($"{p1.position} -> {p2.position} | Astar dist: {tunnel.Count}, eucl dist: {CaveUtils.EuclidianDist(p1.position, p2.position)}, timer: {timer.ElapsedMilliseconds}ms");
 
@@ -187,7 +189,7 @@ public static class CaveViewer
         {
             if (block.isWater)
             {
-                voxels.Add(new Voxell(block.position, WaveFrontMaterial.LightBlue) { force = true });
+                voxels.Add(new Voxell(block.position, WaveFrontMaterial.LightBlue));
             }
             else
             {
@@ -212,7 +214,7 @@ public static class CaveViewer
             }
         }
 
-        GenerateObjFile("path.obj", voxels, true);
+        GenerateObjFile("path.obj", voxels, false);
     }
 
     public static void SphereCommand(string[] args)
@@ -273,63 +275,84 @@ public static class CaveViewer
 
         List<Edge> edges = Graph.Resolve(cachedPrefabs.Prefabs);
 
-        int caveBlockCount = 0;
         int index = 0;
 
         long memoryBefore = GC.GetTotalMemory(true);
 
         object lockObject = new object();
 
-        var cavemap = new HashSet<Vector3i>();
+        var cavemap = new CaveMap();
+        var localMinimas = new HashSet<CaveBlock>();
 
-        using (var multistream = new MultiStream("cavemap", create: true))
+        using (var b = new Bitmap(CaveBuilder.worldSize, CaveBuilder.worldSize))
         {
-            using (var b = new Bitmap(CaveBuilder.worldSize, CaveBuilder.worldSize))
+            using (Graphics g = Graphics.FromImage(b))
             {
-                using (Graphics g = Graphics.FromImage(b))
+                g.Clear(BackgroundColor);
+
+                Parallel.ForEach(edges, edge =>
                 {
-                    g.Clear(BackgroundColor);
+                    var start = edge.node1;
+                    var target = edge.node2;
 
-                    Parallel.ForEach(edges, edge =>
+                    Log.Out($"Cave tunneling: {100.0f * ++index / edges.Count:F0}% ({index} / {edges.Count}) {cavemap.Count:N0}");
+
+                    var markers1 = start.GetMarkerPoints();
+                    var markers2 = target.GetMarkerPoints();
+
+                    var p1 = start.Normal(CaveUtils.FastMax(5, start.Radius));
+                    var p2 = target.Normal(CaveUtils.FastMax(5, target.Radius));
+
+                    markers1.Remove(p1);
+                    markers2.Remove(p2);
+
+                    var path = CaveTunneler.FindPath(p1, p2, cachedPrefabs);
+                    // return path.ToHashSet();
+
+                    if (path.Count == 0)
+                        return;
+
+                    localMinimas.UnionWith(CaveTunneler.FindLocalMinimas(path));
+                    var tunnel = CaveTunneler.ThickenTunnel(path, start, target);
+                    // var tunnel = path.ToHashSet();
+
+                    lock (lockObject)
                     {
-                        var p1 = edge.node1;
-                        var p2 = edge.node2;
-
-                        Log.Out($"Cave tunneling: {100.0f * ++index / edges.Count:F0}% ({index} / {edges.Count}) {caveBlockCount:N0}");
-
-                        var tunnel = CaveTunneler.GenerateTunnel(p1, p2, cachedPrefabs);
+                        cavemap.UnionWith(tunnel);
 
                         foreach (CaveBlock caveBlock in tunnel)
                         {
                             var position = caveBlock.position;
-
-                            int region_x = position.x / CaveBuilder.RegionSize;
-                            int region_z = position.z / CaveBuilder.RegionSize;
-                            int regionID = region_x + region_z * CaveBuilder.regionGridSize;
-
-                            lock (lockObject)
-                            {
-                                cavemap.Add(position);
-                                b.SetPixel(position.x, position.z, TunnelsColor);
-                                var writer = multistream.GetWriter($"region_{regionID}.bin");
-                                caveBlock.ToBinaryStream(writer);
-                                caveBlockCount++;
-                            }
+                            b.SetPixel(position.x, position.z, TunnelsColor);
                         }
-                    });
+                    }
+                });
 
-                    DrawPrefabs(g, cachedPrefabs.Prefabs);
-                    b.Save(@"cave.png", ImageFormat.Png);
-                }
+                DrawPrefabs(g, cachedPrefabs.Prefabs);
+                b.Save(@"cave.png", ImageFormat.Png);
             }
         }
 
-        Console.WriteLine($"{caveBlockCount:N0} cave blocks generated, timer={CaveUtils.TimeFormat(timer)}, memory={(GC.GetTotalMemory(true) - memoryBefore) / 1_048_576.0:F1}MB.");
+        Log.Out($"{cavemap.Count:N0} cave blocks generated, timer={CaveUtils.TimeFormat(timer)}, memory={(GC.GetTotalMemory(true) - memoryBefore) / 1_048_576.0:F1}MB.");
+
+        CaveTunneler.SetTunnelWater(localMinimas, cavemap, cachedPrefabs);
 
         if (CaveBuilder.worldSize > 1024)
             return;
 
-        var voxels = cavemap.Select((pos) => new Voxell(pos, WaveFrontMaterial.DarkRed)).ToHashSet();
+        var voxels = cavemap
+            .Where(block => block.isWater)
+            .Select(block => new Voxell(block.position, WaveFrontMaterial.LightBlue))
+            .ToHashSet();
+
+        Log.Out($"{voxels.Count} water blocks.");
+
+        var tunnels = cavemap
+            .Where(block => !block.isWater)
+            .Select(block => new Voxell(block.position, WaveFrontMaterial.DarkRed))
+            .ToHashSet();
+
+        voxels.UnionWith(tunnels);
 
         foreach (var prefab in cachedPrefabs.Prefabs)
         {
@@ -376,14 +399,9 @@ public static class CaveViewer
             new Voxell(prefab.position, prefab.Size, WaveFrontMaterial.DarkGreen){ force = true },
         };
 
-        foreach (var points in prefab.GetMarkerPoints())
+        foreach (var point in prefab.GetMarkerPoints())
         {
-            // Log.Out(points.Count.ToString());
-            foreach (var point in points)
-            {
-                voxels.Add(new Voxell(point, WaveFrontMaterial.Orange));
-            }
-            // break;
+            voxels.Add(new Voxell(point, WaveFrontMaterial.Orange));
         }
 
         GenerateObjFile("prefab.obj", voxels, true);
@@ -428,7 +446,7 @@ public static class CaveViewer
         }
 
         if (openFile)
-            Process.Start("CMD.exe", $"/C {Path.GetFullPath(filename)}");
+            Process.Start("CMD.exe", $"/C {System.IO.Path.GetFullPath(filename)}");
 
     }
 

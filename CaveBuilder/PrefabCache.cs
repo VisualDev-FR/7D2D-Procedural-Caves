@@ -45,12 +45,12 @@ public class PrefabCache
         yield return new Vector2s(chunkX - 1, chunkZ + 1);
     }
 
-    public HashSet<CavePrefab> GetNearestPrefabs(Vector3i position)
+    public HashSet<CavePrefab> GetNearestPrefabs(int x, int z)
     {
         var nearestPrefabs = new HashSet<CavePrefab>();
 
-        int chunkX = position.x >> 4;
-        int chunkZ = position.z >> 4;
+        int chunkX = x / 16;
+        int chunkZ = z / 16;
 
         foreach (var chunkPos in BrowseNeighborsChunks(chunkX, chunkZ, includeGiven: true))
         {
@@ -69,7 +69,7 @@ public class PrefabCache
     public float MinDistToPrefab(Vector3i position)
     {
         float minDist = int.MaxValue;
-        var prefabs = GetNearestPrefabs(position);
+        var prefabs = GetNearestPrefabs(position.x, position.z);
 
         foreach (var prefab in prefabs)
         {
@@ -94,5 +94,21 @@ public class PrefabCache
         }
 
         return minDist == 0 ? -1 : minDist;
+    }
+
+
+    public bool IntersectMarker(CaveBlock block)
+    {
+        var nearestPrefabs = GetNearestPrefabs(block.x, block.z);
+
+        foreach (CavePrefab prefab in nearestPrefabs)
+        {
+            if (prefab.IntersectMarker(block.position))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

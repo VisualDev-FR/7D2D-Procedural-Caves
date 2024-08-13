@@ -5,7 +5,7 @@ using WorldGenerationEngineFinal;
 
 public static class CaveTunneler
 {
-    private static List<CaveBlock> ReconstructPath(AstarNode currentNode)
+    public static List<CaveBlock> ReconstructPath(AstarNode currentNode)
     {
         var path = new List<CaveBlock>();
 
@@ -20,7 +20,7 @@ public static class CaveTunneler
         return path;
     }
 
-    private static List<CaveBlock> FindPath(Vector3i start, Vector3i target, PrefabCache cachedPrefabs)
+    public static List<CaveBlock> FindPath(Vector3i start, Vector3i target, PrefabCache cachedPrefabs)
     {
         var startNode = new AstarNode(start);
         var goalNode = new AstarNode(target);
@@ -86,17 +86,6 @@ public static class CaveTunneler
         return new List<CaveBlock>();
     }
 
-    private static readonly List<Vector3i> offsets = new List<Vector3i>(){
-        new Vector3i(1, 0, 0),
-        new Vector3i(0, 1, 0),
-        new Vector3i(0, 0, 1),
-
-        new Vector3i(1, 1, 1),
-        new Vector3i(1, 1, 0),
-        new Vector3i(0, 1, 1),
-        new Vector3i(1, 0, 1),
-    };
-
     public static HashSet<CaveBlock> GetSphere(CaveBlock center, float radius)
     {
         var queue = new HashSet<Vector3i>() { center.position };
@@ -135,7 +124,7 @@ public static class CaveTunneler
         return sphere;
     }
 
-    private static int GetTunnelRadius_sinusoid(int x, int yA, int yB, int xB)
+    public static int GetTunnelRadius_sinusoid(int x, int yA, int yB, int xB)
     {
         const float pi = 3.14159f;
         const float factorPi = 2.5f;
@@ -155,7 +144,7 @@ public static class CaveTunneler
         return (int)radius;
     }
 
-    private static int GetTunnelRadius_parabolic(int x, int yA, int yB, int xB)
+    public static int GetTunnelRadius_parabolic(int x, int yA, int yB, int xB)
     {
         const float mini = 1f;
 
@@ -179,7 +168,7 @@ public static class CaveTunneler
         return (int)radius;
     }
 
-    private static HashSet<CaveBlock> ThickenTunnel(List<CaveBlock> path, GraphNode start, GraphNode target)
+    public static HashSet<CaveBlock> ThickenTunnel(List<CaveBlock> path, GraphNode start, GraphNode target)
     {
         var caveMap = path.ToHashSet();
 
@@ -199,7 +188,7 @@ public static class CaveTunneler
         return caveMap;
     }
 
-    private static List<Vector3i> GetVerticalSections(List<Vector3i> path)
+    public static List<Vector3i> GetVerticalSections(List<Vector3i> path)
     {
         var result = new List<Vector3i>();
 
@@ -220,78 +209,146 @@ public static class CaveTunneler
         return result;
     }
 
-    private static void SetWaterBlocks(List<CaveBlock> path)
+    public static HashSet<CaveBlock> FindLocalMinimas(List<CaveBlock> path)
     {
-        var queue = new HashSet<CaveBlock>() { path.First() };
-        var visited = new HashSet<CaveBlock>();
-        var waterQueue = new List<CaveBlock>();
-        var waterLevel = path.First().y;
+        var localMinimas = new HashSet<CaveBlock>();
 
-        var i = 0;
-        while (i++ < path.Count - 1)
+        for (int i = 1; i < path.Count - 1; i++)
         {
-            if (path[i - 1].position.y > path[i].position.y)
+            if (IsLocalMinima(path, i))
             {
-                waterQueue = new List<CaveBlock>() { path[i] };
-
-                while (i++ < path.Count - 1)
-                {
-                    if (path[i - 1].position.y < path[i].position.y)
-                    {
-                        waterQueue.ForEach(block => block.SetWater(true));
-                        break;
-                    }
-                    else if (path[i - 1].position.y > path[i].position.y)
-                    {
-                        break;
-                    }
-
-                    waterQueue.Add(path[i]);
-                }
+                localMinimas.Add(path[i]);
             }
-        }
-    }
-
-    private static void SetTunnelWater(HashSet<CaveBlock> caveblocks)
-    {
-        var tunnelPositions = caveblocks.Select(block => block.position).ToHashSet();
-        var queue = new Queue<Vector3i>(
-            from block in caveblocks
-            where block.isWater
-            select block.position + Vector3i.down
-        );
-
-        var visited = new HashSet<Vector3i>();
-        var waterPositions = new HashSet<Vector3i>();
-        var offsets = CaveUtils.neighborsOffsets.Where(offset => offset.y <= 0).ToArray();
-
-        while (queue.Count > 0)
-        {
-            var pos = queue.Dequeue();
-
-            if (visited.Contains(pos) || !tunnelPositions.Contains(pos))
-                continue;
-
-            visited.Add(pos);
-            waterPositions.Add(pos);
-
-            foreach (var offset in offsets)
+            else if (IsStartOfFlatMinimum(path, i))
             {
-                var neighborPos = pos + offset;
-                if (!visited.Contains(neighborPos) && tunnelPositions.Contains(neighborPos))
+                if (IsFlatMinimum(path, ref i))
                 {
-                    queue.Enqueue(neighborPos);
+                    localMinimas.Add(path[i]);
                 }
             }
         }
 
-        foreach (var block in caveblocks)
+        return localMinimas;
+    }
+
+    public static bool IsLocalMinima(List<CaveBlock> path, int i)
+    {
+        return path[i - 1].position.y > path[i].position.y && path[i].position.y < path[i + 1].position.y;
+    }
+
+    public static bool IsStartOfFlatMinimum(List<CaveBlock> path, int i)
+    {
+        return path[i - 1].position.y > path[i].position.y && path[i].position.y == path[i + 1].position.y;
+    }
+
+    public static bool IsFlatMinimum(List<CaveBlock> path, ref int i)
+    {
+
+        while (i < path.Count - 1 && path[i].position.y == path[i + 1].position.y)
         {
-            block.SetWater(waterPositions.Contains(block.position));
+            i++;
+        }
+
+        return i < path.Count - 1 && path[i].position.y < path[i + 1].position.y;
+    }
+
+    public static CaveBlock GetVerticalLowerPoint(CaveBlock start, CaveMap cavemap)
+    {
+        var x = start.x;
+        var z = start.z;
+        var y = start.y;
+        var index = 256;
+
+        while (true && --index > 0)
+        {
+            int hashcode = CaveBlock.GetHashCode(x, y - 1, z);
+
+            if (!cavemap.Contains(hashcode))
+            {
+                return cavemap.GetBlock(CaveBlock.GetHashCode(x, y, z));
+            }
+
+            y--;
+        }
+
+        throw new Exception("Lower point not found");
+    }
+
+    public static HashSet<int> ExpandWater(CaveBlock waterStart, CaveMap cavemap, PrefabCache cachedPrefabs)
+    {
+        CaveUtils.Assert(waterStart is CaveBlock, "null water start");
+
+        var waterDeep = 1;
+        var queue = new Queue<CaveBlock>();
+        var visited = new HashSet<CaveBlock>() { };
+        var waterBlocks = new HashSet<int>();
+        var startPosition = GetVerticalLowerPoint(waterStart, cavemap);
+
+        for (int i = 0; i < waterDeep; i++)
+        {
+            var start = cavemap.GetBlock(startPosition.x, startPosition.y + i, startPosition.z);
+            queue.Enqueue(start);
+
+            while (queue.Count > 0)
+            {
+                CaveBlock block = queue.Dequeue();
+
+                if (cachedPrefabs.IntersectMarker(block))
+                {
+                    Log.Out("intersect Marker");
+                    return new HashSet<int>();
+                }
+
+                if (visited.Contains(block) || !cavemap.Contains(block))
+                    continue;
+
+                visited.Add(block);
+                waterBlocks.Add(block.GetHashCode());
+
+                foreach (var offset in CaveUtils.neighborsOffsets)
+                {
+                    var hashcode = CaveBlock.GetHashCode(
+                        block.x + offset.x,
+                        block.y + offset.y,
+                        block.z + offset.z
+                    );
+
+                    if (!cavemap.TryGetValue(hashcode, out var neighbor))
+                        continue;
+
+                    if (!visited.Contains(neighbor) && neighbor.y <= start.y)
+                    {
+                        queue.Enqueue(neighbor);
+                    }
+                }
+            }
+        }
+
+        return waterBlocks;
+    }
+
+    public static void SetTunnelWater(HashSet<CaveBlock> localMinimas, CaveMap cavemap, PrefabCache cachedPrefabs)
+    {
+        int index = 0;
+
+        // TODO: multi-thread this loop
+        foreach (var waterStart in localMinimas)
+        {
+            HashSet<int> hashcodes = ExpandWater(waterStart, cavemap, cachedPrefabs);
+
+            Log.Out($"Water processing: {100.0f * ++index / localMinimas.Count:F0}% ({index} / {localMinimas.Count}) {hashcodes.Count:N0}");
+
+            foreach (var hashcode in hashcodes)
+            {
+                cavemap.SetWater(hashcode, true);
+            }
+
+            // if(hashcodes.Count > 1000)
+            //     break;
         }
     }
 
-    public static HashSet<CaveBlock> GenerateTunnel(GraphNode start, GraphNode target, PrefabCache cachedPrefabs)
+    public static HashSet<CaveBlock> GenerateTunnel(GraphNode start, GraphNode target, PrefabCache cachedPrefabs, byte[] densityMap)
     {
         var markers1 = start.GetMarkerPoints();
         var markers2 = target.GetMarkerPoints();
@@ -303,14 +360,12 @@ public static class CaveTunneler
         markers2.Remove(p2);
 
         var path = FindPath(p1, p2, cachedPrefabs);
+        // return path.ToHashSet();
 
         if (path.Count == 0)
             return new HashSet<CaveBlock>();
 
-        SetWaterBlocks(path);
-        // return path.ToHashSet();
         var tunnel = ThickenTunnel(path, start, target);
-        SetTunnelWater(tunnel);
 
         return tunnel;
     }
