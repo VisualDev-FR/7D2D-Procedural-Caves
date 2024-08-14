@@ -6,11 +6,11 @@ using WorldGenerationEngineFinal;
 
 public class CaveTunneler
 {
-    public List<CaveBlock> path;
+    public List<CaveBlock> path = new List<CaveBlock>();
 
-    public HashSet<CaveBlock> localMinimas;
+    public HashSet<CaveBlock> localMinimas = new HashSet<CaveBlock>();
 
-    public HashSet<CaveBlock> tunnel;
+    public HashSet<CaveBlock> tunnel = new HashSet<CaveBlock>();
 
     public HashSet<CaveBlock> GenerateTunnel(Edge edge, PrefabCache cachedPrefabs)
     {

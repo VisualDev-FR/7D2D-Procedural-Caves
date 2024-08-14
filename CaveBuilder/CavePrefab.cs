@@ -453,6 +453,16 @@ public class CavePrefab
         if (pos.x != position.x - 1 && pos.x != position.x + Size.x && pos.z != position.z - 1 && pos.z != position.z + Size.z)
             return false;
 
-        return GetMarkerPoints().Contains(pos);
+        foreach (var marker in markers)
+        {
+            var start = position + marker.start;
+
+            if (CaveUtils.Intersect3D(pos, start, marker.size))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using WorldGenerationEngineFinal;
 
 public class CaveMap : IEnumerable<CaveBlock>
 {
@@ -91,7 +92,7 @@ public class CaveMap : IEnumerable<CaveBlock>
         CaveUtils.Assert(waterStart is CaveBlock, "null water start");
 
         var queue = new Queue<CaveBlock>();
-        var visited = new HashSet<CaveBlock>() { };
+        var visited = new HashSet<CaveBlock>();
         var waterBlocks = new HashSet<int>();
         var startPosition = GetVerticalLowerPoint(waterStart);
         var start = GetBlock(startPosition.x, startPosition.y, startPosition.z);
@@ -145,6 +146,28 @@ public class CaveMap : IEnumerable<CaveBlock>
             HashSet<int> hashcodes = ExpandWater(waterStart, cachedPrefabs);
 
             Log.Out($"Water processing: {100.0f * ++index / localMinimas.Count:F0}% ({index} / {localMinimas.Count}) {hashcodes.Count:N0}");
+
+            foreach (var hashcode in hashcodes)
+            {
+                caveblocks[hashcode].isWater = true;
+            }
+        }
+    }
+
+    public IEnumerator SetWaterCoroutine(HashSet<CaveBlock> localMinimas, PrefabCache cachedPrefabs)
+    {
+        int index = 0;
+
+        foreach (var waterStart in localMinimas)
+        {
+            if (waterStart.isWater)
+                continue;
+
+            HashSet<int> hashcodes = ExpandWater(waterStart, cachedPrefabs);
+
+            string message = $"Water processing: {100.0f * ++index / localMinimas.Count:F0}% ({index} / {localMinimas.Count})";
+
+            yield return WorldBuilder.Instance.SetMessage(message);
 
             foreach (var hashcode in hashcodes)
             {

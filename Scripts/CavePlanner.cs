@@ -288,42 +288,14 @@ public static class CavePlanner
             var start = edge.node1;
             var target = edge.node2;
 
-            var markers1 = start.GetMarkerPoints();
-            var markers2 = target.GetMarkerPoints();
+            var tunneler = new CaveTunneler();
+            var tunnel = tunneler.GenerateTunnel(edge, cachedPrefabs);
 
-            var p1 = start.Normal(CaveUtils.FastMax(5, start.NodeRadius));
-            var p2 = target.Normal(CaveUtils.FastMax(5, target.NodeRadius));
-
-            markers1.Remove(p1);
-            markers2.Remove(p2);
-
-            var path = CaveTunneler.FindPath(p1, p2, cachedPrefabs);
-            // return path.ToHashSet();
-
-            if (path.Count == 0)
-                continue;
-
-            localMinimas.UnionWith(CaveTunneler.FindLocalMinimas(path));
-            var tunnel = CaveTunneler.ThickenTunnel(path, start, target);
-
+            localMinimas.UnionWith(tunneler.localMinimas);
             cavemap.UnionWith(tunnel);
         }
 
-        index = 0;
-
-        foreach (var waterStart in localMinimas)
-        {
-            HashSet<int> hashcodes = CaveTunneler.ExpandWater(waterStart, cavemap, cachedPrefabs);
-
-            string message = $"Water processing: {100.0f * ++index / localMinimas.Count:F0}% ({index} / {localMinimas.Count})";
-
-            yield return WorldBuilder.SetMessage(message);
-
-            foreach (var hashcode in hashcodes)
-            {
-                cavemap.SetWater(hashcode, true);
-            }
-        }
+        yield return cavemap.SetWaterCoroutine(localMinimas, cachedPrefabs);
 
         yield return WorldBuilder.SetMessage("Saving cavemap...");
 
