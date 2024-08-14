@@ -2,6 +2,7 @@
     <property name="MaxPrefabPlacementAttempts" value="50" help="myPropertyHelp" />
     <property name="RadiationMargin" value="50" help="myPropertyHelp" />
     <property name="LightFactor" value="0.5" help="myPropertyHelp" />
+    <property name="SetWater" value="true" help="myPropertyHelp" />
 
     <property name="PathingNoise" help="myPropertyHelp">
         <property name="noiseType" value="perlin" help="myPropertyHelp" />

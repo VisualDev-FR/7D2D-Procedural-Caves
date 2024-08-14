@@ -281,7 +281,7 @@ public static class CavePlanner
 
         foreach (var edge in edges)
         {
-            string message = $"Cave tunneling: {100.0f * index++ / edges.Count:F0}% ({index} / {edges.Count})";
+            string message = $"Cave tunneling: {100f * index++ / edges.Count:F0}% ({index} / {edges.Count})";
 
             yield return WorldBuilder.SetMessage(message);
 
@@ -291,8 +291,8 @@ public static class CavePlanner
             var markers1 = start.GetMarkerPoints();
             var markers2 = target.GetMarkerPoints();
 
-            var p1 = start.Normal(CaveUtils.FastMax(5, start.Radius));
-            var p2 = target.Normal(CaveUtils.FastMax(5, target.Radius));
+            var p1 = start.Normal(CaveUtils.FastMax(5, start.NodeRadius));
+            var p2 = target.Normal(CaveUtils.FastMax(5, target.NodeRadius));
 
             markers1.Remove(p1);
             markers2.Remove(p2);
@@ -308,6 +308,8 @@ public static class CavePlanner
 
             cavemap.UnionWith(tunnel);
         }
+
+        index = 0;
 
         foreach (var waterStart in localMinimas)
         {

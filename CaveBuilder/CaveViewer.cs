@@ -1,6 +1,3 @@
-# pragma warning disable CA1416, CA1050, CA2211, IDE0290, IDE0063, IDE0305, IDE0090
-
-
 using System;
 using System.IO;
 using System.Drawing;
@@ -9,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Linq;
+using System.Collections;
 
 
 public static class CaveViewer
@@ -22,6 +20,17 @@ public static class CaveViewer
     public static readonly Color PrefabBoundsColor = Color.Green;
 
     public static readonly Color NoiseColor = Color.FromArgb(84, 84, 82);
+
+    public static void RunCoroutine(IEnumerator coroutine)
+    {
+        while (coroutine.MoveNext())
+        {
+            if (coroutine.Current is IEnumerator enumerator)
+            {
+                RunCoroutine(enumerator);
+            }
+        }
+    }
 
     public static PointF ParsePointF(Vector3i point)
     {
@@ -162,7 +171,6 @@ public static class CaveViewer
         p1.UpdateMarkers(CaveBuilder.rand);
         p2.UpdateMarkers(CaveBuilder.rand);
 
-        var densityMap = new byte[CaveBuilder.worldSize * CaveBuilder.worldSize];
         var cachedPrefabs = new PrefabCache();
         cachedPrefabs.AddPrefab(p1);
         cachedPrefabs.AddPrefab(p2);
@@ -170,13 +178,16 @@ public static class CaveViewer
         var node1 = p1.nodes[1];
         var node2 = p2.nodes[0];
 
+        var edge = new Edge(node1, node2);
+
         Log.Out($"prefab   {node2.prefab.position}");
         Log.Out($"start    {node2.marker.start}");
         Log.Out($"size     {node2.marker.size}");
         Log.Out($"result   {node2.position}\n");
 
         var timer = CaveUtils.StartTimer();
-        var tunnel = CaveTunneler.GenerateTunnel(node1, node2, cachedPrefabs, densityMap);
+        var tunneler = new CaveTunneler();
+        var tunnel = tunneler.GenerateTunnel(edge, cachedPrefabs);
 
         Log.Out($"{p1.position} -> {p2.position} | Astar dist: {tunnel.Count}, eucl dist: {CaveUtils.EuclidianDist(p1.position, p2.position)}, timer: {timer.ElapsedMilliseconds}ms");
 
@@ -263,13 +274,15 @@ public static class CaveViewer
 
     public static void CaveCommand(string[] args)
     {
-        CaveBuilder.worldSize = 1024;
+        CaveBuilder.worldSize = 2048;
 
         if (args.Length > 1)
             CaveBuilder.worldSize = int.Parse(args[1]);
 
         var timer = CaveUtils.StartTimer();
         var cachedPrefabs = CaveBuilder.GetRandomPrefabs(CaveBuilder.PREFAB_COUNT);
+
+        CaveBuilder.Debug();
 
         Log.Out("Start solving graph...");
 
@@ -292,29 +305,12 @@ public static class CaveViewer
 
                 Parallel.ForEach(edges, edge =>
                 {
-                    var start = edge.node1;
-                    var target = edge.node2;
-
                     Log.Out($"Cave tunneling: {100.0f * ++index / edges.Count:F0}% ({index} / {edges.Count}) {cavemap.Count:N0}");
 
-                    var markers1 = start.GetMarkerPoints();
-                    var markers2 = target.GetMarkerPoints();
+                    var tunneler = new CaveTunneler();
+                    var tunnel = tunneler.GenerateTunnel(edge, cachedPrefabs);
 
-                    var p1 = start.Normal(CaveUtils.FastMax(5, start.Radius));
-                    var p2 = target.Normal(CaveUtils.FastMax(5, target.Radius));
-
-                    markers1.Remove(p1);
-                    markers2.Remove(p2);
-
-                    var path = CaveTunneler.FindPath(p1, p2, cachedPrefabs);
-                    // return path.ToHashSet();
-
-                    if (path.Count == 0)
-                        return;
-
-                    localMinimas.UnionWith(CaveTunneler.FindLocalMinimas(path));
-                    var tunnel = CaveTunneler.ThickenTunnel(path, start, target);
-                    // var tunnel = path.ToHashSet();
+                    localMinimas.UnionWith(tunneler.localMinimas);
 
                     lock (lockObject)
                     {
@@ -333,9 +329,9 @@ public static class CaveViewer
             }
         }
 
-        Log.Out($"{cavemap.Count:N0} cave blocks generated, timer={CaveUtils.TimeFormat(timer)}, memory={(GC.GetTotalMemory(true) - memoryBefore) / 1_048_576.0:F1}MB.");
+        cavemap.SetWater(localMinimas, cachedPrefabs);
 
-        CaveTunneler.SetTunnelWater(localMinimas, cavemap, cachedPrefabs);
+        Log.Out($"{cavemap.Count:N0} cave blocks generated, timer={CaveUtils.TimeFormat(timer)}, memory={(GC.GetTotalMemory(true) - memoryBefore) / 1_048_576.0:F1}MB.");
 
         if (CaveBuilder.worldSize > 1024)
             return;
@@ -467,11 +463,6 @@ public static class CaveViewer
 
     public static void Main(string[] args)
     {
-        Log.Out($"SEED .......... {CaveBuilder.SEED}");
-        Log.Out($"SIZE .......... {CaveBuilder.worldSize}");
-        Log.Out($"PREFAB_COUNT .. {CaveBuilder.PREFAB_COUNT}");
-        Log.Out("");
-
         switch (args[0])
         {
             case "graph":

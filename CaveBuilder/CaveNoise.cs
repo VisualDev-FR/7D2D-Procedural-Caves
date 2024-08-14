@@ -6,6 +6,8 @@ public class CaveNoise
 
     public float threshold;
 
+    public int seed;
+
     public static CaveNoise defaultNoise = new CaveNoise(
         seed: CaveBuilder.SEED,
         octaves: 1,
@@ -18,6 +20,7 @@ public class CaveNoise
 
     public CaveNoise(int seed, int octaves, float frequency, float threshold, bool invert, FastNoiseLite.NoiseType noiseType, FastNoiseLite.FractalType fractalType)
     {
+        this.seed = seed;
         this.invert = invert;
         this.threshold = threshold;
 

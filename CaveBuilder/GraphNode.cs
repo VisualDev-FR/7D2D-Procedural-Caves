@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -14,7 +15,7 @@ public class GraphNode
 
     public int PrefabID => prefab.id;
 
-    public int Radius;
+    public int NodeRadius;
 
     public int sqrRadius;
 
@@ -26,8 +27,8 @@ public class GraphNode
         CaveUtils.Assert(marker != null, $"null marker");
         CaveUtils.Assert(marker.size != null, $"null marker size");
 
-        Radius = CaveUtils.FastMax(1, CaveUtils.FastMin(CaveUtils.FastMax(marker.size.x, marker.size.z), marker.size.y) / 2);
-        sqrRadius = Radius * Radius;
+        NodeRadius = CaveUtils.FastMax(1, CaveUtils.FastMin(CaveUtils.FastMax(marker.size.x, marker.size.z), marker.size.y) / 2);
+        sqrRadius = NodeRadius * NodeRadius;
 
         // TODO: find a way to ensure that the node is in the marker volume
         position = new Vector3i(
@@ -87,9 +88,8 @@ public class GraphNode
         return position.ToString();
     }
 
-    public List<Vector3i> GetMarkerPoints()
+    public IEnumerable<Vector3i> GetMarkerPoints()
     {
-        var result = new List<Vector3i>();
         var p1 = prefab.position + marker.start;
         var p2 = p1 + marker.size;
 
@@ -99,12 +99,10 @@ public class GraphNode
             {
                 for (int z = p1.z; z < p2.z; z++)
                 {
-                    result.Add(new Vector3i(x, y, z));
+                    yield return new Vector3i(x, y, z);
                 }
             }
         }
-
-        return result;
     }
 
     public HashSet<CaveBlock> GetSphere()
