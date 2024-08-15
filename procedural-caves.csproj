@@ -86,6 +86,7 @@
     <Compile Include="Harmony\H_GameManager.cs" />
     <Compile Include="Harmony\H_PrefabManager.cs" />
     <Compile Include="Harmony\H_SpawnManagerBiomes.cs" />
+    <Compile Include="Harmony\H_StreetTile.cs" />
     <Compile Include="Harmony\H_TerrainGeneratorWithBiomeResource.cs" />
     <Compile Include="Harmony\H_WorldBuilder.cs" />
 
