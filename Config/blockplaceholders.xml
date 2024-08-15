@@ -1,9 +1,18 @@
 ﻿<configs>
   <append xpath="/blockplaceholders">
 
+    <placeholder name="cntCaveFloorShallowWater">
+    </placeholder>
+
+    <placeholder name="cntCaveFloorDeepWater">
+    </placeholder>
+
+    <placeholder name="cntCaveCeilingWater">
+    </placeholder>
+
     <placeholder name="cntCaveFloorRandomLootHelper">
 
-      <block name="air" />
+      <block name="caveAir" />
 
       <!-- Lootable -->
       <block name="cntTrashPile01" prob=".0001"/>
@@ -291,6 +300,8 @@
 
     <placeholder name="cntCaveCeilingRandomLootHelper">
 
+      <block name="caveAir"/>
+
       <block name="stalactite01" prob=".005"/>
       <block name="stalactite02" prob=".005"/>
       <block name="stalactite03" prob=".005"/>
@@ -307,12 +318,11 @@
       <block name="corpseHangingRope1Green" prob=".0001"/>
       <block name="corpseHangingRope1Blue" prob=".0001"/>
       <block name="corpseHangingRope1Grey" prob=".0001"/>
-      <block name="air" />
     </placeholder>
 
     <placeholder name="cntCaveWallRandomLootHelper">
+      <block name="caveAir"/>
       <block name="cntDeskSafe" prob=".0001"/>
-      <block name="air" />
     </placeholder>
 
   </append>

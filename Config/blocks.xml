@@ -1,5 +1,6 @@
 ﻿<configs>
 	<append xpath="/blocks">
+
 		<block name="caveAir">
 			<property name="Extends" value="air"/>
 			<property name="StabilityFull" value="true"/>

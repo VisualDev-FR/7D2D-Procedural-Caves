@@ -7,7 +7,7 @@ public static class CaveGenerator
 {
     public static CaveBlocksProvider caveBlocksProvider;
 
-    private static BlockValue caveAir = new BlockValue((uint)Block.GetBlockByName("air").blockID);
+    private static BlockValue caveAir = new BlockValue((uint)Block.GetBlockByName("caveAir").blockID);
 
     private static BlockValue concreteBlock = new BlockValue((uint)Block.GetBlockByName("concreteShapes:cube").blockID);
 

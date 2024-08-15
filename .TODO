@@ -1,28 +1,30 @@
-Live config loader:
-    ☐ full region reset
-    ☐ visitmap full -> commande à rouler pour générer toute la map -> voir dans le repertoire de sauvegarde de la partie
-
-
 Cave generation:
-    ☐ random pois placement
-    ☐ cave decoration
-    ☐ poi placement system
-    ☐ cave entrance system
-    ☐ natural fillers (rooms, canyon, rivers, tensionned stalactites, etc...)
-    ☐ Cave generation menu
+    ✔ random pois placement @done(24-08-15 22:38)
+    ✔ cave decoration @done(24-08-15 22:38)
+    ✔ poi placement system @done(24-08-15 22:38)
+    ✔ cave entrance system @done(24-08-15 22:38)
     ☐ Better procedural width
+    ☐ natural fillers (rooms, canyon, rivers, tensionned stalactites, etc...)
+    ☐ random world generator UI
+    ☐ multiple caves network = good feature + performances trick
+    ☐ connect regular town POIs to the cave system
 
 Editor:
-    ☐ replace selection by terrain / by stone helper
-    ☐ place cave marker from selection
-    ☐ suggest cave tags
+    ✔ replace selection by terrain / by stone helper @done(24-08-15 20:49)
+    ✔ place cave marker from selection @done(24-08-15 20:49)
+    ✔ suggest cave tags @done(24-08-15 20:49)
     ☐ check cave markers placement
     ☐ check min entrance deep
     ☐ fill selection with procedural terrain
     ☐ dedicated testing feature, to test how the cave system is builded around
 
-Misc:
+Else:
     ☐ live cave map
+    ☐ cave navigation with beacons
+    ☐ sound ambiance
+    ☐ possibility to choose which POIs to include or exlude, grouped by mod or else
 
 Cancelled:
     ✘ increase terrain height @cancelled(24-07-10 00:26)
+    ✘ full region reset @cancelled(24-08-15 20:49)
+    ✘ visitmap full -> commande à rouler pour générer toute la map -> voir dans le repertoire de sauvegarde de la partie @cancelled(24-08-15 20:49)
