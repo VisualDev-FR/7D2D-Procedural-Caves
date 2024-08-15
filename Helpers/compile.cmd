@@ -22,8 +22,11 @@ xcopy ProceduralCaves.dll %MOD_NAME%\ > nul
 xcopy ProceduralCaves.pdb %MOD_NAME%\ > nul
 xcopy Helpers\installer.cmd %MOD_NAME%\ > nul
 xcopy README.md %MOD_NAME%\ > nul
-xcopy Config %MOD_NAME%\Config\ /s > nul
 xcopy ModInfo.xml %MOD_NAME%\ > nul
+
+if "%1" == ".\procedural-caves.csproj" (
+    xcopy Config %MOD_NAME%\Config\ /s > nul
+)
 
 7z.exe a "%ZIP_NAME%.zip" %MOD_NAME% > nul
 

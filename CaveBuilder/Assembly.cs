@@ -3,6 +3,7 @@
 # pragma warning disable CA1050, CA2211, IDE0290, IDE0060
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
@@ -36,6 +37,12 @@ namespace WorldGenerationEngineFinal
             public static int GetHeight(int x, int z)
             {
                 return 128;
+            }
+
+            public static IEnumerator SetMessage(string message, bool toLogConsole = false)
+            {
+                Log.Out(message);
+                yield return null;
             }
         };
     }

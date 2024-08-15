@@ -26,7 +26,7 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
             - tags [type]: Add the required tags to get a valid cave prefab. Type is optional an accept the following keywords:
                 * 'entrance' -> the prefab is a cave entrance
 
-            Incoming:
+            Incoming:s
             - test: run a testing session with tunneling around the markers
             - invert: show negative view of the terrain
             - check: create a report of the requirements for getting a valid cave prefab.
@@ -137,7 +137,7 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
             _start: start,
             _size: size,
             _group: "cave",
-            _tags: CavePrefab.tagCaveMarker,
+            _tags: CaveConfig.tagCaveMarker,
             _type: Prefab.Marker.MarkerTypes.None,
             isSelected: false
         );
@@ -347,7 +347,7 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
         var prefabInstance = GetCurrentPrefab();
 
         prefabInstance.prefab.editorGroups.Add("cave");
-        prefabInstance.prefab.Tags = CavePrefab.tagCave;
+        prefabInstance.prefab.Tags = CaveConfig.tagCave;
     }
 
     private void TagsCommand(List<string> args)
@@ -359,7 +359,7 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
             prefabInstance.prefab.editorGroups.Add("cave");
         }
 
-        prefabInstance.prefab.Tags |= CavePrefab.tagCave;
+        prefabInstance.prefab.Tags |= CaveConfig.tagCave;
 
         if (args.Count == 2)
         {
@@ -367,7 +367,7 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
             switch (args[1].ToLower())
             {
                 case "entrance":
-                    prefabInstance.prefab.Tags |= CavePrefab.tagCaveEntrance;
+                    prefabInstance.prefab.Tags |= CaveConfig.tagCaveEntrance;
                     break;
 
                 default:

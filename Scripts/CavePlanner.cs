@@ -59,7 +59,7 @@ public static class CavePlanner
 
         foreach (var pdi in PrefabManager.UsedPrefabsWorld)
         {
-            if (pdi.prefab.Tags.Test_AnySet(CavePrefab.tagCave))
+            if (pdi.prefab.Tags.Test_AnySet(CaveConfig.tagCave))
             {
                 prefabs.AddPrefab(new CavePrefab(prefabs.Count + 1, pdi, HalfWorldSize));
             }
@@ -72,7 +72,7 @@ public static class CavePlanner
     {
         var result =
             from prefab in allCavePrefabs.Values
-            where prefab.Tags.Test_AnySet(CavePrefab.tagCave) && !prefab.Tags.Test_AnySet(CavePrefab.tagCaveEntrance)
+            where prefab.Tags.Test_AnySet(CaveConfig.tagCave) && !prefab.Tags.Test_AnySet(CaveConfig.tagCaveEntrance)
             select prefab;
 
         return result.ToList();
@@ -82,7 +82,7 @@ public static class CavePlanner
     {
         foreach (var marker in prefab.POIMarkers)
         {
-            if (marker.tags.Test_AnySet(CavePrefab.tagCaveMarker))
+            if (marker.tags.Test_AnySet(CaveConfig.tagCaveMarker))
             {
                 return true;
             }
@@ -111,7 +111,7 @@ public static class CavePlanner
 
     private static bool IsCaveEntrance(PrefabData prefabData)
     {
-        return prefabData.Tags.Test_AnySet(CavePrefab.tagCaveEntrance);
+        return prefabData.Tags.Test_AnySet(CaveConfig.tagCaveEntrance);
     }
 
     public static void TryCacheCavePrefab(PrefabData prefabData)

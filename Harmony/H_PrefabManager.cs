@@ -49,7 +49,7 @@ public static class PrefabManager_LoadPrefabs
 
             // PATCH START //
 
-            if (prefabData.Tags.Test_AnySet(CavePrefab.tagCave))
+            if (prefabData.Tags.Test_AnySet(CaveConfig.tagCave))
             {
                 CavePlanner.TryCacheCavePrefab(prefabData);
             }

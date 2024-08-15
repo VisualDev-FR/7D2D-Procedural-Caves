@@ -6,12 +6,6 @@ using WorldGenerationEngineFinal;
 
 public class CavePrefab
 {
-    public static FastTags<TagGroup.Poi> tagCaveMarker = FastTags<TagGroup.Poi>.Parse("cavenode");
-
-    public static FastTags<TagGroup.Poi> tagCaveEntrance = FastTags<TagGroup.Poi>.Parse("entrance");
-
-    public static FastTags<TagGroup.Poi> tagCave = FastTags<TagGroup.Poi>.Parse("cave");
-
     public PrefabDataInstance prefabDataInstance;
 
     public Vector3i position;
@@ -128,7 +122,7 @@ public class CavePrefab
 
         foreach (var marker in prefab.prefab.RotatePOIMarkers(true, rotation))
         {
-            if (!marker.tags.Test_AnySet(tagCaveMarker))
+            if (!marker.tags.Test_AnySet(CaveConfig.tagCaveMarker))
                 continue;
 
             markers.Add(marker);
