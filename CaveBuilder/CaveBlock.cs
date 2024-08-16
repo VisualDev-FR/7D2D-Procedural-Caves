@@ -3,9 +3,15 @@ using UnityEngine;
 
 public class CaveBlock
 {
+    public static readonly sbyte DensityAir = sbyte.MaxValue;
+
+    public static readonly sbyte DensityTerrain = sbyte.MinValue;
+
     public Vector2s ChunkPos { get; internal set; }
 
     public Vector3bf BlockChunkPos { get; internal set; }
+
+    public sbyte density;
 
     public bool isWater;
 
@@ -19,11 +25,12 @@ public class CaveBlock
 
     public Vector3i position => new Vector3i(x, y, z);
 
-    public CaveBlock(Vector3i position)
+    public CaveBlock(Vector3i position, sbyte density)
     {
         short chunk_x = (short)(position.x >> 4);
         short chunk_z = (short)(position.z >> 4);
 
+        this.density = density;
         isWater = false;
         isRope = false;
 
@@ -36,11 +43,12 @@ public class CaveBlock
         );
     }
 
-    public CaveBlock(int x, int y, int z)
+    public CaveBlock(int x, int y, int z, sbyte density)
     {
         short chunk_x = (short)(x >> 4);
         short chunk_z = (short)(z >> 4);
 
+        this.density = density;
         isWater = false;
         isRope = false;
 
@@ -57,8 +65,19 @@ public class CaveBlock
     {
         ChunkPos = new Vector2s(reader.ReadInt16(), reader.ReadInt16());
         BlockChunkPos = new Vector3bf(reader.ReadUInt16());
+        density = reader.ReadSByte();
         isWater = reader.ReadBoolean();
         isRope = reader.ReadBoolean();
+    }
+
+    public void ToBinaryStream(BinaryWriter writer)
+    {
+        writer.Write(ChunkPos.x);
+        writer.Write(ChunkPos.z);
+        writer.Write(BlockChunkPos.value);
+        writer.Write(density);
+        writer.Write(isWater);
+        writer.Write(isRope);
     }
 
     public Vector3i ToVector3i()
@@ -157,12 +176,4 @@ public class CaveBlock
         return position.x + CaveBuilder.worldSize * position.z;
     }
 
-    public void ToBinaryStream(BinaryWriter writer)
-    {
-        writer.Write(ChunkPos.x);
-        writer.Write(ChunkPos.z);
-        writer.Write(BlockChunkPos.value);
-        writer.Write(isWater);
-        writer.Write(isRope);
-    }
 }

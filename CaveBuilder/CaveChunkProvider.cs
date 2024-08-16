@@ -115,7 +115,7 @@ public class CaveBlocksProvider
 
         var caveBlockPosition = worldPos + new Vector3i(worldSize / 2, 0, worldSize / 2);
 
-        return caveBlocks.Contains(new CaveBlock(caveBlockPosition));
+        return caveBlocks.Contains(new CaveBlock(caveBlockPosition, MarchingCubes.DensityAir));
     }
 
     public List<CaveBlock> GetSpawnPositions(Vector3 worldPosition)

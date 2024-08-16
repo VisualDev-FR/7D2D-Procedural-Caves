@@ -80,7 +80,7 @@ public class PrefabTunneler
             {
                 foreach (var pos in queue.ToArray())
                 {
-                    var caveBlock = new CaveBlock(pos);
+                    var caveBlock = new CaveBlock(pos, MarchingCubes.DensityAir);
 
                     queue.Remove(pos);
 

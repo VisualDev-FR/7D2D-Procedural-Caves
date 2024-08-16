@@ -187,7 +187,7 @@ public static class CaveViewer
 
         var timer = CaveUtils.StartTimer();
         var tunneler = new CaveTunneler();
-        var tunnel = tunneler.GenerateTunnel(edge, cachedPrefabs);
+        var tunnel = tunneler.GenerateTunnel(edge, cachedPrefabs, new CaveMap());
 
         Log.Out($"{p1.position} -> {p2.position} | Astar dist: {tunnel.Count}, eucl dist: {CaveUtils.EuclidianDist(p1.position, p2.position)}, timer: {timer.ElapsedMilliseconds}ms");
 
@@ -239,7 +239,7 @@ public static class CaveViewer
             int pos = i * radius * 3;
 
             var position = new Vector3i(pos, 20, 20);
-            var caveBlock = new CaveBlock(position);
+            var caveBlock = new CaveBlock(position, MarchingCubes.DensityAir);
             var sphere = CaveTunneler.GetSphere(caveBlock, radius);
 
             foreach (var block in sphere)
@@ -274,7 +274,7 @@ public static class CaveViewer
 
     public static void CaveCommand(string[] args)
     {
-        CaveBuilder.worldSize = 2048;
+        CaveBuilder.worldSize = 1024;
 
         if (args.Length > 1)
             CaveBuilder.worldSize = int.Parse(args[1]);
@@ -308,7 +308,7 @@ public static class CaveViewer
                     Log.Out($"Cave tunneling: {100.0f * ++index / edges.Count:F0}% ({index} / {edges.Count}) {cavemap.Count:N0}");
 
                     var tunneler = new CaveTunneler();
-                    var tunnel = tunneler.GenerateTunnel(edge, cachedPrefabs);
+                    var tunnel = tunneler.GenerateTunnel(edge, cachedPrefabs, cavemap);
 
                     localMinimas.UnionWith(tunneler.localMinimas);
 

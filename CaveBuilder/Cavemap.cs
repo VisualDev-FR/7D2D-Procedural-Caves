@@ -29,6 +29,11 @@ public class CaveMap : IEnumerable<CaveBlock>
         return caveblocks.ContainsKey(hashcode);
     }
 
+    public bool Contains(int x, int y, int z)
+    {
+        return caveblocks.ContainsKey(CaveBlock.GetHashCode(x, y, z));
+    }
+
     public CaveBlock GetBlock(int hashcode)
     {
         return caveblocks[hashcode];
@@ -135,6 +140,9 @@ public class CaveMap : IEnumerable<CaveBlock>
 
     public void SetWater(HashSet<CaveBlock> localMinimas, PrefabCache cachedPrefabs)
     {
+        if (!CaveConfig.generateWater)
+            return;
+
         int index = 0;
 
         // TODO: multi-thread this loop
@@ -152,6 +160,11 @@ public class CaveMap : IEnumerable<CaveBlock>
                 caveblocks[hashcode].isWater = true;
             }
         }
+    }
+
+    public bool IsCave(int x, int y, int z)
+    {
+        return caveblocks.ContainsKey(CaveBlock.GetHashCode(x, y, z));
     }
 
     public IEnumerator SetWaterCoroutine(HashSet<CaveBlock> localMinimas, PrefabCache cachedPrefabs)

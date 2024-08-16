@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 using WorldGenerationEngineFinal;
 
 public class CaveTunneler
@@ -12,7 +13,7 @@ public class CaveTunneler
 
     public HashSet<CaveBlock> tunnel = new HashSet<CaveBlock>();
 
-    public HashSet<CaveBlock> GenerateTunnel(Edge edge, PrefabCache cachedPrefabs)
+    public HashSet<CaveBlock> GenerateTunnel(Edge edge, PrefabCache cachedPrefabs, CaveMap cavemap)
     {
         var start = edge.node1;
         var target = edge.node2;
@@ -26,7 +27,7 @@ public class CaveTunneler
             return new HashSet<CaveBlock>();
 
         localMinimas = FindLocalMinimas();
-        tunnel = ThickenTunnel(start, target);
+        tunnel = ThickenTunnel(start, target, cavemap);
 
         return tunnel;
     }
@@ -43,7 +44,7 @@ public class CaveTunneler
             {
                 queue.Remove(pos);
 
-                var caveBlock = new CaveBlock(pos);
+                var caveBlock = new CaveBlock(pos, MarchingCubes.DensityAir);
 
                 if (sphere.Contains(caveBlock))
                     continue;
@@ -75,7 +76,7 @@ public class CaveTunneler
 
         while (currentNode != null)
         {
-            path.Add(new CaveBlock(currentNode.position));
+            path.Add(new CaveBlock(currentNode.position, MarchingCubes.DensityAir));
             currentNode = currentNode.Parent;
         }
 
@@ -150,7 +151,7 @@ public class CaveTunneler
         return new List<CaveBlock>();
     }
 
-    private HashSet<CaveBlock> ThickenTunnel(GraphNode start, GraphNode target)
+    private HashSet<CaveBlock> ThickenTunnel(GraphNode start, GraphNode target, CaveMap cavemap)
     {
         tunnel = path.ToHashSet();
 
@@ -163,7 +164,7 @@ public class CaveTunneler
         for (int i = 0; i < path.Count; i++)
         {
             var tunnelRadius = (int)(r1 + (r2 - r1) * (1f * i / path.Count));
-            var circle = GetSphere(path[i], tunnelRadius);
+            var circle = GetSphereV2(path[i], tunnelRadius, cavemap);
             tunnel.UnionWith(circle);
         }
 
@@ -211,6 +212,119 @@ public class CaveTunneler
         }
 
         return i < path.Count - 1 && path[i].position.y < path[i + 1].position.y;
+    }
+
+    public static Vector3[] INNER_POINTS = new Vector3[17]
+    {
+        new Vector3(0.5f, 0.5f, 0.5f),
+        new Vector3(0f, 0f, 0f),
+        new Vector3(1f, 0f, 0f),
+        new Vector3(0f, 1f, 0f),
+        new Vector3(0f, 0f, 1f),
+        new Vector3(1f, 1f, 0f),
+        new Vector3(0f, 1f, 1f),
+        new Vector3(1f, 0f, 1f),
+        new Vector3(1f, 1f, 1f),
+        new Vector3(0.25f, 0.25f, 0.25f),
+        new Vector3(0.75f, 0.25f, 0.25f),
+        new Vector3(0.25f, 0.75f, 0.25f),
+        new Vector3(0.25f, 0.25f, 0.75f),
+        new Vector3(0.75f, 0.75f, 0.25f),
+        new Vector3(0.25f, 0.75f, 0.75f),
+        new Vector3(0.75f, 0.25f, 0.75f),
+        new Vector3(0.75f, 0.75f, 0.75f)
+    };
+
+    public IEnumerable<CaveBlock> GetSphereV2(CaveBlock center, float sphereRadius, CaveMap cavemap)
+    {
+        // adapted from ItemActionTerrainTool.RemoveTerrain
+
+        Vector3 worldPos = center.position.ToVector3();
+        // ItemActionData _actionData;
+        // float _damage = 0f;
+        // DamageMultiplier _damageMultiplier = null;
+        // bool _bChangeBlocks = true;
+
+        int x_min = Utils.Fastfloor(worldPos.x - sphereRadius);
+        int x_max = Utils.Fastfloor(worldPos.x + sphereRadius);
+        int y_min = Utils.Fastfloor(worldPos.y - sphereRadius);
+        int y_max = Utils.Fastfloor(worldPos.y + sphereRadius);
+        int z_min = Utils.Fastfloor(worldPos.z - sphereRadius);
+        int z_max = Utils.Fastfloor(worldPos.z + sphereRadius);
+
+        for (int x = x_min; x <= x_max; x++)
+        {
+            for (int y = y_min; y <= y_max; y++)
+            {
+                for (int z = z_min; z <= z_max; z++)
+                {
+                    int num7 = 0;
+                    for (int i = 0; i < INNER_POINTS.Length; i++)
+                    {
+                        Vector3 vector = INNER_POINTS[i];
+                        if ((new Vector3(x + vector.x, y + vector.y, z + vector.z) - worldPos).magnitude <= sphereRadius)
+                        {
+                            num7++;
+                        }
+                        if (i == 8)
+                        {
+                            switch (num7)
+                            {
+                                case 9:
+                                    num7 = INNER_POINTS.Length;
+                                    break;
+                                default:
+                                    continue;
+                                case 0:
+                                    break;
+                            }
+                            break;
+                        }
+                    }
+                    if (num7 == 0)
+                    {
+                        continue;
+                    }
+
+                    sbyte density = MarchingCubes.DensityAir;
+
+                    if (num7 > INNER_POINTS.Length / 2)
+                    {
+                        density = (sbyte)((float)MarchingCubes.DensityAir * (num7 - INNER_POINTS.Length / 2 - 1) / (INNER_POINTS.Length / 2));
+                        if (density <= 0)
+                        {
+                            density = 1;
+                        }
+                    }
+                    else if (!cavemap.IsCave(x, y, z))
+                    {
+                        density = (sbyte)((float)MarchingCubes.DensityTerrain * (INNER_POINTS.Length / 2 - num7) / (INNER_POINTS.Length / 2));
+                        if (density >= 0)
+                        {
+                            density = -1;
+                        }
+                    }
+
+                    var caveBlock = new CaveBlock(x, y, z, density);
+
+                    yield return caveBlock;
+                    // if (blockValue.type != block.type || density > initialDensity)
+                    // {
+                    //     BlockChangeInfo blockChangeInfo = new BlockChangeInfo();
+                    //     blockChangeInfo.pos = vector3i;
+                    //     blockChangeInfo.bChangeDensity = true;
+                    //     blockChangeInfo.density = density;
+                    //     if (blockValue.type != block.type)
+                    //     {
+                    //         blockChangeInfo.bChangeBlockValue = true;
+                    //         blockChangeInfo.blockValue = blockValue;
+                    //     }
+                    //     blockChanges.Add(blockChangeInfo);
+                    // }
+                }
+            }
+        }
+
     }
 
 }

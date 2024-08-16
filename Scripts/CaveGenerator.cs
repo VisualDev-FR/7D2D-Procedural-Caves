@@ -43,10 +43,10 @@ public static class CaveGenerator
 
         return false;
 
-        Bounds bounds = block.multiBlockPos.CalcBounds(_blockValue.type, _blockValue.rotation);
-        bounds.center += _blockPos.ToVector3();
+        // Bounds bounds = block.multiBlockPos.CalcBounds(_blockValue.type, _blockValue.rotation);
+        // bounds.center += _blockPos.ToVector3();
 
-        return true;
+        // return true;
     }
 
     public static void GenerateCave(Chunk chunk)

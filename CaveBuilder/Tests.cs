@@ -40,7 +40,7 @@ public class GraphNodeTests
     [TestMethod]
     public void Test_CaveBlockNeighbors()
     {
-        var block = new CaveBlock(10, 10, 10);
+        var block = new CaveBlock(10, 10, 10, MarchingCubes.DensityAir);
 
         foreach (var pos in CaveUtils.GetValidNeighbors(block.ToVector3i()))
         {
@@ -53,12 +53,12 @@ public class GraphNodeTests
     [TestMethod]
     public void Test_CaveBlockEquals()
     {
-        var p1 = new CaveBlock(0, 1, 2);
-        var p2 = new CaveBlock(0, 1, 2);
+        var p1 = new CaveBlock(0, 1, 2, MarchingCubes.DensityAir);
+        var p2 = new CaveBlock(0, 1, 2, MarchingCubes.DensityAir);
         Assert.AreEqual(p1, p2, $"{p1} | {p2}");
 
-        p1 = new CaveBlock(0, 1, 2);
-        p2 = new CaveBlock(0, 2, 2);
+        p1 = new CaveBlock(0, 1, 2, MarchingCubes.DensityAir);
+        p2 = new CaveBlock(0, 2, 2, MarchingCubes.DensityAir);
         Assert.AreNotEqual(p1, p2, $"{p1.BlockChunkPos}({p1.BlockChunkPos.GetHashCode()}) | {p2.BlockChunkPos}({p2.BlockChunkPos.GetHashCode()})");
     }
 

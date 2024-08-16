@@ -146,7 +146,7 @@ public class GraphNode
                 if (CaveUtils.SqrEuclidianDist(pos, center) >= sqrRadius)
                     continue;
 
-                var caveBlock = new CaveBlock(pos)
+                var caveBlock = new CaveBlock(pos, MarchingCubes.DensityAir)
                 {
                     isWater = false
                 };
