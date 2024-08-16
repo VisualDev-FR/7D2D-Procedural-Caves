@@ -20,6 +20,7 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
             - room: create an empty room of selected item in the selection box.
             - stalactite [height] Creates a procedural stalactite of the specified height at the start position of the selection box.
             - replaceground, rg: replace all terrain blocks inside the selection box, which have air above them with the selected item.
+            - replaceall, ra: replace all block in the selection box except air and water, by the selected item
             - setwater, sw [mode]:
                 * 'empty': set all water blocks of the selection to air.
                 * 'fill': set all air blocks of the selection to water.
@@ -405,6 +406,44 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
         }
     }
 
+    private void ReplaceAllCommand()
+    {
+        EntityPlayerLocal primaryPlayer = GameManager.Instance.World.GetPrimaryPlayer();
+        ItemValue holdingItemItemValue = primaryPlayer.inventory.holdingItemItemValue;
+        BlockValue blockValue = holdingItemItemValue.ToBlockValue();
+
+        if (blockValue.isair)
+        {
+            Log.Error($"Invalid filler block: '{holdingItemItemValue.ItemClass.Name}'");
+            return;
+        }
+
+        Block block = blockValue.Block;
+        BlockPlacement.Result _bpResult = new BlockPlacement.Result(0, Vector3.zero, Vector3i.zero, blockValue);
+        block.OnBlockPlaceBefore(GameManager.Instance.World, ref _bpResult, primaryPlayer, GameManager.Instance.World.GetGameRandom());
+        blockValue = _bpResult.blockValue;
+
+        List<BlockChangeInfo> list = new List<BlockChangeInfo>();
+
+        var _gm = GameManager.Instance;
+
+        foreach (var position in BrowseSelectionPositions())
+        {
+            var worldBlock = _gm.World.GetBlock(position);
+            var clusterIndex = _gm.World.ChunkCache.ClusterIdx;
+            var _density = _gm.World.GetDensity(clusterIndex, position);
+
+            BlockChangeInfo blockChangeInfo = new BlockChangeInfo(position, blockValue, _density);
+
+            if (worldBlock.isWater || worldBlock.isair)
+                continue;
+
+            list.Add(blockChangeInfo);
+        }
+
+        _gm.SetBlocksRPC(list);
+    }
+
     private void NotImplementedCommand(string commandName)
     {
         Log.Error($"Not implemented command: '{commandName}'");
@@ -489,6 +528,11 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
             case "selectall":
             case "sa":
                 SelectAllCommand();
+                break;
+
+            case "replaceall":
+            case "ra":
+                ReplaceAllCommand();
                 break;
 
             case "setwater":
