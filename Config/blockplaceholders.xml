@@ -160,7 +160,6 @@
       <block name="treeDeadPineLeaf" prob=".001"/>
       <block name="treeSnowyDeadBush" prob=".001"/>
       <block name="treeAzalea" prob=".001"/>
-      <block name="treeDeadTree02" prob=".001"/>
 
       <block name="plantShrub" prob=".001"/>
       <block name="plantShrubDead" prob=".001"/>

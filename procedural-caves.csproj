@@ -75,6 +75,11 @@
       <HintPath>$(PATH_7D2D)\7DaysToDie_Data\Managed\mscorlib.dll</HintPath>
       <Private>False</Private>
     </Reference>
+
+    <Reference Include="InControl">
+      <HintPath>$(PATH_7D2D)\7DaysToDie_Data\Managed\InControl.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <!-- Assembly info -->
@@ -82,6 +87,7 @@
 
     <!-- Harmony -->
     <Compile Include="Harmony\ModApi.cs" />
+    <Compile Include="Harmony\H_BlockToolSelection.cs" />
     <Compile Include="Harmony\H_DynamicPrefabDecorator.cs" />
     <Compile Include="Harmony\H_GameManager.cs" />
     <Compile Include="Harmony\H_PrefabManager.cs" />
