@@ -3,7 +3,9 @@
 
         <!-- Same as air but with property ground_cover=true to allow any block to replace caveAir  -->
         <material id="McaveAir">
-            <property name="Extends" value="Mair"/>
+            <property name="collidable" value="false"/>
+            <property name="lightopacity" value="0"/>
+            <property name="explosionresistance" value="1"/>
             <property name="ground_cover" value="true"/>
         </material>
 
