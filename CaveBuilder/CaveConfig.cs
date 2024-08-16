@@ -1,5 +1,7 @@
 public static class CaveConfig
 {
+    public static bool generateWater = false;
+
     public static FastTags<TagGroup.Poi> tagCaveMarker = FastTags<TagGroup.Poi>.Parse("cavenode");
 
     public static FastTags<TagGroup.Poi> tagCaveEntrance = FastTags<TagGroup.Poi>.Parse("entrance");

@@ -8,6 +8,7 @@ Cave generation:
     ☐ random world generator UI
     ☐ multiple caves network = good feature + performances trick
     ☐ connect regular town POIs to the cave system
+    ☐ allow to cancel the generation
 
 Editor:
     ✔ replace selection by terrain / by stone helper @done(24-08-15 20:49)

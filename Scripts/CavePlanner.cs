@@ -17,6 +17,8 @@ public static class CavePlanner
 {
     private static Dictionary<string, PrefabData> allCavePrefabs = new Dictionary<string, PrefabData>();
 
+    private static HashSet<string> usedEntrances = new HashSet<string>();
+
     public static int AllPrefabsCount => allCavePrefabs.Count;
 
     private static List<string> entrancePrefabsNames = new List<string>();
@@ -39,18 +41,43 @@ public static class CavePlanner
 
     public static void Init()
     {
+        CaveBuilder.rand = new Random(CaveBuilder.SEED);
         entrancePrefabsNames = new List<string>();
         allCavePrefabs = new Dictionary<string, PrefabData>();
-        CaveBuilder.rand = new Random(CaveBuilder.SEED);
+        usedEntrances = new HashSet<string>();
+    }
+
+    private static HashSet<string> GetAddedPrefabNames()
+    {
+        var result =
+                from prefab in PrefabManager.UsedPrefabsWorld
+                where prefab.prefab.Tags.Test_AnySet(CaveConfig.tagCave)
+                select prefab.prefab.Name;
+
+        return result.ToHashSet();
     }
 
     public static PrefabData SelectRandomEntrance()
     {
         CaveUtils.Assert(entrancePrefabsNames.Count > 0, "Seems that no cave entrance was found.");
 
-        string prefabName = entrancePrefabsNames[rand.Next(entrancePrefabsNames.Count)];
+        var unusedEntranceNames = entrancePrefabsNames.Where(prefabName => !usedEntrances.Contains(prefabName)).ToList();
+        string entranceName;
 
-        return allCavePrefabs[prefabName];
+        if (unusedEntranceNames.Count > 0)
+        {
+            entranceName = unusedEntranceNames[rand.Next(unusedEntranceNames.Count)];
+        }
+        else
+        {
+            entranceName = entrancePrefabsNames[rand.Next(entrancePrefabsNames.Count)];
+        }
+
+        Log.Out($"[Cave] random selected entrance: '{entranceName}'");
+
+        usedEntrances.Add(entranceName);
+
+        return allCavePrefabs[entranceName];
     }
 
     private static PrefabCache GetUsedCavePrefabs()
@@ -118,25 +145,26 @@ public static class CavePlanner
     {
         if (!ContainsCaveMarkers(prefabData))
         {
-            Log.Warning($"[Cave] skipping {prefabData.Name} because no cave marker was found.");
+            Log.Warning($"[Cave] skipping '{prefabData.Name} 'because no cave marker was found.");
             return;
         }
 
         if (!PrefabMarkersAreValid(prefabData))
         {
-            Log.Warning($"[Cave] skipping {prefabData.Name} because at least one marker is invalid.");
+            Log.Warning($"[Cave] skipping '{prefabData.Name}' because at least one marker is invalid.");
             return;
         }
 
         string prefabName = prefabData.Name.ToLower();
+        string suffix = "";
 
         if (IsCaveEntrance(prefabData))
         {
-            Log.Out($"[Cave] cache prefab {prefabName} as a cave entrance.");
+            suffix = "(entrance)";
             entrancePrefabsNames.Add(prefabName);
         }
 
-        Log.Out($"[Cave] caching prefab '{prefabName}'");
+        Log.Out($"[Cave] caching prefab '{prefabName}' {suffix}".TrimEnd());
 
         allCavePrefabs[prefabName] = prefabData;
     }
@@ -242,7 +270,7 @@ public static class CavePlanner
             cavePrefabs.AddPrefab(cavePrefab);
             PrefabManager.AddUsedPrefabWorld(-1, pdi);
 
-            Log.Out($"[Cave] cave prefab {cavePrefab.Name} added at {cavePrefab.position}");
+            Log.Out($"[Cave] cave prefab '{cavePrefab.Name}' added at {cavePrefab.position}");
         }
 
         Log.Out($"[Cave] {cavePrefabs.Count} cave prefabs added.");
@@ -259,7 +287,7 @@ public static class CavePlanner
 
         foreach (var prefab in addedCaveEntrances.Prefabs)
         {
-            Log.Out($"[Cave] Cave entrance added at {prefab.position}: {prefab.Name}");
+            Log.Out($"[Cave] Cave entrance '{prefab.Name}' added at {prefab.position}");
         }
 
         CaveBuilder.worldSize = WorldSize;
@@ -295,7 +323,8 @@ public static class CavePlanner
             cavemap.UnionWith(tunnel);
         }
 
-        yield return cavemap.SetWaterCoroutine(localMinimas, cachedPrefabs);
+        if (CaveConfig.generateWater)
+            yield return cavemap.SetWaterCoroutine(localMinimas, cachedPrefabs);
 
         yield return WorldBuilder.SetMessage("Saving cavemap...");
 
