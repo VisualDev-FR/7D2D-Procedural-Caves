@@ -1,0 +1,11 @@
+<configs>
+    <append xpath="/materials">
+
+        <!-- Same as air but with property ground_cover=true to allow any block to replace caveAir  -->
+        <material id="McaveAir">
+            <property name="Extends" value="Mair"/>
+            <property name="ground_cover" value="true"/>
+        </material>
+
+    </append>
+</configs>

@@ -4,6 +4,7 @@
 		<block name="caveAir">
 			<property name="Extends" value="air"/>
 			<property name="StabilityFull" value="true"/>
+			<property name="Material" value="McaveAir"/>
 		</block>
 
 		<block name="cntCaveFloor">
