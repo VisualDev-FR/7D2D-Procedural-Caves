@@ -62,16 +62,22 @@ public static class CaveGenerator
             var worldX = chunkWorldPos.x + blockPos.x;
             var worldZ = chunkWorldPos.z + blockPos.z;
 
+            BlockValue blockValue;
+
             if (isFloor)
             {
-                BlockValue blockValue = BlockPlaceholderMap.Instance.Replace(cntCaveFloor, random, worldX, worldZ);
-                chunk.SetBlockRaw(blockPos.x, blockPos.y, blockPos.z, blockValue);
+                blockValue = BlockPlaceholderMap.Instance.Replace(cntCaveFloor, random, worldX, worldZ);
             }
             else if (isCeiling)
             {
-                BlockValue blockValue = BlockPlaceholderMap.Instance.Replace(cntCaveCeiling, random, worldX, worldZ);
-                chunk.SetBlockRaw(blockPos.x, blockPos.y, blockPos.z, blockValue);
+                blockValue = BlockPlaceholderMap.Instance.Replace(cntCaveCeiling, random, worldX, worldZ);
             }
+            else
+            {
+                continue;
+            }
+
+            chunk.SetBlock(GameManager.Instance.World, blockPos.x, blockPos.y, blockPos.z, blockValue);
         }
 
         HashSet<CaveBlock> waterBlocks = caveBlocks.Where(block => block.isWater).ToHashSet();

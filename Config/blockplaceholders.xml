@@ -31,8 +31,25 @@
       <block name="cntDuffle01" prob=".00001"/>
       <block name="cntPurse01" prob=".00001"/>
 
-      <block name="cntSportsBag01" prob=".00001"/>
-      <block name="cntSportsBag02" prob=".00001"/>
+      <block name="cntSportsBag01" prob=".0001"/>
+      <block name="cntSportsBag01Red" prob=".0001"/>
+      <block name="cntSportsBag01Orange" prob=".0001"/>
+      <block name="cntSportsBag01Yellow" prob=".0001"/>
+      <block name="cntSportsBag01Green" prob=".0001"/>
+      <block name="cntSportsBag01Blue" prob=".0001"/>
+      <block name="cntSportsBag01Purple" prob=".0001"/>
+      <block name="cntSportsBag01Pink" prob=".0001"/>
+
+      <block name="cntSportsBag02" prob=".0001"/>
+      <block name="cntSportsBag02Brown" prob=".0001"/>
+      <block name="cntSportsBag02Red" prob=".0001"/>
+      <block name="cntSportsBag02Orange" prob=".0001"/>
+      <block name="cntSportsBag02Yellow" prob=".0001"/>
+      <block name="cntSportsBag02Green" prob=".0001"/>
+      <block name="cntSportsBag02Blue" prob=".0001"/>
+      <block name="cntSportsBag02Purple" prob=".0001"/>
+      <block name="cntSportsBag02Pink" prob=".0001"/>
+
       <block name="cntWeaponsBagSmall" prob=".00001"/>
       <block name="cntWeaponsBagLarge" prob=".00001"/>
       <block name="cntAmmoPileSmall" prob=".00001"/>
