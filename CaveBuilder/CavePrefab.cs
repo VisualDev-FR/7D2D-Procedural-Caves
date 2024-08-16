@@ -269,39 +269,6 @@ public class CavePrefab
         return intersectionsCount;
     }
 
-    public List<Vector3i> Get2DEdges()
-    {
-        List<Vector3i> points = new List<Vector3i>();
-
-        int x0 = position.x;
-        int z0 = position.z;
-
-        int x1 = x0 + Size.x;
-        int z1 = z0 + Size.z;
-
-        for (int x = x0; x <= x1; x++)
-        {
-            points.Add(new Vector3i(x, position.y, z0));
-        }
-
-        for (int x = x0; x <= x1; x++)
-        {
-            points.Add(new Vector3i(x, position.y, z1));
-        }
-
-        for (int z = z0; z <= z1; z++)
-        {
-            points.Add(new Vector3i(x0, position.y, z));
-        }
-
-        for (int z = z0; z <= z1; z++)
-        {
-            points.Add(new Vector3i(x1, position.y, z));
-        }
-
-        return points;
-    }
-
     private List<Vector3i> GetBoundingPoints()
     {
         var points = new HashSet<Vector3i>();

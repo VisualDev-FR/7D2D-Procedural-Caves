@@ -5,6 +5,7 @@ using HarmonyLib;
 [HarmonyPatch(typeof(BlockToolSelection), "CheckKeys")]
 public class BlockToolSelection_CheckKeys
 {
+    // simple patch allowing to access the density modifier out of the edit mode
     public static void CheckKeys(BlockToolSelection instance, ItemInventoryData _data, WorldRayHitInfo _hitInfo, PlayerActionsLocal playerActions)
     {
         if (LocalPlayerUI.primaryUI.windowManager.IsInputActive())

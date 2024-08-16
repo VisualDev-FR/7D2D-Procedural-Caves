@@ -15,19 +15,13 @@ public class CaveTunneler
 
     public HashSet<CaveBlock> GenerateTunnel(Edge edge, PrefabCache cachedPrefabs, CaveMap cavemap)
     {
-        var start = edge.node1;
-        var target = edge.node2;
-
-        var p1 = start.Normal(CaveUtils.FastMax(5, start.NodeRadius));
-        var p2 = target.Normal(CaveUtils.FastMax(5, target.NodeRadius));
-
-        path = FindPath(p1, p2, cachedPrefabs);
+        path = FindPath(edge, cachedPrefabs);
 
         if (path.Count == 0)
             return new HashSet<CaveBlock>();
 
         localMinimas = FindLocalMinimas();
-        tunnel = ThickenTunnel(start, target, cavemap);
+        tunnel = ThickenTunnel(edge.node1, edge.node2, cavemap);
 
         return tunnel;
     }
@@ -85,8 +79,11 @@ public class CaveTunneler
         return path;
     }
 
-    private List<CaveBlock> FindPath(Vector3i start, Vector3i target, PrefabCache cachedPrefabs)
+    private List<CaveBlock> FindPath(Edge edge, PrefabCache cachedPrefabs)
     {
+        var start = edge.node1.Normal(CaveUtils.FastMax(5, edge.node1.NodeRadius));
+        var target = edge.node2.Normal(CaveUtils.FastMax(5, edge.node2.NodeRadius));
+
         var startNode = new AstarNode(start);
         var goalNode = new AstarNode(target);
 
@@ -146,7 +143,7 @@ public class CaveTunneler
             }
         }
 
-        Log.Warning($"No Path found from {start} to {target} after {index} iterations");
+        Log.Warning($"No Path found from '{edge.Prefab1.Name}' to '{edge.Prefab2.Name}' after {index} iterations");
 
         return new List<CaveBlock>();
     }

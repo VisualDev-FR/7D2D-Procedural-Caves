@@ -328,6 +328,8 @@ public static class CavePlanner
 
         yield return WorldBuilder.SetMessage("Saving cavemap...");
 
+        yield return GenerateCavePreview(cavemap);
+
         cavemap.Save($"{CaveTempDir}/cavemap");
 
         yield return WorldBuilder.SetMessage("Creating cave preview...", _logToConsole: true);
@@ -337,32 +339,52 @@ public static class CavePlanner
         yield return null;
     }
 
-    public static IEnumerator GenerateCavePreview(List<CavePrefab> prefabs, HashSet<CaveBlock> caveMap)
+    public static IEnumerator GenerateCavePreview(CaveMap caveMap)
     {
-        string filename = @"C:\tools\DEV\7D2D_Modding\7D2D-Procedural-caves\CaveBuilder\graph.png";
+        Color32 regularPrefabColor = new Color32(255, 255, 255, 32);
+        Color32 cavePrefabsColor = new Color32(0, 255, 0, 128);
+        Color32 caveEntrancesColor = new Color32(255, 255, 0, 255);
+        Color32 caveTunnelColor = new Color32(255, 0, 0, 64);
+
+        string filename = $"{GameIO.GetUserGameDataDir()}/temp/cavemap.png";
 
         var pixels = Enumerable.Repeat(new Color32(0, 0, 0, 255), WorldSize * WorldSize).ToArray();
 
-        foreach (var prefab in prefabs)
+        foreach (PrefabDataInstance pdi in PrefabManager.UsedPrefabsWorld)
         {
-            foreach (var point in prefab.Get2DEdges())
+            var prefabColor = regularPrefabColor;
+
+            if (pdi.prefab.Tags.Test_AnySet(CaveConfig.tagCaveEntrance))
+            {
+                prefabColor = caveEntrancesColor;
+            }
+            else if (pdi.prefab.Tags.Test_AnySet(CaveConfig.tagCave))
+            {
+                prefabColor = cavePrefabsColor;
+            }
+
+            var position = pdi.boundingBoxPosition + HalfWorldSize;
+            var size = pdi.boundingBoxSize;
+
+            foreach (var point in CaveUtils.GetBoundingEdges(position, size))
             {
                 int index = point.x + point.z * WorldSize;
-                pixels[index] = new Color32(0, 255, 0, 255);
+                pixels[index] = prefabColor;
             }
         }
 
-        foreach (var blockPos in caveMap)
+        foreach (CaveBlock caveblock in caveMap)
         {
-            var position = blockPos;
+            var position = caveblock;
             int index = position.x + position.z * WorldSize;
             try
             {
-                pixels[index] = new Color32(255, 0, 0, 255);
+                caveTunnelColor.a = (byte)position.y;
+                pixels[index] = caveTunnelColor;
             }
             catch (IndexOutOfRangeException)
             {
-                Log.Error($"[Cave] IndexOutOfRangeException: index={index}, position={blockPos}, worldSize={WorldSize}");
+                Log.Error($"[Cave] IndexOutOfRangeException: index={index}, position={caveblock}, worldSize={WorldSize}");
             }
         }
 
