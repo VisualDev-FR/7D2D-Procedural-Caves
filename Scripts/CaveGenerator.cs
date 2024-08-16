@@ -74,7 +74,7 @@ public static class CaveGenerator
             try
             {
                 chunk.SetBlockRaw(blockChunkPos.x, blockChunkPos.y, blockChunkPos.z, caveAir);
-                chunk.SetDensity(blockChunkPos.x, blockChunkPos.y, blockChunkPos.z, MarchingCubes.DensityAir);
+                chunk.SetDensity(blockChunkPos.x, blockChunkPos.y, blockChunkPos.z, caveBlock.density);
             }
             catch (Exception e)
             {

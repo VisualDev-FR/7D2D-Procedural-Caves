@@ -164,7 +164,7 @@ public class CaveTunneler
         for (int i = 0; i < path.Count; i++)
         {
             var tunnelRadius = (int)(r1 + (r2 - r1) * (1f * i / path.Count));
-            var circle = GetSphereV2(path[i], tunnelRadius, cavemap);
+            var circle = GetSphere(path[i], tunnelRadius);
             tunnel.UnionWith(circle);
         }
 
@@ -290,15 +290,15 @@ public class CaveTunneler
 
                     if (num7 > INNER_POINTS.Length / 2)
                     {
-                        density = (sbyte)((float)MarchingCubes.DensityAir * (num7 - INNER_POINTS.Length / 2 - 1) / (INNER_POINTS.Length / 2));
+                        density = (sbyte)((float)MarchingCubes.DensityTerrain * (INNER_POINTS.Length / 2 - num7) / (INNER_POINTS.Length / 2));
                         if (density <= 0)
                         {
                             density = 1;
                         }
                     }
-                    else if (!cavemap.IsCave(x, y, z))
+                    else
                     {
-                        density = (sbyte)((float)MarchingCubes.DensityTerrain * (INNER_POINTS.Length / 2 - num7) / (INNER_POINTS.Length / 2));
+                        density = (sbyte)((float)MarchingCubes.DensityAir * (num7 - INNER_POINTS.Length / 2 - 1) / (INNER_POINTS.Length / 2));
                         if (density >= 0)
                         {
                             density = -1;
