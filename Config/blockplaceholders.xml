@@ -1,6 +1,7 @@
 ﻿<configs>
   <append xpath="/blockplaceholders">
 
+    <!-- ALL BIOMES -->
     <placeholder name="cntCaveFloorShallowWater">
     </placeholder>
 
@@ -10,7 +11,7 @@
     <placeholder name="cntCaveCeilingWater">
     </placeholder>
 
-    <placeholder name="cntCaveFloorRandomLootHelper">
+    <placeholder name="cntCaveFloor">
 
       <block name="caveAir" />
 
@@ -298,7 +299,7 @@
 
     </placeholder>
 
-    <placeholder name="cntCaveCeilingRandomLootHelper">
+    <placeholder name="cntCaveCeiling">
 
       <block name="caveAir"/>
 
@@ -320,9 +321,107 @@
       <block name="corpseHangingRope1Grey" prob=".0001"/>
     </placeholder>
 
-    <placeholder name="cntCaveWallRandomLootHelper">
+    <placeholder name="cntCaveWall">
       <block name="caveAir"/>
       <block name="cntDeskSafe" prob=".0001"/>
+    </placeholder>
+
+    <!-- FOREST -->
+    <placeholder name="cntCaveFloorShallowWater_forest">
+    </placeholder>
+
+    <placeholder name="cntCaveFloorDeepWater_forest">
+    </placeholder>
+
+    <placeholder name="cntCaveCeilingWater_forest">
+    </placeholder>
+
+    <placeholder name="cntCaveFloor_forest">
+    </placeholder>
+
+    <placeholder name="cntCaveCeiling_forest">
+    </placeholder>
+
+    <placeholder name="cntCaveWall_forest">
+    </placeholder>
+
+    <!-- BURNT FOREST -->
+    <placeholder name="cntCaveFloorShallowWater_burnt">
+    </placeholder>
+
+    <placeholder name="cntCaveFloorDeepWater_burnt">
+    </placeholder>
+
+    <placeholder name="cntCaveCeilingWater_burnt">
+    </placeholder>
+
+    <placeholder name="cntCaveFloor_burnt">
+    </placeholder>
+
+    <placeholder name="cntCaveCeiling_burnt">
+    </placeholder>
+
+    <placeholder name="cntCaveWall_burnt">
+    </placeholder>
+
+
+    <!-- DESERT -->
+    <placeholder name="cntCaveFloorShallowWater_desert">
+    </placeholder>
+
+    <placeholder name="cntCaveFloorDeepWater_desert">
+    </placeholder>
+
+    <placeholder name="cntCaveCeilingWater_desert">
+    </placeholder>
+
+    <placeholder name="cntCaveFloor_desert">
+    </placeholder>
+
+    <placeholder name="cntCaveCeiling_desert">
+    </placeholder>
+
+    <placeholder name="cntCaveWall_desert">
+    </placeholder>
+
+    <!-- SNOW -->
+    <placeholder name="cntCaveFloorShallowWater_snow">
+    </placeholder>
+
+    <placeholder name="cntCaveFloorDeepWater_snow">
+    </placeholder>
+
+    <placeholder name="cntCaveCeilingWater_snow">
+    </placeholder>
+
+    <placeholder name="cntCaveFloor_snow">
+    </placeholder>
+
+    <placeholder name="cntCaveCeiling_snow">
+    </placeholder>
+
+    <placeholder name="cntCaveWall_snow">
+    </placeholder>
+
+
+    <!-- WASTELAND -->
+
+    <placeholder name="cntCaveFloorShallowWater_wasteland">
+    </placeholder>
+
+    <placeholder name="cntCaveFloorDeepWater_wasteland">
+    </placeholder>
+
+    <placeholder name="cntCaveCeilingWater_wasteland">
+    </placeholder>
+
+    <placeholder name="cntCaveFloor_wasteland">
+    </placeholder>
+
+    <placeholder name="cntCaveCeiling_wasteland">
+    </placeholder>
+
+    <placeholder name="cntCaveWall_wasteland">
     </placeholder>
 
   </append>

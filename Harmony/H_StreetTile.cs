@@ -1,8 +1,8 @@
 // using HarmonyLib;
 // using WorldGenerationEngineFinal;
 
-// [HarmonyPatch(typeof(StreetTile), "SpawnPrefabs")]
-// public static class StreetTile_SpawnPrefabs
+// [HarmonyPatch(typeof(StreetTile), "SpawnWildernessPrefab")]
+// public static class StreetTile_SpawnWildernessPrefab
 // {
 //     public static bool SpawnWildernessCaveEntrances(StreetTile tile)
 //     {

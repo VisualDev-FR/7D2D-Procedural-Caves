@@ -6,17 +6,17 @@
 			<property name="StabilityFull" value="true"/>
 		</block>
 
-		<block name="cntCaveFloorRandomLootHelper">
+		<block name="cntCaveFloor">
 			<property name="Extends" value="cntWastelandRandomLootHelper"/>
 			<property name="CreativeMode" value="Dev"/>
 		</block>
 
-		<block name="cntCaveCeilingRandomLootHelper">
+		<block name="cntCaveCeiling">
 			<property name="Extends" value="cntWastelandRandomLootHelper"/>
 			<property name="CreativeMode" value="Dev"/>
 		</block>
 
-		<block name="cntDeepCaveFloorRandomLootHelper">
+		<block name="cntDeepCaveFloor">
 			<property name="Extends" value="cntWastelandRandomLootHelper"/>
 			<property name="CreativeMode" value="Dev"/>
 		</block>

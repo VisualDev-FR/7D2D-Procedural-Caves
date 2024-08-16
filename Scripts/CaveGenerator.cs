@@ -11,9 +11,9 @@ public static class CaveGenerator
 
     private static BlockValue concreteBlock = new BlockValue((uint)Block.GetBlockByName("concreteShapes:cube").blockID);
 
-    private static BlockValue bottomCaveDecoration = new BlockValue((uint)Block.GetBlockByName("cntCaveFloorRandomLootHelper").blockID);
+    private static BlockValue cntCaveFloor = new BlockValue((uint)Block.GetBlockByName("cntCaveFloor").blockID);
 
-    private static BlockValue topCaveDecoration = new BlockValue((uint)Block.GetBlockByName("cntCaveCeilingRandomLootHelper").blockID);
+    private static BlockValue cntCaveCeiling = new BlockValue((uint)Block.GetBlockByName("cntCaveCeiling").blockID);
 
     public static void Init(string worldName)
     {
@@ -64,12 +64,12 @@ public static class CaveGenerator
 
             if (isFloor)
             {
-                BlockValue blockValue = BlockPlaceholderMap.Instance.Replace(bottomCaveDecoration, random, worldX, worldZ);
+                BlockValue blockValue = BlockPlaceholderMap.Instance.Replace(cntCaveFloor, random, worldX, worldZ);
                 chunk.SetBlockRaw(blockPos.x, blockPos.y, blockPos.z, blockValue);
             }
             else if (isCeiling)
             {
-                BlockValue blockValue = BlockPlaceholderMap.Instance.Replace(topCaveDecoration, random, worldX, worldZ);
+                BlockValue blockValue = BlockPlaceholderMap.Instance.Replace(cntCaveCeiling, random, worldX, worldZ);
                 chunk.SetBlockRaw(blockPos.x, blockPos.y, blockPos.z, blockValue);
             }
         }
