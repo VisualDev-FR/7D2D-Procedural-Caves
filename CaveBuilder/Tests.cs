@@ -59,7 +59,7 @@ public class GraphNodeTests
 
         p1 = new CaveBlock(0, 1, 2);
         p2 = new CaveBlock(0, 2, 2);
-        Assert.AreNotEqual(p1, p2, $"{p1.BlockPos}({p1.BlockPos.GetHashCode()}) | {p2.BlockPos}({p2.BlockPos.GetHashCode()})");
+        Assert.AreNotEqual(p1, p2, $"{p1.BlockChunkPos}({p1.BlockChunkPos.GetHashCode()}) | {p2.BlockChunkPos}({p2.BlockChunkPos.GetHashCode()})");
     }
 
     public static void Test_prefabGrouping()

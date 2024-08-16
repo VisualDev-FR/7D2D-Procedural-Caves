@@ -65,6 +65,11 @@ public struct Vector3bf
         return new Vector3(x, y, z);
     }
 
+    public Vector3i ToVector3i()
+    {
+        return new Vector3i(x, y, z);
+    }
+
     public string ToBinaryString()
     {
         string binaryString = Convert.ToString(value, 2).PadLeft(16, '0');

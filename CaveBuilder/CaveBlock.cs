@@ -5,17 +5,17 @@ public class CaveBlock
 {
     public Vector2s ChunkPos { get; internal set; }
 
-    public Vector3bf BlockPos { get; internal set; }
+    public Vector3bf BlockChunkPos { get; internal set; }
 
     public bool isWater;
 
     public bool isRope;
 
-    public int x => (ChunkPos.x << 4) + BlockPos.x;
+    public int x => (ChunkPos.x << 4) + BlockChunkPos.x;
 
-    public int y => BlockPos.y;
+    public int y => BlockChunkPos.y;
 
-    public int z => (ChunkPos.z << 4) + BlockPos.z;
+    public int z => (ChunkPos.z << 4) + BlockChunkPos.z;
 
     public Vector3i position => new Vector3i(x, y, z);
 
@@ -29,7 +29,7 @@ public class CaveBlock
 
         ChunkPos = new Vector2s(chunk_x, chunk_z);
 
-        BlockPos = new Vector3bf(
+        BlockChunkPos = new Vector3bf(
             (byte)(position.x & 15),
             (byte)position.y,
             (byte)(position.z & 15)
@@ -46,7 +46,7 @@ public class CaveBlock
 
         ChunkPos = new Vector2s(chunk_x, chunk_z);
 
-        BlockPos = new Vector3bf(
+        BlockChunkPos = new Vector3bf(
             (byte)(x & 15),
             (byte)y,
             (byte)(z & 15)
@@ -56,7 +56,7 @@ public class CaveBlock
     public CaveBlock(BinaryReader reader)
     {
         ChunkPos = new Vector2s(reader.ReadInt16(), reader.ReadInt16());
-        BlockPos = new Vector3bf(reader.ReadUInt16());
+        BlockChunkPos = new Vector3bf(reader.ReadUInt16());
         isWater = reader.ReadBoolean();
         isRope = reader.ReadBoolean();
     }
@@ -101,15 +101,15 @@ public class CaveBlock
         return !(p1 == p2);
     }
 
-    public Vector3 ToWorldPos()
+    public Vector3i ToWorldPos()
     {
-        Vector3 chunkPos = new Vector3(
+        Vector3i chunkPos = new Vector3i(
             ChunkPos.x - CaveBuilder.worldSize / 32,
             0,
             ChunkPos.z - CaveBuilder.worldSize / 32
         );
 
-        return 16 * chunkPos + BlockPos.ToVector3();
+        return 16 * chunkPos + BlockChunkPos.ToVector3i();
     }
 
     public override string ToString()
@@ -161,7 +161,7 @@ public class CaveBlock
     {
         writer.Write(ChunkPos.x);
         writer.Write(ChunkPos.z);
-        writer.Write(BlockPos.value);
+        writer.Write(BlockChunkPos.value);
         writer.Write(isWater);
         writer.Write(isRope);
     }

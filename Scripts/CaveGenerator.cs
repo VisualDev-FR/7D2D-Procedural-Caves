@@ -15,9 +15,38 @@ public static class CaveGenerator
 
     private static BlockValue cntCaveCeiling = new BlockValue((uint)Block.GetBlockByName("cntCaveCeiling").blockID);
 
+    private static readonly Vector3i[] flatNeighbors = CaveUtils.neighborsOffsets.Where(offset => offset.y == -1).ToArray();
+
     public static void Init(string worldName)
     {
         caveBlocksProvider = new CaveBlocksProvider(worldName);
+    }
+
+    private static bool CanDecorateFlatCave(BlockValue _blockValue, Vector3i _blockPos)
+    {
+        var block = _blockValue.Block;
+
+        if (!block.isMultiBlock)
+        {
+            foreach (var offset in flatNeighbors)
+            {
+                Vector3i position = _blockPos + offset;
+
+                if (caveBlocksProvider.IsCave(position))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        return false;
+
+        Bounds bounds = block.multiBlockPos.CalcBounds(_blockValue.type, _blockValue.rotation);
+        bounds.center += _blockPos.ToVector3();
+
+        return true;
     }
 
     public static void GenerateCave(Chunk chunk)
@@ -28,7 +57,6 @@ public static class CaveGenerator
             return;
         }
 
-
         GameRandom random = Utils.RandomFromSeedOnPos(chunk.ChunkPos.x, chunk.ChunkPos.z, GameManager.Instance.World.Seed);
         Vector3i chunkWorldPos = chunk.GetWorldPos();
 
@@ -37,32 +65,32 @@ public static class CaveGenerator
         if (caveBlocks == null)
             return;
 
-        HashSet<Vector3> positions = caveBlocks.Select(block => block.BlockPos.ToVector3()).ToHashSet();
+        HashSet<Vector3> positions = caveBlocks.Select(block => block.BlockChunkPos.ToVector3()).ToHashSet();
 
         foreach (CaveBlock caveBlock in caveBlocks)
         {
-            var blockPos = caveBlock.BlockPos;
+            Vector3bf blockChunkPos = caveBlock.BlockChunkPos;
 
             try
             {
-                chunk.SetBlockRaw(blockPos.x, blockPos.y, blockPos.z, caveAir);
-                chunk.SetDensity(blockPos.x, blockPos.y, blockPos.z, MarchingCubes.DensityAir);
+                chunk.SetBlockRaw(blockChunkPos.x, blockChunkPos.y, blockChunkPos.z, caveAir);
+                chunk.SetDensity(blockChunkPos.x, blockChunkPos.y, blockChunkPos.z, MarchingCubes.DensityAir);
             }
             catch (Exception e)
             {
-                Log.Error($"[Cave] {e.GetType()} (Chunk={caveBlock.ChunkPos}, block={caveBlock.BlockPos})");
+                Log.Error($"[Cave] {e.GetType()} (Chunk={caveBlock.ChunkPos}, block={caveBlock.BlockChunkPos})");
             }
 
-            var under = blockPos.ToVector3() + new Vector3(0, -1, 0);
-            var above = blockPos.ToVector3() + new Vector3(0, +1, 0);
+            var under = blockChunkPos.ToVector3() + new Vector3(0, -1, 0);
+            var above = blockChunkPos.ToVector3() + new Vector3(0, +1, 0);
 
             bool isFloor = !positions.Contains(under);
             bool isCeiling = !positions.Contains(above);
 
-            var worldX = chunkWorldPos.x + blockPos.x;
-            var worldZ = chunkWorldPos.z + blockPos.z;
+            var worldX = chunkWorldPos.x + blockChunkPos.x;
+            var worldZ = chunkWorldPos.z + blockChunkPos.z;
 
-            BlockValue blockValue;
+            BlockValue blockValue = concreteBlock;
 
             if (isFloor)
             {
@@ -77,13 +105,16 @@ public static class CaveGenerator
                 continue;
             }
 
-            chunk.SetBlock(GameManager.Instance.World, blockPos.x, blockPos.y, blockPos.z, blockValue);
+            if (CanDecorateFlatCave(blockValue, caveBlock.ToWorldPos()))
+            {
+                chunk.SetBlock(GameManager.Instance.World, blockChunkPos.x, blockChunkPos.y, blockChunkPos.z, blockValue);
+            }
         }
 
         HashSet<CaveBlock> waterBlocks = caveBlocks.Where(block => block.isWater).ToHashSet();
         foreach (CaveBlock waterBlock in waterBlocks)
         {
-            var blockPos = waterBlock.BlockPos;
+            var blockPos = waterBlock.BlockChunkPos;
 
             try
             {
@@ -92,7 +123,7 @@ public static class CaveGenerator
             }
             catch (Exception e)
             {
-                Log.Error($"[Cave] {e.GetType()} (Chunk={waterBlock.ChunkPos}, block={waterBlock.BlockPos})");
+                Log.Error($"[Cave] {e.GetType()} (Chunk={waterBlock.ChunkPos}, block={waterBlock.BlockChunkPos})");
             }
         }
 

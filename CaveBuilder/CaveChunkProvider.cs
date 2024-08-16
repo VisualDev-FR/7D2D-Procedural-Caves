@@ -84,13 +84,13 @@ public class CaveBlocksProvider
 
     public static List<CaveBlock> FilterFloorBlocks(HashSet<CaveBlock> blocks)
     {
-        HashSet<Vector3> positions = blocks.Select(block => block.BlockPos.ToVector3()).ToHashSet();
+        HashSet<Vector3> positions = blocks.Select(block => block.BlockChunkPos.ToVector3()).ToHashSet();
         List<CaveBlock> result = new List<CaveBlock>();
 
         foreach (var block in blocks)
         {
-            var upper = block.BlockPos.ToVector3() + Vector3.up;
-            var lower = block.BlockPos.ToVector3() + Vector3.down;
+            var upper = block.BlockChunkPos.ToVector3() + Vector3.up;
+            var lower = block.BlockChunkPos.ToVector3() + Vector3.down;
 
             if (!positions.Contains(lower) && positions.Contains(upper))
             {
@@ -99,6 +99,23 @@ public class CaveBlocksProvider
         }
 
         return result;
+    }
+
+    public bool IsCave(Vector3i worldPos)
+    {
+        var worldSize = CaveBuilder.worldSize;
+        Vector2i chunkPos = World.toChunkXZ(worldPos) + new Vector2i(worldSize / 32, worldSize / 32);
+
+        var caveBlocks = GetCaveBlocks(new Vector2s(chunkPos));
+
+        if (caveBlocks == null)
+        {
+            return false;
+        }
+
+        var caveBlockPosition = worldPos + new Vector3i(worldSize / 2, 0, worldSize / 2);
+
+        return caveBlocks.Contains(new CaveBlock(caveBlockPosition));
     }
 
     public List<CaveBlock> GetSpawnPositions(Vector3 worldPosition)
