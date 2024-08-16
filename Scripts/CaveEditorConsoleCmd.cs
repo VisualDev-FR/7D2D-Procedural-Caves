@@ -346,8 +346,10 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
         PrefabEditModeManager.Instance.NewVoxelPrefab();
 
         var prefabInstance = GetCurrentPrefab();
+        var playername = GameManager.Instance.World.GetPrimaryPlayer().name;
 
         prefabInstance.prefab.editorGroups.Add("cave");
+        prefabInstance.prefab.editorGroups.Add(playername);
         prefabInstance.prefab.Tags = CaveConfig.tagCave;
     }
 
@@ -430,13 +432,14 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
         foreach (var position in BrowseSelectionPositions())
         {
             var worldBlock = _gm.World.GetBlock(position);
-            var clusterIndex = _gm.World.ChunkCache.ClusterIdx;
-            var _density = _gm.World.GetDensity(clusterIndex, position);
-
-            BlockChangeInfo blockChangeInfo = new BlockChangeInfo(position, blockValue, _density);
 
             if (worldBlock.isWater || worldBlock.isair)
                 continue;
+
+            var clusterIndex = _gm.World.ChunkCache.ClusterIdx;
+            var _density = _gm.World.GetDensity(clusterIndex, position);
+
+            BlockChangeInfo blockChangeInfo = new BlockChangeInfo(position, blockValue, MarchingCubes.DensityTerrain);
 
             list.Add(blockChangeInfo);
         }
