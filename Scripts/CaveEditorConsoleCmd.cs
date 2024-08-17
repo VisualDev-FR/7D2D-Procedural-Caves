@@ -1,6 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Text.RegularExpressions;
 using UnityEngine;
+
+using Path = System.IO.Path;
 
 
 public class CaveEditorConsoleCmd : ConsoleCmdAbstract
@@ -20,26 +24,27 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
         return @"Cave prefab editor helpers:
             - create: creates a new empty prefab with the required tags
             - marker: Add a cave marker into the selection.
-            - replaceterrain, rt: Replace all terrain blocks in the selection with the selected item.
-            - selectall, sa: add all the prefab volume to the selection box.
-            - room: create an empty room of selected item in the selection box.
-            - stalactite [height] Creates a procedural stalactite of the specified height at the start position of the selection box.
-            - replaceground, rg: replace all terrain blocks inside the selection box, which have air above them with the selected item.
             - replaceall, ra: replace all block in the selection box except air and water, by the selected item
+            - replaceground, rg: replace all terrain blocks inside the selection box, which have air above them with the selected item.
+            - replaceterrain, rt: Replace all terrain blocks in the selection with the selected item.
+            - rename [name]: rename all files of the current prefab with the given new name
+            - room: create an empty room of selected item in the selection box.
+            - selectall, sa: add all the prefab volume to the selection box.
             - setwater, sw [mode]:
                 * 'empty': set all water blocks of the selection to air.
                 * 'fill': set all air blocks of the selection to water.
+            - stalactite [height] Creates a procedural stalactite of the specified height at the start position of the selection box.
             - tags [type]: Add the required tags to get a valid cave prefab. Type is optional an accept the following keywords:
                 * 'entrance' -> the prefab is a cave entrance
 
-            Incoming:s
+            Incoming:
             - test: run a testing session with tunneling around the markers
             - invert: show negative view of the terrain
             - check: create a report of the requirements for getting a valid cave prefab.
             - procedural, proc [type]: Create a procedural volume into the selection box (min selection size = 10x10x10).
             - decorate: Decorate terrain with items specfied in config files.
             - tunnel [marker1] [marker2]: Create a tunnel between two specified cave markers.
-            - extend [x] [y] [z]: extend the selection of x blocks in the x direction, etc ...
+            - extendselection, es [x] [y] [z]: extend the selection of x blocks in the x direction, etc ...
         ";
     }
 
@@ -446,6 +451,56 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
         _gm.SetBlocksRPC(list);
     }
 
+    private void RenameCommand(List<string> args)
+    {
+        if (args.Count < 2)
+        {
+            Log.Error("[RenameCommand] No name was given");
+            return;
+        }
+
+        var pattern = @"[0-9a-zA-Z_-]+_[0-9a-zA-Z_-]+_[0-9a-zA-Z_-]+";
+        var newName = args[1];
+
+        if (!Regex.IsMatch(newName, pattern))
+        {
+            Log.Warning("[RenameCommand] Naming convention not respected: <author>_<prefab type>_<identifier>");
+        }
+
+        var prefab = GetCurrentPrefab().prefab;
+        var currentName = prefab.PrefabName;
+        var dirName = prefab.location.Folder;
+
+        foreach (var path in Directory.GetFiles(dirName))
+        {
+            var filename = Path.GetFileName(path).Split(".")[0];
+            var extension = Path.GetFileName(path).Replace(filename, "");
+            var newPath = $"{dirName}/{newName}{extension}";
+
+            if (filename.StartsWith(currentName))
+            {
+                Log.Out($"{path} -> {newPath}");
+                File.Move(path, newPath);
+            }
+        }
+
+        var loadedPrefabs = GameManager.Instance.prefabEditModeManager.loadedPrefabHeaders;
+        var newLocation = new PathAbstractions.AbstractedLocation(
+            _type: PathAbstractions.EAbstractedLocationType.UserDataPath,
+            _name: newName,
+            _fullPath: $"{dirName}/{newName}.tts",
+            _relativePath: "",
+            _isFolder: false
+        );
+
+        loadedPrefabs[newLocation] = prefab;
+
+        if (loadedPrefabs.ContainsKey(prefab.location))
+            loadedPrefabs.Remove(prefab.location);
+
+        prefab.location = newLocation;
+    }
+
     private void NotImplementedCommand(string commandName)
     {
         Log.Error($"Not implemented command: '{commandName}'");
@@ -535,6 +590,10 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
             case "replaceall":
             case "ra":
                 ReplaceAllCommand();
+                break;
+
+            case "rename":
+                RenameCommand(_params);
                 break;
 
             case "setwater":
