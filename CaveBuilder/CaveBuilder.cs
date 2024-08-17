@@ -12,21 +12,21 @@ public static class CaveBuilder
 
     public static int worldSize = 2048;
 
-    public static int RegionSize = 512;
+    public static int regionGridSize => worldSize / RegionSize;
 
-    public static int ChunkSize = 16;
+    public static int chunkGridSize => RegionSize / ChunkSize;
 
-    public static int regionGridSize = worldSize / RegionSize;
+    public static int PREFAB_COUNT => worldSize / 5;
 
-    public static int chunkGridSize = RegionSize / ChunkSize;
+    public static readonly int RegionSize = 512;
 
-    public static int MIN_PREFAB_SIZE = 8;
+    public static readonly int ChunkSize = 16;
 
-    public static int MAX_PREFAB_SIZE = 100;
+    public static readonly int MIN_PREFAB_SIZE = 8;
 
-    public static float POINT_WIDTH = 5;
+    public static readonly int MAX_PREFAB_SIZE = 100;
 
-    public static int PREFAB_COUNT = worldSize / 5;
+    public static readonly float POINT_WIDTH = 5;
 
     public static Random rand = new Random(SEED);
 
@@ -36,7 +36,7 @@ public static class CaveBuilder
 
     public static int radiationSize = StreetTile.TileSize;
 
-    public static int bedRockMargin = 2;
+    public static int bedRockMargin = 4;
 
     public static int terrainMargin = 2;
 

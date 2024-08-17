@@ -31,6 +31,8 @@ public static class CavePlanner
 
     private static int Seed => WorldBuilder.Instance.Seed + WorldSize;
 
+    public static int TargetEntranceCount => WorldBuilder.Instance.WorldSize / 20;
+
     private const int maxPlacementAttempts = 20;
 
     private static Vector3i HalfWorldSize => new Vector3i(WorldBuilder.HalfWorldSize, 0, WorldBuilder.HalfWorldSize);
@@ -350,8 +352,6 @@ public static class CavePlanner
         Color32 caveEntrancesColor = new Color32(255, 255, 0, 255);
         Color32 caveTunnelColor = new Color32(255, 0, 0, 64);
 
-        string filename = $"{GameIO.GetUserGameDataDir()}/temp/cavemap.png";
-
         var pixels = Enumerable.Repeat(new Color32(0, 0, 0, 255), WorldSize * WorldSize).ToArray();
 
         foreach (PrefabDataInstance pdi in PrefabManager.UsedPrefabsWorld)
@@ -393,6 +393,11 @@ public static class CavePlanner
         }
 
         var image = ImageConversion.EncodeArrayToPNG(pixels, GraphicsFormat.R8G8B8A8_UNorm, (uint)WorldSize, (uint)WorldSize, (uint)WorldSize * 4);
+        var filename = $"{CaveTempDir}/cavemap.png";
+
+        if (!Directory.Exists(CaveTempDir))
+            Directory.CreateDirectory(CaveTempDir);
+
         SdFile.WriteAllBytes(filename, image);
 
         yield return null;
@@ -406,8 +411,10 @@ public static class CavePlanner
         if (!Directory.Exists(source))
             return;
 
-        if (!Directory.Exists(destination))
-            Directory.CreateDirectory(destination);
+        if (Directory.Exists(destination))
+            Directory.Delete(destination);
+
+        Directory.CreateDirectory(destination);
 
         try
         {
