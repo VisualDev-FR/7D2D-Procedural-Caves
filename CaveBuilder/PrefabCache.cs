@@ -96,7 +96,6 @@ public class PrefabCache
         return minDist == 0 ? -1 : minDist;
     }
 
-
     public bool IntersectMarker(CaveBlock block)
     {
         var nearestPrefabs = GetNearestPrefabs(block.x, block.z);

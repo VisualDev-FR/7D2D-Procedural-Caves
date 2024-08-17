@@ -15,17 +15,15 @@ using Path = System.IO.Path;
 
 public static class CavePlanner
 {
-    private static Dictionary<string, PrefabData> allCavePrefabs = new Dictionary<string, PrefabData>();
+    private static readonly Dictionary<string, PrefabData> allCavePrefabs = new Dictionary<string, PrefabData>();
+
+    private static List<string> entrancePrefabsNames = new List<string>();
 
     private static HashSet<string> usedEntrances = new HashSet<string>();
 
     public static int AllPrefabsCount => allCavePrefabs.Count;
 
-    private static List<string> entrancePrefabsNames = new List<string>();
-
     public static int EntrancePrefabCount => entrancePrefabsNames.Count;
-
-    private static Random rand = CaveBuilder.rand;
 
     private static WorldBuilder WorldBuilder => WorldBuilder.Instance;
 
@@ -41,10 +39,15 @@ public static class CavePlanner
 
     public static void Init()
     {
-        CaveBuilder.rand = new Random(CaveBuilder.SEED);
-        entrancePrefabsNames = new List<string>();
-        allCavePrefabs = new Dictionary<string, PrefabData>();
+        CaveBuilder.worldSize = WorldSize;
+        CaveBuilder.rand = new Random(Seed);
+
         usedEntrances = new HashSet<string>();
+        entrancePrefabsNames = new List<string>();
+
+        PrefabManager.Clear();
+        PrefabManager.ClearDisplayed();
+        PrefabManager.Cleanup();
     }
 
     private static HashSet<string> GetAddedPrefabNames()
@@ -66,11 +69,11 @@ public static class CavePlanner
 
         if (unusedEntranceNames.Count > 0)
         {
-            entranceName = unusedEntranceNames[rand.Next(unusedEntranceNames.Count)];
+            entranceName = unusedEntranceNames[CaveBuilder.rand.Next(unusedEntranceNames.Count)];
         }
         else
         {
-            entranceName = entrancePrefabsNames[rand.Next(entrancePrefabsNames.Count)];
+            entranceName = entrancePrefabsNames[CaveBuilder.rand.Next(entrancePrefabsNames.Count)];
         }
 
         Log.Out($"[Cave] random selected entrance: '{entranceName}'");
@@ -88,7 +91,7 @@ public static class CavePlanner
         {
             if (pdi.prefab.Tags.Test_AnySet(CaveConfig.tagCave))
             {
-                prefabs.AddPrefab(new CavePrefab(prefabs.Count + 1, pdi, HalfWorldSize));
+                prefabs.AddPrefab(new CavePrefab(pdi.id, pdi, HalfWorldSize));
             }
         }
 
@@ -189,9 +192,9 @@ public static class CavePlanner
         var offset = CaveBuilder.radiationSize + CaveBuilder.radiationZoneMargin;
 
         return new Vector3i(
-            _x: rand.Next(offset, WorldSize - offset - size.x),
+            _x: CaveBuilder.rand.Next(offset, WorldSize - offset - size.x),
             _y: 0,
-            _z: rand.Next(offset, WorldSize - offset - size.z)
+            _z: CaveBuilder.rand.Next(offset, WorldSize - offset - size.z)
         );
     }
 
@@ -244,7 +247,7 @@ public static class CavePlanner
             if (OverLaps2D(position, rotatedSize, others.Prefabs))
                 continue;
 
-            position.y = rand.Next(CaveBuilder.bedRockMargin, minTerrainHeight - prefabData.size.y - CaveBuilder.terrainMargin);
+            position.y = CaveBuilder.rand.Next(CaveBuilder.bedRockMargin, minTerrainHeight - prefabData.size.y - CaveBuilder.terrainMargin);
 
             return new PrefabDataInstance(-1, position - HalfWorldSize, (byte)rotation, prefabData);
         }
@@ -280,8 +283,8 @@ public static class CavePlanner
 
     public static IEnumerator GenerateCaveMap()
     {
-        Log.Out($"[Cave] worldsize = {WorldSize}");
-        Log.Out($"[Cave] Seed = {Seed}");
+        if (WorldBuilder.IsCanceled)
+            yield break;
 
         PrefabCache addedCaveEntrances = GetUsedCavePrefabs();
 
@@ -289,10 +292,6 @@ public static class CavePlanner
         {
             Log.Out($"[Cave] Cave entrance '{prefab.Name}' added at {prefab.position}");
         }
-
-        CaveBuilder.worldSize = WorldSize;
-        CaveBuilder.SEED = Seed;
-        CaveBuilder.rand = new Random(Seed);
 
         var timer = new Stopwatch();
         timer.Start();
@@ -313,6 +312,9 @@ public static class CavePlanner
 
             yield return WorldBuilder.SetMessage(message);
 
+            if (WorldBuilder.IsCanceled)
+                yield break;
+
             var start = edge.node1;
             var target = edge.node2;
 
@@ -323,8 +325,10 @@ public static class CavePlanner
             cavemap.UnionWith(tunnel);
         }
 
-        if (CaveConfig.generateWater)
-            yield return cavemap.SetWaterCoroutine(localMinimas, cachedPrefabs);
+        yield return cavemap.SetWaterCoroutine(localMinimas, cachedPrefabs);
+
+        if (WorldBuilder.IsCanceled)
+            yield break;
 
         yield return WorldBuilder.SetMessage("Saving cavemap...");
 

@@ -171,8 +171,14 @@ public class CaveMap : IEnumerable<CaveBlock>
     {
         int index = 0;
 
+        if (!CaveConfig.generateWater)
+            yield break;
+
         foreach (var waterStart in localMinimas)
         {
+            if (WorldBuilder.Instance.IsCanceled)
+                yield break;
+
             if (waterStart.isWater)
                 continue;
 

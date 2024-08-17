@@ -3,7 +3,7 @@ Cave generation:
     ✔ cave decoration @done(24-08-15 22:38)
     ✔ poi placement system @done(24-08-15 22:38)
     ✔ cave entrance system @done(24-08-15 22:38)
-    ☐ Better procedural width
+    ☐ more procedural rooms
     ☐ natural fillers (rooms, canyon, rivers, tensionned stalactites, etc...)
     ☐ random world generator UI
     ☐ multiple caves network = good feature + performances trick
