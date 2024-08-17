@@ -3,6 +3,8 @@ Priority:
     ☐ implement the multiple cave networks system
     ☐ Implement custom wilderness prefab spawning function
     ☐ Implement connection between town poi entrance and cave network
+    ☐ free cavemap memory after saving it
+    ☐ implement prefab rename command in cave editor plugin
 
 Cave generation:
     ✔ random pois placement @done(24-08-15 22:38)
@@ -25,7 +27,7 @@ Editor:
     ☐ fill selection with procedural terrain
     ☐ dedicated testing feature, to test how the cave system is builded around
 
-Else:
+Later:
     ☐ live cave map
     ☐ cave navigation with beacons
     ☐ sound ambiance
