@@ -470,6 +470,19 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
         var prefab = GetCurrentPrefab().prefab;
         var currentName = prefab.PrefabName;
         var dirName = prefab.location.Folder;
+        var newLocation = new PathAbstractions.AbstractedLocation(
+            _type: PathAbstractions.EAbstractedLocationType.UserDataPath,
+            _name: newName,
+            _fullPath: $"{dirName}/{newName}.tts",
+            _relativePath: "",
+            _isFolder: false
+        );
+
+        if (File.Exists(newLocation.FullPath))
+        {
+            Log.Error($"[RenameCommand] A prefab named '{newName}' already exists.");
+            return;
+        }
 
         foreach (var path in Directory.GetFiles(dirName))
         {
@@ -485,20 +498,13 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
         }
 
         var loadedPrefabs = GameManager.Instance.prefabEditModeManager.loadedPrefabHeaders;
-        var newLocation = new PathAbstractions.AbstractedLocation(
-            _type: PathAbstractions.EAbstractedLocationType.UserDataPath,
-            _name: newName,
-            _fullPath: $"{dirName}/{newName}.tts",
-            _relativePath: "",
-            _isFolder: false
-        );
 
         loadedPrefabs[newLocation] = prefab;
+        prefab.location = newLocation;
 
         if (loadedPrefabs.ContainsKey(prefab.location))
             loadedPrefabs.Remove(prefab.location);
 
-        prefab.location = newLocation;
     }
 
     private void NotImplementedCommand(string commandName)
