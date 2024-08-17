@@ -1,8 +1,8 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using WorldGenerationEngineFinal;
+using Random = System.Random;
 
 public class CavePrefab
 {
@@ -187,15 +187,7 @@ public class CavePrefab
 
     public bool OverLaps2D(CavePrefab other)
     {
-        int overlapMargin = CaveBuilder.overLapMargin;
-
-        if (position.x + Size.x + overlapMargin < other.position.x || other.position.x + other.Size.x + overlapMargin < position.x)
-            return false;
-
-        if (position.z + Size.z + overlapMargin < other.position.z || other.position.z + other.Size.z + overlapMargin < position.z)
-            return false;
-
-        return true;
+        return CaveUtils.OverLaps2D(position, Size, other.position, other.Size);
     }
 
     public bool OverLaps2D(List<CavePrefab> others)

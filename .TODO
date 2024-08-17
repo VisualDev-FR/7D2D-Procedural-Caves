@@ -1,22 +1,23 @@
 Priority:
-    ☐ debug cave prefab placements regarding vanilla prefabs
-    ☐ implement the multiple cave networks system
-    ☐ Implement custom wilderness prefab spawning function
-    ☐ Implement connection between town poi entrance and cave network
+    ☐ debug cave prefab placements regarding surface prefabs
     ☐ free cavemap memory after saving it
     ☐ implement prefab rename command in cave editor plugin
+    ☐ Implement connection between town poi entrance and cave network
+    ☐ Implement custom wilderness prefab spawning function
+    ☐ implement the multiple cave networks system
+    ☐ force rwg POIs choices
 
 Cave generation:
     ✔ random pois placement @done(24-08-15 22:38)
     ✔ cave decoration @done(24-08-15 22:38)
     ✔ poi placement system @done(24-08-15 22:38)
     ✔ cave entrance system @done(24-08-15 22:38)
+    ✔ allow to cancel the generation @done(24-08-17 21:09)
     ☐ more procedural rooms
     ☐ natural fillers (rooms, canyon, rivers, tensionned stalactites, etc...)
     ☐ random world generator UI
     ☐ multiple caves network = good feature + performances trick
     ☐ connect regular town POIs to the cave system
-    ☐ allow to cancel the generation
 
 Editor:
     ✔ replace selection by terrain / by stone helper @done(24-08-15 20:49)

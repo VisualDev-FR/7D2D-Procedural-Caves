@@ -19,11 +19,15 @@ public static class CavePlanner
 
     private static List<string> entrancePrefabsNames = new List<string>();
 
+    private static List<PrefabDataInstance> surfacePrefabs = new List<PrefabDataInstance>();
+
     private static HashSet<string> usedEntrances = new HashSet<string>();
 
     public static int AllPrefabsCount => allCavePrefabs.Count;
 
     public static int EntrancePrefabCount => entrancePrefabsNames.Count;
+
+    public static int TargetEntranceCount => WorldBuilder.Instance.WorldSize / 20;
 
     private static WorldBuilder WorldBuilder => WorldBuilder.Instance;
 
@@ -31,13 +35,11 @@ public static class CavePlanner
 
     private static int Seed => WorldBuilder.Instance.Seed + WorldSize;
 
-    public static int TargetEntranceCount => WorldBuilder.Instance.WorldSize / 20;
-
-    private const int maxPlacementAttempts = 20;
-
     private static Vector3i HalfWorldSize => new Vector3i(WorldBuilder.HalfWorldSize, 0, WorldBuilder.HalfWorldSize);
 
-    private static readonly string CaveTempDir = $"{GameIO.GetUserGameDataDir()}/temp";
+    private static readonly int maxPlacementAttempts = 20;
+
+    private static readonly string caveTempDir = $"{GameIO.GetUserGameDataDir()}/temp";
 
     public static void Init()
     {
@@ -46,10 +48,21 @@ public static class CavePlanner
 
         usedEntrances = new HashSet<string>();
         entrancePrefabsNames = new List<string>();
+        surfacePrefabs = new List<PrefabDataInstance>();
 
         PrefabManager.Clear();
         PrefabManager.ClearDisplayed();
         PrefabManager.Cleanup();
+    }
+
+    private static List<PrefabDataInstance> GetSurfacePrefabs()
+    {
+        var result = PrefabManager.UsedPrefabsWorld.Where(pdi =>
+            pdi.prefab.Tags.Test_AnySet(CaveConfig.tagCaveEntrance) ||
+            !pdi.prefab.Tags.Test_AnySet(CaveConfig.tagCave)
+        );
+
+        return result.ToList();
     }
 
     private static HashSet<string> GetAddedPrefabNames()
@@ -174,6 +187,16 @@ public static class CavePlanner
         allCavePrefabs[prefabName] = prefabData;
     }
 
+    public static List<PrefabDataInstance> GetPrefabsAbove(Vector3i position, Vector3i size)
+    {
+        var prefabs = surfacePrefabs.Where(pdi =>
+        {
+            return CaveUtils.OverLaps2D(position, size, pdi.boundingBoxPosition, pdi.boundingBoxSize);
+        });
+
+        return prefabs.ToList();
+    }
+
     private static int GetMinTerrainHeight(Vector3i position, Vector3i size)
     {
         int minHeight = 1337;
@@ -183,6 +206,16 @@ public static class CavePlanner
             for (int z = position.z; z < position.z + size.z; z++)
             {
                 minHeight = Utils.FastMin(minHeight, (int)WorldBuilder.GetHeight(x, z));
+            }
+        }
+
+        var prefabsAbove = GetPrefabsAbove(position - HalfWorldSize, size);
+
+        if (prefabsAbove.Count > 0)
+        {
+            foreach (var prefab in prefabsAbove)
+            {
+                minHeight = Utils.FastMin(minHeight, prefab.boundingBoxPosition.y);
             }
         }
 
@@ -235,13 +268,13 @@ public static class CavePlanner
 
         while (attempts-- > 0)
         {
-            int rotation = 0; // rand.Next(4);
+            int rotation = CaveBuilder.rand.Next(4);
 
             Vector3i rotatedSize = CaveUtils.GetRotatedSize(prefabData.size, rotation);
             Vector3i position = GetRandomPositionFor(rotatedSize);
 
             var minTerrainHeight = GetMinTerrainHeight(position, rotatedSize);
-            var canBePlacedUnderTerrain = minTerrainHeight > (prefabData.size.y + CaveBuilder.bedRockMargin + CaveBuilder.terrainMargin);
+            var canBePlacedUnderTerrain = minTerrainHeight > (CaveBuilder.bedRockMargin + prefabData.size.y + CaveBuilder.terrainMargin);
 
             if (!canBePlacedUnderTerrain)
                 continue;
@@ -287,6 +320,8 @@ public static class CavePlanner
     {
         if (WorldBuilder.IsCanceled)
             yield break;
+
+        surfacePrefabs = GetSurfacePrefabs();
 
         PrefabCache addedCaveEntrances = GetUsedCavePrefabs();
 
@@ -336,7 +371,7 @@ public static class CavePlanner
 
         yield return GenerateCavePreview(cavemap);
 
-        cavemap.Save($"{CaveTempDir}/cavemap");
+        cavemap.Save($"{caveTempDir}/cavemap");
 
         yield return WorldBuilder.SetMessage("Creating cave preview...", _logToConsole: true);
 
@@ -393,10 +428,10 @@ public static class CavePlanner
         }
 
         var image = ImageConversion.EncodeArrayToPNG(pixels, GraphicsFormat.R8G8B8A8_UNorm, (uint)WorldSize, (uint)WorldSize, (uint)WorldSize * 4);
-        var filename = $"{CaveTempDir}/cavemap.png";
+        var filename = $"{caveTempDir}/cavemap.png";
 
-        if (!Directory.Exists(CaveTempDir))
-            Directory.CreateDirectory(CaveTempDir);
+        if (!Directory.Exists(caveTempDir))
+            Directory.CreateDirectory(caveTempDir);
 
         SdFile.WriteAllBytes(filename, image);
 
@@ -405,7 +440,7 @@ public static class CavePlanner
 
     public static void SaveCaveMap()
     {
-        string source = $"{CaveTempDir}/cavemap";
+        string source = $"{caveTempDir}/cavemap";
         string destination = $"{WorldBuilder.WorldPath}/cavemap";
 
         if (!Directory.Exists(source))
