@@ -12,6 +12,11 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
 
     public override string getDescription()
     {
+        return "caveeditor ce => additional command line tools for the prefab editor";
+    }
+
+    public override string getHelp()
+    {
         return @"Cave prefab editor helpers:
             - create: creates a new empty prefab with the required tags
             - marker: Add a cave marker into the selection.
@@ -36,11 +41,6 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
             - tunnel [marker1] [marker2]: Create a tunnel between two specified cave markers.
             - extend [x] [y] [z]: extend the selection of x blocks in the x direction, etc ...
         ";
-    }
-
-    public override string getHelp()
-    {
-        return getDescription();
     }
 
     public static IEnumerable<Vector3i> BrowseSelectionPositions()

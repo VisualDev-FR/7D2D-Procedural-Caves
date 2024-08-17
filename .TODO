@@ -1,3 +1,9 @@
+Priority:
+    ☐ debug cave prefab placements regarding vanilla prefabs
+    ☐ implement the multiple cave networks system
+    ☐ Implement custom wilderness prefab spawning function
+    ☐ Implement connection between town poi entrance and cave network
+
 Cave generation:
     ✔ random pois placement @done(24-08-15 22:38)
     ✔ cave decoration @done(24-08-15 22:38)
