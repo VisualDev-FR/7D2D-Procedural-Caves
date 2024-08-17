@@ -5,6 +5,7 @@
 			<property name="Extends" value="air"/>
 			<property name="StabilityFull" value="true"/>
 			<property name="Material" value="McaveAir"/>
+			<drop event="Destroy" count="0"/>
 		</block>
 
 		<block name="cntCaveFloor">

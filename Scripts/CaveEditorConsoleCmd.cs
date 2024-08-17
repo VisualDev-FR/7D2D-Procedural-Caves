@@ -346,11 +346,10 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
         PrefabEditModeManager.Instance.NewVoxelPrefab();
 
         var prefabInstance = GetCurrentPrefab();
-        var playername = GameManager.Instance.World.GetPrimaryPlayer().name;
 
         prefabInstance.prefab.editorGroups.Add("cave");
-        prefabInstance.prefab.editorGroups.Add(playername);
         prefabInstance.prefab.Tags = CaveConfig.tagCave;
+        // prefabInstance.prefab.editorGroups.Add(playername);
     }
 
     private void TagsCommand(List<string> args)
