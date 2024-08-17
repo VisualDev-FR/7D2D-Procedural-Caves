@@ -1,6 +1,6 @@
 @echo off
 
-set MOD_NAME=ProceduralCaves
+call "%~dp0\_datas.cmd"
 
 for %%f in (%1) do (
     set ZIP_NAME=%%~nf
