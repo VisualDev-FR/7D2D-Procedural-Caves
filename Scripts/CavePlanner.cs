@@ -17,7 +17,7 @@ public static class CavePlanner
 {
     private static readonly Dictionary<string, PrefabData> allCavePrefabs = new Dictionary<string, PrefabData>();
 
-    private static List<string> entrancePrefabsNames = new List<string>();
+    private static List<string> wildernessEntranceNames = new List<string>();
 
     private static List<PrefabDataInstance> surfacePrefabs = new List<PrefabDataInstance>();
 
@@ -25,7 +25,7 @@ public static class CavePlanner
 
     public static int AllPrefabsCount => allCavePrefabs.Count;
 
-    public static int EntrancePrefabCount => entrancePrefabsNames.Count;
+    public static int EntrancePrefabCount => wildernessEntranceNames.Count;
 
     public static int TargetEntranceCount => WorldBuilder.Instance.WorldSize / 20;
 
@@ -47,7 +47,7 @@ public static class CavePlanner
         CaveBuilder.rand = new Random(Seed);
 
         usedEntrances = new HashSet<string>();
-        entrancePrefabsNames = new List<string>();
+        wildernessEntranceNames = new List<string>();
         surfacePrefabs = new List<PrefabDataInstance>();
 
         PrefabManager.Clear();
@@ -75,11 +75,11 @@ public static class CavePlanner
         return result.ToHashSet();
     }
 
-    public static PrefabData SelectRandomEntrance()
+    public static PrefabData SelectRandomWildernessEntrance()
     {
-        CaveUtils.Assert(entrancePrefabsNames.Count > 0, "Seems that no cave entrance was found.");
+        CaveUtils.Assert(wildernessEntranceNames.Count > 0, "Seems that no cave entrance was found.");
 
-        var unusedEntranceNames = entrancePrefabsNames.Where(prefabName => !usedEntrances.Contains(prefabName)).ToList();
+        var unusedEntranceNames = wildernessEntranceNames.Where(prefabName => !usedEntrances.Contains(prefabName)).ToList();
         string entranceName;
 
         if (unusedEntranceNames.Count > 0)
@@ -88,7 +88,7 @@ public static class CavePlanner
         }
         else
         {
-            entranceName = entrancePrefabsNames[CaveBuilder.rand.Next(entrancePrefabsNames.Count)];
+            entranceName = wildernessEntranceNames[CaveBuilder.rand.Next(wildernessEntranceNames.Count)];
         }
 
         Log.Out($"[Cave] random selected entrance: '{entranceName}'");
@@ -154,32 +154,48 @@ public static class CavePlanner
         return true;
     }
 
-    private static bool IsCaveEntrance(PrefabData prefabData)
+    private static bool IsWildernessEntrance(PrefabData prefabData)
     {
-        return prefabData.Tags.Test_AnySet(CaveConfig.tagCaveEntrance);
+        return prefabData.Tags.Test_AllSet(CaveConfig.tagCaveWildernessEntrance);
+    }
+
+    private static string SkippingBecause(string prefabName, string reason)
+    {
+        return $"[Cave] skipping '{prefabName}' because {reason}.";
     }
 
     public static void TryCacheCavePrefab(PrefabData prefabData)
     {
+        if (!prefabData.Tags.Test_AnySet(CaveConfig.tagCave))
+        {
+            return;
+        }
+
+        if (!prefabData.Tags.Test_AnySet(CaveConfig.requiredCaveTags))
+        {
+            Log.Warning(SkippingBecause(prefabData.Name, $"missing cave type tag: {prefabData.Tags}"));
+            return;
+        }
+
         if (!ContainsCaveMarkers(prefabData))
         {
-            Log.Warning($"[Cave] skipping '{prefabData.Name} 'because no cave marker was found.");
+            Log.Warning(SkippingBecause(prefabData.Name, "no cave marker was found."));
             return;
         }
 
         if (!PrefabMarkersAreValid(prefabData))
         {
-            Log.Warning($"[Cave] skipping '{prefabData.Name}' because at least one marker is invalid.");
+            Log.Warning(SkippingBecause(prefabData.Name, "at least one marker is invalid."));
             return;
         }
 
         string prefabName = prefabData.Name.ToLower();
         string suffix = "";
 
-        if (IsCaveEntrance(prefabData))
+        if (IsWildernessEntrance(prefabData))
         {
             suffix = "(entrance)";
-            entrancePrefabsNames.Add(prefabName);
+            wildernessEntranceNames.Add(prefabName);
         }
 
         Log.Out($"[Cave] caching prefab '{prefabName}' {suffix}".TrimEnd());

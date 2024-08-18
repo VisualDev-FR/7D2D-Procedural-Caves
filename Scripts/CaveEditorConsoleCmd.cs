@@ -36,6 +36,7 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
             - stalactite [height] Creates a procedural stalactite of the specified height at the start position of the selection box.
             - tags [type]: Add the required tags to get a valid cave prefab. Type is optional an accept the following keywords:
                 * 'entrance' -> the prefab is a cave entrance
+                * 'underground, ug' -> the prefab is an underground prefab
 
             Incoming:
             - test: run a testing session with tunneling around the markers
@@ -375,6 +376,11 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
             {
                 case "entrance":
                     prefabInstance.prefab.Tags |= CaveConfig.tagCaveEntrance;
+                    break;
+
+                case "underground":
+                case "ug":
+                    prefabInstance.prefab.Tags |= CaveConfig.tagCaveUnderground;
                     break;
 
                 default:

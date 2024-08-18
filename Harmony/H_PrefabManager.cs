@@ -11,7 +11,7 @@ public static class PrefabManager_GetWildernessPrefab
     {
         if (CavePlanner.EntrancePrefabCount < CavePlanner.TargetEntranceCount)
         {
-            __result = CavePlanner.SelectRandomEntrance();
+            __result = CavePlanner.SelectRandomWildernessEntrance();
             return false;
         }
 
@@ -32,7 +32,9 @@ public static class PrefabManager_LoadPrefabs
         }
         MicroStopwatch ms = new MicroStopwatch(_bStart: true);
         List<PathAbstractions.AbstractedLocation> prefabs = PathAbstractions.PrefabsSearchPaths.GetAvailablePathsList(null, null, null, _ignoreDuplicateNames: true);
-        FastTags<TagGroup.Poi> filter = FastTags<TagGroup.Poi>.Parse("navonly,devonly,testonly,biomeonly");
+
+        // PATCH: add underground prefab filter
+        FastTags<TagGroup.Poi> filter = FastTags<TagGroup.Poi>.Parse("navonly,devonly,testonly,biomeonly,underground");
 
         for (int i = 0; i < prefabs.Count; i++)
         {
@@ -49,11 +51,9 @@ public static class PrefabManager_LoadPrefabs
 
             // PATCH START //
 
-            if (prefabData.Tags.Test_AnySet(CaveConfig.tagCave))
-            {
-                CavePlanner.TryCacheCavePrefab(prefabData);
-            }
-            else if (!prefabData.Tags.Test_AnySet(filter))
+            CavePlanner.TryCacheCavePrefab(prefabData);
+
+            if (!prefabData.Tags.Test_AnySet(filter))
             {
                 PrefabManager.AllPrefabDatas[location.Name.ToLower()] = prefabData;
             }

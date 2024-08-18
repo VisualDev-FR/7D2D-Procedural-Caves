@@ -1,13 +1,14 @@
 Priority:
     ✔ debug cave prefab placements regarding surface prefabs @done(24-08-17 22:43)
+    ☐ Implement connection between town poi entrance and cave network
     ☐ implement prefab rename command in cave editor plugin
-    ☐ implement procedural caves in prefab editor
     ☐ debug tunnels intersections with surface prefabs
     ☐ free cavemap memory after saving it
-    ☐ Implement connection between town poi entrance and cave network
     ☐ Implement custom wilderness prefab spawning function
     ☐ implement the multiple cave networks system
     ☐ force rwg POIs choices
+    ☐ debug low zombies spawning in caves
+    ☐ implement procedural volumes in prefab editor
 
 Cave generation:
     ✔ random pois placement @done(24-08-15 22:38)
