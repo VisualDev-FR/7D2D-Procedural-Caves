@@ -30,6 +30,7 @@ Editor:
     ☐ check min entrance deep
     ☐ fill selection with procedural terrain
     ☐ dedicated testing feature, to test how the cave system is builded around
+    ☐ Add missing prefab names localization.txt
 
 Later:
     ☐ live cave map
