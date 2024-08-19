@@ -4,13 +4,13 @@ public class AstarNode
 {
     public Vector3i position;
 
-    public float GCost { get; set; } // coût du chemin depuis le noeud de départ jusqu'à ce noeud
+    public float GCost { get; set; }
 
-    public float HCost { get; set; } // estimation heuristique du coût restant jusqu'à l'objectif
+    public float HCost { get; set; }
 
-    public float FCost => GCost + HCost; // coût total estimé (GCost + HCost)
+    public float FCost => GCost + HCost;
 
-    public AstarNode Parent { get; set; } // noeud parent dans le chemin optimal
+    public AstarNode Parent { get; set; }
 
     public AstarNode(Vector3i pos)
     {

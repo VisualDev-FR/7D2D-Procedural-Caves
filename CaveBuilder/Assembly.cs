@@ -34,6 +34,8 @@ namespace WorldGenerationEngineFinal
     {
         public static class Instance
         {
+            public static bool IsCanceled = false;
+
             public static int GetHeight(int x, int z)
             {
                 return 128;

@@ -38,6 +38,10 @@ public static class CaveUtils
         new Vector3i(-1, -1, -1)
     };
 
+    public static readonly int[] neighborsHashes = neighborsOffsets
+        .Select(vector => CaveBlock.GetHashCode(vector.x, vector.y, vector.z))
+        .ToArray();
+
     public static readonly Vector3i[] neighborsOffsetsNonVertical = neighborsOffsets
         .Where(offset => !(FastAbs(offset.y) == 1 && offset.x == 0 && offset.z == 0))
         .ToArray();

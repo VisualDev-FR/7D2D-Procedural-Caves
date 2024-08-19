@@ -70,7 +70,8 @@ public class CaveTunneler
 
         while (currentNode != null)
         {
-            path.Add(new CaveBlock(currentNode.position, MarchingCubes.DensityAir));
+            var block = new CaveBlock(currentNode.position, MarchingCubes.DensityAir);
+            path.Add(block);
             currentNode = currentNode.Parent;
         }
 
@@ -97,16 +98,15 @@ public class CaveTunneler
         {
             AstarNode currentNode = queue.Dequeue();
 
+            if (currentNode.position == goalNode.position)
+            {
+                return ReconstructPath(currentNode);
+            }
+
             visited.Add(currentNode);
 
             foreach (AstarNode neighbor in currentNode.GetNeighbors())
             {
-                if (neighbor.position == goalNode.position)
-                {
-                    neighbor.Parent = currentNode;
-                    return ReconstructPath(neighbor);
-                }
-
                 if (neighbor.position.y < CaveBuilder.bedRockMargin + 1)
                     continue;
 

@@ -96,41 +96,50 @@ public class CaveMap : IEnumerable<CaveBlock>
     {
         CaveUtils.Assert(waterStart is CaveBlock, "null water start");
 
-        var queue = new Queue<CaveBlock>();
-        var visited = new HashSet<CaveBlock>();
-        var waterBlocks = new HashSet<int>();
+        var queue = new Queue<int>(1_000);
+        var visited = new HashSet<int>(100_000);
+        var waterBlocks = new HashSet<int>(100_000);
         var startPosition = GetVerticalLowerPoint(waterStart);
-        var start = GetBlock(startPosition.x, startPosition.y, startPosition.z);
+        var start = CaveBlock.GetHashCode(startPosition.x, startPosition.y, startPosition.z);
 
         queue.Enqueue(start);
 
         while (queue.Count > 0)
         {
-            CaveBlock block = queue.Dequeue();
+            int currentHash = queue.Dequeue();
 
-            if (cachedPrefabs.IntersectMarker(block))
+            if (cachedPrefabs.IntersectMarker(caveblocks[currentHash]))
                 return new HashSet<int>();
 
-            if (visited.Contains(block) || !Contains(block))
+            if (visited.Contains(currentHash) || !Contains(currentHash))
                 continue;
 
-            visited.Add(block);
-            waterBlocks.Add(block.GetHashCode());
+            visited.Add(currentHash);
+            waterBlocks.Add(currentHash.GetHashCode());
 
-            foreach (var offset in CaveUtils.neighborsOffsets)
+            foreach (int offsetHash in CaveUtils.neighborsHashes)
             {
-                var hashcode = CaveBlock.GetHashCode(
-                    block.x + offset.x,
-                    block.y + offset.y,
-                    block.z + offset.z
-                );
+                // f(x, y, z) = Ax + By + z
+                // f(dx, dy, dz) = Adx + Bdy + dz
+                // f(x + dx, y + dy, z + dz)
+                //      = A(x + dx) + B(y + dy) + (z + dz)
+                //      = Ax + Adx + By + Bdy + z + dz
+                //      = (Ax + By + z) + Adx + Bdy + dz
+                //      = f(x, y, z) + f(dx, dy, dz)
+                // => currentHash = f(x, y, z)
+                // => offsetHash = f(dx, dy, dz)
+                // => neighborHash = currentHash + offSetHash
+                //      -> TODO: SIMD Vectorization ?
+                //      -> TODO: f(x, y, z) = (x << 13) + (y << 17) + z
 
-                if (!TryGetValue(hashcode, out var neighbor))
+                var neighborHash = currentHash + offsetHash;
+
+                if (!caveblocks.ContainsKey(neighborHash))
                     continue;
 
-                if (!visited.Contains(neighbor) && neighbor.y <= start.y)
+                if (!visited.Contains(neighborHash) && caveblocks[neighborHash].y <= startPosition.y)
                 {
-                    queue.Enqueue(neighbor);
+                    queue.Enqueue(neighborHash);
                 }
             }
         }
@@ -148,12 +157,14 @@ public class CaveMap : IEnumerable<CaveBlock>
         // TODO: multi-thread this loop
         foreach (var waterStart in localMinimas)
         {
+            index++;
+
             if (waterStart.isWater)
                 continue;
 
             HashSet<int> hashcodes = ExpandWater(waterStart, cachedPrefabs);
 
-            Log.Out($"Water processing: {100.0f * ++index / localMinimas.Count:F0}% ({index} / {localMinimas.Count}) {hashcodes.Count:N0}");
+            Log.Out($"Water processing: {100.0f * index / localMinimas.Count:F0}% ({index} / {localMinimas.Count}) {hashcodes.Count:N0}");
 
             foreach (var hashcode in hashcodes)
             {

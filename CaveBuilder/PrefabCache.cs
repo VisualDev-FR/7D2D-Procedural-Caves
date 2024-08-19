@@ -57,10 +57,7 @@ public class PrefabCache
             if (!groupedPrefabs.TryGetValue(chunkPos, out var chunkPrefabs))
                 continue;
 
-            foreach (var prefab in chunkPrefabs)
-            {
-                nearestPrefabs.Add(prefab);
-            }
+            nearestPrefabs.UnionWith(chunkPrefabs);
         }
 
         return nearestPrefabs;
