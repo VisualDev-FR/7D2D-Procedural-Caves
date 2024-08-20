@@ -1,15 +1,14 @@
 Priority:
     ✔ debug cave prefab placements regarding surface prefabs @done(24-08-17 22:43)
-    ✔ Implement connection between town poi entrance and cave network @done(24-08-18 22:22)
+    ✔ Implement connection regular town POIs to the cave network @done(24-08-18 22:22)
     ✔ implement prefab rename command in cave editor plugin @done(24-08-18 22:22)
     ☐ integrate small prefabs in tunnels (dirt, decoration, modeled terrain, stalactites, water well)
     ☐ Implement custom wilderness prefab spawning function
-    ☐ implement the multiple cave networks system
-    ☐ force rwg POIs choices
+    ☐ implement multiple cave networks (good feature + performances hack)
+    ☐ find a way to force rwg POIs choices
     ☐ debug tunnels intersections with surface prefabs
     ☐ free cavemap memory after saving it, after game exit
-    ☐ debug low zombies spawning in caves
-    ☐ implement procedural volumes in prefab editor
+    ☐ debug low caves zombies spawning
     ☐ implement tunneling with code of toolTerrainModelder
     ☐ implement tunnel terrain smoothing
 
@@ -22,8 +21,6 @@ Cave generation:
     ☐ more procedural rooms
     ☐ natural fillers (rooms, mazes, canyon, rivers, tensionned stalactites, etc...)
     ☐ random world generator UI
-    ☐ multiple caves network = good feature + performances trick
-    ☐ connect regular town POIs to the cave system
 
 Editor:
     ✔ replace selection by terrain / by stone helper @done(24-08-15 20:49)
@@ -33,7 +30,8 @@ Editor:
     ☐ check min entrance deep
     ☐ fill selection with procedural terrain
     ☐ dedicated testing feature, to test how the cave system is builded around
-    ☐ Add missing prefab names localization.txt
+    ☐ Add missing prefab names into localization.txt
+    ☐ command to add entry in localization.txt
 
 prefab themes:
     ☐ nest of creatures
