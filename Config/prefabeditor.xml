@@ -1,0 +1,5 @@
+<configs>
+    <append xpath="/prefabeditor">
+        <property name="localization" value="" help="Absolute path of your localization file"/>
+    </append>
+</configs>
