@@ -1,15 +1,15 @@
+using System;
 using System.IO;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using WorldGenerationEngineFinal;
 
-using Random = System.Random;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
-using System.Collections;
-using System;
 
+using Random = System.Random;
 using Path = System.IO.Path;
 
 
@@ -91,7 +91,7 @@ public static class CavePlanner
             entranceName = wildernessEntranceNames[CaveBuilder.rand.Next(wildernessEntranceNames.Count)];
         }
 
-        Log.Out($"[Cave] random selected entrance: '{entranceName}'");
+        // Log.Out($"[Cave] random selected entrance: '{entranceName}'");
 
         usedEntrances.Add(entranceName);
 
@@ -334,6 +334,11 @@ public static class CavePlanner
 
     public static IEnumerator GenerateCaveMap()
     {
+        var _cavemap = new CaveMap();
+
+        yield return GenerateCavePreview(_cavemap);
+        yield break;
+
         if (WorldBuilder.IsCanceled)
             yield break;
 
@@ -421,10 +426,30 @@ public static class CavePlanner
             var position = pdi.boundingBoxPosition + HalfWorldSize;
             var size = pdi.boundingBoxSize;
 
+            Log.Out($"[Cave] pdi.boundingBoxPosition: {position}");
+
             foreach (var point in CaveUtils.GetBoundingEdges(position, size))
             {
                 int index = point.x + point.z * WorldSize;
                 pixels[index] = prefabColor;
+            }
+        }
+
+        var usedTiles = (
+            from StreetTile st in WorldBuilder.Instance.StreetTileMap
+            where st.Used
+            select st
+            ).ToList();
+
+        foreach (var st in usedTiles)
+        {
+            var position = new Vector3i(st.WorldPosition.x, 0, st.WorldPosition.y);
+            var size = new Vector3i(150, 0, 150);
+
+            foreach (var point in CaveUtils.GetBoundingEdges(position, size))
+            {
+                int index = point.x + point.z * WorldSize;
+                pixels[index] = regularPrefabColor;
             }
         }
 
@@ -482,4 +507,5 @@ public static class CavePlanner
             Log.Error($"An error occured: {ex.Message}");
         }
     }
+
 }

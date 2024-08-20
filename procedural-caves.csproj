@@ -94,10 +94,12 @@
     <Compile Include="Harmony\H_SpawnManagerBiomes.cs" />
     <Compile Include="Harmony\H_StreetTile.cs" />
     <Compile Include="Harmony\H_TerrainGeneratorWithBiomeResource.cs" />
+    <Compile Include="Harmony\H_WildernessPlanner.cs" />
     <Compile Include="Harmony\H_WorldBuilder.cs" />
 
     <!-- WorldGen -->
     <Compile Include="Scripts\CaveEditorConsoleCmd.cs" />
+    <Compile Include="Scripts\CaveEntrancesPlanner.cs" />
     <Compile Include="Scripts\CaveGenerator.cs" />
     <Compile Include="Scripts\CavePlanner.cs" />
     <Compile Include="Scripts\StalactiteGenerator.cs" />
