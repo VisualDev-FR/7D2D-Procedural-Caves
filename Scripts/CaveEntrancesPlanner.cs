@@ -51,6 +51,7 @@ public static class CaveEntrancesPlanner
         return
             !st.OverlapsRadiation
             && !st.AllIsWater
+            && !st.Used
             && (st.District == null || st.District.name == "wilderness");
     }
 
