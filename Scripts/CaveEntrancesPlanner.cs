@@ -1,10 +1,13 @@
+/*
+    refactored WildernessPlanner, allowing more control on cave entrances placement
+*/
+
 using System.Collections.Generic;
 using WorldGenerationEngineFinal;
 using UnityEngine;
 using System.Linq;
 using System;
 
-// refactored WildernessPlanner, to allow more control on cave entrances placement
 
 public static class CaveEntrancesPlanner
 {
@@ -17,7 +20,7 @@ public static class CaveEntrancesPlanner
         var spawnedEntrances = new List<PrefabData>();
         var wildernessTiles = GetWildernessTiles();
         var tileIndex = 0;
-        var maxRolls = 500;
+        var maxRolls = 50;
 
         if (wildernessTiles.Count == 0)
         {
@@ -33,13 +36,13 @@ public static class CaveEntrancesPlanner
 
             if (succeed)
             {
-                Log.Out($"[Cave] Entrance spawned: '{prefab.Name}'");
+                Log.Out($"[Cave] Entrance spawned: '{prefab.Name}' on tile '{tile.GridPosition}'");
                 spawnedEntrances.Add(prefab);
                 tileIndex++;
             }
             else
             {
-                Log.Warning($"[Cave] fail to spawn entrance '{prefab.Name}'");
+                // Log.Warning($"[Cave] fail to spawn entrance '{prefab.Name}' on tile '{tile.GridPosition}'");
             }
         }
 
@@ -142,14 +145,20 @@ public static class CaveEntrancesPlanner
         return markers;
     }
 
-    private static void ProcessRoadExits(PrefabDataInstance pdi, StreetTile tile)
+    private static void ProcessRoadExits(PrefabDataInstance pdi, StreetTile tile, Rect prefabRectangle)
     {
+        var rotation = pdi.rotation;
+        var prefabPosition = new Vector2i(pdi.boundingBoxPosition.x, pdi.boundingBoxPosition.z);
+        var sizeX = pdi.boundingBoxSize.x;
+        var sizeZ = pdi.boundingBoxSize.y;
+
         if (pdi.prefab.POIMarkers == null)
             return;
 
         var roadRadius = 0f;
         var rotatedPosition = GetRotatedPrefabPosition(rotation, prefabPosition, sizeX, sizeZ);
-        var roadMarkers = GetRotatedRoadExitMarkers(pdi, rotation);
+        var roadMarkers = GetRotatedRoadExitMarkers(pdi.prefab, rotation);
+
         var vector3i2 = new Vector3i(
             tile.subHalfWorld(prefabPosition.x),
             tile.getHeightCeil(prefabRectangle.center),
@@ -181,7 +190,7 @@ public static class CaveEntrancesPlanner
 
         if (roadMarkers.Count > 1)
         {
-            roadMarkers = pdi.POIMarkers.FindAll((Prefab.Marker m) => m.MarkerType == Prefab.Marker.MarkerTypes.RoadExit && m.Start != start && m.GroupName == groupName);
+            roadMarkers = pdi.prefab.POIMarkers.FindAll((Prefab.Marker m) => m.MarkerType == Prefab.Marker.MarkerTypes.RoadExit && m.Start != start && m.GroupName == groupName);
             if (roadMarkers.Count > 0)
             {
                 index = gameRandom.RandomRange(0, roadMarkers.Count);
@@ -196,8 +205,9 @@ public static class CaveEntrancesPlanner
         path.FinalPathPoints.Add(new Vector2(vector3.x, vector3.y));
         path.pathPoints3d.Add(new Vector3(vector3.x, vector3i2.y, vector3.y));
         path.IsPrefabPath = isPrefabPath;
-        path.StartPointID = prefabId;
-        path.EndPointID = prefabId;
+        path.StartPointID = pdi.id;
+        path.EndPointID = pdi.id;
+
         WorldBuilder.Instance.wildernessPaths.Add(path);
 
         if (roadRadius != 0f)
@@ -205,7 +215,7 @@ public static class CaveEntrancesPlanner
             WildernessPlanner.WildernessPathInfos.Add(
                 new WorldBuilder.WildernessPathInfo(
                     new Vector2i(rotatedPosition),
-                    prefabId,
+                    pdi.id,
                     roadRadius,
                     WorldBuilder.Instance.GetBiome((int)rotatedPosition.x,
                     (int)rotatedPosition.y
@@ -323,7 +333,7 @@ public static class CaveEntrancesPlanner
                 wildernessPrefab
             );
 
-            ProcessRoadExits(pdi);
+            ProcessRoadExits(pdi, tile, prefabRectangle);
 
             tile.SpawnMarkerPartsAndPrefabsWilderness(wildernessPrefab, new Vector3i(prefabPosition.x, Mathf.CeilToInt(medianHeight + wildernessPrefab.yOffset + 1), prefabPosition.y), (byte)rotation);
             tile.AddPrefab(pdi);
@@ -372,16 +382,21 @@ public static class CaveEntrancesPlanner
 
             if (!PositionIsValid(prefabRectangle, prefabPosition, maxSize, sizeX, sizeZ))
             {
+                Log.Out($"[Cave] Invalid position to spawn '{wildernessPrefab.Name}'");
                 continue;
             }
 
-            if (TrySpawnCaveEntrance(prefabRectangle, prefabPosition, rotation, sizeX, sizeZ, wildernessPrefab, tile))
+            if (TrySpawnCaveEntrance(prefabRectangle, prefabPosition, sizeX, sizeZ, wildernessPrefab, tile))
             {
                 return true;
             }
+
+            Log.Out($"[Cave] spawning '{wildernessPrefab.Name}' failed.");
         }
 
         GameRandomManager.Instance.FreeGameRandom(gameRandom);
+
+        Log.Out($"[Cave] fail to spawn prefab '{wildernessPrefab.Name}' after {maxTries} tries");
         return false;
     }
 
