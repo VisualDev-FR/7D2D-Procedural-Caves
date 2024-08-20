@@ -19,7 +19,7 @@ Cave generation:
     ✔ cave entrance system @done(24-08-15 22:38)
     ✔ allow to cancel the generation @done(24-08-17 21:09)
     ☐ more procedural rooms
-    ☐ natural fillers (rooms, canyon, rivers, tensionned stalactites, etc...)
+    ☐ natural fillers (rooms, mazes, canyon, rivers, tensionned stalactites, etc...)
     ☐ random world generator UI
     ☐ multiple caves network = good feature + performances trick
     ☐ connect regular town POIs to the cave system
@@ -34,11 +34,28 @@ Editor:
     ☐ dedicated testing feature, to test how the cave system is builded around
     ☐ Add missing prefab names localization.txt
 
+prefab themes:
+    ☐ nest of creatures
+
 Later:
     ☐ live cave map
     ☐ cave navigation with beacons
     ☐ sound ambiance
     ☐ possibility to choose which POIs to include or exlude, grouped by mod or else
+    ☐ rare ore vein
+    ☐ hidden treasures
+    ☐ landslide event
+    ☐ flooding event
+    ☐ horde triggers
+    ☐ no oxygen event
+    ☐ radiation event
+    ☐ fog
+    ☐ zombie spore events + particule effects
+    ☐ artifact collections
+    ☐ murals
+    ☐ loot bioming
+    ☐ dedicated cave flore
+    ☐ mine structures (or else) along tunnels (via prefab parts ? make new cave parts group ?)
 
 Cancelled:
     ✘ increase terrain height @cancelled(24-07-10 00:26)
