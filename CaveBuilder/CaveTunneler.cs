@@ -80,7 +80,7 @@ public class CaveTunneler
         return path;
     }
 
-    private List<CaveBlock> FindPath(Edge edge, PrefabCache cachedPrefabs)
+    private List<CaveBlock> FindPath(Edge edge, PrefabCache prefabCluster)
     {
         var start = edge.node1.Normal(CaveUtils.FastMax(5, edge.node1.NodeRadius));
         var target = edge.node2.Normal(CaveUtils.FastMax(5, edge.node2.NodeRadius));
@@ -89,8 +89,17 @@ public class CaveTunneler
         var goalNode = new AstarNode(target);
 
         var queue = new HashedPriorityQueue<AstarNode>();
-        var visited = new HashSet<AstarNode>();
-        var index = 0;
+        var visited = new HashSet<Vector3i>();
+
+        // avoid allocations in critical sections
+        float tentativeGCost, minDist;
+        bool isCave, shouldContinue;
+        byte factor;
+
+        int bedRockMargin = CaveBuilder.bedRockMargin + 1;
+        int terrainMargin = CaveBuilder.terrainMargin + 3;
+        int neighborDistance = 1;
+        int index = 0;
 
         queue.Enqueue(startNode, float.MaxValue);
 
@@ -103,42 +112,46 @@ public class CaveTunneler
                 return ReconstructPath(currentNode);
             }
 
-            visited.Add(currentNode);
+            visited.Add(currentNode.position);
 
-            foreach (AstarNode neighbor in currentNode.GetNeighbors())
+            foreach (var offset in CaveUtils.AstarOffsets)
             {
-                if (neighbor.position.y < CaveBuilder.bedRockMargin + 1)
+                Vector3i neighborPos = currentNode.position + offset;
+
+                shouldContinue =
+                    neighborPos.y < bedRockMargin
+                    || neighborPos.y + terrainMargin > WorldBuilder.Instance.GetHeight(neighborPos.x, neighborPos.z)
+                    || visited.Contains(neighborPos);
+
+                if (shouldContinue)
                     continue;
 
-                if (neighbor.position.y + CaveBuilder.terrainMargin + 1 > WorldBuilder.Instance.GetHeight(neighbor.position.x, neighbor.position.z))
-                    continue;
+                AstarNode neighbor = new AstarNode(neighborPos);
 
-                if (visited.Contains(neighbor))
-                    continue;
-
-                float minDist = cachedPrefabs.MinDistToPrefab(neighbor.position);
+                minDist = prefabCluster.MinDistToPrefab(neighborPos);
 
                 if (minDist == 0)
                     continue;
 
-                bool isCave = CaveBuilder.pathingNoise.IsCave(neighbor.position.x, neighbor.position.y, neighbor.position.z);
-                float factor = 1.0f;
+                isCave = CaveBuilder.pathingNoise.IsCave(neighborPos);
+                factor = 0;
 
-                factor *= isCave ? 0.5f : 1f;
-                factor *= minDist < 100 ? 1 : .5f;
+                if (!isCave) factor += 1;
+                if (minDist < 100) factor += 1;
 
-                float tentativeGCost = currentNode.GCost + CaveUtils.SqrEuclidianDist(currentNode, neighbor) * factor;
+                // tentativeGCost = currentNode.GCost + CaveUtils.SqrEuclidianDistInt32(currentNode, neighbor) << factor;
+                tentativeGCost = currentNode.GCost + (neighborDistance << factor);
 
-                bool isInQueue = queue.Contains(neighbor);
-
-                if (!isInQueue || tentativeGCost < neighbor.GCost)
+                if (tentativeGCost < neighbor.GCost || !queue.Contains(neighbor))
                 {
                     neighbor.Parent = currentNode;
                     neighbor.GCost = tentativeGCost;
-                    neighbor.HCost = CaveUtils.SqrEuclidianDist(neighbor, goalNode) * factor;
+                    neighbor.HCost = CaveUtils.SqrEuclidianDistInt32(neighbor.position, goalNode.position) << factor;
 
-                    if (!isInQueue)
+                    if (!queue.Contains(neighbor))
+                    {
                         queue.Enqueue(neighbor, neighbor.FCost);
+                    }
                 }
             }
         }
@@ -160,7 +173,7 @@ public class CaveTunneler
 
         for (int i = 0; i < path.Count; i++)
         {
-            var tunnelRadius = (int)(r1 + (r2 - r1) * (1f * i / path.Count));
+            var tunnelRadius = (int)(r1 + (r2 - r1) * ((float)i / path.Count));
             var circle = GetSphere(path[i], tunnelRadius);
             tunnel.UnionWith(circle);
         }

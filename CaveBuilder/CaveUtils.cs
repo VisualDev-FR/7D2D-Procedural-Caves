@@ -46,6 +46,10 @@ public static class CaveUtils
         .Where(offset => !(FastAbs(offset.y) == 1 && offset.x == 0 && offset.z == 0))
         .ToArray();
 
+    public static readonly Vector3i[] AstarOffsets = neighborsOffsets
+        .Where(offset => offset.y == 0 || offset.x != 0 || offset.z != 0)
+        .ToArray();
+
     public static Stopwatch StartTimer()
     {
         var timer = new Stopwatch();
@@ -112,6 +116,15 @@ public static class CaveUtils
         return dx * dx + dy * dy + dz * dz;
     }
 
+    public static int SqrEuclidianDistInt32(Vector3i p1, Vector3i p2)
+    {
+        int dx = p1.x - p2.x;
+        int dy = p1.y - p2.y;
+        int dz = p1.z - p2.z;
+
+        return dx * dx + dy * dy + dz * dz;
+    }
+
     public static float SqrEuclidianDist2D(Vector3i p1, Vector3i p2)
     {
         float dx = p1.x - p2.x;
@@ -144,9 +157,9 @@ public static class CaveUtils
     public static bool PositionIsValid(Vector3i pos)
     {
         return (
-            pos.y > 0 && pos.y < WorldBuilder.Instance.GetHeight(pos.x, pos.z)
-            && pos.x > 0 && pos.x < CaveBuilder.worldSize
+            pos.x > 0 && pos.x < CaveBuilder.worldSize
             && pos.z > 0 && pos.z < CaveBuilder.worldSize
+            && pos.y > 0 && pos.y < WorldBuilder.Instance.GetHeight(pos.x, pos.z)
         );
     }
 

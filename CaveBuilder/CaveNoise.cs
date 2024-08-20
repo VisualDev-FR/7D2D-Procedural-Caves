@@ -57,6 +57,14 @@ public class CaveNoise
         return noise.GetNoise(x, z) < threshold;
     }
 
+    public bool IsCave(Vector3i pos)
+    {
+        if (invert)
+            return noise.GetNoise(pos.x, pos.y, pos.z) < threshold;
+
+        return noise.GetNoise(pos.x, pos.y, pos.z) > threshold;
+    }
+
     public bool IsCave(int x, int y, int z)
     {
         if (invert)

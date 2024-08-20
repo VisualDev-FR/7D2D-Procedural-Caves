@@ -2,7 +2,11 @@ using System.Collections.Generic;
 
 public class AstarNode
 {
-    public Vector3i position;
+    public readonly Vector3i position;
+
+    public AstarNode Parent { get; set; }
+
+    public readonly int hashcode;
 
     public float GCost { get; set; }
 
@@ -10,43 +14,27 @@ public class AstarNode
 
     public float FCost => GCost + HCost;
 
-    public AstarNode Parent { get; set; }
-
     public AstarNode(Vector3i pos)
     {
         position = pos;
+        hashcode = position.GetHashCode();
     }
 
     public AstarNode(int x, int y, int z)
     {
         position = new Vector3i(x, y, z);
-    }
-
-    public List<AstarNode> GetNeighbors()
-    {
-        var neighbors = CaveUtils.GetValidNeighbors(position);
-        var nodes = new List<AstarNode>();
-
-        foreach (var pos in neighbors)
-        {
-            if (pos.x == position.x && pos.z == position.z && pos.y != position.y)
-                continue;
-
-            nodes.Add(new AstarNode(pos));
-        }
-
-        return nodes;
+        hashcode = position.GetHashCode();
     }
 
     public override int GetHashCode()
     {
-        return position.GetHashCode();
+        return hashcode;
     }
 
     public override bool Equals(object obj)
     {
         AstarNode other = (AstarNode)obj;
-        return position.GetHashCode() == other.position.GetHashCode();
+        return hashcode == other.hashcode;
     }
 
     public List<CaveBlock> ReconstructPath()

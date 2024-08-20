@@ -75,18 +75,18 @@ public class CaveMap : IEnumerable<CaveBlock>
         var x = start.x;
         var z = start.z;
         var y = start.y;
-        var index = 256;
 
-        while (true && --index > 0)
+        int hashcode = CaveBlock.GetHashCode(x, y, z);
+        int offsetHashCode = CaveBlock.GetHashCode(0, -1, 0);
+
+        while (--y > 0)
         {
-            int hashcode = CaveBlock.GetHashCode(x, y - 1, z);
-
-            if (!caveblocks.ContainsKey(hashcode))
+            if (!caveblocks.ContainsKey(hashcode + offsetHashCode))
             {
-                return GetBlock(CaveBlock.GetHashCode(x, y, z));
+                return caveblocks[hashcode];
             }
 
-            y--;
+            hashcode += offsetHashCode;
         }
 
         throw new Exception("Lower point not found");
@@ -98,7 +98,7 @@ public class CaveMap : IEnumerable<CaveBlock>
 
         var queue = new Queue<int>(1_000);
         var visited = new HashSet<int>(100_000);
-        var waterBlocks = new HashSet<int>(100_000);
+        var waterHashes = new HashSet<int>(100_000);
         var startPosition = GetVerticalLowerPoint(waterStart);
         var start = CaveBlock.GetHashCode(startPosition.x, startPosition.y, startPosition.z);
 
@@ -111,40 +111,43 @@ public class CaveMap : IEnumerable<CaveBlock>
             if (cachedPrefabs.IntersectMarker(caveblocks[currentHash]))
                 return new HashSet<int>();
 
-            if (visited.Contains(currentHash) || !Contains(currentHash))
+            if (visited.Contains(currentHash) || !caveblocks.ContainsKey(currentHash))
                 continue;
 
             visited.Add(currentHash);
-            waterBlocks.Add(currentHash.GetHashCode());
+            waterHashes.Add(currentHash.GetHashCode());
 
             foreach (int offsetHash in CaveUtils.neighborsHashes)
             {
-                // f(x, y, z) = Ax + By + z
-                // f(dx, dy, dz) = Adx + Bdy + dz
-                // f(x + dx, y + dy, z + dz)
-                //      = A(x + dx) + B(y + dy) + (z + dz)
-                //      = Ax + Adx + By + Bdy + z + dz
-                //      = (Ax + By + z) + Adx + Bdy + dz
-                //      = f(x, y, z) + f(dx, dy, dz)
-                // => currentHash = f(x, y, z)
-                // => offsetHash = f(dx, dy, dz)
-                // => neighborHash = currentHash + offSetHash
-                //      -> TODO: SIMD Vectorization ?
-                //      -> TODO: f(x, y, z) = (x << 13) + (y << 17) + z
+                /* NOTE:
+                    f(x, y, z) = Ax + By + z
+                    f(dx, dy, dz) = Adx + Bdy + dz
+                    f(x + dx, y + dy, z + dz)
+                        = A(x + dx) + B(y + dy) + (z + dz)
+                        = Ax + Adx + By + Bdy + z + dz
+                        = (Ax + By + z) + Adx + Bdy + dz
+                        = f(x, y, z) + f(dx, dy, dz)
+                    => currentHash = f(x, y, z)
+                    => offsetHash = f(dx, dy, dz)
+                    => neighborHash = currentHash + offSetHash
+                        -> TODO: SIMD Vectorization ?
+                        -> TODO: f(x, y, z) = (x << 13) + (y << 17) + z
+                */
 
                 var neighborHash = currentHash + offsetHash;
+                var shouldEnqueue =
+                    caveblocks[neighborHash].y <= startPosition.y
+                    && !visited.Contains(neighborHash)
+                    && caveblocks.ContainsKey(neighborHash);
 
-                if (!caveblocks.ContainsKey(neighborHash))
-                    continue;
-
-                if (!visited.Contains(neighborHash) && caveblocks[neighborHash].y <= startPosition.y)
+                if (shouldEnqueue)
                 {
                     queue.Enqueue(neighborHash);
                 }
             }
         }
 
-        return waterBlocks;
+        return waterHashes;
     }
 
     public void SetWater(HashSet<CaveBlock> localMinimas, PrefabCache cachedPrefabs)
@@ -187,6 +190,8 @@ public class CaveMap : IEnumerable<CaveBlock>
 
         foreach (var waterStart in localMinimas)
         {
+            index++;
+
             if (WorldBuilder.Instance.IsCanceled)
                 yield break;
 
@@ -195,7 +200,7 @@ public class CaveMap : IEnumerable<CaveBlock>
 
             HashSet<int> hashcodes = ExpandWater(waterStart, cachedPrefabs);
 
-            string message = $"Water processing: {100.0f * ++index / localMinimas.Count:F0}% ({index} / {localMinimas.Count})";
+            string message = $"Water processing: {100.0f * index / localMinimas.Count:F0}% ({index} / {localMinimas.Count})";
 
             yield return WorldBuilder.Instance.SetMessage(message);
 

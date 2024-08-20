@@ -274,7 +274,7 @@ public static class CaveViewer
 
     public static void CaveCommand(string[] args)
     {
-        CaveBuilder.worldSize = 2048;
+        CaveBuilder.worldSize = 1024;
 
         if (args.Length > 1)
             CaveBuilder.worldSize = int.Parse(args[1]);

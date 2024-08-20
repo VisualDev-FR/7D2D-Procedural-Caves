@@ -6,7 +6,8 @@ using UnityEngine;
 public struct Vector3bf
 {
     // NOTE:
-    // wrapper for storing Vector3 with x, y, and z all stored in a unique 16 bits sized bitfield
+    // Allow to save memory size of a relative chunk position by storing only a unique unsigned short bitfield
+    // sizes: [0 < x, z < 16], [0 < y < 256]
     // allow to store 2x 4-bits (x, z) + 1x 8-bits (y) in one unique unsigned short
     // uses only 16 bits, instead of using 24 bits by storing 3 bytes (only for memory optimization purpose)
     // wil be used to store the relative positions between a chunk and a caveBlock

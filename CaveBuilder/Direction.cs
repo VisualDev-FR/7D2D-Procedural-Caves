@@ -17,6 +17,16 @@ public class Direction
         Vector = new Vector3i(x, 0, z);
     }
 
+    public static bool operator ==(Direction dir1, Direction dir2)
+    {
+        return dir1.Vector == dir2.Vector;
+    }
+
+    public static bool operator !=(Direction dir1, Direction dir2)
+    {
+        return dir1.Vector != dir2.Vector;
+    }
+
     public override bool Equals(object obj)
     {
         Direction other = (Direction)obj;
@@ -28,13 +38,4 @@ public class Direction
         return Vector.GetHashCode();
     }
 
-    public static bool operator ==(Direction dir1, Direction dir2)
-    {
-        return dir1.Vector == dir2.Vector;
-    }
-
-    public static bool operator !=(Direction dir1, Direction dir2)
-    {
-        return dir1.Vector != dir2.Vector;
-    }
 }
