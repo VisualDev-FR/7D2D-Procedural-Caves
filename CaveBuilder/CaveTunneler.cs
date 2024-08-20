@@ -23,6 +23,51 @@ public class CaveTunneler
         localMinimas = FindLocalMinimas();
         tunnel = ThickenTunnel(edge.node1, edge.node2, cavemap);
 
+        // for (int i = 0; i < 10; i++)
+        // {
+        //     tunnel = SmoothTunnel();
+        // }
+
+        return tunnel;
+    }
+
+    public HashSet<CaveBlock> SmoothTunnel()
+    {
+        var dictionary = tunnel.ToDictionary(
+            block => block.GetHashCode(),
+            block => block
+        );
+
+        foreach (var block in tunnel.ToList())
+        {
+            int neighborsCount = 0;
+            int totalDensity = 0;
+
+            foreach (var offset in CaveUtils.smoothingOffsets)
+            {
+                var hash = CaveBlock.GetHashCode(
+                    block.x + offset.x,
+                    block.y + offset.y,
+                    block.z + offset.z
+                );
+
+                if (dictionary.ContainsKey(hash))
+                {
+                    totalDensity += dictionary[hash].density;
+                    neighborsCount++;
+                }
+            }
+
+            if (neighborsCount < 2)
+            {
+                tunnel.Remove(block);
+            }
+            else
+            {
+                block.density = (sbyte)((float)totalDensity / neighborsCount);
+            }
+        }
+
         return tunnel;
     }
 
@@ -173,7 +218,7 @@ public class CaveTunneler
         for (int i = 0; i < path.Count; i++)
         {
             float tunnelRadius = r1 + (r2 - r1) * ((float)i / path.Count);
-            var circle = GetSphereV2(path[i], tunnelRadius, cavemap);
+            var circle = GetSphere(path[i], tunnelRadius);
             tunnel.UnionWith(circle);
         }
 
@@ -250,7 +295,7 @@ public class CaveTunneler
 
         Vector3 worldPos = center.position.ToVector3();
 
-        if (sphereRadius < 2) sphereRadius = 2;
+        if (sphereRadius < 2f) sphereRadius = 2f;
 
         int x_min = Utils.Fastfloor(worldPos.x - sphereRadius);
         int x_max = Utils.Fastfloor(worldPos.x + sphereRadius);
@@ -265,20 +310,20 @@ public class CaveTunneler
             {
                 for (int z = z_min; z <= z_max; z++)
                 {
-                    int num7 = 0;
+                    int pointIndex = 0;
                     for (int i = 0; i < INNER_POINTS.Length; i++)
                     {
                         Vector3 vector = INNER_POINTS[i];
                         if ((new Vector3(x + vector.x, y + vector.y, z + vector.z) - worldPos).magnitude <= sphereRadius)
                         {
-                            num7++;
+                            pointIndex++;
                         }
                         if (i == 8)
                         {
-                            switch (num7)
+                            switch (pointIndex)
                             {
                                 case 9:
-                                    num7 = INNER_POINTS.Length;
+                                    pointIndex = INNER_POINTS.Length;
                                     break;
                                 default:
                                     continue;
@@ -288,23 +333,19 @@ public class CaveTunneler
                             break;
                         }
                     }
-                    if (num7 == 0)
+                    if (pointIndex == 0)
                     {
                         continue;
                     }
 
-                    var hashcode = CaveBlock.GetHashCode(x, y, z);
-
-                    // BlockValue block = myInventoryData.invData.world.GetBlock(vector3i);
-                    // BlockValue blockValue = block;
-                    // sbyte initialDensity = myInventoryData.invData.world.GetDensity(0, position);
+                    int hashcode = CaveBlock.GetHashCode(x, y, z);
 
                     sbyte initialDensity = 0;
                     sbyte density = initialDensity;
 
-                    if (num7 > INNER_POINTS.Length / 2)
+                    if (pointIndex > INNER_POINTS.Length / 2)
                     {
-                        density = (sbyte)((float)MarchingCubes.DensityAir * (num7 - INNER_POINTS.Length / 2 - 1) / (INNER_POINTS.Length / 2));
+                        density = (sbyte)((float)MarchingCubes.DensityAir * (pointIndex - INNER_POINTS.Length / 2 - 1) / (INNER_POINTS.Length / 2));
                         if (density <= 0)
                         {
                             density = 1;
@@ -312,7 +353,7 @@ public class CaveTunneler
                     }
                     else if (!cavemap.IsCaveAir(hashcode))
                     {
-                        density = (sbyte)((float)MarchingCubes.DensityTerrain * (INNER_POINTS.Length / 2 - num7) / (INNER_POINTS.Length / 2));
+                        density = (sbyte)((float)MarchingCubes.DensityTerrain * (INNER_POINTS.Length / 2 - pointIndex) / (INNER_POINTS.Length / 2));
                         if (density >= 0)
                         {
                             density = -1;
@@ -322,26 +363,10 @@ public class CaveTunneler
                     if (density > initialDensity)
                     {
                         yield return new CaveBlock(x, y, z, density);
-                        // BlockChangeInfo blockChangeInfo = new BlockChangeInfo();
-                        // blockChangeInfo.pos = position;
-                        // blockChangeInfo.bChangeDensity = true;
-                        // blockChangeInfo.density = density;
-                        // if (blockValue.type != block.type)
-                        // {
-                        //     blockChangeInfo.bChangeBlockValue = true;
-                        //     blockChangeInfo.blockValue = blockValue;
-                        // }
-                        // blockChanges.Add(blockChangeInfo);
                     }
                 }
             }
         }
-        // if (blockChanges.Count > 0)
-        // {
-        //     BlockToolSelection.Instance.BeginUndo(0);
-        //     myInventoryData.invData.world.SetBlocksRPC(blockChanges);
-        //     BlockToolSelection.Instance.EndUndo(0);
-        // }
 
         yield break;
     }

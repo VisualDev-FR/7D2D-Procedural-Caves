@@ -42,6 +42,10 @@ public static class CaveUtils
         .Select(vector => CaveBlock.GetHashCode(vector.x, vector.y, vector.z))
         .ToArray();
 
+    public static readonly Vector3i[] smoothingOffsets = neighborsOffsets
+        .Where(v => (v.x == 0 && v.y == 0) || (v.x == 0 && v.z == 0) || (v.y == 0 && v.z == 0))
+        .ToArray();
+
     public static readonly Vector3i[] neighborsOffsetsNonVertical = neighborsOffsets
         .Where(offset => !(FastAbs(offset.y) == 1 && offset.x == 0 && offset.z == 0))
         .ToArray();
