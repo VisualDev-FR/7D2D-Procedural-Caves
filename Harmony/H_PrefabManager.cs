@@ -4,22 +4,6 @@ using HarmonyLib;
 using WorldGenerationEngineFinal;
 
 
-// [HarmonyPatch(typeof(PrefabManager), "GetWildernessPrefab")]
-// public static class PrefabManager_GetWildernessPrefab
-// {
-//     public static bool Prefix(FastTags<TagGroup.Poi> _withoutTags, FastTags<TagGroup.Poi> _markerTags, Vector2i minSize, Vector2i maxSize, Vector2i center, bool _isRetry, ref PrefabData __result)
-//     {
-//         if (CavePlanner.EntrancePrefabCount < CavePlanner.TargetEntranceCount)
-//         {
-//             __result = CavePlanner.SelectRandomWildernessEntrance();
-//             return false;
-//         }
-
-//         return true;
-//     }
-// }
-
-
 [HarmonyPatch(typeof(PrefabManager), "LoadPrefabs")]
 public static class PrefabManager_LoadPrefabs
 {
