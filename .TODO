@@ -2,6 +2,7 @@ Priority:
     ✔ debug cave prefab placements regarding surface prefabs @done(24-08-17 22:43)
     ✔ Implement connection between town poi entrance and cave network @done(24-08-18 22:22)
     ✔ implement prefab rename command in cave editor plugin @done(24-08-18 22:22)
+    ☐ integrate small prefabs in tunnels (dirt, decoration, modeled terrain, stalactites, water well)
     ☐ Implement custom wilderness prefab spawning function
     ☐ implement the multiple cave networks system
     ☐ force rwg POIs choices
@@ -40,8 +41,10 @@ prefab themes:
     ☐ pirate treasures
 
 Later:
+    ☐ special rope with stability + 360 degres climbable
     ☐ live cave map
     ☐ cave navigation with beacons
+    ☐ random ropes (some of those are trapped ? with a dedicated sound when it breaks ?)
     ☐ sound ambiance
     ☐ possibility to choose which POIs to include or exlude, grouped by mod or else
     ☐ rare ore vein
@@ -58,10 +61,14 @@ Later:
     ☐ artifact collections, only complete collection sellable to trader
     ☐ murals
     ☐ loot bioming
-    ☐ dedicated cave flore
+    ☐ dedicated cave flora
     ☐ mine structures (or else) along tunnels (via prefab parts ? make new cave parts group ?)
     ☐ tunnel treasure quest
-    ☐ dedicated materials to explore caves (metal detector, gps, gazmask, nbc suit, flares, flare gun)
+    ☐ dedicated materials to explore caves (metal detector, gps, gazmask, nbc suit, flares, flare gun, ice axe)
+    ☐ dedicated game settings tab in saves menu for cave gameplay
+    ☐ broken bikes or else mechanical stuff to gather mechanical parts, etc...
+    ☐ lights to turn on
+    ☐ loot in niches dug into the walls or the floor
 
 Cancelled:
     ✘ increase terrain height @cancelled(24-07-10 00:26)
