@@ -36,6 +36,8 @@ Editor:
 
 prefab themes:
     ☐ nest of creatures
+    ☐ trapped tunnels, confused with regular ones
+    ☐ pirate treasures
 
 Later:
     ☐ live cave map
@@ -43,19 +45,23 @@ Later:
     ☐ sound ambiance
     ☐ possibility to choose which POIs to include or exlude, grouped by mod or else
     ☐ rare ore vein
+    ☐ tunnels blocked with dirt
     ☐ hidden treasures
+    ☐ obstacles to jumb over (with traps at the bottom ?)
     ☐ landslide event
     ☐ flooding event
     ☐ horde triggers
     ☐ no oxygen event
+    ☐ zombie toxic spore events (with particule effects)
     ☐ radiation event
-    ☐ fog
-    ☐ zombie spore events + particule effects
-    ☐ artifact collections
+    ☐ cave fog
+    ☐ artifact collections, only complete collection sellable to trader
     ☐ murals
     ☐ loot bioming
     ☐ dedicated cave flore
     ☐ mine structures (or else) along tunnels (via prefab parts ? make new cave parts group ?)
+    ☐ tunnel treasure quest
+    ☐ dedicated materials to explore caves (metal detector, gps, gazmask, nbc suit, flares, flare gun)
 
 Cancelled:
     ✘ increase terrain height @cancelled(24-07-10 00:26)
