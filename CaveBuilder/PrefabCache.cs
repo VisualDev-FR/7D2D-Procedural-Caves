@@ -68,19 +68,19 @@ public class PrefabCache
         float minDist = int.MaxValue;
         var prefabs = GetNearestPrefabs(position.x, position.z);
 
-        foreach (var prefab in prefabs)
+        foreach (CavePrefab prefab in prefabs)
         {
-            var min = prefab.position;
-            var max = min + prefab.Size;
+            Vector3i start = prefab.position;
+            Vector3i end = start + prefab.Size;
 
             if (prefab.Intersect3D(position))
             {
                 return 0f;
             }
 
-            float dx = Math.Max(Math.Max(min.x - position.x, 0), position.x - max.x);
-            float dy = Math.Max(Math.Max(min.y - position.y, 0), position.y - max.y);
-            float dz = Math.Max(Math.Max(min.z - position.z, 0), position.z - max.z);
+            float dx = CaveUtils.FastMax(CaveUtils.FastMax(start.x - position.x, 0), position.x - end.x);
+            float dy = CaveUtils.FastMax(CaveUtils.FastMax(start.y - position.y, 0), position.y - end.y);
+            float dz = CaveUtils.FastMax(CaveUtils.FastMax(start.z - position.z, 0), position.z - end.z);
 
             float sqrDistance = dx * dx + dy * dy + dz * dz;
 

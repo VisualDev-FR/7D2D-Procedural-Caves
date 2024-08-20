@@ -80,7 +80,7 @@ public class CaveTunneler
         return path;
     }
 
-    private List<CaveBlock> FindPath(Edge edge, PrefabCache prefabCluster)
+    private List<CaveBlock> FindPath(Edge edge, PrefabCache cachedPrefabs)
     {
         var start = edge.node1.Normal(CaveUtils.FastMax(5, edge.node1.NodeRadius));
         var target = edge.node2.Normal(CaveUtils.FastMax(5, edge.node2.NodeRadius));
@@ -128,7 +128,7 @@ public class CaveTunneler
 
                 AstarNode neighbor = new AstarNode(neighborPos);
 
-                minDist = prefabCluster.MinDistToPrefab(neighborPos);
+                minDist = cachedPrefabs.MinDistToPrefab(neighborPos);
 
                 if (minDist == 0)
                     continue;
@@ -139,7 +139,6 @@ public class CaveTunneler
                 if (!isCave) factor += 1;
                 if (minDist < 100) factor += 1;
 
-                // tentativeGCost = currentNode.GCost + CaveUtils.SqrEuclidianDistInt32(currentNode, neighbor) << factor;
                 tentativeGCost = currentNode.GCost + (neighborDistance << factor);
 
                 if (tentativeGCost < neighbor.GCost || !queue.Contains(neighbor))
