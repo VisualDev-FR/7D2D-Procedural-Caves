@@ -38,7 +38,7 @@ public class CaveTunneler
             {
                 queue.Remove(pos);
 
-                var caveBlock = new CaveBlock(pos, MarchingCubes.DensityAir);
+                var caveBlock = new CaveBlock(pos);
 
                 if (sphere.Contains(caveBlock))
                     continue;
@@ -70,7 +70,7 @@ public class CaveTunneler
 
         while (currentNode != null)
         {
-            var block = new CaveBlock(currentNode.position, MarchingCubes.DensityAir);
+            var block = new CaveBlock(currentNode.position);
             path.Add(block);
             currentNode = currentNode.Parent;
         }
@@ -172,8 +172,8 @@ public class CaveTunneler
 
         for (int i = 0; i < path.Count; i++)
         {
-            var tunnelRadius = (int)(r1 + (r2 - r1) * ((float)i / path.Count));
-            var circle = GetSphere(path[i], tunnelRadius);
+            float tunnelRadius = r1 + (r2 - r1) * ((float)i / path.Count);
+            var circle = GetSphereV2(path[i], tunnelRadius, cavemap);
             tunnel.UnionWith(circle);
         }
 
@@ -249,10 +249,8 @@ public class CaveTunneler
         // adapted from ItemActionTerrainTool.RemoveTerrain
 
         Vector3 worldPos = center.position.ToVector3();
-        // ItemActionData _actionData;
-        // float _damage = 0f;
-        // DamageMultiplier _damageMultiplier = null;
-        // bool _bChangeBlocks = true;
+
+        if (sphereRadius < 2) sphereRadius = 2;
 
         int x_min = Utils.Fastfloor(worldPos.x - sphereRadius);
         int x_max = Utils.Fastfloor(worldPos.x + sphereRadius);
@@ -295,45 +293,57 @@ public class CaveTunneler
                         continue;
                     }
 
-                    sbyte density = MarchingCubes.DensityAir;
+                    var hashcode = CaveBlock.GetHashCode(x, y, z);
+
+                    // BlockValue block = myInventoryData.invData.world.GetBlock(vector3i);
+                    // BlockValue blockValue = block;
+                    // sbyte initialDensity = myInventoryData.invData.world.GetDensity(0, position);
+
+                    sbyte initialDensity = 0;
+                    sbyte density = initialDensity;
 
                     if (num7 > INNER_POINTS.Length / 2)
                     {
-                        density = (sbyte)((float)MarchingCubes.DensityTerrain * (INNER_POINTS.Length / 2 - num7) / (INNER_POINTS.Length / 2));
+                        density = (sbyte)((float)MarchingCubes.DensityAir * (num7 - INNER_POINTS.Length / 2 - 1) / (INNER_POINTS.Length / 2));
                         if (density <= 0)
                         {
                             density = 1;
                         }
                     }
-                    else
+                    else if (!cavemap.IsCaveAir(hashcode))
                     {
-                        density = (sbyte)((float)MarchingCubes.DensityAir * (num7 - INNER_POINTS.Length / 2 - 1) / (INNER_POINTS.Length / 2));
+                        density = (sbyte)((float)MarchingCubes.DensityTerrain * (INNER_POINTS.Length / 2 - num7) / (INNER_POINTS.Length / 2));
                         if (density >= 0)
                         {
                             density = -1;
                         }
                     }
 
-                    var caveBlock = new CaveBlock(x, y, z, density);
-
-                    yield return caveBlock;
-                    // if (blockValue.type != block.type || density > initialDensity)
-                    // {
-                    //     BlockChangeInfo blockChangeInfo = new BlockChangeInfo();
-                    //     blockChangeInfo.pos = vector3i;
-                    //     blockChangeInfo.bChangeDensity = true;
-                    //     blockChangeInfo.density = density;
-                    //     if (blockValue.type != block.type)
-                    //     {
-                    //         blockChangeInfo.bChangeBlockValue = true;
-                    //         blockChangeInfo.blockValue = blockValue;
-                    //     }
-                    //     blockChanges.Add(blockChangeInfo);
-                    // }
+                    if (density > initialDensity)
+                    {
+                        yield return new CaveBlock(x, y, z, density);
+                        // BlockChangeInfo blockChangeInfo = new BlockChangeInfo();
+                        // blockChangeInfo.pos = position;
+                        // blockChangeInfo.bChangeDensity = true;
+                        // blockChangeInfo.density = density;
+                        // if (blockValue.type != block.type)
+                        // {
+                        //     blockChangeInfo.bChangeBlockValue = true;
+                        //     blockChangeInfo.blockValue = blockValue;
+                        // }
+                        // blockChanges.Add(blockChangeInfo);
+                    }
                 }
             }
         }
+        // if (blockChanges.Count > 0)
+        // {
+        //     BlockToolSelection.Instance.BeginUndo(0);
+        //     myInventoryData.invData.world.SetBlocksRPC(blockChanges);
+        //     BlockToolSelection.Instance.EndUndo(0);
+        // }
 
+        yield break;
     }
 
 }

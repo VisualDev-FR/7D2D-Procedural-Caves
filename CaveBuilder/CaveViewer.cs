@@ -239,7 +239,7 @@ public static class CaveViewer
             int pos = i * radius * 3;
 
             var position = new Vector3i(pos, 20, 20);
-            var caveBlock = new CaveBlock(position, MarchingCubes.DensityAir);
+            var caveBlock = new CaveBlock(position);
             var sphere = CaveTunneler.GetSphere(caveBlock, radius);
 
             foreach (var block in sphere)

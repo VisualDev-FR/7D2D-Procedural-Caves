@@ -7,6 +7,8 @@ public class CaveBlock
 
     public static readonly sbyte DensityTerrain = sbyte.MinValue;
 
+    public const sbyte defaultDensity = 0;
+
     public Vector2s ChunkPos { get; internal set; }
 
     public Vector3bf BlockChunkPos { get; internal set; }
@@ -25,7 +27,7 @@ public class CaveBlock
 
     public Vector3i position => new Vector3i(x, y, z);
 
-    public CaveBlock(Vector3i position, sbyte density)
+    public CaveBlock(Vector3i position, sbyte density = defaultDensity)
     {
         short chunk_x = (short)(position.x >> 4);
         short chunk_z = (short)(position.z >> 4);
@@ -43,7 +45,7 @@ public class CaveBlock
         );
     }
 
-    public CaveBlock(int x, int y, int z, sbyte density)
+    public CaveBlock(int x, int y, int z, sbyte density = defaultDensity)
     {
         short chunk_x = (short)(x >> 4);
         short chunk_z = (short)(z >> 4);

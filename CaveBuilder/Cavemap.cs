@@ -44,6 +44,22 @@ public class CaveMap : IEnumerable<CaveBlock>
         return caveblocks[CaveBlock.GetHashCode(x, y, z)];
     }
 
+    public sbyte GetDensity(Vector3i pos)
+    {
+        var hashcode = CaveBlock.GetHashCode(pos.x, pos.y, pos.z);
+        return GetDensity(hashcode);
+    }
+
+    public sbyte GetDensity(int hashcode)
+    {
+        if (caveblocks.TryGetValue(hashcode, out var block))
+        {
+            return block.density;
+        }
+
+        return MarchingCubes.DensityTerrain;
+    }
+
     public void UnionWith(HashSet<CaveBlock> others)
     {
         foreach (var block in others)
@@ -176,9 +192,9 @@ public class CaveMap : IEnumerable<CaveBlock>
         }
     }
 
-    public bool IsCave(int x, int y, int z)
+    public bool IsCaveAir(int hashcode)
     {
-        return caveblocks.ContainsKey(CaveBlock.GetHashCode(x, y, z));
+        return caveblocks.ContainsKey(hashcode);
     }
 
     public IEnumerator SetWaterCoroutine(HashSet<CaveBlock> localMinimas, PrefabCache cachedPrefabs)

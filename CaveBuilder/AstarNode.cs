@@ -44,7 +44,7 @@ public class AstarNode
 
         while (currentNode != null)
         {
-            path.Add(new CaveBlock(currentNode.position, MarchingCubes.DensityAir));
+            path.Add(new CaveBlock(currentNode.position));
             currentNode = currentNode.Parent;
         }
 
