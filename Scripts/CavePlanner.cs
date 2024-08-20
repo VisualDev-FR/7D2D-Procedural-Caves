@@ -4,12 +4,12 @@ using System.Diagnostics;
 using System.Linq;
 using WorldGenerationEngineFinal;
 
-using Random = System.Random;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
 using System.Collections;
 using System;
 
+using Random = System.Random;
 using Path = System.IO.Path;
 
 
@@ -91,7 +91,7 @@ public static class CavePlanner
             entranceName = wildernessEntranceNames[CaveBuilder.rand.Next(wildernessEntranceNames.Count)];
         }
 
-        Log.Out($"[Cave] random selected entrance: '{entranceName}'");
+        // Log.Out($"[Cave] random selected entrance: '{entranceName}'");
 
         usedEntrances.Add(entranceName);
 
@@ -337,6 +337,11 @@ public static class CavePlanner
         if (WorldBuilder.IsCanceled)
             yield break;
 
+        var entrances = SpawnCaveEntrances();
+
+        if (entrances.Count == 0)
+            yield break;
+
         surfacePrefabs = GetSurfacePrefabs();
 
         PrefabCache addedCaveEntrances = GetUsedCavePrefabs();
@@ -483,19 +488,50 @@ public static class CavePlanner
         }
     }
 
-    public bool SpawnWildernessPrefab()
+    public static List<PrefabData> SpawnCaveEntrances()
+    {
+        var spawnedEntrances = new List<PrefabData>();
+        var wildernessTiles = WildernessPlanner.GetUnusedWildernessTiles();
+        var tileIndex = 0;
+        var maxRolls = 500;
+
+        if (wildernessTiles.Count == 0)
+        {
+            Log.Error("[Cave] no wilderness streetTile Available");
+            return spawnedEntrances;
+        }
+
+        while (tileIndex < wildernessTiles.Count && --maxRolls > 0)
+        {
+            var tile = wildernessTiles[tileIndex];
+            var prefab = SelectRandomWildernessEntrance();
+            var succeed = SpawnWildernessPrefab(tile, prefab);
+
+            if (succeed)
+            {
+                Log.Out($"[Cave] Entrance spawned: '{prefab.Name}'");
+                spawnedEntrances.Add(prefab);
+                tileIndex++;
+            }
+            else
+            {
+                Log.Warning($"[Cave] fail to spawn entrance '{prefab.Name}'");
+            }
+        }
+
+        return spawnedEntrances;
+    }
+
+    public static bool SpawnWildernessPrefab(StreetTile tile, PrefabData wildernessPrefab)
     {
         GameRandom gameRandom = GameRandomManager.Instance.CreateGameRandom(WorldBuilder.Instance.Seed + 4096953);
 
-        FastTags<TagGroup.Poi> withoutTags = (WorldBuilder.Instance.Towns == WorldBuilder.GenerationSelections.None) ? FastTags<TagGroup.Poi>.none : traderTag;
-        FastTags<TagGroup.Poi> none = FastTags<TagGroup.Poi>.none;
+        Vector2i worldPositionCenter = tile.WorldPositionCenter;
+        Vector2i worldPosition = tile.WorldPosition;
 
-        Vector2i worldPositionCenter = WorldPositionCenter;
+        int maxTries = 6;
 
-        PrefabData wildernessPrefab = PrefabManager.GetWildernessPrefab(withoutTags, none, default, default, worldPositionCenter);
-        int maxTries = 0;
-
-        while (++maxTries < 6)
+        while (maxTries-- < 0)
         {
             int rotation = (wildernessPrefab.RotationsToNorth + gameRandom.RandomRange(0, 4)) & 3;
             int sizeX = wildernessPrefab.size.x;
@@ -506,20 +542,21 @@ public static class CavePlanner
                 sizeX = wildernessPrefab.size.z;
                 sizeZ = wildernessPrefab.size.x;
             }
+
             Vector2i vector2i;
             if (sizeX > 150 || sizeZ > 150)
             {
-                vector2i = WorldPositionCenter - new Vector2i((sizeX - 150) / 2, (sizeZ - 150) / 2);
+                vector2i = worldPositionCenter - new Vector2i((sizeX - 150) / 2, (sizeZ - 150) / 2);
             }
             else
             {
                 try
                 {
-                    vector2i = new Vector2i(gameRandom.RandomRange(WorldPosition.x + 10, WorldPosition.x + 150 - sizeX - 10), gameRandom.RandomRange(WorldPosition.y + 10, WorldPosition.y + 150 - sizeZ - 10));
+                    vector2i = new Vector2i(gameRandom.RandomRange(worldPosition.x + 10, worldPosition.x + 150 - sizeX - 10), gameRandom.RandomRange(worldPosition.y + 10, worldPosition.y + 150 - sizeZ - 10));
                 }
                 catch
                 {
-                    vector2i = WorldPositionCenter - new Vector2i(sizeX / 2, sizeZ / 2);
+                    vector2i = worldPositionCenter - new Vector2i(sizeX / 2, sizeZ / 2);
                 }
             }
             int maxSize = (sizeX > sizeZ) ? sizeX : sizeZ;
@@ -552,6 +589,7 @@ public static class CavePlanner
                     {
                         if (positionX >= WorldBuilder.Instance.WorldSize || positionX < 0 || positionZ >= WorldBuilder.Instance.WorldSize || positionZ < 0 || WorldBuilder.Instance.GetWater(positionX, positionZ) > 0 || biome != WorldBuilder.Instance.GetBiome(positionX, positionZ) || Mathf.Abs(Mathf.CeilToInt(WorldBuilder.Instance.GetHeight(positionX, positionZ)) - medianHeight) > 11)
                         {
+                            Log.Out("[Cave] end_IL_03d4");
                             goto end_IL_03d4;
                         }
                         list.Add((int)WorldBuilder.Instance.GetHeight(positionX, positionZ));
@@ -560,14 +598,14 @@ public static class CavePlanner
                     continue;
                 }
 
-                medianHeight = getMedianHeight(list);
+                medianHeight = tile.getMedianHeight(list);
                 if (medianHeight + wildernessPrefab.yOffset < 2)
                 {
                     break;
                 }
 
-                var vector3i = new Vector3i(subHalfWorld(vector2i.x), getHeightCeil(rect.center) + wildernessPrefab.yOffset + 1, subHalfWorld(vector2i.y));
-                var vector3i2 = new Vector3i(subHalfWorld(vector2i.x), getHeightCeil(rect.center), subHalfWorld(vector2i.y));
+                var vector3i = new Vector3i(tile.subHalfWorld(vector2i.x), tile.getHeightCeil(rect.center) + wildernessPrefab.yOffset + 1, tile.subHalfWorld(vector2i.y));
+                var vector3i2 = new Vector3i(tile.subHalfWorld(vector2i.x), tile.getHeightCeil(rect.center), tile.subHalfWorld(vector2i.y));
                 gameRandom.SetSeed(vector2i.x + vector2i.x * vector2i.y + vector2i.y);
 
                 rotation = gameRandom.RandomRange(0, 4);
@@ -624,7 +662,7 @@ public static class CavePlanner
                             }
                             isPrefabPath = true;
                         }
-                        Path path = new Path(_isCountryRoad: true, maxSizeZX);
+                        WorldGenerationEngineFinal.Path path = new WorldGenerationEngineFinal.Path(_isCountryRoad: true, maxSizeZX);
                         path.FinalPathPoints.Add(new Vector2(vector.x, vector.y));
                         path.pathPoints3d.Add(new Vector3(vector.x, vector3i2.y, vector.y));
                         path.FinalPathPoints.Add(new Vector2(vector3.x, vector3.y));
@@ -635,15 +673,15 @@ public static class CavePlanner
                         WorldBuilder.Instance.wildernessPaths.Add(path);
                     }
                 }
-                SpawnMarkerPartsAndPrefabsWilderness(wildernessPrefab, new Vector3i(vector2i.x, Mathf.CeilToInt(medianHeight + wildernessPrefab.yOffset + 1), vector2i.y), (byte)rotation);
+                tile.SpawnMarkerPartsAndPrefabsWilderness(wildernessPrefab, new Vector3i(vector2i.x, Mathf.CeilToInt(medianHeight + wildernessPrefab.yOffset + 1), vector2i.y), (byte)rotation);
                 PrefabDataInstance pdi = new PrefabDataInstance(prefabId, new Vector3i(vector3i.x, medianHeight + wildernessPrefab.yOffset + 1, vector3i.z), (byte)rotation, wildernessPrefab);
-                AddPrefab(pdi);
+                tile.AddPrefab(pdi);
                 WorldBuilder.Instance.WildernessPrefabCount++;
-                if (medianHeight != getHeightCeil(rect.min.x, rect.min.y) || medianHeight != getHeightCeil(rect.max.x, rect.min.y) || medianHeight != getHeightCeil(rect.min.x, rect.max.y) || medianHeight != getHeightCeil(rect.max.x, rect.max.y))
+                if (medianHeight != tile.getHeightCeil(rect.min.x, rect.min.y) || medianHeight != tile.getHeightCeil(rect.max.x, rect.min.y) || medianHeight != tile.getHeightCeil(rect.min.x, rect.max.y) || medianHeight != tile.getHeightCeil(rect.max.x, rect.max.y))
                 {
-                    WildernessPOICenter = new Vector2i(rect.center);
-                    WildernessPOISize = Mathf.RoundToInt(Mathf.Max(rect.size.x, rect.size.y));
-                    WildernessPOIHeight = medianHeight;
+                    tile.WildernessPOICenter = new Vector2i(rect.center);
+                    tile.WildernessPOISize = Mathf.RoundToInt(Mathf.Max(rect.size.x, rect.size.y));
+                    tile.WildernessPOIHeight = medianHeight;
                 }
                 if (maxSizeZX != 0f)
                 {
