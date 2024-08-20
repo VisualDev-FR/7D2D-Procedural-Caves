@@ -20,7 +20,7 @@ public static class CaveEntrancesPlanner
         var spawnedEntrances = new List<PrefabData>();
         var wildernessTiles = GetWildernessTiles();
         var tileIndex = 0;
-        var maxRolls = 50;
+        var maxRolls = 500;
 
         if (wildernessTiles.Count == 0)
         {
@@ -364,7 +364,7 @@ public static class CaveEntrancesPlanner
 
         int maxTries = 6;
 
-        while (maxTries-- < 0)
+        while (maxTries-- > 0)
         {
             int sizeX = wildernessPrefab.size.x;
             int sizeZ = wildernessPrefab.size.z;
@@ -396,7 +396,7 @@ public static class CaveEntrancesPlanner
 
         GameRandomManager.Instance.FreeGameRandom(gameRandom);
 
-        Log.Out($"[Cave] fail to spawn prefab '{wildernessPrefab.Name}' after {maxTries} tries");
+        Log.Out($"[Cave] fail to spawn prefab '{wildernessPrefab.Name}', remaining tries: {maxTries}");
         return false;
     }
 
