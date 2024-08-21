@@ -2,8 +2,6 @@ public class CaveNoise
 {
     public FastNoiseLite noise;
 
-    public bool invert;
-
     public float threshold;
 
     public int seed;
@@ -21,8 +19,9 @@ public class CaveNoise
     public CaveNoise(int seed, int octaves, float frequency, float threshold, bool invert, FastNoiseLite.NoiseType noiseType, FastNoiseLite.FractalType fractalType)
     {
         this.seed = seed;
-        this.invert = invert;
         this.threshold = threshold;
+
+        if (invert) this.threshold *= -1;
 
         noise = new FastNoiseLite(seed != -1 ? seed : CaveBuilder.SEED);
         noise.SetFractalType(fractalType);
@@ -43,41 +42,26 @@ public class CaveNoise
 
     public bool IsTerrain(int x, int y, int z)
     {
-        if (invert)
-            return noise.GetNoise(x, y, z) > threshold;
-
         return noise.GetNoise(x, y, z) < threshold;
     }
 
     public bool IsTerrain(int x, int z)
     {
-        if (invert)
-            return noise.GetNoise(x, z) > threshold;
-
         return noise.GetNoise(x, z) < threshold;
     }
 
     public bool IsCave(Vector3i pos)
     {
-        if (invert)
-            return noise.GetNoise(pos.x, pos.y, pos.z) < threshold;
-
         return noise.GetNoise(pos.x, pos.y, pos.z) > threshold;
     }
 
     public bool IsCave(int x, int y, int z)
     {
-        if (invert)
-            return noise.GetNoise(x, y, z) < threshold;
-
         return noise.GetNoise(x, y, z) > threshold;
     }
 
     public bool IsCave(int x, int z)
     {
-        if (invert)
-            return noise.GetNoise(x, z) < threshold;
-
         return noise.GetNoise(x, z) > threshold;
     }
 

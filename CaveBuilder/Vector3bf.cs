@@ -12,29 +12,31 @@ public struct Vector3bf
     // uses only 16 bits, instead of using 24 bits by storing 3 bytes (only for memory optimization purpose)
     // wil be used to store the relative positions between a chunk and a caveBlock
 
-    public ushort value { get; internal set; }
+    private ushort _value;
+
+    public ushort value => _value;
 
     public byte x
     {
-        get => (byte)(value & 0b0000_0000_0000_1111);
-        set => this.value = (ushort)((this.value & 0b1111_0000_0000_0000) | (value & 0b0000_0000_0000_1111));
+        get => (byte)(_value & 0b0000_0000_0000_1111);
+        set => _value = (ushort)((this._value & 0b1111_0000_0000_0000) | (value & 0b0000_0000_0000_1111));
     }
 
     public byte y
     {
-        get => (byte)((value >> 4) & 0b0000_0000_1111_1111);
-        set => this.value = (ushort)((this.value & 0b1111_0000_0000_1111) | ((value & 0b0000_0000_1111_1111) << 4));
+        get => (byte)((_value >> 4) & 0b0000_0000_1111_1111);
+        set => _value = (ushort)((this._value & 0b1111_0000_0000_1111) | ((value & 0b0000_0000_1111_1111) << 4));
     }
 
     public byte z
     {
-        get => (byte)((value >> 12) & 0b0000_0000_0000_1111);
-        set => this.value = (ushort)((this.value & 0b0000_1111_1111_1111) | ((value & 0b0000_0000_0000_1111) << 12));
+        get => (byte)((_value >> 12) & 0b0000_0000_0000_1111);
+        set => _value = (ushort)((this._value & 0b0000_1111_1111_1111) | ((value & 0b0000_0000_0000_1111) << 12));
     }
 
     public Vector3bf(byte _x, byte _y, byte _z)
     {
-        value = 0;
+        _value = 0;
         x = _x;
         y = _y;
         z = _z;
@@ -42,12 +44,12 @@ public struct Vector3bf
 
     public Vector3bf(ushort value)
     {
-        this.value = value;
+        this._value = value;
     }
 
     public Vector3bf(string value)
     {
-        this.value = 0;
+        this._value = 0;
 
         string[] array = value.Split(',');
 
@@ -73,7 +75,7 @@ public struct Vector3bf
 
     public string ToBinaryString()
     {
-        string binaryString = Convert.ToString(value, 2).PadLeft(16, '0');
+        string binaryString = Convert.ToString(_value, 2).PadLeft(16, '0');
 
         binaryString = binaryString.Insert(4, "|");
         binaryString = binaryString.Insert(13, "|");
@@ -83,14 +85,14 @@ public struct Vector3bf
 
     public override int GetHashCode()
     {
-        return value;
+        return _value;
     }
 
     public override bool Equals(object obj)
     {
         if (obj is Vector3bf other)
         {
-            return value == other.value;
+            return _value == other._value;
         }
         return false;
     }
