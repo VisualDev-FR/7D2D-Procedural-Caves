@@ -15,8 +15,6 @@ public static class CaveGenerator
 
     private static BlockValue cntCaveCeiling = new BlockValue((uint)Block.GetBlockByName("cntCaveCeiling").blockID);
 
-    private static readonly Vector3i[] flatNeighbors = CaveUtils.neighborsOffsets.Where(offset => offset.y == -1).ToArray();
-
     public static void Init(string worldName)
     {
         caveBlocksProvider = new CaveBlocksProvider(worldName);
@@ -28,9 +26,9 @@ public static class CaveGenerator
 
         if (!block.isMultiBlock)
         {
-            foreach (var offset in flatNeighbors)
+            foreach (var below in CaveUtils.offsetsBelow)
             {
-                Vector3i position = _blockPos + offset;
+                Vector3i position = _blockPos + below;
 
                 if (caveBlocksProvider.IsCave(position))
                 {

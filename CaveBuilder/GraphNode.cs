@@ -65,27 +65,11 @@ public class GraphNode
         return Direction.None;
     }
 
-    public override int GetHashCode()
-    {
-        return position.GetHashCode();
-    }
-
-    public override bool Equals(object obj)
-    {
-        GraphNode other = (GraphNode)obj;
-        return position.Equals(other.position);
-    }
-
     public Vector3i Normal(int distance)
     {
         CaveUtils.Assert(direction != Direction.None, $"Direction sould not be None");
 
         return position + direction.Vector * distance;
-    }
-
-    public override string ToString()
-    {
-        return position.ToString();
     }
 
     public IEnumerable<Vector3i> GetMarkerPoints()
@@ -105,12 +89,12 @@ public class GraphNode
         }
     }
 
-    public HashSet<CaveBlock> GetSphere()
+    public IEnumerable<CaveBlock> GetSphere()
     {
         var center = position;
         var queue = new HashSet<Vector3i>() { center };
         var visited = new HashSet<Vector3i>();
-        var sphere = new HashSet<CaveBlock>();
+        var index = 100_000;
 
         var markerStart = prefab.position + marker.start;
         var markerEnd = markerStart + marker.size;
@@ -120,43 +104,55 @@ public class GraphNode
         CaveUtils.Assert(radius >= 5, $"marker radius should be over 5: {radius}");
         CaveUtils.Assert(!prefab.Intersect3D(center), $"Marker {marker.start} intersect with prefab {prefab.Name}");
 
-        while (queue.Count > 0)
+        while (queue.Count > 0 && index-- > 0)
         {
-            foreach (var pos in queue.ToArray())
+            Vector3i currentPosition = queue.First();
+
+            visited.Add(currentPosition);
+            queue.Remove(currentPosition);
+
+            yield return new CaveBlock(currentPosition);
+
+            // TODO: add more specifics offsets, one for each direction and
+            // -> take it according to the node direction.
+            foreach (Vector3i offset in CaveUtils.offsets)
             {
-                queue.Remove(pos);
+                Vector3i pos = currentPosition + offset;
 
-                if (visited.Contains(pos))
-                    continue;
+                bool shouldContinue =
+                    visited.Contains(pos)
+                    || prefab.Intersect2D(pos)
+                    || pos.y < markerStart.y || pos.y >= markerEnd.y
+                    || (direction.Vector.x == 0 && (pos.x < markerStart.x || pos.x >= markerEnd.x))
+                    || (direction.Vector.z == 0 && (pos.z < markerStart.z || pos.z >= markerEnd.z))
+                    || CaveUtils.SqrEuclidianDist(pos, center) >= sqrRadius;
 
-                visited.Add(pos);
-
-                if (prefab.Intersect2D(pos))
-                    continue;
-
-                if (pos.y < markerStart.y || pos.y >= markerEnd.y)
-                    continue;
-
-                if (direction.Vector.x == 0 && (pos.x < markerStart.x || pos.x >= markerEnd.x))
-                    continue;
-
-                if (direction.Vector.z == 0 && (pos.z < markerStart.z || pos.z >= markerEnd.z))
-                    continue;
-
-                if (CaveUtils.SqrEuclidianDist(pos, center) >= sqrRadius)
-                    continue;
-
-                var caveBlock = new CaveBlock(pos)
+                if (!shouldContinue)
                 {
-                    isWater = false
-                };
-
-                queue.UnionWith(CaveUtils.GetValidNeighbors(pos));
-                sphere.Add(caveBlock);
+                    queue.Add(pos);
+                }
             }
         }
 
-        return sphere;
+        CaveUtils.Assert(queue.Count == 0, "Infinite loop detected.");
+
+        yield break;
+    }
+
+    public override string ToString()
+    {
+        return position.ToString();
+    }
+
+    public override int GetHashCode()
+    {
+        return position.GetHashCode();
+    }
+
+    public override bool Equals(object obj)
+    {
+        GraphNode other = (GraphNode)obj;
+        return position.Equals(other.position);
     }
 
 }

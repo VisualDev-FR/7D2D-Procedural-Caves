@@ -20,7 +20,7 @@ public class PrefabTunneler
 
             visited.Add(currentNode);
 
-            foreach (var offset in CaveUtils.neighborsOffsetsNonVertical)
+            foreach (var offset in CaveUtils.offsetsNoVertical)
             {
                 var pos = currentNode.position + offset;
                 var neighbor = new AstarNode(pos);
@@ -95,7 +95,7 @@ public class PrefabTunneler
                     if (CaveUtils.SqrEuclidianDist(pos, center.position) >= sqrRadius)
                         continue;
 
-                    foreach (var offset in CaveUtils.neighborsOffsets)
+                    foreach (var offset in CaveUtils.offsets)
                     {
                         queue.Add(pos + offset);
                     }

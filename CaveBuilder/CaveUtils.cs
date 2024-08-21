@@ -8,7 +8,7 @@ using WorldGenerationEngineFinal;
 
 public static class CaveUtils
 {
-    public static readonly Vector3i[] neighborsOffsets = new Vector3i[]
+    public static readonly Vector3i[] offsets = new Vector3i[]
     {
         new Vector3i(1, 0, 0),
         new Vector3i(-1, 0, 0),
@@ -38,20 +38,28 @@ public static class CaveUtils
         new Vector3i(-1, -1, -1)
     };
 
-    public static readonly int[] neighborsHashes = neighborsOffsets
-        .Select(vector => CaveBlock.GetHashCode(vector.x, vector.y, vector.z))
+    public static readonly int[] offsetHashes = offsets
+        .Select(offset => CaveBlock.GetHashCode(offset.x, offset.y, offset.z))
         .ToArray();
 
-    public static readonly Vector3i[] smoothingOffsets = neighborsOffsets
-        .Where(v => (v.x == 0 && v.y == 0) || (v.x == 0 && v.z == 0) || (v.y == 0 && v.z == 0))
+    public static readonly int[] offsetsHorizontalHashes = offsets
+        .Where(offset => offset.y == 0)
+        .Select(offset => PrefabCache.GetChunkHash(offset.x, offset.z))
         .ToArray();
 
-    public static readonly Vector3i[] neighborsOffsetsNonVertical = neighborsOffsets
-        .Where(offset => !(FastAbs(offset.y) == 1 && offset.x == 0 && offset.z == 0))
+    public static readonly Vector3i[] offsetsNoDiagonal = offsets
+        .Where(offset =>
+               (offset.x == 0 && offset.y == 0)
+            || (offset.x == 0 && offset.z == 0)
+            || (offset.y == 0 && offset.z == 0))
         .ToArray();
 
-    public static readonly Vector3i[] AstarOffsets = neighborsOffsets
+    public static readonly Vector3i[] offsetsNoVertical = offsets
         .Where(offset => offset.y == 0 || offset.x != 0 || offset.z != 0)
+        .ToArray();
+
+    public static readonly Vector3i[] offsetsBelow = offsets
+        .Where(offset => offset.y == -1)
         .ToArray();
 
     public static Stopwatch StartTimer()
@@ -63,8 +71,7 @@ public static class CaveUtils
 
     public static void Assert(bool condition, string message)
     {
-        if (!condition)
-            throw new Exception($"Assertion error: {message}");
+        if (!condition) throw new Exception($"Assertion error: {message}");
     }
 
     public static int FastMin(int a, int b)
@@ -120,6 +127,7 @@ public static class CaveUtils
         return dx * dx + dy * dy + dz * dz;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int SqrEuclidianDistInt32(Vector3i p1, Vector3i p2)
     {
         int dx = p1.x - p2.x;
@@ -161,7 +169,7 @@ public static class CaveUtils
     public static bool PositionIsValid(Vector3i pos)
     {
         return (
-            pos.x > 0 && pos.x < CaveBuilder.worldSize
+               pos.x > 0 && pos.x < CaveBuilder.worldSize
             && pos.z > 0 && pos.z < CaveBuilder.worldSize
             && pos.y > 0 && pos.y < WorldBuilder.Instance.GetHeight(pos.x, pos.z)
         );
@@ -171,7 +179,7 @@ public static class CaveUtils
     {
         List<Vector3i> validNeighbors = new List<Vector3i>();
 
-        foreach (var offset in neighborsOffsets)
+        foreach (var offset in offsets)
         {
             Vector3i neighbor = position + offset;
 

@@ -3,10 +3,6 @@ using UnityEngine;
 
 public class CaveBlock
 {
-    public static readonly sbyte DensityAir = sbyte.MaxValue;
-
-    public static readonly sbyte DensityTerrain = sbyte.MinValue;
-
     public const sbyte defaultDensity = 0;
 
     public Vector2s ChunkPos { get; internal set; }
@@ -16,8 +12,6 @@ public class CaveBlock
     public sbyte density;
 
     public bool isWater;
-
-    public bool isRope;
 
     public int x => (ChunkPos.x << 4) + BlockChunkPos.x;
 
@@ -34,7 +28,6 @@ public class CaveBlock
 
         this.density = density;
         isWater = false;
-        isRope = false;
 
         ChunkPos = new Vector2s(chunk_x, chunk_z);
 
@@ -52,7 +45,6 @@ public class CaveBlock
 
         this.density = density;
         isWater = false;
-        isRope = false;
 
         ChunkPos = new Vector2s(chunk_x, chunk_z);
 
@@ -69,7 +61,6 @@ public class CaveBlock
         BlockChunkPos = new Vector3bf(reader.ReadUInt16());
         density = reader.ReadSByte();
         isWater = reader.ReadBoolean();
-        isRope = reader.ReadBoolean();
     }
 
     public void ToBinaryStream(BinaryWriter writer)
@@ -79,7 +70,6 @@ public class CaveBlock
         writer.Write(BlockChunkPos.value);
         writer.Write(density);
         writer.Write(isWater);
-        writer.Write(isRope);
     }
 
     public Vector3i ToVector3i()
@@ -99,7 +89,7 @@ public class CaveBlock
 
     public static int GetHashCode(int x, int y, int z)
     {
-        // see Vector3i.GetHashCode()
+        // same as Vector3i.GetHashCode(), to make a caveblock comaprable to Vector3i
         return x * 8976890 + y * 981131 + z;
     }
 
@@ -119,7 +109,7 @@ public class CaveBlock
 
     public static bool operator !=(CaveBlock p1, CaveBlock p2)
     {
-        return !(p1 == p2);
+        return p1.x != p2.x || p1.y != p2.y || p1.z != p2.z;
     }
 
     public Vector3i ToWorldPos()
@@ -137,41 +127,6 @@ public class CaveBlock
     {
         return $"{x},{y},{z}";
     }
-
-    // public static SortedDictionary<Vector3i, List<string>> GroupByChunk(HashSet<Vector3i> caveMap)
-    // {
-    //     var groupedCaveMap = new SortedDictionary<Vector3i, List<string>>(new VectorComparer());
-
-    //     foreach (var pos in caveMap)
-    //     {
-    //         Vector3i chunkPos = GetChunkPosZX(pos);
-
-    //         if (!groupedCaveMap.ContainsKey(chunkPos))
-    //             groupedCaveMap[chunkPos] = new List<string>();
-
-    //         var transform = new Vector3i(
-    //             16 * (pos.x / 16),
-    //             0,
-    //             16 * (pos.z / 16)
-    //         );
-
-    //         var chunkRelativePos = pos - transform;
-
-    //         // groupedCaveMap[chunkPos].Add($"{pos} - {transform} = {relative_pos}");
-    //         groupedCaveMap[chunkPos].Add(chunkRelativePos.ToString());
-
-    //         if (chunkRelativePos.x < 0 || chunkRelativePos.x > 15)
-    //             throw new Exception($"ChunkPos.x out of bound: {pos} - {transform} = {chunkRelativePos}");
-
-    //         if (chunkRelativePos.y < 0 || chunkRelativePos.y > 255)
-    //             throw new Exception($"ChunkPos.y out of bound: {pos} - {transform} = {chunkRelativePos}");
-
-    //         if (chunkRelativePos.z < 0 || chunkRelativePos.z > 15)
-    //             throw new Exception($"ChunkPos.z out of bound: {pos} - {transform} = {chunkRelativePos}");
-    //     }
-
-    //     return groupedCaveMap;
-    // }
 
     public int Index()
     {

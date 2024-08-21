@@ -201,7 +201,6 @@ public class CavePrefab
         return false;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool Intersect2D(Vector3i point)
     {
         if (point.x < position.x)
@@ -369,22 +368,8 @@ public class CavePrefab
         );
     }
 
-    public override int GetHashCode()
+    public IEnumerable<int> GetOverlappingChunkHashes()
     {
-        return position.GetHashCode();
-    }
-
-    public override bool Equals(object obj)
-    {
-        var other = (CavePrefab)obj;
-
-        return GetHashCode() == other.GetHashCode();
-    }
-
-    public List<Vector2s> GetOverlappingChunks()
-    {
-        var chunkPositions = new List<Vector2s>();
-
         var x0chunk = position.x >> 4;
         var z0chunk = position.z >> 4;
         var x1Chunk = (position.x + Size.x - 1) >> 4;
@@ -394,16 +379,18 @@ public class CavePrefab
         {
             for (int z = z0chunk; z <= z1Chunk; z++)
             {
-                chunkPositions.Add(new Vector2s(x, z));
+                yield return PrefabCache.GetChunkHash(x, z);
             }
         }
-
-        return chunkPositions;
     }
 
     public bool IntersectMarker(Vector3i pos)
     {
-        if (pos.x != position.x - 1 && pos.x != position.x + Size.x && pos.z != position.z - 1 && pos.z != position.z + Size.z)
+        bool posIsNotOnBounds =
+            (pos.x != position.x - 1 && pos.x != position.x + Size.x) &&
+            (pos.z != position.z - 1 && pos.z != position.z + Size.z);
+
+        if (posIsNotOnBounds)
             return false;
 
         foreach (var marker in markers)
@@ -418,4 +405,17 @@ public class CavePrefab
 
         return false;
     }
+
+    public override int GetHashCode()
+    {
+        return position.GetHashCode();
+    }
+
+    public override bool Equals(object obj)
+    {
+        var other = (CavePrefab)obj;
+
+        return GetHashCode() == other.GetHashCode();
+    }
+
 }

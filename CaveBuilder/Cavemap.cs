@@ -1,13 +1,28 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Security.Policy;
 using WorldGenerationEngineFinal;
 
 public class CaveMap : IEnumerable<CaveBlock>
 {
+    private readonly Vector3i position;
+
+    private readonly Vector3i size;
+
+    private readonly PrefabCache prefabsCluster;
+
     private readonly Dictionary<int, CaveBlock> caveblocks;
 
     public int Count => caveblocks.Count;
+
+    public CaveMap(Vector3i position, Vector3i size, PrefabCache prefabCluster)
+    {
+        caveblocks = new Dictionary<int, CaveBlock>();
+
+        this.position = position;
+        this.size = size;
+    }
 
     public CaveMap()
     {
@@ -131,9 +146,9 @@ public class CaveMap : IEnumerable<CaveBlock>
                 continue;
 
             visited.Add(currentHash);
-            waterHashes.Add(currentHash.GetHashCode());
+            waterHashes.Add(currentHash);
 
-            foreach (int offsetHash in CaveUtils.neighborsHashes)
+            foreach (int offsetHash in CaveUtils.offsetHashes)
             {
                 /* NOTE:
                     f(x, y, z) = Ax + By + z
@@ -151,10 +166,11 @@ public class CaveMap : IEnumerable<CaveBlock>
                 */
 
                 var neighborHash = currentHash + offsetHash;
+
                 var shouldEnqueue =
-                    caveblocks[neighborHash].y <= startPosition.y
+                    caveblocks.ContainsKey(neighborHash)
                     && !visited.Contains(neighborHash)
-                    && caveblocks.ContainsKey(neighborHash);
+                    && caveblocks[neighborHash].y <= startPosition.y;
 
                 if (shouldEnqueue)
                 {

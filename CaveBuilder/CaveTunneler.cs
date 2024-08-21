@@ -1,4 +1,4 @@
-# pragma warning disable CS0436
+// # pragma warning disable CS0436
 
 using System.Collections.Generic;
 using System.Linq;
@@ -7,31 +7,160 @@ using WorldGenerationEngineFinal;
 
 public class CaveTunneler
 {
-    public List<CaveBlock> path = new List<CaveBlock>();
+    public readonly List<CaveBlock> path = new List<CaveBlock>();
 
-    public HashSet<CaveBlock> localMinimas = new HashSet<CaveBlock>();
+    public readonly HashSet<CaveBlock> localMinimas = new HashSet<CaveBlock>();
 
-    public HashSet<CaveBlock> tunnel = new HashSet<CaveBlock>();
+    public readonly HashSet<CaveBlock> tunnel = new HashSet<CaveBlock>();
 
+    private static readonly Vector3[] INNER_POINTS = new Vector3[17]
+    {
+        new Vector3(0.5f, 0.5f, 0.5f),
+        new Vector3(0f, 0f, 0f),
+        new Vector3(1f, 0f, 0f),
+        new Vector3(0f, 1f, 0f),
+        new Vector3(0f, 0f, 1f),
+        new Vector3(1f, 1f, 0f),
+        new Vector3(0f, 1f, 1f),
+        new Vector3(1f, 0f, 1f),
+        new Vector3(1f, 1f, 1f),
+        new Vector3(0.25f, 0.25f, 0.25f),
+        new Vector3(0.75f, 0.25f, 0.25f),
+        new Vector3(0.25f, 0.75f, 0.25f),
+        new Vector3(0.25f, 0.25f, 0.75f),
+        new Vector3(0.75f, 0.75f, 0.25f),
+        new Vector3(0.25f, 0.75f, 0.75f),
+        new Vector3(0.75f, 0.25f, 0.75f),
+        new Vector3(0.75f, 0.75f, 0.75f)
+    };
+
+    // public API
     public HashSet<CaveBlock> GenerateTunnel(Edge edge, PrefabCache cachedPrefabs, CaveMap cavemap)
     {
-        path = FindPath(edge, cachedPrefabs);
-
-        if (path.Count == 0)
-            return new HashSet<CaveBlock>();
-
-        localMinimas = FindLocalMinimas();
-        tunnel = ThickenTunnel(edge.node1, edge.node2, cavemap);
-
-        // for (int i = 0; i < 10; i++)
-        // {
-        //     tunnel = SmoothTunnel();
-        // }
+        FindPath(edge, cachedPrefabs);
+        FindLocalMinimas();
+        ThickenTunnel(edge.node1, edge.node2, cavemap);
 
         return tunnel;
     }
 
-    public HashSet<CaveBlock> SmoothTunnel()
+    // private API
+    private void FindPath(Edge edge, PrefabCache cachedPrefabs)
+    {
+        var start = edge.node1.Normal(CaveUtils.FastMax(5, edge.node1.NodeRadius));
+        var target = edge.node2.Normal(CaveUtils.FastMax(5, edge.node2.NodeRadius));
+
+        var startNode = new AstarNode(start);
+        var goalNode = new AstarNode(target);
+
+        var queue = new HashedPriorityQueue<AstarNode>();
+        var visited = new HashSet<int>();
+
+        int bedRockMargin = CaveBuilder.bedRockMargin + 1;
+        int terrainMargin = CaveBuilder.terrainMargin + 3;
+        int sqrMinPrefabDistance = 100;
+        int neighborDistance = 1;
+        int index = 0;
+
+        queue.Enqueue(startNode, float.MaxValue);
+
+        while (queue.Count > 0 && index++ < 100_000)
+        {
+            AstarNode currentNode = queue.Dequeue();
+
+            if (currentNode.hashcode == goalNode.hashcode)
+            {
+                ReconstructPath(currentNode);
+                return;
+            }
+
+            visited.Add(currentNode.hashcode);
+
+            foreach (var offset in CaveUtils.offsetsNoVertical)
+            {
+                Vector3i neighborPos = currentNode.position + offset;
+
+                bool shouldContinue =
+                    neighborPos.y < bedRockMargin
+                    || neighborPos.y + terrainMargin > WorldBuilder.Instance.GetHeight(neighborPos.x, neighborPos.z)
+                    || visited.Contains(neighborPos.GetHashCode()); // NOTE: AstarNode and Vector3i must have same hashcode function
+
+                if (shouldContinue)
+                    continue;
+
+                float minDist = cachedPrefabs.MinSqrDistanceToPrefab(neighborPos);
+
+                if (minDist == 0)
+                {
+                    continue;
+                }
+
+                bool isCave = CaveBuilder.pathingNoise.IsCave(neighborPos);
+                int factor = 0;
+
+                if (!isCave) factor += 1;
+                if (minDist < sqrMinPrefabDistance) factor += 1;
+
+                float tentativeGCost = currentNode.GCost + (neighborDistance << factor);
+
+                AstarNode neighbor = new AstarNode(neighborPos);
+
+                // TODO: try to remove condition 'tentativeGCost < neighbor.GCost'
+                // -> it seems to be useless (to be confirmed)
+                // -> try with condition 'tentativeGCost < currentNode.GCost' instead
+                if (tentativeGCost < neighbor.GCost || !queue.Contains(neighbor))
+                {
+                    neighbor.Parent = currentNode;
+                    neighbor.GCost = tentativeGCost;
+                    neighbor.HCost = CaveUtils.SqrEuclidianDistInt32(neighbor.position, goalNode.position) << factor;
+
+                    if (!queue.Contains(neighbor))
+                    {
+                        queue.Enqueue(neighbor, neighbor.FCost);
+                    }
+                }
+            }
+        }
+
+        Log.Warning($"No Path found from '{edge.Prefab1.Name}' to '{edge.Prefab2.Name}' after {index} iterations");
+    }
+
+    private void FindLocalMinimas()
+    {
+        for (int i = 1; i < path.Count - 1; i++)
+        {
+            if (IsLocalMinima(path, i))
+            {
+                localMinimas.Add(path[i]);
+            }
+            else if (IsStartOfFlatMinimum(path, i))
+            {
+                if (IsFlatMinimum(path, ref i))
+                {
+                    localMinimas.Add(path[i]);
+                }
+            }
+        }
+    }
+
+    private void ThickenTunnel(GraphNode start, GraphNode target, CaveMap cavemap)
+    {
+        tunnel.UnionWith(start.GetSphere());
+        tunnel.UnionWith(target.GetSphere());
+
+        int r1 = start.NodeRadius;
+        int r2 = target.NodeRadius;
+
+        for (int i = 0; i < path.Count; i++)
+        {
+            var tunnelRadius = r1 + (r2 - r1) * ((float)i / path.Count);
+            var sphere = GetSphere(path[i], tunnelRadius);
+
+            tunnel.UnionWith(sphere);
+        }
+    }
+
+    private HashSet<CaveBlock> SmoothTunnel()
     {
         var dictionary = tunnel.ToDictionary(
             block => block.GetHashCode(),
@@ -43,7 +172,7 @@ public class CaveTunneler
             int neighborsCount = 0;
             int totalDensity = 0;
 
-            foreach (var offset in CaveUtils.smoothingOffsets)
+            foreach (var offset in CaveUtils.offsetsNoDiagonal)
             {
                 var hash = CaveBlock.GetHashCode(
                     block.x + offset.x,
@@ -71,48 +200,8 @@ public class CaveTunneler
         return tunnel;
     }
 
-    public static HashSet<CaveBlock> GetSphere(CaveBlock center, float radius)
+    private void ReconstructPath(AstarNode currentNode)
     {
-        var queue = new HashSet<Vector3i>() { center.position };
-        var sphere = new HashSet<CaveBlock>();
-        var sqrRadius = radius * radius;
-
-        while (queue.Count > 0)
-        {
-            foreach (var pos in queue.ToArray())
-            {
-                queue.Remove(pos);
-
-                var caveBlock = new CaveBlock(pos);
-
-                if (sphere.Contains(caveBlock))
-                    continue;
-
-                if (pos.y <= CaveBuilder.bedRockMargin)
-                    continue;
-
-                if (pos.y + CaveBuilder.terrainMargin >= WorldBuilder.Instance.GetHeight(pos.x, pos.z))
-                    continue;
-
-                sphere.Add(caveBlock);
-
-                if (CaveUtils.SqrEuclidianDist(pos, center.position) >= sqrRadius)
-                    continue;
-
-                foreach (var offset in CaveUtils.neighborsOffsets)
-                {
-                    queue.Add(pos + offset);
-                }
-            }
-        }
-
-        return sphere;
-    }
-
-    private List<CaveBlock> ReconstructPath(AstarNode currentNode)
-    {
-        path = new List<CaveBlock>();
-
         while (currentNode != null)
         {
             var block = new CaveBlock(currentNode.position);
@@ -121,130 +210,47 @@ public class CaveTunneler
         }
 
         path.Reverse();
-
-        return path;
     }
 
-    private List<CaveBlock> FindPath(Edge edge, PrefabCache cachedPrefabs)
+    // static API
+    public static IEnumerable<CaveBlock> GetSphere(CaveBlock center, float radius)
     {
-        var start = edge.node1.Normal(CaveUtils.FastMax(5, edge.node1.NodeRadius));
-        var target = edge.node2.Normal(CaveUtils.FastMax(5, edge.node2.NodeRadius));
+        if (radius < 2) radius = 2;
 
-        var startNode = new AstarNode(start);
-        var goalNode = new AstarNode(target);
-
-        var queue = new HashedPriorityQueue<AstarNode>();
+        var queue = new HashSet<Vector3i>() { center.position };
         var visited = new HashSet<Vector3i>();
+        var sqrRadius = radius * radius;
+        var index = 100_000;
 
-        // avoid allocations in critical sections
-        float tentativeGCost, minDist;
-        bool isCave, shouldContinue;
-        byte factor;
+        Vector3i pos = new Vector3i();
 
-        int bedRockMargin = CaveBuilder.bedRockMargin + 1;
-        int terrainMargin = CaveBuilder.terrainMargin + 3;
-        int neighborDistance = 1;
-        int index = 0;
-
-        queue.Enqueue(startNode, float.MaxValue);
-
-        while (queue.Count > 0 && index++ < 100_000)
+        while (queue.Count > 0 && index-- > 0)
         {
-            AstarNode currentNode = queue.Dequeue();
+            Vector3i currentPosition = queue.First();
 
-            if (currentNode.position == goalNode.position)
+            visited.Add(currentPosition);
+            queue.Remove(currentPosition);
+
+            foreach (var offset in CaveUtils.offsets)
             {
-                return ReconstructPath(currentNode);
-            }
+                pos.x = currentPosition.x + offset.x;
+                pos.y = currentPosition.y + offset.y;
+                pos.z = currentPosition.z + offset.z;
 
-            visited.Add(currentNode.position);
+                bool shouldEnqueue =
+                    !visited.Contains(pos)
+                    && pos.y > CaveBuilder.bedRockMargin
+                    && pos.y + CaveBuilder.terrainMargin < WorldBuilder.Instance.GetHeight(pos.x, pos.z)
+                    && CaveUtils.SqrEuclidianDistInt32(pos, center.position) < sqrRadius;
 
-            foreach (var offset in CaveUtils.AstarOffsets)
-            {
-                Vector3i neighborPos = currentNode.position + offset;
-
-                shouldContinue =
-                    neighborPos.y < bedRockMargin
-                    || neighborPos.y + terrainMargin > WorldBuilder.Instance.GetHeight(neighborPos.x, neighborPos.z)
-                    || visited.Contains(neighborPos);
-
-                if (shouldContinue)
-                    continue;
-
-                AstarNode neighbor = new AstarNode(neighborPos);
-
-                minDist = cachedPrefabs.MinDistToPrefab(neighborPos);
-
-                if (minDist == 0)
-                    continue;
-
-                isCave = CaveBuilder.pathingNoise.IsCave(neighborPos);
-                factor = 0;
-
-                if (!isCave) factor += 1;
-                if (minDist < 100) factor += 1;
-
-                tentativeGCost = currentNode.GCost + (neighborDistance << factor);
-
-                if (tentativeGCost < neighbor.GCost || !queue.Contains(neighbor))
+                if (shouldEnqueue)
                 {
-                    neighbor.Parent = currentNode;
-                    neighbor.GCost = tentativeGCost;
-                    neighbor.HCost = CaveUtils.SqrEuclidianDistInt32(neighbor.position, goalNode.position) << factor;
-
-                    if (!queue.Contains(neighbor))
-                    {
-                        queue.Enqueue(neighbor, neighbor.FCost);
-                    }
+                    queue.Add(pos);
                 }
             }
         }
 
-        Log.Warning($"No Path found from '{edge.Prefab1.Name}' to '{edge.Prefab2.Name}' after {index} iterations");
-
-        return new List<CaveBlock>();
-    }
-
-    private HashSet<CaveBlock> ThickenTunnel(GraphNode start, GraphNode target, CaveMap cavemap)
-    {
-        tunnel = path.ToHashSet();
-
-        tunnel.UnionWith(start.GetSphere());
-        tunnel.UnionWith(target.GetSphere());
-
-        int r1 = start.NodeRadius;
-        int r2 = target.NodeRadius;
-
-        for (int i = 0; i < path.Count; i++)
-        {
-            float tunnelRadius = r1 + (r2 - r1) * ((float)i / path.Count);
-            var circle = GetSphere(path[i], tunnelRadius);
-            tunnel.UnionWith(circle);
-        }
-
-        return tunnel;
-    }
-
-    private HashSet<CaveBlock> FindLocalMinimas()
-    {
-        var localMinimas = new HashSet<CaveBlock>();
-
-        for (int i = 1; i < path.Count - 1; i++)
-        {
-            if (IsLocalMinima(path, i))
-            {
-                localMinimas.Add(path[i]);
-            }
-            else if (IsStartOfFlatMinimum(path, i))
-            {
-                if (IsFlatMinimum(path, ref i))
-                {
-                    localMinimas.Add(path[i]);
-                }
-            }
-        }
-
-        return localMinimas;
+        return visited.Select(position => new CaveBlock(position));
     }
 
     private static bool IsLocalMinima(List<CaveBlock> path, int i)
@@ -267,29 +273,7 @@ public class CaveTunneler
 
         return i < path.Count - 1 && path[i].position.y < path[i + 1].position.y;
     }
-
-    public static Vector3[] INNER_POINTS = new Vector3[17]
-    {
-        new Vector3(0.5f, 0.5f, 0.5f),
-        new Vector3(0f, 0f, 0f),
-        new Vector3(1f, 0f, 0f),
-        new Vector3(0f, 1f, 0f),
-        new Vector3(0f, 0f, 1f),
-        new Vector3(1f, 1f, 0f),
-        new Vector3(0f, 1f, 1f),
-        new Vector3(1f, 0f, 1f),
-        new Vector3(1f, 1f, 1f),
-        new Vector3(0.25f, 0.25f, 0.25f),
-        new Vector3(0.75f, 0.25f, 0.25f),
-        new Vector3(0.25f, 0.75f, 0.25f),
-        new Vector3(0.25f, 0.25f, 0.75f),
-        new Vector3(0.75f, 0.75f, 0.25f),
-        new Vector3(0.25f, 0.75f, 0.75f),
-        new Vector3(0.75f, 0.25f, 0.75f),
-        new Vector3(0.75f, 0.75f, 0.75f)
-    };
-
-    public IEnumerable<CaveBlock> GetSphereV2(CaveBlock center, float sphereRadius, CaveMap cavemap)
+    private static IEnumerable<CaveBlock> GetSphereV2(CaveBlock center, float sphereRadius, CaveMap cavemap)
     {
         // adapted from ItemActionTerrainTool.RemoveTerrain
 

@@ -17,8 +17,8 @@ public class CaveBlocksProvider
 
     public int GetRegionID(Vector2s chunkPos)
     {
-        var region_x = chunkPos.x / CaveBuilder.chunkGridSize;
-        var region_z = chunkPos.z / CaveBuilder.chunkGridSize;
+        var region_x = chunkPos.x / CaveBuilder.chunkRegionGridSize;
+        var region_z = chunkPos.z / CaveBuilder.chunkRegionGridSize;
 
         var regionID = region_x + region_z * CaveBuilder.regionGridSize;
 
@@ -52,11 +52,6 @@ public class CaveBlocksProvider
 
     public static Vector2s GetChunkPos(Chunk chunk)
     {
-        // return new Vector2s(
-        //     (pos.x / 16) - CaveBuilder.worldSize / 32,
-        //     (pos.z / 16) - CaveBuilder.worldSize / 32
-        // );
-
         return new Vector2s(
             (short)(chunk.ChunkPos.x + CaveBuilder.worldSize / 32),
             (short)(chunk.ChunkPos.z + CaveBuilder.worldSize / 32)

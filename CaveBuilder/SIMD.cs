@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.InteropServices;
 
+// TODO: see https://github.com/giladfrid009/SimpleSIMD/tree/master
 
 public class EuclidianSIMD
 {

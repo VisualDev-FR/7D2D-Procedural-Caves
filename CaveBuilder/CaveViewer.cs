@@ -185,11 +185,17 @@ public static class CaveViewer
         Log.Out($"size     {node2.marker.size}");
         Log.Out($"result   {node2.position}\n");
 
+        var cavemap = new CaveMap();
+
         var timer = CaveUtils.StartTimer();
         var tunneler = new CaveTunneler();
-        var tunnel = tunneler.GenerateTunnel(edge, cachedPrefabs, new CaveMap());
+        var tunnel = tunneler.GenerateTunnel(edge, cachedPrefabs, cavemap);
 
-        Log.Out($"{p1.position} -> {p2.position} | Astar dist: {tunnel.Count}, eucl dist: {CaveUtils.EuclidianDist(p1.position, p2.position)}, timer: {timer.ElapsedMilliseconds}ms");
+        cavemap.UnionWith(tunnel);
+        cavemap.SetWater(tunneler.localMinimas, cachedPrefabs);
+
+        Log.Out($"{p1.position} -> {p2.position} | Astar dist: {tunneler.path.Count}, eucl dist: {CaveUtils.EuclidianDist(p1.position, p2.position)}, timer: {timer.ElapsedMilliseconds}ms");
+        Log.Out($"{tunneler.localMinimas.Count} water blocks found");
 
         var voxels = new HashSet<Voxell>(){
             new Voxell(p1.position, p1.Size, WaveFrontMaterial.DarkGreen) { force = true },
@@ -198,14 +204,13 @@ public static class CaveViewer
 
         foreach (var block in tunnel)
         {
-            if (block.isWater)
+            if (cavemap.GetBlock(block.GetHashCode()).isWater)
             {
                 voxels.Add(new Voxell(block.position, WaveFrontMaterial.LightBlue));
             }
             else
             {
                 voxels.Add(new Voxell(block.position, WaveFrontMaterial.DarkRed));
-
             }
         }
 
@@ -225,7 +230,7 @@ public static class CaveViewer
             }
         }
 
-        GenerateObjFile("path.obj", voxels, false);
+        GenerateObjFile("path.obj", voxels, true);
     }
 
     public static void SphereCommand(string[] args)
@@ -274,7 +279,7 @@ public static class CaveViewer
 
     public static void CaveCommand(string[] args)
     {
-        CaveBuilder.worldSize = 2048;
+        CaveBuilder.worldSize = 1024;
 
         if (args.Length > 1)
             CaveBuilder.worldSize = int.Parse(args[1]);
@@ -332,6 +337,7 @@ public static class CaveViewer
         cavemap.SetWater(localMinimas, cachedPrefabs);
 
         Log.Out($"{cavemap.Count:N0} cave blocks generated, timer={CaveUtils.TimeFormat(timer)}, memory={(GC.GetTotalMemory(true) - memoryBefore) / 1_048_576.0:F1}MB.");
+        Log.Out($"{localMinimas.Count} local minimas");
 
         if (CaveBuilder.worldSize > 1024)
             return;
@@ -341,7 +347,7 @@ public static class CaveViewer
             .Select(block => new Voxell(block.position, WaveFrontMaterial.LightBlue))
             .ToHashSet();
 
-        Log.Out($"{voxels.Count} water blocks.");
+        Log.Out($"{voxels.Count} water blocks");
 
         var tunnels = cavemap
             .Where(block => !block.isWater)

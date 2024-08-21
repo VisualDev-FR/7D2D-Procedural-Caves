@@ -10,7 +10,7 @@ using System.Runtime.CompilerServices;
 
 public static class Log
 {
-    public static void Out(string message)
+    public static void Out(object message)
     {
         Console.WriteLine($"{"INFO",-10} {message}");
     }

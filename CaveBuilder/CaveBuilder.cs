@@ -14,7 +14,7 @@ public static class CaveBuilder
 
     public static int regionGridSize => worldSize / RegionSize;
 
-    public static int chunkGridSize => RegionSize / ChunkSize;
+    public static int chunkRegionGridSize => RegionSize / ChunkSize;
 
     public static int PREFAB_COUNT => worldSize / 5;
 
