@@ -8,6 +8,9 @@ public class PrefabCache
     // all prefabs grouped by chunk, where key is the hashcode of the chunk
     public readonly Dictionary<int, List<CavePrefab>> groupedPrefabs;
 
+    // a dictionary to store the nearest prefabs for each chunk, where key is chunk hashcode, and values are the nearest prefabs
+    public readonly Dictionary<int, HashSet<CavePrefab>> nearestPrefabs;
+
     public readonly List<CavePrefab> Prefabs;
 
     public int Count => Prefabs.Count;
@@ -16,6 +19,7 @@ public class PrefabCache
     {
         Prefabs = new List<CavePrefab>();
         groupedPrefabs = new Dictionary<int, List<CavePrefab>>();
+        nearestPrefabs = new Dictionary<int, HashSet<CavePrefab>>();
     }
 
     public static int GetChunkHash(int x, int z)
@@ -35,43 +39,44 @@ public class PrefabCache
             }
 
             groupedPrefabs[chunkHash].Add(prefab);
-        }
-    }
 
-    public static IEnumerable<int> GetChunkHashesAround(int chunkX, int chunkZ)
-    {
-        var hashcode = GetChunkHash(chunkX, chunkZ);
-
-        yield return hashcode;
-
-        foreach (int offsetHash in CaveUtils.offsetsHorizontalHashes)
-        {
-            yield return hashcode + offsetHash;
-        }
-    }
-
-    public IEnumerable<CavePrefab> IteratePrefabsNearTo(int worldX, int worldZ)
-    {
-        int chunkX = worldX >> 4; // worldX / 16;
-        int chunkZ = worldZ >> 4; // worldZ / 16;
-
-        foreach (int chunkHash in GetChunkHashesAround(chunkX, chunkZ))
-        {
-            if (!groupedPrefabs.TryGetValue(chunkHash, out var chunkPrefabs))
-                continue;
-
-            foreach (var prefab in chunkPrefabs)
+            // cache neighbors to avoid computing nearest prefabs in critical sections
+            foreach (var offsetHash in CaveUtils.offsetsHorizontalHashes)
             {
-                yield return prefab;
+                var neighborHashcode = chunkHash + offsetHash;
+
+                if (!nearestPrefabs.ContainsKey(neighborHashcode))
+                {
+                    nearestPrefabs[neighborHashcode] = new HashSet<CavePrefab>();
+                }
+
+                nearestPrefabs[neighborHashcode].Add(prefab);
             }
         }
+    }
+
+    private static readonly HashSet<CavePrefab> emptyPrefabs = new HashSet<CavePrefab>();
+
+    private HashSet<CavePrefab> GetNearestPrefabsFrom(int worldX, int worldZ)
+    {
+        int chunkX = worldX >> 4; // -> x / 16;
+        int chunkZ = worldZ >> 4; // -> z / 16;
+
+        var chunkHash = GetChunkHash(chunkX, chunkZ);
+
+        if (nearestPrefabs.TryGetValue(chunkHash, out var closePrefabs))
+        {
+            return closePrefabs;
+        }
+
+        return emptyPrefabs;
     }
 
     public float MinSqrDistanceToPrefab(Vector3i position)
     {
         var minSqrDist = float.MaxValue;
 
-        foreach (CavePrefab prefab in IteratePrefabsNearTo(position.x, position.z))
+        foreach (CavePrefab prefab in GetNearestPrefabsFrom(position.x, position.z))
         {
             Vector3i start = prefab.position;
             Vector3i end = start + prefab.Size;
@@ -93,14 +98,14 @@ public class PrefabCache
             }
         }
 
-        return minSqrDist == 0 ? -1 : minSqrDist;
+        return minSqrDist;
     }
 
     public bool IntersectMarker(CaveBlock block)
     {
-        foreach (CavePrefab prefab in IteratePrefabsNearTo(block.x, block.z))
+        foreach (CavePrefab prefab in GetNearestPrefabsFrom(block.x, block.z))
         {
-            if (prefab.IntersectMarker(block.position))
+            if (prefab.IntersectMarker(block.x, block.y, block.z))
             {
                 return true;
             }

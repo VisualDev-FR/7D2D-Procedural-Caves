@@ -63,11 +63,11 @@ public static class CaveGenerator
         if (caveBlocks == null)
             return;
 
-        HashSet<Vector3> positions = caveBlocks.Select(block => block.BlockChunkPos.ToVector3()).ToHashSet();
+        HashSet<Vector3> positions = caveBlocks.Select(block => block.blockChunkPos.ToVector3()).ToHashSet();
 
         foreach (CaveBlock caveBlock in caveBlocks)
         {
-            Vector3bf blockChunkPos = caveBlock.BlockChunkPos;
+            Vector3bf blockChunkPos = caveBlock.blockChunkPos;
 
             try
             {
@@ -76,7 +76,7 @@ public static class CaveGenerator
             }
             catch (Exception e)
             {
-                Log.Error($"[Cave] {e.GetType()} (Chunk={caveBlock.ChunkPos}, block={caveBlock.BlockChunkPos})");
+                Log.Error($"[Cave] {e.GetType()} (Chunk={caveBlock.chunkPos}, block={caveBlock.blockChunkPos})");
             }
 
             var under = blockChunkPos.ToVector3() + new Vector3(0, -1, 0);
@@ -112,7 +112,7 @@ public static class CaveGenerator
         HashSet<CaveBlock> waterBlocks = caveBlocks.Where(block => block.isWater).ToHashSet();
         foreach (CaveBlock waterBlock in waterBlocks)
         {
-            var blockPos = waterBlock.BlockChunkPos;
+            var blockPos = waterBlock.blockChunkPos;
 
             try
             {
@@ -121,7 +121,7 @@ public static class CaveGenerator
             }
             catch (Exception e)
             {
-                Log.Error($"[Cave] {e.GetType()} (Chunk={waterBlock.ChunkPos}, block={waterBlock.BlockChunkPos})");
+                Log.Error($"[Cave] {e.GetType()} (Chunk={waterBlock.chunkPos}, block={waterBlock.blockChunkPos})");
             }
         }
 

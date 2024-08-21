@@ -89,10 +89,8 @@ public class CaveMap : IEnumerable<CaveBlock>
         {
             foreach (CaveBlock caveBlock in caveblocks.Values)
             {
-                var position = caveBlock.position;
-
-                int region_x = position.x / CaveBuilder.RegionSize;
-                int region_z = position.z / CaveBuilder.RegionSize;
+                int region_x = caveBlock.x / CaveBuilder.RegionSize;
+                int region_z = caveBlock.z / CaveBuilder.RegionSize;
                 int regionID = region_x + region_z * CaveBuilder.regionGridSize;
 
                 var writer = multistream.GetWriter($"region_{regionID}.bin");

@@ -206,11 +206,11 @@ public static class CaveViewer
         {
             if (cavemap.GetBlock(block.GetHashCode()).isWater)
             {
-                voxels.Add(new Voxell(block.position, WaveFrontMaterial.LightBlue));
+                voxels.Add(new Voxell(block.x, block.y, block.z, WaveFrontMaterial.LightBlue));
             }
             else
             {
-                voxels.Add(new Voxell(block.position, WaveFrontMaterial.DarkRed));
+                voxels.Add(new Voxell(block.x, block.y, block.z, WaveFrontMaterial.DarkRed));
             }
         }
 
@@ -249,7 +249,7 @@ public static class CaveViewer
 
             foreach (var block in sphere)
             {
-                voxels.Add(new Voxell(block.position));
+                voxels.Add(new Voxell(block.x, block.y, block.z));
             }
         }
 
@@ -323,8 +323,7 @@ public static class CaveViewer
 
                         foreach (CaveBlock caveBlock in tunnel)
                         {
-                            var position = caveBlock.position;
-                            b.SetPixel(position.x, position.z, TunnelsColor);
+                            b.SetPixel(caveBlock.x, caveBlock.z, TunnelsColor);
                         }
                     }
                 });
@@ -334,7 +333,7 @@ public static class CaveViewer
             }
         }
 
-        cavemap.SetWater(localMinimas, cachedPrefabs);
+        // cavemap.SetWater(localMinimas, cachedPrefabs);
 
         Log.Out($"{cavemap.Count:N0} cave blocks generated, timer={CaveUtils.TimeFormat(timer)}, memory={(GC.GetTotalMemory(true) - memoryBefore) / 1_048_576.0:F1}MB.");
         Log.Out($"{localMinimas.Count} local minimas");
@@ -344,14 +343,14 @@ public static class CaveViewer
 
         var voxels = cavemap
             .Where(block => block.isWater)
-            .Select(block => new Voxell(block.position, WaveFrontMaterial.LightBlue))
+            .Select(block => new Voxell(block.x, block.y, block.z, WaveFrontMaterial.LightBlue))
             .ToHashSet();
 
         Log.Out($"{voxels.Count} water blocks");
 
         var tunnels = cavemap
             .Where(block => !block.isWater)
-            .Select(block => new Voxell(block.position, WaveFrontMaterial.DarkRed))
+            .Select(block => new Voxell(block.x, block.y, block.z, WaveFrontMaterial.DarkRed))
             .ToHashSet();
 
         voxels.UnionWith(tunnels);

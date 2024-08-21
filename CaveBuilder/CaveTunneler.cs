@@ -217,7 +217,8 @@ public class CaveTunneler
     {
         if (radius < 2) radius = 2;
 
-        var queue = new HashSet<Vector3i>() { center.position };
+        var centerPos = new Vector3i(center.x, center.y, center.z);
+        var queue = new HashSet<Vector3i>() { centerPos };
         var visited = new HashSet<Vector3i>();
         var sqrRadius = radius * radius;
         var index = 100_000;
@@ -241,7 +242,7 @@ public class CaveTunneler
                     !visited.Contains(pos)
                     && pos.y > CaveBuilder.bedRockMargin
                     && pos.y + CaveBuilder.terrainMargin < WorldBuilder.Instance.GetHeight(pos.x, pos.z)
-                    && CaveUtils.SqrEuclidianDistInt32(pos, center.position) < sqrRadius;
+                    && CaveUtils.SqrEuclidianDistInt32(pos, centerPos) < sqrRadius;
 
                 if (shouldEnqueue)
                 {
@@ -255,29 +256,29 @@ public class CaveTunneler
 
     private static bool IsLocalMinima(List<CaveBlock> path, int i)
     {
-        return path[i - 1].position.y > path[i].position.y && path[i].position.y < path[i + 1].position.y;
+        return path[i - 1].y > path[i].y && path[i].y < path[i + 1].y;
     }
 
     private static bool IsStartOfFlatMinimum(List<CaveBlock> path, int i)
     {
-        return path[i - 1].position.y > path[i].position.y && path[i].position.y == path[i + 1].position.y;
+        return path[i - 1].y > path[i].y && path[i].y == path[i + 1].y;
     }
 
     private static bool IsFlatMinimum(List<CaveBlock> path, ref int i)
     {
 
-        while (i < path.Count - 1 && path[i].position.y == path[i + 1].position.y)
+        while (i < path.Count - 1 && path[i].y == path[i + 1].y)
         {
             i++;
         }
 
-        return i < path.Count - 1 && path[i].position.y < path[i + 1].position.y;
+        return i < path.Count - 1 && path[i].y < path[i + 1].y;
     }
     private static IEnumerable<CaveBlock> GetSphereV2(CaveBlock center, float sphereRadius, CaveMap cavemap)
     {
         // adapted from ItemActionTerrainTool.RemoveTerrain
 
-        Vector3 worldPos = center.position.ToVector3();
+        Vector3 worldPos = new Vector3(center.x, center.y, center.z);
 
         if (sphereRadius < 2f) sphereRadius = 2f;
 

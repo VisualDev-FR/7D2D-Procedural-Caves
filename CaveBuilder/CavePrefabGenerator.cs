@@ -247,9 +247,7 @@ public class CavePrefabGenerator
         var path = tunneler.FindPath(node1.position, node2.position, prefab);
         var tunnel = tunneler.ThickenTunnels(path, prefab);
 
-        var result = path.Select((block) => block.position).ToList();
-        // result.AddRange(CaveUtils.GetPointsInside(node1.position, node1.position + node1.marker.size));
-        // result.AddRange(CaveUtils.GetPointsInside(node2.position, node2.position + node2.marker.size));
+        var result = path.Select(block => new Vector3i(block.x, block.y, block.z)).ToList();
 
         return result;
     }

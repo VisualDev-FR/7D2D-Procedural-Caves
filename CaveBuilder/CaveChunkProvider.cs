@@ -79,13 +79,13 @@ public class CaveBlocksProvider
 
     public static List<CaveBlock> FilterFloorBlocks(HashSet<CaveBlock> blocks)
     {
-        HashSet<Vector3> positions = blocks.Select(block => block.BlockChunkPos.ToVector3()).ToHashSet();
+        HashSet<Vector3> positions = blocks.Select(block => block.blockChunkPos.ToVector3()).ToHashSet();
         List<CaveBlock> result = new List<CaveBlock>();
 
         foreach (var block in blocks)
         {
-            var upper = block.BlockChunkPos.ToVector3() + Vector3.up;
-            var lower = block.BlockChunkPos.ToVector3() + Vector3.down;
+            var upper = block.blockChunkPos.ToVector3() + Vector3.up;
+            var lower = block.blockChunkPos.ToVector3() + Vector3.down;
 
             if (!positions.Contains(lower) && positions.Contains(upper))
             {

@@ -2,6 +2,7 @@ Priority:
     ✔ debug cave prefab placements regarding surface prefabs @done(24-08-17 22:43)
     ✔ Implement connection regular town POIs to the cave network @done(24-08-18 22:22)
     ✔ implement prefab rename command in cave editor plugin @done(24-08-18 22:22)
+    ☐ travailler avec des vectors3i le plus lontemps possible
     ☐ integrate small prefabs in tunnels (dirt, decoration, modeled terrain, stalactites, water well)
     ☐ Implement custom wilderness prefab spawning function
     ☐ implement multiple cave networks (good feature + performances hack)

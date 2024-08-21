@@ -30,7 +30,7 @@ public class PrefabTunneler
                     return currentNode.ReconstructPath();
                 }
 
-                if(pos != start && !prefab.Intersect3D(pos))
+                if (pos != start && !prefab.Intersect3D(pos))
                     continue;
 
                 if (visited.Contains(neighbor))
@@ -72,7 +72,8 @@ public class PrefabTunneler
         for (int i = 0; i < path.Count; i++)
         {
             var center = path[i];
-            var queue = new HashSet<Vector3i>() { center.position };
+            var centerPos = new Vector3i(center.x, center.y, center.z);
+            var queue = new HashSet<Vector3i>() { centerPos };
             var sphere = new HashSet<CaveBlock>();
             var sqrRadius = radius * radius;
 
@@ -92,7 +93,7 @@ public class PrefabTunneler
                     if (!prefab.Intersect3D(pos))
                         continue;
 
-                    if (CaveUtils.SqrEuclidianDist(pos, center.position) >= sqrRadius)
+                    if (CaveUtils.SqrEuclidianDist(pos, centerPos) >= sqrRadius)
                         continue;
 
                     foreach (var offset in CaveUtils.offsets)

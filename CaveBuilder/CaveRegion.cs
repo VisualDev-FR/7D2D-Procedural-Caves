@@ -19,12 +19,12 @@ public class CaveRegion
                 {
                     var caveBlock = new CaveBlock(reader);
 
-                    if (!CaveChunks.ContainsKey(caveBlock.ChunkPos))
+                    if (!CaveChunks.ContainsKey(caveBlock.chunkPos))
                     {
-                        CaveChunks[caveBlock.ChunkPos] = new HashSet<CaveBlock>();
+                        CaveChunks[caveBlock.chunkPos] = new HashSet<CaveBlock>();
                     }
 
-                    CaveChunks[caveBlock.ChunkPos].Add(caveBlock);
+                    CaveChunks[caveBlock.chunkPos].Add(caveBlock);
                 }
             }
         }

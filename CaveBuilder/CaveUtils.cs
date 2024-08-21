@@ -229,32 +229,32 @@ public static class CaveUtils
         return new Vector3i(Size.z, Size.y, Size.x);
     }
 
-    public static bool Intersect2D(Vector3i point, Vector3i position, Vector3i size)
+    public static bool Intersect2D(int x, int y, int z, Vector3i position, Vector3i size)
     {
-        if (point.x < position.x)
+        if (x < position.x)
             return false;
 
-        if (point.x >= position.x + size.x)
+        if (x >= position.x + size.x)
             return false;
 
-        if (point.z < position.z)
+        if (z < position.z)
             return false;
 
-        if (point.z >= position.z + size.z)
+        if (z >= position.z + size.z)
             return false;
 
         return true;
     }
 
-    public static bool Intersect3D(Vector3i point, Vector3i position, Vector3i size)
+    public static bool Intersect3D(int x, int y, int z, Vector3i position, Vector3i size)
     {
-        if (!Intersect2D(point, position, size))
+        if (!Intersect2D(x, y, z, position, size))
             return false;
 
-        if (point.y < position.y)
+        if (y < position.y)
             return false;
 
-        if (point.y >= position.y + size.z)
+        if (y >= position.y + size.z)
             return false;
 
         return true;

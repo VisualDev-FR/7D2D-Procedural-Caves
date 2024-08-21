@@ -79,7 +79,9 @@ public static class CaveBuilder
             var prefab = new CavePrefab(prefabCache.Count + 1, rand);
 
             if (TryPlacePrefab(ref prefab, prefabCache.Prefabs))
+            {
                 prefabCache.AddPrefab(prefab);
+            }
         }
 
         Log.Out($"{prefabCache.Count} / {PREFAB_COUNT} prefabs added");
