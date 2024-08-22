@@ -334,9 +334,9 @@ public static class CavePlanner
 
     public static IEnumerator GenerateCaveMap()
     {
-        var _cavemap = new CaveMap();
-        yield return GenerateCavePreview(_cavemap);
-        yield break;
+        // var _cavemap = new CaveMap();
+        // yield return GenerateCavePreview(_cavemap);
+        // yield break;
 
         if (WorldBuilder.IsCanceled)
             yield break;

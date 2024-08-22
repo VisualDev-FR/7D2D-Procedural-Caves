@@ -19,7 +19,7 @@ public static class CaveEntrancesPlanner
 
         var spawnedEntrances = new List<PrefabData>();
         var wildernessTiles = GetShuffledWildernessTiles();
-        var maxEntrancesCount = wildernessTiles.Count;
+        var maxEntrancesCount = wildernessTiles.Count / 2;
         var maxRolls = 1_000;
         var tileIndex = 0;
         var usedTileIndexes = new HashSet<int>();
@@ -42,6 +42,10 @@ public static class CaveEntrancesPlanner
                 spawnedEntrances.Add(prefab);
                 usedTileIndexes.Add(tileIndex);
                 tileIndex++;
+            }
+            else
+            {
+                Log.Out($"[Cave] Fail to spawn prefab '{prefab.Name}' on tile '{tile.GridPosition}'");
             }
         }
 
@@ -102,7 +106,8 @@ public static class CaveEntrancesPlanner
 
     private static bool OverlapsPrefab(StreetTile tile, Vector2i position, int sizeX, int sizeZ)
     {
-        int margin = 100;
+        // TODO: make an option with this param
+        int margin = 50;
         int halfWorldSize = WorldBuilder.Instance.WorldSize / 2;
 
         foreach (var st in tile.GetNeighbors8way())
@@ -112,6 +117,12 @@ public static class CaveEntrancesPlanner
 
             foreach (var pdi in st.StreetTilePrefabDatas)
             {
+                // TODO: make an option with this check
+                // if (pdi.prefab.Tags.Test_AnySet(CaveConfig.tagCaveEntrance))
+                // {
+                //     return true;
+                // }
+
                 var p1 = new Vector3i(position.x - halfWorldSize, 0, position.y - halfWorldSize);
                 var s1 = new Vector3i(sizeX, 0, sizeZ);
 
@@ -127,10 +138,10 @@ public static class CaveEntrancesPlanner
 
     private static bool PositionIsValid(StreetTile st, Rect prefabRectangle, Vector2i prefabPosition, int maxSize, int sizeX, int sizeZ)
     {
-        // if (OverlapsPrefab(st, prefabPosition, sizeX, sizeZ))
-        // {
-        //     return false;
-        // }
+        if (OverlapsPrefab(st, prefabPosition, sizeX, sizeZ))
+        {
+            return false;
+        }
 
         Rect rect2 = new Rect(
             prefabRectangle.min - new Vector2(maxSize, maxSize) / 2f,
@@ -321,8 +332,6 @@ public static class CaveEntrancesPlanner
         StreetTile tile
     )
     {
-        Log.Out($"[Cave] rotation3: {rotation}");
-
         var medianHeight = Mathf.CeilToInt(WorldBuilder.Instance.GetHeight(
             (int)prefabRectangle.center.x,
             (int)prefabRectangle.center.y
@@ -369,8 +378,6 @@ public static class CaveEntrancesPlanner
             wildernessPrefab
         );
 
-        Log.Out($"[Cave] roation={rotation}, pdi.rotation={pdi.rotation}");
-
         ProcessRoadExits(pdi, tile, prefabRectangle);
 
         tile.SpawnMarkerPartsAndPrefabsWilderness(wildernessPrefab, new Vector3i(prefabPosition.x, Mathf.CeilToInt(medianHeight + wildernessPrefab.yOffset + 1), prefabPosition.y), (byte)rotation);
@@ -404,8 +411,6 @@ public static class CaveEntrancesPlanner
             int maxSize = CaveUtils.FastMax(sizeX, sizeZ);
             int rotation = gameRandom.RandomRange(0, 4);
 
-            Log.Out($"[Cave] rotation1: {rotation}");
-
             if (rotation == 1 || rotation == 3)
             {
                 sizeX = wildernessPrefab.size.z;
@@ -417,21 +422,15 @@ public static class CaveEntrancesPlanner
 
             if (!PositionIsValid(tile, prefabRectangle, prefabPosition, maxSize, sizeX, sizeZ))
             {
-                // Log.Out($"[Cave] Invalid position to spawn '{wildernessPrefab.Name}'");
                 continue;
             }
-
-            Log.Out($"[Cave] rotation2: {rotation}");
 
             if (TrySpawnCaveEntrance(prefabRectangle, prefabPosition, sizeX, sizeZ, (byte)rotation, wildernessPrefab, tile))
             {
                 return true;
             }
-
-            Log.Out($"[Cave] spawning '{wildernessPrefab.Name}' failed.");
         }
 
-        Log.Out($"[Cave] fail to spawn prefab '{wildernessPrefab.Name}', remaining tries: {maxTries}");
         return false;
     }
 
