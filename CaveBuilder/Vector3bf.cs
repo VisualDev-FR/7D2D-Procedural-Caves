@@ -44,7 +44,7 @@ public struct Vector3bf
 
     public Vector3bf(ushort value)
     {
-        this._value = value;
+        _value = value;
     }
 
     public Vector3bf(string value)

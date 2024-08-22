@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class CaveBlock
 {
-    public const sbyte defaultDensity = 0;
+    public const sbyte defaultDensity = sbyte.MaxValue;
 
     public Vector2s chunkPos;
 

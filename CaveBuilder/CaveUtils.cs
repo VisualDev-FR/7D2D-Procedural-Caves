@@ -293,14 +293,12 @@ public static class CaveUtils
         return points;
     }
 
-    public static bool OverLaps2D(Vector3i position1, Vector3i size1, Vector3i position2, Vector3i size2)
+    public static bool OverLaps2D(Vector3i position1, Vector3i size1, Vector3i position2, Vector3i size2, int margin = 0)
     {
-        int overlapMargin = CaveBuilder.overLapMargin;
-
-        if (position1.x + size1.x + overlapMargin < position2.x || position2.x + size2.x + overlapMargin < position1.x)
+        if (position1.x + size1.x + margin < position2.x || position2.x + size2.x + margin < position1.x)
             return false;
 
-        if (position1.z + size1.z + overlapMargin < position2.z || position2.z + size2.z + overlapMargin < position1.z)
+        if (position1.z + size1.z + margin < position2.z || position2.z + size2.z + margin < position1.z)
             return false;
 
         return true;

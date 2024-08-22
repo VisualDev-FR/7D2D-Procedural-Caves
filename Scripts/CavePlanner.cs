@@ -335,7 +335,6 @@ public static class CavePlanner
     public static IEnumerator GenerateCaveMap()
     {
         var _cavemap = new CaveMap();
-
         yield return GenerateCavePreview(_cavemap);
         yield break;
 
@@ -424,7 +423,12 @@ public static class CavePlanner
             }
 
             var position = pdi.boundingBoxPosition + HalfWorldSize;
-            var size = pdi.boundingBoxSize;
+            var size = new Vector3i(pdi.boundingBoxSize);
+
+            if (pdi.rotation == 1 || pdi.rotation == 3)
+            {
+                size = new Vector3i(pdi.boundingBoxSize.z, pdi.boundingBoxSize.y, pdi.boundingBoxSize.x);
+            }
 
             Log.Out($"[Cave] pdi.boundingBoxPosition: {position}");
 

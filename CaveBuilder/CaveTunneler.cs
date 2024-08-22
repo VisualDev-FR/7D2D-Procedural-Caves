@@ -39,7 +39,7 @@ public class CaveTunneler
     {
         FindPath(edge, cachedPrefabs);
         FindLocalMinimas();
-        ThickenTunnel(edge.node1, edge.node2, cavemap);
+        ThickenTunnel(edge.node1, edge.node2);
 
         return tunnel;
     }
@@ -57,7 +57,7 @@ public class CaveTunneler
         var visited = new HashSet<int>();
 
         int bedRockMargin = CaveBuilder.bedRockMargin + 1;
-        int terrainMargin = CaveBuilder.terrainMargin + 3;
+        int terrainMargin = CaveBuilder.terrainMargin + 1;
         int sqrMinPrefabDistance = 100;
         int neighborDistance = 1;
         int index = 0;
@@ -122,7 +122,15 @@ public class CaveTunneler
             }
         }
 
-        Log.Warning($"No Path found from '{edge.Prefab1.Name}' to '{edge.Prefab2.Name}' after {index} iterations");
+        // reaching here mean no path was found
+        var height1 = WorldBuilder.Instance.GetHeight(start.x, start.z);
+        var height2 = WorldBuilder.Instance.GetHeight(target.x, target.z);
+
+        var half = new Vector3i(WorldBuilder.Instance.HalfWorldSize, 0, WorldBuilder.Instance.HalfWorldSize);
+        var p1 = start - half;
+        var p2 = target - half;
+
+        Log.Warning($"No Path found from '{edge.Prefab1.Name}' ({p1} / {height1}) to '{edge.Prefab2.Name}' ({p2} / ({height2})) after {index} iterations ");
     }
 
     private void FindLocalMinimas()
@@ -143,7 +151,7 @@ public class CaveTunneler
         }
     }
 
-    private void ThickenTunnel(GraphNode start, GraphNode target, CaveMap cavemap)
+    private void ThickenTunnel(GraphNode start, GraphNode target)
     {
         tunnel.UnionWith(start.GetSphere());
         tunnel.UnionWith(target.GetSphere());

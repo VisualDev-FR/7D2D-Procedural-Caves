@@ -13,14 +13,16 @@ public static class CaveEntrancesPlanner
 {
     private static GameRandom gameRandom;
 
-    public static List<PrefabData> SpawnCaveEntrances()
+    public static List<PrefabData> SpawnCaveEntrances(GameRandom _gameRandom)
     {
-        gameRandom = GameRandomManager.Instance.CreateGameRandom(WorldBuilder.Instance.Seed + 4096953);
+        gameRandom = _gameRandom;
 
         var spawnedEntrances = new List<PrefabData>();
-        var wildernessTiles = GetWildernessTiles();
+        var wildernessTiles = GetShuffledWildernessTiles();
+        var maxEntrancesCount = wildernessTiles.Count / 2;
+        var maxRolls = 1_000;
+        var placedEntrances = 0;
         var tileIndex = 0;
-        var maxRolls = 500;
 
         if (wildernessTiles.Count == 0)
         {
@@ -28,9 +30,9 @@ public static class CaveEntrancesPlanner
             return spawnedEntrances;
         }
 
-        while (tileIndex < wildernessTiles.Count && --maxRolls > 0)
+        while (placedEntrances < maxEntrancesCount && --maxRolls > 0)
         {
-            var tile = wildernessTiles[tileIndex];
+            var tile = wildernessTiles[tileIndex++];
             var prefab = CavePlanner.SelectRandomWildernessEntrance();
             var succeed = SpawnWildernessCaveEntrance(tile, prefab);
 
@@ -38,11 +40,7 @@ public static class CaveEntrancesPlanner
             {
                 Log.Out($"[Cave] Entrance spawned: '{prefab.Name}' on tile '{tile.GridPosition}'");
                 spawnedEntrances.Add(prefab);
-                tileIndex++;
-            }
-            else
-            {
-                // Log.Warning($"[Cave] fail to spawn entrance '{prefab.Name}' on tile '{tile.GridPosition}'");
+                placedEntrances++;
             }
         }
 
@@ -55,17 +53,22 @@ public static class CaveEntrancesPlanner
             !st.OverlapsRadiation
             && !st.AllIsWater
             && !st.Used
+            && !st.ContainsHighway
+            && !st.HasPrefabs
+            // && !WildernessPlanner.hasPrefabNeighbor(st)
             && (st.District == null || st.District.name == "wilderness");
     }
 
-    private static List<StreetTile> GetWildernessTiles()
+    private static List<StreetTile> GetShuffledWildernessTiles()
     {
         var result =
             from StreetTile st in WorldBuilder.Instance.StreetTileMap
             where IsWildernessStreetTile(st)
             select st;
 
-        return result.ToList();
+        return result
+            .OrderBy(tile => gameRandom.Next())
+            .ToList();
     }
 
     private static Vector2i GetRandomPosition(int sizeX, int sizeZ, Vector2i worldPositionCenter, Vector2i worldPosition)
@@ -96,7 +99,31 @@ public static class CaveEntrancesPlanner
         return position;
     }
 
-    private static bool PositionIsValid(Rect prefabRectangle, Vector2i prefabPosition, int maxSize, int sizeX, int sizeZ)
+    private static bool OverlapsPrefab(StreetTile tile, Vector2i position, Rect size)
+    {
+        int margin = 100;
+
+        foreach (var st in tile.GetNeighbors8way())
+        {
+            if (!st.HasPrefabs)
+                continue;
+
+            foreach (var pdi in st.StreetTilePrefabDatas)
+            {
+                var _pos = new Vector3i(position.x, 0, position.y);
+                var _size = new Vector3i(size.x, 0, size.y);
+
+                if (CaveUtils.OverLaps2D(_pos, _size, pdi.boundingBoxPosition, pdi.boundingBoxSize, margin))
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private static bool PositionIsValid(StreetTile st, Rect prefabRectangle, Vector2i prefabPosition, int maxSize, int sizeX, int sizeZ)
     {
         Rect rect2 = new Rect(
             prefabRectangle.min - new Vector2(maxSize, maxSize) / 2f,
@@ -105,6 +132,11 @@ public static class CaveEntrancesPlanner
         {
             center = new Vector2(prefabPosition.x + sizeZ / 2, prefabPosition.y + sizeX / 2)
         };
+
+        if (WildernessPlanner.hasPrefabNeighbor(st) && OverlapsPrefab(st, prefabPosition, prefabRectangle))
+        {
+            return false;
+        }
 
         return !(
             rect2.max.x >= WorldBuilder.Instance.WorldSize
@@ -321,9 +353,9 @@ public static class CaveEntrancesPlanner
                 tile.subHalfWorld(prefabPosition.y)
             );
 
-            gameRandom.SetSeed((prefabPosition.x << 13) + (prefabPosition.y << 17));
+            var rand = GameRandomManager.instance.CreateGameRandom((prefabPosition.x << 13) + (prefabPosition.y << 17));
 
-            var rotation = gameRandom.RandomRange(0, 4);
+            var rotation = rand.RandomRange(0, 4);
             var prefabId = PrefabManager.PrefabInstanceId++;
 
             PrefabDataInstance pdi = new PrefabDataInstance(
@@ -348,8 +380,6 @@ public static class CaveEntrancesPlanner
 
             SetPathBlocked(prefabRectangle);
             SetNeighborsUsed(prefabRectangle);
-
-            GameRandomManager.Instance.FreeGameRandom(gameRandom);
 
             return true;
         }
@@ -380,9 +410,9 @@ public static class CaveEntrancesPlanner
             var prefabPosition = GetRandomPosition(sizeX, sizeZ, worldPositionCenter, worldPosition);
             var prefabRectangle = new Rect(prefabPosition.x, prefabPosition.y, maxSize, maxSize);
 
-            if (!PositionIsValid(prefabRectangle, prefabPosition, maxSize, sizeX, sizeZ))
+            if (!PositionIsValid(tile, prefabRectangle, prefabPosition, maxSize, sizeX, sizeZ))
             {
-                Log.Out($"[Cave] Invalid position to spawn '{wildernessPrefab.Name}'");
+                // Log.Out($"[Cave] Invalid position to spawn '{wildernessPrefab.Name}'");
                 continue;
             }
 
@@ -393,8 +423,6 @@ public static class CaveEntrancesPlanner
 
             Log.Out($"[Cave] spawning '{wildernessPrefab.Name}' failed.");
         }
-
-        GameRandomManager.Instance.FreeGameRandom(gameRandom);
 
         Log.Out($"[Cave] fail to spawn prefab '{wildernessPrefab.Name}', remaining tries: {maxTries}");
         return false;

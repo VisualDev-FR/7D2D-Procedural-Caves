@@ -5,6 +5,8 @@ using System.Numerics;
 
 public class PrefabCache
 {
+    private static readonly HashSet<CavePrefab> emptyPrefabs = new HashSet<CavePrefab>();
+
     // all prefabs grouped by chunk, where key is the hashcode of the chunk
     public readonly Dictionary<int, List<CavePrefab>> groupedPrefabs;
 
@@ -40,7 +42,7 @@ public class PrefabCache
 
             groupedPrefabs[chunkHash].Add(prefab);
 
-            // cache neighbors to avoid computing nearest prefabs in critical sections
+            // caching occupied neighbors chunks to avoid computing nearest prefabs in critical sections
             foreach (var offsetHash in CaveUtils.offsetsHorizontalHashes)
             {
                 var neighborHashcode = chunkHash + offsetHash;
@@ -55,14 +57,9 @@ public class PrefabCache
         }
     }
 
-    private static readonly HashSet<CavePrefab> emptyPrefabs = new HashSet<CavePrefab>();
-
     private HashSet<CavePrefab> GetNearestPrefabsFrom(int worldX, int worldZ)
     {
-        int chunkX = worldX >> 4; // -> x / 16;
-        int chunkZ = worldZ >> 4; // -> z / 16;
-
-        var chunkHash = GetChunkHash(chunkX, chunkZ);
+        var chunkHash = GetChunkHash(worldX >> 4, worldZ >> 4); // -> worldX / 16, worldZ / 16
 
         if (nearestPrefabs.TryGetValue(chunkHash, out var closePrefabs))
         {
