@@ -8,6 +8,9 @@ public class TerrainGeneratorWithBiomeResource_GenerateTerrain
 {
     public static void Postfix(Chunk _chunk)
     {
-        CaveGenerator.GenerateCave(_chunk);
+        if (CaveGenerator.isEnabled)
+        {
+            CaveGenerator.GenerateCave(_chunk);
+        }
     }
 }

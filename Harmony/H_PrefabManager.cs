@@ -17,8 +17,9 @@ public static class PrefabManager_LoadPrefabs
         MicroStopwatch ms = new MicroStopwatch(_bStart: true);
         List<PathAbstractions.AbstractedLocation> prefabs = PathAbstractions.PrefabsSearchPaths.GetAvailablePathsList(null, null, null, _ignoreDuplicateNames: true);
 
-        // PATCH: add underground prefab filter
+        // PATCH: add underground prefab filter + create tag to prevent the vanilla rwg from selecting wilderness cave entrances
         FastTags<TagGroup.Poi> filter = FastTags<TagGroup.Poi>.Parse("navonly,devonly,testonly,biomeonly,underground");
+        FastTags<TagGroup.Poi> wildernessCaveEntrance = FastTags<TagGroup.Poi>.Parse("cave,entrance,wilderness");
 
         for (int i = 0; i < prefabs.Count; i++)
         {
@@ -37,7 +38,7 @@ public static class PrefabManager_LoadPrefabs
 
             CavePlanner.TryCacheCavePrefab(prefabData);
 
-            if (!prefabData.Tags.Test_AnySet(filter))
+            if (!prefabData.Tags.Test_AnySet(filter) && !prefabData.Tags.Test_AllSet(wildernessCaveEntrance))
             {
                 PrefabManager.AllPrefabDatas[location.Name.ToLower()] = prefabData;
             }

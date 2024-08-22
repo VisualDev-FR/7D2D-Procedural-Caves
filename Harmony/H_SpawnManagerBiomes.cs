@@ -1,9 +1,6 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using HarmonyLib;
 using UnityEngine;
-using WorldGenerationEngineFinal;
 
 
 [HarmonyPatch(typeof(SpawnManagerBiomes), "Update")]
@@ -11,7 +8,7 @@ public class SpawnManagerBiomes_Update
 {
     public static bool Prefix(SpawnManagerBiomes __instance, string _spawnerName, bool _bSpawnEnemyEntities, object _userData, ref List<Entity> ___spawnNearList, ref int ___lastClassId)
     {
-        if (!GameUtils.IsPlaytesting())
+        if (!GameUtils.IsPlaytesting() && CaveGenerator.isEnabled)
         {
             return SpawnUpdate(_spawnerName, _bSpawnEnemyEntities, _userData as ChunkAreaBiomeSpawnData, ref ___spawnNearList, ref ___lastClassId);
         }

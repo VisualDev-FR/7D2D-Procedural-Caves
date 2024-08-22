@@ -39,7 +39,7 @@ public static class CavePlanner
 
     private static readonly int maxPlacementAttempts = 20;
 
-    private static readonly string caveTempDir = $"{GameIO.GetUserGameDataDir()}/temp";
+    public static readonly string caveTempDir = $"{GameIO.GetUserGameDataDir()}/temp";
 
     public static void Init()
     {
@@ -430,7 +430,7 @@ public static class CavePlanner
                 size = new Vector3i(pdi.boundingBoxSize.z, pdi.boundingBoxSize.y, pdi.boundingBoxSize.x);
             }
 
-            Log.Out($"[Cave] pdi.boundingBoxPosition: {position}");
+            // Log.Out($"[Cave] pdi.boundingBoxPosition: {position}");
 
             foreach (var point in CaveUtils.GetBoundingEdges(position, size))
             {
@@ -478,7 +478,7 @@ public static class CavePlanner
         if (!Directory.Exists(caveTempDir))
             Directory.CreateDirectory(caveTempDir);
 
-        SdFile.WriteAllBytes(filename, image);
+        File.WriteAllBytes(filename, image);
 
         yield return null;
     }

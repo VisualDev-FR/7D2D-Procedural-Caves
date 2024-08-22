@@ -1,11 +1,14 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using UnityEngine;
 
 public static class CaveGenerator
 {
     public static CaveBlocksProvider caveBlocksProvider;
+
+    public static bool isEnabled = false;
 
     private static BlockValue caveAir = new BlockValue((uint)Block.GetBlockByName("caveAir").blockID);
 
@@ -17,7 +20,16 @@ public static class CaveGenerator
 
     public static void Init(string worldName)
     {
-        caveBlocksProvider = new CaveBlocksProvider(worldName);
+        isEnabled = Directory.Exists($"{GameIO.GetWorldDir(worldName)}/cavemap");
+
+        if (isEnabled)
+        {
+            caveBlocksProvider = new CaveBlocksProvider(worldName);
+        }
+        else
+        {
+            Log.Warning($"[Cave] no cavemap found for world '{worldName}'");
+        }
     }
 
     private static bool CanDecorateFlatCave(BlockValue _blockValue, Vector3i _blockPos)
