@@ -2,9 +2,10 @@ Priority:
     ✔ debug cave prefab placements regarding surface prefabs @done(24-08-17 22:43)
     ✔ Implement connection regular town POIs to the cave network @done(24-08-18 22:22)
     ✔ implement prefab rename command in cave editor plugin @done(24-08-18 22:22)
+    ✔ Implement custom wilderness prefab spawning function @done(24-08-23 21:41)
+    ☐ implement intersection detection inside rwg tiles
     ☐ assert abs(prefab.yOffset) < prefab.size.y
     ☐ integrate small prefabs in tunnels (dirt, decoration, modeled terrain, stalactites, water well)
-    ☐ Implement custom wilderness prefab spawning function
     ☐ implement multiple cave networks (good feature + performances hack)
     ☐ find a way to force rwg POIs choices
     ☐ debug tunnels intersections with surface prefabs
@@ -13,7 +14,7 @@ Priority:
     ☐ implement tunnel terrain smoothing
 
 Optimization:
-    ☐ work with vector3i as long as possible in cave tunneling, avoiding instanciating caveBlocks
+    ☐ work special vector3sbs(short, byte, short) as long as possible in cave tunneling, avoiding instanciating caveBlocks
     ☐ free cavemap memory after saving it, after game exit
 
 Cave generation:

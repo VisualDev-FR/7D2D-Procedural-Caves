@@ -466,6 +466,13 @@ public static class CaveViewer
         }
     }
 
+    public static void ReadPrefabCommand(string[] args)
+    {
+        string path = Path.GetFullPath(@"C:\Users\menan\AppData\Roaming\7DaysToDie\LocalPrefabs\demo.tts");
+
+        StreetTileReader.Read(path);
+    }
+
     public static void Main(string[] args)
     {
         switch (args[0])
@@ -501,6 +508,11 @@ public static class CaveViewer
 
             case "region":
                 RegionCommand(args);
+                break;
+
+            case "readprefab":
+            case "rp":
+                ReadPrefabCommand(args);
                 break;
 
             default:
