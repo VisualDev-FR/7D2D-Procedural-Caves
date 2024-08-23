@@ -4,7 +4,7 @@ using System.IO;
 
 public class TTSReader
 {
-    public static List<Vector3i> LoadTerrainBlocks(string fullPath)
+    public static List<Vector3i> LoadTerrainBlocks(string fullPath, int yOffset)
     {
         try
         {
@@ -21,7 +21,7 @@ public class TTSReader
 
                     uint version = pooledBinaryReader.ReadUInt32();
 
-                    return GetTerrainBlocks(pooledBinaryReader, version);
+                    return GetTerrainBlocks(pooledBinaryReader, version, yOffset);
                 }
             }
         }
@@ -48,7 +48,7 @@ public class TTSReader
         return block.type < 256 && !block.isWater;
     }
 
-    private static List<Vector3i> GetTerrainBlocks(BinaryReader _br, uint _version)
+    private static List<Vector3i> GetTerrainBlocks(BinaryReader _br, uint _version, int yOffset)
     {
         int size_x = _br.ReadInt16();
         int size_y = _br.ReadInt16();
@@ -86,7 +86,7 @@ public class TTSReader
                         blockValue.rawData = (uint)(tempBuf[cursor] | (tempBuf[cursor + 1] << 8) | (tempBuf[cursor + 2] << 16) | (tempBuf[cursor + 3] << 24));
                         cursor += 4;
 
-                        if (blockValue.isair || BlockIsTerrain(blockValue))
+                        if (y < -yOffset && (blockValue.isair || BlockIsTerrain(blockValue)))
                         {
                             result.Add(new Vector3i(x, y, z));
                         }
@@ -111,9 +111,11 @@ public class TTSReader
                 }
                 blockValue.rawData = _rawData;
 
-                if (blockValue.isair || BlockIsTerrain(blockValue))
+                var position = OffsetToCoord(i, size_x, size_y);
+
+                if (position.y < -yOffset && (blockValue.isair || BlockIsTerrain(blockValue)))
                 {
-                    result.Add(OffsetToCoord(i, size_x, size_y));
+                    result.Add(position);
                 }
             }
             _br.Read(_data.m_Density, 0, size_x * size_y * size_z);
