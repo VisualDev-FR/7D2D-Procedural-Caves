@@ -140,11 +140,15 @@ public static class CavePlanner
     {
         foreach (var marker in prefab.POIMarkers)
         {
+            if (!marker.tags.Test_AnySet(CaveConfig.tagCaveMarker))
+                continue;
+
             bool isOnBound_x = marker.start.x == -1 || marker.start.x == prefab.size.x;
             bool isOnBound_z = marker.start.z == -1 || marker.start.z == prefab.size.z;
 
             if (!isOnBound_x && !isOnBound_z)
             {
+                Log.Out($"[Cave] cave marker out of bounds: [{marker.start}] '{prefab.Name}'");
                 return false;
             }
 
@@ -152,11 +156,6 @@ public static class CavePlanner
         }
 
         return true;
-    }
-
-    private static bool IsWildernessEntrance(PrefabData prefabData)
-    {
-        return prefabData.Tags.Test_AllSet(CaveConfig.tagCaveWildernessEntrance);
     }
 
     private static string SkippingBecause(string prefabName, string reason)
@@ -192,10 +191,14 @@ public static class CavePlanner
         string prefabName = prefabData.Name.ToLower();
         string suffix = "";
 
-        if (IsWildernessEntrance(prefabData))
+        if (prefabData.Tags.Test_AllSet(CaveConfig.tagCaveWildernessEntrance))
         {
-            suffix = "(entrance)";
+            suffix = "(wild entrance)";
             wildernessEntranceNames.Add(prefabName);
+        }
+        else if (prefabData.Tags.Test_AllSet(CaveConfig.tagCaveEntrance))
+        {
+            suffix = $"(town entrance)";
         }
 
         Log.Out($"[Cave] caching prefab '{prefabName}' {suffix}".TrimEnd());
