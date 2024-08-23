@@ -19,8 +19,6 @@ public static class CavePlanner
 
     private static List<string> wildernessEntranceNames = new List<string>();
 
-    private static List<PrefabDataInstance> surfacePrefabs = new List<PrefabDataInstance>();
-
     private static HashSet<string> usedEntrances = new HashSet<string>();
 
     public static int AllPrefabsCount => allCavePrefabs.Count;
@@ -48,21 +46,10 @@ public static class CavePlanner
 
         usedEntrances = new HashSet<string>();
         wildernessEntranceNames = new List<string>();
-        surfacePrefabs = new List<PrefabDataInstance>();
 
         PrefabManager.Clear();
         PrefabManager.ClearDisplayed();
         PrefabManager.Cleanup();
-    }
-
-    private static List<PrefabDataInstance> GetSurfacePrefabs()
-    {
-        var result = PrefabManager.UsedPrefabsWorld.Where(pdi =>
-            pdi.prefab.Tags.Test_AnySet(CaveConfig.tagCaveEntrance) ||
-            !pdi.prefab.Tags.Test_AnySet(CaveConfig.tagCave)
-        );
-
-        return result.ToList();
     }
 
     private static HashSet<string> GetAddedPrefabNames()
@@ -208,10 +195,10 @@ public static class CavePlanner
 
     public static List<PrefabDataInstance> GetPrefabsAbove(Vector3i position, Vector3i size)
     {
-        var prefabs = surfacePrefabs.Where(pdi =>
-        {
-            return CaveUtils.OverLaps2D(position, size, pdi.boundingBoxPosition, pdi.boundingBoxSize);
-        });
+        var prefabs = PrefabManager.UsedPrefabsWorld.Where(pdi =>
+            !pdi.prefab.Tags.Test_AnySet(CaveConfig.tagCaveUnderground)
+            && CaveUtils.OverLaps2D(position, size, pdi.boundingBoxPosition, pdi.boundingBoxSize)
+        );
 
         return prefabs.ToList();
     }
@@ -224,7 +211,7 @@ public static class CavePlanner
         {
             for (int z = position.z; z < position.z + size.z; z++)
             {
-                minHeight = Utils.FastMin(minHeight, (int)WorldBuilder.GetHeight(x, z));
+                minHeight = CaveUtils.FastMin(minHeight, (int)WorldBuilder.GetHeight(x, z));
             }
         }
 
@@ -234,7 +221,7 @@ public static class CavePlanner
         {
             foreach (var prefab in prefabsAbove)
             {
-                minHeight = Utils.FastMin(minHeight, prefab.boundingBoxPosition.y);
+                minHeight = CaveUtils.FastMin(minHeight, prefab.boundingBoxPosition.y);
             }
         }
 
@@ -309,30 +296,41 @@ public static class CavePlanner
         return null;
     }
 
-    public static PrefabCache PlaceCavePrefabs(int count, PrefabCache prefabCache)
+    public static void SpawnUnderGroundPrefabs(int count, ref PrefabCache cachedPrefabs)
     {
-        var availablePrefabs = GetUndergroundPrefabs();
-        var cavePrefabs = prefabCache;
+        var undergroundPrefabs = GetUndergroundPrefabs();
 
         for (int i = 0; i < count; i++)
         {
-            var prefabData = availablePrefabs[i % availablePrefabs.Count];
-            var pdi = TrySpawnCavePrefab(prefabData, cavePrefabs);
+            var prefabData = undergroundPrefabs[i % undergroundPrefabs.Count];
+            var pdi = TrySpawnCavePrefab(prefabData, cachedPrefabs);
 
             if (pdi == null)
                 continue;
 
-            var cavePrefab = new CavePrefab(cavePrefabs.Count + 1, pdi, HalfWorldSize);
+            var cavePrefab = new CavePrefab(cachedPrefabs.Count + 1, pdi, HalfWorldSize);
 
-            cavePrefabs.AddPrefab(cavePrefab);
+            cachedPrefabs.AddPrefab(cavePrefab);
             PrefabManager.AddUsedPrefabWorld(-1, pdi);
 
             Log.Out($"[Cave] cave prefab '{cavePrefab.Name}' added at {cavePrefab.position}");
         }
 
-        Log.Out($"[Cave] {cavePrefabs.Count} cave prefabs added.");
+        Log.Out($"[Cave] {cachedPrefabs.Count} cave prefabs added.");
+    }
 
-        return cavePrefabs;
+    private static void AddSurfacePrefabs(PrefabCache cachedPrefabs)
+    {
+        foreach (var pdi in PrefabManager.UsedPrefabsWorld)
+        {
+            bool isRwgTile = pdi.prefab.Tags.Test_AnySet(CaveConfig.tagRwgStreetTile);
+            bool isUndergound = pdi.prefab.Tags.Test_AnySet(CaveConfig.tagCaveUnderground);
+
+            if (isRwgTile || isUndergound)
+                continue;
+
+            cachedPrefabs.AddPrefab(new CavePrefab(cachedPrefabs.Count + 1, pdi, HalfWorldSize));
+        }
     }
 
     public static IEnumerator GenerateCaveMap()
@@ -344,11 +342,9 @@ public static class CavePlanner
         if (WorldBuilder.IsCanceled)
             yield break;
 
-        surfacePrefabs = GetSurfacePrefabs();
+        PrefabCache cachedPrefabs = GetUsedCavePrefabs();
 
-        PrefabCache addedCaveEntrances = GetUsedCavePrefabs();
-
-        foreach (var prefab in addedCaveEntrances.Prefabs)
+        foreach (var prefab in cachedPrefabs.Prefabs)
         {
             Log.Out($"[Cave] Cave entrance '{prefab.Name}' added at {prefab.position}");
         }
@@ -358,9 +354,11 @@ public static class CavePlanner
 
         yield return WorldBuilder.SetMessage("Spawning cave prefabs...", _logToConsole: true);
 
-        PrefabCache cachedPrefabs = PlaceCavePrefabs(CaveBuilder.PREFAB_COUNT, addedCaveEntrances);
+        SpawnUnderGroundPrefabs(CaveBuilder.PREFAB_COUNT, ref cachedPrefabs);
 
         List<Edge> edges = Graph.Resolve(cachedPrefabs.Prefabs);
+
+        AddSurfacePrefabs(cachedPrefabs);
 
         var localMinimas = new HashSet<CaveBlock>();
         var cavemap = new CaveMap();

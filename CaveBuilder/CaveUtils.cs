@@ -304,4 +304,13 @@ public static class CaveUtils
         return true;
     }
 
+    public static int SqrDistanceToRectangle3D(Vector3i point, Vector3i min, Vector3i max)
+    {
+        int dx = FastMax(min.x - point.x, 0, point.x - max.x);
+        int dy = FastMax(min.y - point.y, 0, point.y - max.y);
+        int dz = FastMax(min.z - point.z, 0, point.z - max.z);
+
+        return dx * dx + dy * dy + dz * dz;
+    }
+
 }

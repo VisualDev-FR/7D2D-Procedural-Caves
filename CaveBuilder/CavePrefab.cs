@@ -38,7 +38,7 @@ public class CavePrefab
 
     public List<GraphNode> nodes;
 
-    public List<Prefab.Marker> markers;
+    public List<Prefab.Marker> caveMarkers;
 
     public CavePrefab(int index)
     {
@@ -113,33 +113,36 @@ public class CavePrefab
         UpdateMarkers(pdi);
     }
 
-    public void UpdateMarkers(PrefabDataInstance prefab)
+    public void UpdateMarkers(PrefabDataInstance pdi)
     {
         nodes = new List<GraphNode>();
-        markers = new List<Prefab.Marker>();
+        caveMarkers = new List<Prefab.Marker>();
 
-        CaveUtils.Assert(prefab.prefab.POIMarkers.Count > 0, $"prefab {prefab.prefab.Name} has not cave marker.");
+        // if (pdi.prefab.POIMarkers.Count > 0 && pdi.prefab.Tags.Test_AnySet(CaveConfig.tagCave))
+        // {
+        //     Log.Warning($"prefab {pdi.prefab.Name} has not cave marker.");
+        // }
 
-        foreach (var marker in prefab.prefab.RotatePOIMarkers(true, rotation))
+        foreach (var marker in pdi.prefab.RotatePOIMarkers(true, rotation))
         {
             if (!marker.tags.Test_AnySet(CaveConfig.tagCaveMarker))
                 continue;
 
-            markers.Add(marker);
+            caveMarkers.Add(marker);
             nodes.Add(new GraphNode(marker, this));
         }
     }
 
     public void UpdateMarkers(Random rand)
     {
-        markers = new List<Prefab.Marker>(){
+        caveMarkers = new List<Prefab.Marker>(){
             RandomMarker(rand, 0, Size.x - 2, Size.y, 1),
             RandomMarker(rand, 1, Size.x - 2, Size.y, 1),
             RandomMarker(rand, 2, 1, Size.y, Size.z - 2),
             RandomMarker(rand, 3, 1, Size.y, Size.z - 2),
         };
 
-        UpdateMarkers(markers);
+        UpdateMarkers(caveMarkers);
     }
 
     public void UpdateMarkers(List<Prefab.Marker> markers)
@@ -159,9 +162,9 @@ public class CavePrefab
     {
         var result = new HashSet<Vector3i>();
 
-        for (int i = 0; i < markers.Count; i++)
+        for (int i = 0; i < caveMarkers.Count; i++)
         {
-            var marker = markers[i];
+            var marker = caveMarkers[i];
             var markerPoints = CaveUtils.GetPointsInside(position + marker.start, position + marker.start + marker.size);
 
             result.UnionWith(markerPoints);
@@ -387,13 +390,13 @@ public class CavePrefab
     public bool IntersectMarker(int x, int y, int z)
     {
         bool posIsNotOnBounds =
-            (x != position.x - 1 && x != position.x + Size.x) &&
-            (z != position.z - 1 && z != position.z + Size.z);
+            x != position.x - 1 && x != position.x + Size.x &&
+            z != position.z - 1 && z != position.z + Size.z;
 
         if (posIsNotOnBounds)
             return false;
 
-        foreach (var marker in markers)
+        foreach (var marker in caveMarkers)
         {
             var start = position + marker.start;
 

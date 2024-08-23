@@ -28,24 +28,24 @@ public static class Log
 }
 
 
-namespace WorldGenerationEngineFinal
-{
-    public class WorldBuilder
-    {
-        public static class Instance
-        {
-            public static bool IsCanceled = false;
+// namespace WorldGenerationEngineFinal
+// {
+//     public class WorldBuilder
+//     {
+//         public static class Instance
+//         {
+//             public static bool IsCanceled = false;
 
-            public static int GetHeight(int x, int z)
-            {
-                return 128;
-            }
+//             public static int GetHeight(int x, int z)
+//             {
+//                 return 128;
+//             }
 
-            public static IEnumerator SetMessage(string message, bool toLogConsole = false)
-            {
-                Log.Out(message);
-                yield return null;
-            }
-        };
-    }
-}
+//             public static IEnumerator SetMessage(string message, bool toLogConsole = false)
+//             {
+//                 Log.Out(message);
+//                 yield return null;
+//             }
+//         };
+//     }
+// }

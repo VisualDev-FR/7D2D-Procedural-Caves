@@ -359,7 +359,7 @@ public static class CaveViewer
         {
             voxels.Add(new Voxell(prefab.position, prefab.Size, WaveFrontMaterial.DarkGreen) { force = true });
 
-            foreach (var marker in prefab.markers)
+            foreach (var marker in prefab.caveMarkers)
             {
                 voxels.Add(new Voxell(prefab.position + marker.start, marker.size, WaveFrontMaterial.Orange) { force = true });
             }
