@@ -470,7 +470,9 @@ public static class CaveViewer
     {
         string path = Path.GetFullPath(@"C:\Users\menan\AppData\Roaming\7DaysToDie\LocalPrefabs\demo.tts");
 
-        PrefabReader.Read(path);
+        var blocks = TTSReader.LoadTerrainBlocks(path);
+
+        Log.Out(blocks.Count);
     }
 
     public static void Main(string[] args)

@@ -1,24 +1,10 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 
-public class PrefabReader
+public class TTSReader
 {
-    public static void Read(string fullPath)
-    {
-        Load(fullPath);
-    }
-
-    public static bool Load(string fullPath, bool _applyMapping = true, bool _fixChildblocks = true, bool _allowMissingBlocks = false, bool _skipLoadingBlockData = false)
-    {
-        if (!LoadBlockData(fullPath, _applyMapping, _fixChildblocks, _allowMissingBlocks, _skipLoadingBlockData))
-        {
-            return false;
-        }
-
-        return true;
-    }
-
-    public static bool LoadBlockData(string fullPath, bool _applyMapping, bool _fixChildblocks, bool _allowMissingBlocks, bool _skipLoadingBlockData = false)
+    public static List<Vector3i> LoadTerrainBlocks(string fullPath)
     {
         try
         {
@@ -30,27 +16,23 @@ public class PrefabReader
                     // pooledBinaryReader.SetBaseStream(baseStream);
                     if (pooledBinaryReader.ReadChar() != 't' || pooledBinaryReader.ReadChar() != 't' || pooledBinaryReader.ReadChar() != 's' || pooledBinaryReader.ReadChar() != 0)
                     {
-                        return false;
+                        return null;
                     }
+
                     uint version = pooledBinaryReader.ReadUInt32();
 
-                    if (!ReadBlockData(pooledBinaryReader, version))
-                    {
-                        return false;
-                    }
+                    return GetTerrainBlocks(pooledBinaryReader, version);
                 }
             }
         }
         catch (Exception e)
         {
             Log.Error($"[Cave] Error while reading '{fullPath}': {e}");
-            return false;
+            return null;
         }
-
-        return true;
     }
 
-    public static Vector3i OffsetToCoord(int _offset, int size_x, int size_y)
+    private static Vector3i OffsetToCoord(int _offset, int size_x, int size_y)
     {
         int num = size_x * size_y;
         int z = _offset / num;
@@ -61,14 +43,19 @@ public class PrefabReader
         return new Vector3i(x, y, z);
     }
 
-    public static bool ReadBlockData(BinaryReader _br, uint _version)
+    private static bool BlockIsTerrain(BlockValue block)
+    {
+        return block.type < 256 && !block.isWater;
+    }
+
+    private static List<Vector3i> GetTerrainBlocks(BinaryReader _br, uint _version)
     {
         int size_x = _br.ReadInt16();
         int size_y = _br.ReadInt16();
         int size_z = _br.ReadInt16();
         int blockCount = size_x * size_y * size_z;
-        int totalBlocks = 0;
 
+        var result = new List<Vector3i>();
         var blockValue = new BlockValue();
         var _data = new Prefab.Data();
         _data.Expand(blockCount);
@@ -98,7 +85,11 @@ public class PrefabReader
                     {
                         blockValue.rawData = (uint)(tempBuf[cursor] | (tempBuf[cursor + 1] << 8) | (tempBuf[cursor + 2] << 16) | (tempBuf[cursor + 3] << 24));
                         cursor += 4;
-                        totalBlocks++;
+
+                        if (blockValue.isair || BlockIsTerrain(blockValue))
+                        {
+                            result.Add(new Vector3i(x, y, z));
+                        }
                     }
                 }
             }
@@ -119,19 +110,15 @@ public class PrefabReader
                     _rawData = BlockValueV3.ConvertOldRawData(_rawData);
                 }
                 blockValue.rawData = _rawData;
-                totalBlocks++;
 
-                var position = OffsetToCoord(i, size_x, size_y);
-
-                Log.Out($"{blockValue.type,-6}: {position}");
+                if (blockValue.isair || BlockIsTerrain(blockValue))
+                {
+                    result.Add(OffsetToCoord(i, size_x, size_y));
+                }
             }
             _br.Read(_data.m_Density, 0, size_x * size_y * size_z);
         }
 
-        Log.Out($"total blocks: {totalBlocks}");
-
-        return true;
-
+        return result;
     }
-
 }

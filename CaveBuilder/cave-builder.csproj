@@ -10,4 +10,8 @@
     <Reference Include="$(PATH_7D2D)\7DaysToDie_Data\Managed\UnityEngine.CoreModule.dll" />
     <Reference Include="$(PATH_7D2D)\7DaysToDie_Data\Managed\netstandard.dll" />
   </ItemGroup>
+  <ItemGroup>
+    <!-- Assembly info -->
+    <Compile Include="../Scripts/TTSReader.cs" />
+  </ItemGroup>
 </Project>

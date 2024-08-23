@@ -319,12 +319,25 @@ public static class CavePlanner
         Log.Out($"[Cave] {cachedPrefabs.Count} cave prefabs added.");
     }
 
+    private static void ParseRwgStreetTile(PrefabDataInstance pdi)
+    {
+        var path = pdi.location.FullPath;
+        var terrainBlocks = TTSReader.LoadTerrainBlocks(path);
+
+        Log.Out($"{terrainBlocks.Count} terrain blocks found for '{pdi.prefab.Name}'");
+    }
+
     private static void AddSurfacePrefabs(PrefabCache cachedPrefabs)
     {
         foreach (var pdi in PrefabManager.UsedPrefabsWorld)
         {
             bool isRwgTile = pdi.prefab.Tags.Test_AnySet(CaveConfig.tagRwgStreetTile);
             bool isUndergound = pdi.prefab.Tags.Test_AnySet(CaveConfig.tagCaveUnderground);
+
+            if (isRwgTile)
+            {
+                ParseRwgStreetTile(pdi);
+            }
 
             if (isRwgTile || isUndergound)
                 continue;
