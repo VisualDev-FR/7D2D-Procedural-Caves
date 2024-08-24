@@ -1,7 +1,23 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using UnityEngine;
 
+public struct Rect3D
+{
+    public Vector3i start;
+
+    public Vector3i end;
+
+    public Vector3i Size => end - start;
+
+    public Rect3D(Vector3i start, Vector3i end)
+    {
+        this.start = start;
+        this.end = end;
+    }
+}
 
 // Light .tts file reader, to read prefab blocks datas from the world builder.
 // His purpose is to collect non tunnelable blocks from rwg-street-tile prefabs
@@ -73,9 +89,11 @@ public class TTSReader
                         blockValue.rawData = (uint)(tempBuf[cursor] | (tempBuf[cursor + 1] << 8) | (tempBuf[cursor + 2] << 16) | (tempBuf[cursor + 3] << 24));
                         cursor += 4;
 
-                        if (y <= -yOffset && IsObstacle(blockValue))
+                        var position = new Vector3i(x, y, z);
+
+                        if (IsObstacle(blockValue, position, yOffset))
                         {
-                            result.Add(new Vector3i(x, y, z));
+                            result.Add(position);
                         }
                     }
                 }
@@ -100,7 +118,7 @@ public class TTSReader
 
                 var position = OffsetToCoord(i, size_x, size_y);
 
-                if (position.y <= -yOffset && IsObstacle(blockValue))
+                if (IsObstacle(blockValue, position, yOffset))
                 {
                     result.Add(position);
                 }
@@ -120,12 +138,64 @@ public class TTSReader
         int y = _offset / size_x;
         int x = _offset % size_x;
 
-        return new Vector3i(x, y, z);
+        return new Vector3i(z, y, x);
     }
 
-    public static bool IsObstacle(BlockValue block)
+    public static bool IsObstacle(BlockValue block, Vector3 position, int yOffset)
     {
-        return block.type > 255 || block.isWater || block.isair;
+        return position.y < -yOffset - CaveBuilder.terrainMargin && (block.type > 255 || block.isWater || block.isair);
+    }
+
+    public static List<Rect3D> Clusterize(HashSet<Vector3i> points)
+    {
+        var clusters = new List<Rect3D>();
+        var visited = new HashSet<Vector3i>();
+
+        foreach (var start in points)
+        {
+            if (visited.Contains(start))
+                continue;
+
+            var clusterMin = new Vector3i(int.MaxValue, int.MaxValue, int.MaxValue);
+            var clusterMax = new Vector3i(int.MinValue, int.MinValue, int.MinValue);
+
+            var queue = new HashSet<Vector3i>() { start };
+            var cluster = new HashSet<Vector3i>();
+            var index = 100_000;
+
+            while (queue.Count > 0 && index-- > 0)
+            {
+                Vector3i currentPosition = queue.First();
+
+                clusterMin.x = CaveUtils.FastMin(clusterMin.x, currentPosition.x);
+                clusterMin.y = CaveUtils.FastMin(clusterMin.y, currentPosition.y);
+                clusterMin.z = CaveUtils.FastMin(clusterMin.z, currentPosition.z);
+
+                clusterMax.x = CaveUtils.FastMax(clusterMax.x, currentPosition.x + 1);
+                clusterMax.y = CaveUtils.FastMax(clusterMax.y, currentPosition.y + 1);
+                clusterMax.z = CaveUtils.FastMax(clusterMax.z, currentPosition.z + 1);
+
+                cluster.Add(currentPosition);
+                queue.Remove(currentPosition);
+
+                foreach (var offset in CaveUtils.offsets)
+                {
+                    var position = currentPosition + offset;
+
+                    if (!cluster.Contains(position) && points.Contains(position))
+                    {
+                        queue.Add(position);
+                    }
+                }
+            }
+
+            Log.Out($"cluster: {cluster.Count} points");
+
+            visited.UnionWith(cluster);
+            clusters.Add(new Rect3D(clusterMin, clusterMax));
+        }
+
+        return clusters;
     }
 
 }

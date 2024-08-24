@@ -466,13 +466,30 @@ public static class CaveViewer
         }
     }
 
-    public static void ReadPrefabCommand(string[] args)
+    public static void ClusterizeCommand(string[] args)
     {
-        string path = Path.GetFullPath(@"C:\Users\menan\AppData\Roaming\7DaysToDie\LocalPrefabs\demo.tts");
+        var timer = CaveUtils.StartTimer();
 
-        var blocks = TTSReader.LoadTerrainBlocks(path);
+        var path = @"C:\SteamLibrary\steamapps\common\7 Days To Die\Data\Prefabs\RWGTiles\rwg_tile_downtown_corner.tts";
+        var points = TTSReader.GetUndergroundObstacles(path, -11);
 
-        Log.Out(blocks.Count);
+        Log.Out($"{points.Count} points");
+
+        var clusters = TTSReader.Clusterize(points.ToHashSet());
+
+        Log.Out($"timer: {timer.ElapsedMilliseconds}ms");
+
+        // var voxels = new HashSet<Voxell>();
+        var voxels = points.Select(pos => new Voxell(pos, WaveFrontMaterial.LightBlue)).ToHashSet();
+
+        foreach (var cluster in clusters)
+        {
+            Log.Out($"min: {cluster.start}, max: {cluster.end}");
+            voxels.Add(new Voxell(cluster.start, cluster.Size, WaveFrontMaterial.DarkGreen) { force = true });
+            break;
+        }
+
+        GenerateObjFile("dbscan.obj", voxels, false);
     }
 
     public static void Main(string[] args)
@@ -512,9 +529,8 @@ public static class CaveViewer
                 RegionCommand(args);
                 break;
 
-            case "readprefab":
-            case "rp":
-                ReadPrefabCommand(args);
+            case "cluster":
+                ClusterizeCommand(args);
                 break;
 
             default:
