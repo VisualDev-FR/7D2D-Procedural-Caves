@@ -110,68 +110,10 @@ public static class CavePlanner
         return result.ToList();
     }
 
-    public static bool ContainsCaveMarkers(PrefabData prefab)
-    {
-        foreach (var marker in prefab.POIMarkers)
-        {
-            if (marker.tags.Test_AnySet(CaveConfig.tagCaveMarker))
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private static bool PrefabMarkersAreValid(PrefabData prefab)
-    {
-        foreach (var marker in prefab.POIMarkers)
-        {
-            if (!marker.tags.Test_AnySet(CaveConfig.tagCaveMarker))
-                continue;
-
-            bool isOnBound_x = marker.start.x == -1 || marker.start.x == prefab.size.x;
-            bool isOnBound_z = marker.start.z == -1 || marker.start.z == prefab.size.z;
-
-            if (!isOnBound_x && !isOnBound_z)
-            {
-                Log.Out($"[Cave] cave marker out of bounds: [{marker.start}] '{prefab.Name}'");
-                return false;
-            }
-
-            // TODO: check 3D Intersection between prefab and markers
-        }
-
-        return true;
-    }
-
-    private static string SkippingBecause(string prefabName, string reason)
-    {
-        return $"[Cave] skipping '{prefabName}' because {reason}.";
-    }
-
     public static void TryCacheCavePrefab(PrefabData prefabData)
     {
-        if (!prefabData.Tags.Test_AnySet(CaveConfig.tagCave))
+        if (!prefabData.Tags.Test_AnySet(CaveConfig.tagCave) || !CavePrefabChecker.IsValid(prefabData))
         {
-            return;
-        }
-
-        if (!prefabData.Tags.Test_AnySet(CaveConfig.requiredCaveTags))
-        {
-            Log.Warning(SkippingBecause(prefabData.Name, $"missing cave type tag: {prefabData.Tags}"));
-            return;
-        }
-
-        if (!ContainsCaveMarkers(prefabData))
-        {
-            Log.Warning(SkippingBecause(prefabData.Name, "no cave marker was found."));
-            return;
-        }
-
-        if (!PrefabMarkersAreValid(prefabData))
-        {
-            Log.Warning(SkippingBecause(prefabData.Name, "at least one marker is invalid."));
             return;
         }
 

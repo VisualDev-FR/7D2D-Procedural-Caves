@@ -101,6 +101,7 @@
     <Compile Include="Scripts\CaveEntrancesPlanner.cs" />
     <Compile Include="Scripts\CaveGenerator.cs" />
     <Compile Include="Scripts\CavePlanner.cs" />
+    <Compile Include="Scripts\CavePrefabChecker.cs" />
     <Compile Include="Scripts\StalactiteGenerator.cs" />
     <Compile Include="Scripts\TTSReader.cs" />
 

@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using UnityEngine;
 
-public struct Rect3D
+public class Rect3D
 {
     public Vector3i start;
 
@@ -16,6 +16,11 @@ public struct Rect3D
     {
         this.start = start;
         this.end = end;
+    }
+
+    public override int GetHashCode()
+    {
+        return start.GetHashCode() + end.GetHashCode();
     }
 }
 
