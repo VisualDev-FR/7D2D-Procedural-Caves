@@ -322,9 +322,9 @@ public static class CavePlanner
     private static void ParseRwgStreetTile(PrefabDataInstance pdi)
     {
         var path = pdi.location.FullPath;
-        var terrainBlocks = TTSReader.LoadTerrainBlocks(path, pdi.prefab.yOffset);
+        var terrainBlocks = TTSReader.GetUndergroundObstacles(path, pdi.prefab.yOffset);
 
-        Log.Out($"{terrainBlocks.Count} terrain blocks found for '{pdi.prefab.Name}'");
+        Log.Out($"{terrainBlocks.Count} obstacles found for '{pdi.prefab.Name}'");
     }
 
     private static void AddSurfacePrefabs(PrefabCache cachedPrefabs)

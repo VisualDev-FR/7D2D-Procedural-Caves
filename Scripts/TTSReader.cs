@@ -2,53 +2,40 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
+
+// Light .tts file reader, to read prefab blocks datas from the world builder.
+// His purpose is to collect non tunnelable blocks from rwg-street-tile prefabs
 public class TTSReader
 {
-    public static List<Vector3i> LoadTerrainBlocks(string fullPath, int yOffset)
+    // NOTE: copied from Prefab.loadBlockData
+    public static List<Vector3i> GetUndergroundObstacles(string fullPath, int yOffset)
     {
         try
         {
-            using (var baseStream = new FileStream(fullPath, FileMode.Open))
+            using (var stream = new FileStream(fullPath, FileMode.Open))
             {
-                // using (PooledBinaryReader pooledBinaryReader = MemoryPools.poolBinaryReader.AllocSync(_bReset: false))
-                using (var pooledBinaryReader = new BinaryReader(baseStream))
+                using (var reader = new BinaryReader(stream))
                 {
-                    // pooledBinaryReader.SetBaseStream(baseStream);
-                    if (pooledBinaryReader.ReadChar() != 't' || pooledBinaryReader.ReadChar() != 't' || pooledBinaryReader.ReadChar() != 's' || pooledBinaryReader.ReadChar() != 0)
+                    if (reader.ReadChar() != 't' || reader.ReadChar() != 't' || reader.ReadChar() != 's' || reader.ReadChar() != 0)
                     {
                         return null;
                     }
 
-                    uint version = pooledBinaryReader.ReadUInt32();
+                    uint version = reader.ReadUInt32();
 
-                    return GetTerrainBlocks(pooledBinaryReader, version, yOffset);
+                    return GetUndergroundObstacles(reader, version, yOffset);
                 }
             }
         }
         catch (Exception e)
         {
-            Log.Error($"[Cave] Error while reading '{fullPath}': {e}");
+            Log.Error($"[Cave] Error while reading .tts file '{fullPath}': {e}");
             return null;
         }
     }
 
-    private static Vector3i OffsetToCoord(int _offset, int size_x, int size_y)
-    {
-        int num = size_x * size_y;
-        int z = _offset / num;
-        _offset %= num;
-        int y = _offset / size_x;
-        int x = _offset % size_x;
-
-        return new Vector3i(x, y, z);
-    }
-
-    private static bool BlockIsTerrain(BlockValue block)
-    {
-        return block.type < 256 && !block.isWater;
-    }
-
-    private static List<Vector3i> GetTerrainBlocks(BinaryReader _br, uint _version, int yOffset)
+    // NOTE: copied from Prefab.readBlockData
+    private static List<Vector3i> GetUndergroundObstacles(BinaryReader _br, uint _version, int yOffset)
     {
         int size_x = _br.ReadInt16();
         int size_y = _br.ReadInt16();
@@ -58,6 +45,7 @@ public class TTSReader
         var result = new List<Vector3i>();
         var blockValue = new BlockValue();
         var _data = new Prefab.Data();
+
         _data.Expand(blockCount);
 
         if (_version >= 2 && _version < 7)
@@ -69,8 +57,7 @@ public class TTSReader
             _br.ReadBoolean(); // bAllowTopSoilDecorations
         }
 
-        int bufferSize = blockCount * 4;
-        byte[] tempBuf = new byte[Utils.FastMax(200000, bufferSize)]; ;
+        byte[] tempBuf = new byte[Utils.FastMax(200_000, blockCount * 4)]; ;
 
         int cursor = 0;
         _br.Read(tempBuf, 0, blockCount * 4);
@@ -86,7 +73,7 @@ public class TTSReader
                         blockValue.rawData = (uint)(tempBuf[cursor] | (tempBuf[cursor + 1] << 8) | (tempBuf[cursor + 2] << 16) | (tempBuf[cursor + 3] << 24));
                         cursor += 4;
 
-                        if (y < -yOffset && (blockValue.isair || BlockIsTerrain(blockValue)))
+                        if (y <= -yOffset && IsObstacle(blockValue))
                         {
                             result.Add(new Vector3i(x, y, z));
                         }
@@ -113,7 +100,7 @@ public class TTSReader
 
                 var position = OffsetToCoord(i, size_x, size_y);
 
-                if (position.y < -yOffset && (blockValue.isair || BlockIsTerrain(blockValue)))
+                if (position.y <= -yOffset && IsObstacle(blockValue))
                 {
                     result.Add(position);
                 }
@@ -123,4 +110,22 @@ public class TTSReader
 
         return result;
     }
+
+    // NOTE: copied from Prefab.offsetToCoord
+    private static Vector3i OffsetToCoord(int _offset, int size_x, int size_y)
+    {
+        int num = size_x * size_y;
+        int z = _offset / num;
+        _offset %= num;
+        int y = _offset / size_x;
+        int x = _offset % size_x;
+
+        return new Vector3i(x, y, z);
+    }
+
+    public static bool IsObstacle(BlockValue block)
+    {
+        return block.type > 255 || block.isWater || block.isair;
+    }
+
 }
