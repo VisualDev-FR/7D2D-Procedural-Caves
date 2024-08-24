@@ -11,10 +11,13 @@ using UnityEngine.Experimental.Rendering;
 
 using Random = System.Random;
 using Path = System.IO.Path;
+using MusicUtils;
 
 
 public static class CavePlanner
 {
+    private static CaveMap cavemap;
+
     private static readonly Dictionary<string, PrefabData> allCavePrefabs = new Dictionary<string, PrefabData>();
 
     private static List<string> wildernessEntranceNames = new List<string>();
@@ -261,16 +264,24 @@ public static class CavePlanner
         Log.Out($"[Cave] {cachedPrefabs.Count} cave prefabs added.");
     }
 
-    private static void ParseRwgStreetTile(PrefabDataInstance pdi)
+    private static void SaveClusters(List<string> strClusters)
     {
-        var path = pdi.location.FullPath;
-        var terrainBlocks = TTSReader.GetUndergroundObstacles(path, pdi.prefab.yOffset);
+        var path = $"{caveTempDir}/cluster.csv";
 
-        Log.Out($"{terrainBlocks.Count} obstacles found for '{pdi.prefab.Name}'");
+        using (var writer = new StreamWriter(path))
+        {
+            foreach (var strCluster in strClusters)
+            {
+                writer.WriteLine(strCluster);
+            }
+        }
     }
 
     private static void AddSurfacePrefabs(PrefabCache cachedPrefabs)
     {
+        var rwgTilesClusters = new Dictionary<string, List<Rect3D>>();
+        var placedClusters = new List<string>();
+
         foreach (var pdi in PrefabManager.UsedPrefabsWorld)
         {
             bool isRwgTile = pdi.prefab.Tags.Test_AnySet(CaveConfig.tagRwgStreetTile);
@@ -278,14 +289,32 @@ public static class CavePlanner
 
             if (isRwgTile)
             {
-                ParseRwgStreetTile(pdi);
+                if (!rwgTilesClusters.TryGetValue(pdi.prefab.Name, out var clusters))
+                {
+                    var path = pdi.location.FullPath;
+                    var terrainBlocks = TTSReader.GetUndergroundObstacles(path, pdi.prefab.yOffset);
+                    clusters = TTSReader.ClusterizeBlocks(terrainBlocks.ToHashSet());
+                    rwgTilesClusters[pdi.prefab.Name] = clusters;
+
+                    Log.Out($"[Cave] {clusters.Count} clusters found for '{pdi.prefab.Name}'");
+                }
+
+                foreach (var cluster in clusters)
+                {
+                    var position = pdi.boundingBoxPosition + HalfWorldSize;
+                    var rectangle = cluster.Transform(position, pdi.rotation, pdi.prefab.size);
+                    var cavePrefab = new CavePrefab(rectangle);
+                    cachedPrefabs.AddPrefab(cavePrefab);
+                    placedClusters.Add($"{pdi.boundingBoxPosition} | {rectangle.start - HalfWorldSize} | {rectangle.end - HalfWorldSize}");
+                }
             }
-
-            if (isRwgTile || isUndergound)
-                continue;
-
-            cachedPrefabs.AddPrefab(new CavePrefab(cachedPrefabs.Count + 1, pdi, HalfWorldSize));
+            else if (!isUndergound)
+            {
+                cachedPrefabs.AddPrefab(new CavePrefab(cachedPrefabs.Count + 1, pdi, HalfWorldSize));
+            }
         }
+
+        SaveClusters(placedClusters);
     }
 
     public static IEnumerator GenerateCaveMap()
@@ -315,8 +344,9 @@ public static class CavePlanner
 
         AddSurfacePrefabs(cachedPrefabs);
 
+        cavemap = new CaveMap();
+
         var localMinimas = new HashSet<CaveBlock>();
-        var cavemap = new CaveMap();
         int index = 0;
 
         foreach (var edge in edges)
@@ -441,31 +471,7 @@ public static class CavePlanner
 
     public static void SaveCaveMap()
     {
-        string source = $"{caveTempDir}/cavemap";
-        string destination = $"{WorldBuilder.WorldPath}/cavemap";
-
-        if (!Directory.Exists(source))
-            return;
-
-        if (Directory.Exists(destination))
-            Directory.Delete(destination);
-
-        Directory.CreateDirectory(destination);
-
-        try
-        {
-            foreach (string filePath in Directory.GetFiles(source))
-            {
-                string fileName = Path.GetFileName(filePath);
-                string destPath = Path.Combine(destination, fileName);
-
-                File.Move(filePath, destPath);
-            }
-        }
-        catch (Exception ex)
-        {
-            Log.Error($"An error occured: {ex.Message}");
-        }
+        cavemap.Save($"{WorldBuilder.WorldPath}/cavemap");
     }
 
 }

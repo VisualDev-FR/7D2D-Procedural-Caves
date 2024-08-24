@@ -22,6 +22,58 @@ public class Rect3D
     {
         return start.GetHashCode() + end.GetHashCode();
     }
+
+    public static Rect3D RotateRectangle(int _rotCount, Rect3D marker, Vector3i tileSize, bool _bLeft = true)
+    {
+        var rectangle = new Rect3D(marker.start, marker.end);
+
+        for (int i = 0; i < _rotCount; i++)
+        {
+            Vector3i size = rectangle.Size;
+            Vector3i start = rectangle.start;
+            Vector3i end = start + size;
+
+            if (_bLeft)
+            {
+                start = new Vector3i(tileSize.z - start.z, start.y, start.x);
+                end = new Vector3i(tileSize.z - end.z, end.y, end.x);
+            }
+            else
+            {
+                start = new Vector3i(start.z, start.y, tileSize.x - start.x);
+                end = new Vector3i(end.z, end.y, tileSize.x - end.x);
+            }
+            if (start.x > end.x)
+            {
+                MathUtils.Swap(ref start.x, ref end.x);
+            }
+            if (start.z > end.z)
+            {
+                MathUtils.Swap(ref start.z, ref end.z);
+            }
+
+            rectangle.start = start;
+            MathUtils.Swap(ref size.x, ref size.z);
+            rectangle.end = start + size;
+
+            MathUtils.Swap(ref tileSize.x, ref tileSize.z);
+        }
+
+        return rectangle;
+    }
+
+    public Rect3D Transform(Vector3i position, byte rotation, Vector3i tileSize)
+    {
+        var rectangle = RotateRectangle(1, this, tileSize);
+
+        rectangle.start.x += position.x;
+        rectangle.start.z += position.z;
+
+        rectangle.end.x += position.x;
+        rectangle.end.z += position.z;
+
+        return rectangle;
+    }
 }
 
 // Light .tts file reader, to read prefab blocks datas from the world builder.
@@ -205,8 +257,6 @@ public class TTSReader
                     }
                 }
             }
-
-            Log.Out($"cluster: {cluster.Count} points");
 
             blockClusters.Add(new Rect3D(clusterMin, clusterMax));
         }

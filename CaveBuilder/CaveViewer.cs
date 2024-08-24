@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Linq;
 using System.Collections;
+using System.Numerics;
 
 
 public static class CaveViewer
@@ -468,28 +469,31 @@ public static class CaveViewer
 
     public static void ClusterizeCommand(string[] args)
     {
-        var timer = CaveUtils.StartTimer();
+        var playerPos = new Vector3i(958, 26, -1440);
+        CaveDebugConsoleCmd.FindClusters(playerPos);
 
-        var path = @"C:\SteamLibrary\steamapps\common\7 Days To Die\Data\Prefabs\RWGTiles\rwg_tile_downtown_corner.tts";
-        var points = TTSReader.GetUndergroundObstacles(path, -11);
+        // var timer = CaveUtils.StartTimer();
 
-        Log.Out($"{points.Count} points");
+        // var path = @"C:\SteamLibrary\steamapps\common\7 Days To Die\Data\Prefabs\RWGTiles\rwg_tile_downtown_corner.tts";
+        // var points = TTSReader.GetUndergroundObstacles(path, -11);
 
-        var clusters = TTSReader.ClusterizeBlocks(points.ToHashSet());
+        // Log.Out($"{points.Count} points");
 
-        Log.Out($"timer: {timer.ElapsedMilliseconds}ms");
+        // var clusters = TTSReader.ClusterizeBlocks(points.ToHashSet());
 
-        // var voxels = new HashSet<Voxell>();
-        var voxels = points.Select(pos => new Voxell(pos, WaveFrontMaterial.LightBlue)).ToHashSet();
+        // Log.Out($"timer: {timer.ElapsedMilliseconds}ms");
 
-        foreach (var cluster in clusters)
-        {
-            Log.Out($"min: {cluster.start}, max: {cluster.end}");
-            voxels.Add(new Voxell(cluster.start, cluster.Size, WaveFrontMaterial.DarkGreen) { force = true });
-            break;
-        }
+        // // var voxels = new HashSet<Voxell>();
+        // var voxels = points.Select(pos => new Voxell(pos, WaveFrontMaterial.LightBlue)).ToHashSet();
 
-        GenerateObjFile("dbscan.obj", voxels, false);
+        // foreach (var cluster in clusters)
+        // {
+        //     Log.Out($"min: {cluster.start}, max: {cluster.end}");
+        //     voxels.Add(new Voxell(cluster.start, cluster.Size, WaveFrontMaterial.DarkGreen) { force = true });
+        //     break;
+        // }
+
+        // GenerateObjFile("dbscan.obj", voxels, false);
     }
 
     public static void Main(string[] args)

@@ -13,5 +13,6 @@
   <ItemGroup>
     <!-- Assembly info -->
     <Compile Include="../Scripts/TTSReader.cs" />
+    <Compile Include="../Scripts/CaveDebugConsoleCmd.cs" />
   </ItemGroup>
 </Project>

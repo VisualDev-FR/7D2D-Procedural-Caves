@@ -58,6 +58,12 @@ public class CavePrefab
         );
     }
 
+    public CavePrefab(Rect3D rectangle)
+    {
+        position = rectangle.start;
+        Size = rectangle.Size;
+    }
+
     public Prefab.Marker RandomMarker(Random rand, int rotation, int xMax, int yMax, int zMax)
     {
         var markerType = Prefab.Marker.MarkerTypes.None;

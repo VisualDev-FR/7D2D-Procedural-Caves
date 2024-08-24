@@ -32,8 +32,6 @@ public class PrefabCache
     {
         Prefabs.Add(prefab);
 
-        CaveUtils.Assert(!prefab.prefabDataInstance.prefab.Tags.Test_AnySet(CaveConfig.tagRwgStreetTile), "Street tile should not be cached");
-
         foreach (var chunkHash in prefab.GetOverlappingChunkHashes())
         {
             if (!groupedCavePrefabs.ContainsKey(chunkHash))
