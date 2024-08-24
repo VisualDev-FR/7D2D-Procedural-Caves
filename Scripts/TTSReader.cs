@@ -20,7 +20,7 @@ public struct Rect3D
 }
 
 // Light .tts file reader, to read prefab blocks datas from the world builder.
-// His purpose is to collect non tunnelable blocks from rwg-street-tile prefabs
+// His purpose is to collect and clusterize non tunnelable blocks from rwg-street-tile prefabs
 public class TTSReader
 {
     // NOTE: copied from Prefab.loadBlockData
@@ -133,12 +133,12 @@ public class TTSReader
     private static Vector3i OffsetToCoord(int _offset, int size_x, int size_y)
     {
         int num = size_x * size_y;
-        int z = _offset / num;
+        int x = _offset / num;
         _offset %= num;
         int y = _offset / size_x;
-        int x = _offset % size_x;
+        int z = _offset % size_x;
 
-        return new Vector3i(z, y, x);
+        return new Vector3i(x, y, z);
     }
 
     public static bool IsObstacle(BlockValue block, Vector3 position, int yOffset)
