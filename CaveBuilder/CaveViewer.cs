@@ -475,7 +475,7 @@ public static class CaveViewer
 
         Log.Out($"{points.Count} points");
 
-        var clusters = TTSReader.Clusterize(points.ToHashSet());
+        var clusters = TTSReader.ClusterizeBlocks(points.ToHashSet());
 
         Log.Out($"timer: {timer.ElapsedMilliseconds}ms");
 

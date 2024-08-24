@@ -146,14 +146,26 @@ public class TTSReader
         return position.y < -yOffset - CaveBuilder.terrainMargin && (block.type > 255 || block.isWater || block.isair);
     }
 
-    public static List<Rect3D> Clusterize(HashSet<Vector3i> points)
+    public static bool IsInClusters(Vector3i pos, List<Rect3D> clusters)
     {
-        var clusters = new List<Rect3D>();
-        var visited = new HashSet<Vector3i>();
+        foreach (var rect in clusters)
+        {
+            if (CaveUtils.Intersect3D(pos.x, pos.y, pos.z, rect.start, rect.Size))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public static List<Rect3D> ClusterizeBlocks(HashSet<Vector3i> points)
+    {
+        var blockClusters = new List<Rect3D>();
 
         foreach (var start in points)
         {
-            if (visited.Contains(start))
+            if (IsInClusters(start, blockClusters))
                 continue;
 
             var clusterMin = new Vector3i(int.MaxValue, int.MaxValue, int.MaxValue);
@@ -191,11 +203,10 @@ public class TTSReader
 
             Log.Out($"cluster: {cluster.Count} points");
 
-            visited.UnionWith(cluster);
-            clusters.Add(new Rect3D(clusterMin, clusterMax));
+            blockClusters.Add(new Rect3D(clusterMin, clusterMax));
         }
 
-        return clusters;
+        return blockClusters;
     }
 
 }
