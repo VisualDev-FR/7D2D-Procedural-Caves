@@ -6,7 +6,7 @@ public class CaveNoise
 
     public int seed;
 
-    public static CaveNoise defaultNoise = new CaveNoise(
+    public static CaveNoise pathingNoise = new CaveNoise(
         seed: CaveBuilder.SEED,
         octaves: 1,
         frequency: 0.15f,

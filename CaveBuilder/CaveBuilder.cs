@@ -40,17 +40,6 @@ public static class CaveBuilder
 
     public static int terrainMargin = 2;
 
-    public static CaveNoise pathingNoise = CaveNoise.defaultNoise;
-
-    public static void Debug()
-    {
-        Log.Out($"SEED .......... {SEED}");
-        Log.Out($"SIZE .......... {worldSize}");
-        Log.Out($"PREFAB_COUNT .. {PREFAB_COUNT}");
-        Log.Out($"PATHING_SEED .. {pathingNoise.seed}");
-        Log.Out("");
-    }
-
     public static bool TryPlacePrefab(ref CavePrefab prefab, List<CavePrefab> others)
     {
         int maxTries = 10;

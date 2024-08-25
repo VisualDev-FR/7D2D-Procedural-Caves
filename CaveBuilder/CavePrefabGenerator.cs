@@ -217,40 +217,4 @@ public class CavePrefabGenerator
         return terrain;
     }
 
-
-    public static List<Vector3i> GenerateTunnels(Vector3i position, Vector3i size, int seed = -1)
-    {
-        if (seed == -1)
-            seed = new Random().Next(MAX_SEED);
-
-        var rand = new Random(seed);
-
-        Log.Out($"Seed: {seed}");
-
-        var prefab = new CavePrefab(0)
-        {
-            position = position,
-            Size = size,
-        };
-
-        var markers = new List<Prefab.Marker>(){
-            prefab.RandomMarker(rand, 0, 5, 5, 1),
-            prefab.RandomMarker(rand, 1, 5, 5, 1),
-        };
-
-        prefab.UpdateMarkers(markers);
-
-        var node1 = prefab.nodes[0];
-        var node2 = prefab.nodes[1];
-
-        var tunneler = new PrefabTunneler();
-        var path = tunneler.FindPath(node1.position, node2.position, prefab);
-        var tunnel = tunneler.ThickenTunnels(path, prefab);
-
-        var result = path.Select(block => new Vector3i(block.x, block.y, block.z)).ToList();
-
-        return result;
-    }
-
-
 }

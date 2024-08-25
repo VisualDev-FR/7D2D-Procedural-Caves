@@ -129,7 +129,6 @@
     <Compile Include="CaveBuilder\HashedPriorityQueue.cs" />
     <Compile Include="CaveBuilder\MultiStream.cs" />
     <Compile Include="CaveBuilder\PrefabCache.cs" />
-    <Compile Include="CaveBuilder\PrefabTunneler.cs" />
     <Compile Include="CaveBuilder\Segment.cs" />
     <Compile Include="CaveBuilder\Vector2s.cs" />
     <Compile Include="CaveBuilder\Vector3bf.cs" />

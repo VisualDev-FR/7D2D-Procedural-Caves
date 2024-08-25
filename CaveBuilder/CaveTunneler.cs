@@ -109,7 +109,7 @@ public class CaveTunneler
                     continue;
                 }
 
-                bool isCave = CaveBuilder.pathingNoise.IsCave(neighborPos);
+                bool isCave = CaveNoise.pathingNoise.IsCave(neighborPos);
                 int factor = 0;
 
                 if (!isCave) factor += 1;

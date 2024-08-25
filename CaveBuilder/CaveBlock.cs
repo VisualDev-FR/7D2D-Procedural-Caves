@@ -1,5 +1,4 @@
 using System.IO;
-using UnityEngine;
 
 public class CaveBlock
 {
@@ -18,8 +17,6 @@ public class CaveBlock
     public int y => blockChunkPos.y;
 
     public int z => (chunkPos.z << 4) + blockChunkPos.z;
-
-    // public Vector3i position => new Vector3i(x, y, z);
 
     public CaveBlock(Vector3i position, sbyte density = defaultDensity)
     {
@@ -77,11 +74,6 @@ public class CaveBlock
         return new Vector3i(x, y, z);
     }
 
-    public void SetWater(bool isWater)
-    {
-        this.isWater = isWater;
-    }
-
     public override int GetHashCode()
     {
         return GetHashCode(x, y, z);
@@ -89,8 +81,24 @@ public class CaveBlock
 
     public static int GetHashCode(int x, int y, int z)
     {
-        // same as Vector3i.GetHashCode(), to make a caveblock comaprable to Vector3i
+        // same as Vector3i.GetHashCode(), to make a caveblock comparable to Vector3i
         return x * 8976890 + y * 981131 + z;
+    }
+
+    public Vector3i ToWorldPos()
+    {
+        Vector3i chunkPos = new Vector3i(
+            blockChunkPos.x - CaveBuilder.worldSize / 32,
+            0,
+            blockChunkPos.z - CaveBuilder.worldSize / 32
+        );
+
+        return 16 * chunkPos + blockChunkPos.ToVector3i();
+    }
+
+    public override string ToString()
+    {
+        return $"{x},{y},{z}";
     }
 
     public override bool Equals(object obj)
@@ -110,27 +118,6 @@ public class CaveBlock
     public static bool operator !=(CaveBlock p1, CaveBlock p2)
     {
         return p1.x != p2.x || p1.y != p2.y || p1.z != p2.z;
-    }
-
-    public Vector3i ToWorldPos()
-    {
-        Vector3i chunkPos = new Vector3i(
-            blockChunkPos.x - CaveBuilder.worldSize / 32,
-            0,
-            blockChunkPos.z - CaveBuilder.worldSize / 32
-        );
-
-        return 16 * chunkPos + blockChunkPos.ToVector3i();
-    }
-
-    public override string ToString()
-    {
-        return $"{x},{y},{z}";
-    }
-
-    public int Index()
-    {
-        return x + CaveBuilder.worldSize * z;
     }
 
 }
