@@ -5,13 +5,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using WorldGenerationEngineFinal;
-
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
 
 using Random = System.Random;
-using Path = System.IO.Path;
-using MusicUtils;
 
 
 public static class CavePlanner
@@ -53,16 +50,6 @@ public static class CavePlanner
         PrefabManager.Clear();
         PrefabManager.ClearDisplayed();
         PrefabManager.Cleanup();
-    }
-
-    private static HashSet<string> GetAddedPrefabNames()
-    {
-        var result =
-                from prefab in PrefabManager.UsedPrefabsWorld
-                where prefab.prefab.Tags.Test_AnySet(CaveConfig.tagCave)
-                select prefab.prefab.Name;
-
-        return result.ToHashSet();
     }
 
     public static PrefabData SelectRandomWildernessEntrance()
@@ -281,8 +268,6 @@ public static class CavePlanner
                     var terrainBlocks = TTSReader.GetUndergroundObstacles(path, pdi.prefab.yOffset);
                     clusters = TTSReader.ClusterizeBlocks(terrainBlocks.ToHashSet());
                     rwgTilesClusters[pdi.prefab.Name] = clusters;
-
-                    // Log.Out($"[Cave] {clusters.Count} clusters found for '{pdi.prefab.Name}'");
                 }
 
                 foreach (var cluster in clusters)
@@ -302,10 +287,6 @@ public static class CavePlanner
 
     public static IEnumerator GenerateCaveMap()
     {
-        // var _cavemap = new CaveMap();
-        // yield return GenerateCavePreview(_cavemap);
-        // yield break;
-
         if (WorldBuilder.IsCanceled)
             yield break;
 
@@ -396,8 +377,6 @@ public static class CavePlanner
             {
                 size = new Vector3i(pdi.boundingBoxSize.z, pdi.boundingBoxSize.y, pdi.boundingBoxSize.x);
             }
-
-            // Log.Out($"[Cave] pdi.boundingBoxPosition: {position}");
 
             foreach (var point in CaveUtils.GetBoundingEdges(position, size))
             {
