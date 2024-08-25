@@ -21,7 +21,6 @@ public class Graph
     {
         prefabsConnections.TryGetValue(edge.HashPrefabs(), out int occurences);
 
-        // const float distCoef = .5f;
         const float occurencesCoef = 2f;
         const float orientationCoef = 2f;
 
@@ -52,12 +51,12 @@ public class Graph
         Nodes.Add(edge.node2);
     }
 
-    public List<GraphEdge> GetEdgesFromNode(GraphNode node)
+    private List<GraphEdge> GetEdgesFromNode(GraphNode node)
     {
         return Edges.Where(e => e.node1.Equals(node) || e.node2.Equals(node)).ToList();
     }
 
-    public List<GraphEdge> FindMST()
+    private List<GraphEdge> FindMST()
     {
         var graph = new List<GraphEdge>();
         var nodes = new HashSet<GraphNode>();
@@ -86,7 +85,7 @@ public class Graph
         return graph;
     }
 
-    public static Graph BuildDelauneyGraph(List<CavePrefab> prefabs)
+    private static Graph BuildDelauneyGraph(List<CavePrefab> prefabs)
     {
         var points = prefabs.Select((prefab) => new DelauneyPoint(prefab));
         var triangulator = new DelaunayTriangulator();
@@ -135,4 +134,5 @@ public class Graph
 
         return edges; //graph.Edges.ToList();
     }
+
 }
