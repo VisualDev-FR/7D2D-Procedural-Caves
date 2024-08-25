@@ -87,7 +87,7 @@ public class CaveDebugConsoleCmd : ConsoleCmdAbstract
                 var start = ParseVector(splitted[1].Trim());
                 var end = ParseVector(splitted[2].Trim());
 
-                var key = new Vector2i(tilePos.x / 150, tilePos.z / 150);
+                var key = new Vector2i(tilePos.x, tilePos.z);
                 var rect = new Rect3D(start, end);
 
                 if (!result.TryGetValue(key, out var list))
@@ -105,11 +105,11 @@ public class CaveDebugConsoleCmd : ConsoleCmdAbstract
 
     public static List<Rect3D> FindClusters(Vector3 playerPos)
     {
+        var prefabInstance = GameManager.Instance.World.GetPOIAtPosition(playerPos, false);
         var result = new List<Rect3D>();
         var clusters = ReadClusters();
-        var tileX = (int)playerPos.x / 150;
-        var tileZ = (int)playerPos.z / 150;
-        var tilePosition = new Vector2i(tileX, tileZ);
+
+        var tilePosition = new Vector2i(prefabInstance.boundingBoxPosition.x, prefabInstance.boundingBoxPosition.z);
 
         Log.Out($"[Cluster] playerPos: [{playerPos}], tilePos: [{tilePosition}]");
 

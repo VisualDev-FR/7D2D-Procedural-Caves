@@ -64,12 +64,14 @@ public class Rect3D
 
     public Rect3D Transform(Vector3i position, byte rotation, Vector3i tileSize)
     {
-        var rectangle = RotateRectangle(1, this, tileSize);
+        var rectangle = RotateRectangle(rotation, this, tileSize);
 
         rectangle.start.x += position.x;
+        rectangle.start.y += position.y;
         rectangle.start.z += position.z;
 
         rectangle.end.x += position.x;
+        rectangle.end.y += position.y;
         rectangle.end.z += position.z;
 
         return rectangle;

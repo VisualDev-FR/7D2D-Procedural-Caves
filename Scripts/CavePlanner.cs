@@ -377,8 +377,6 @@ public static class CavePlanner
 
         yield return GenerateCavePreview(cavemap);
 
-        cavemap.Save($"{caveTempDir}/cavemap");
-
         yield return WorldBuilder.SetMessage("Creating cave preview...", _logToConsole: true);
 
         Log.Out($"{cavemap.Count:N0} cave blocks generated, timer={CaveUtils.TimeFormat(timer)}.");
