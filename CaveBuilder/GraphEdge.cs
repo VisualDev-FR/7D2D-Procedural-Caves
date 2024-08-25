@@ -22,12 +22,6 @@ public class GraphEdge : IComparable<GraphEdge>
         return $"{index1};{index2}";
     }
 
-    private float GetWeight()
-    {
-        // return CaveUtils.SqrEuclidianDist2D(node1, node2) / CaveUtils.FastAbs(node1.y - node2.y);
-        return CaveUtils.SqrEuclidianDist(node1.position, node2.position);
-    }
-
     public int GetOrientationWeight()
     {
         Vector3i p1 = node1.position;
@@ -44,7 +38,7 @@ public class GraphEdge : IComparable<GraphEdge>
     {
         this.node1 = node1;
         this.node2 = node2;
-        Weight = GetWeight();
+        Weight = CaveUtils.SqrEuclidianDist(node1.position, node2.position);
     }
 
     public int CompareTo(GraphEdge other)
@@ -62,25 +56,6 @@ public class GraphEdge : IComparable<GraphEdge>
         hash = hash * 23 + hash1 + hash2;
 
         return hash;
-    }
-
-    public string ToWaveFront(ref int vertexOffset)
-    {
-        var wavefront = new List<String>();
-
-        var pointA = node1.position;
-        var pointB = node2.position;
-
-        // Write vertices
-        wavefront.Add($"v {pointA.x} {pointA.y} {pointA.z}");
-        wavefront.Add($"v {pointB.x} {pointB.y} {pointB.z}");
-
-        // Write edges
-        wavefront.Add($"l {vertexOffset} {vertexOffset + 1}");
-
-        vertexOffset += 2; // Each tetrahedron adds 4 new vertices
-
-        return string.Join("\n", wavefront);
     }
 }
 

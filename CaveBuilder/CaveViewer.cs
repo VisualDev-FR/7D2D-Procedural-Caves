@@ -179,7 +179,7 @@ public static class CaveViewer
         var node1 = p1.nodes[1];
         var node2 = p2.nodes[0];
 
-        var edge = new Edge(node1, node2);
+        var edge = new GraphEdge(node1, node2);
 
         Log.Out($"prefab   {node2.prefab.position}");
         Log.Out($"start    {node2.marker.start}");
@@ -267,7 +267,7 @@ public static class CaveViewer
         var position = new Vector3i(0, 0, 0);
         var size = new Vector3i(vecSize, 10, vecSize);
         var seed = new Random().Next();
-        var terrain = CavePrefabGenerator.GenerateTunnels(position, size);
+        var terrain = CavePrefabGenerator.GenerateRoomV3(position, size);
 
         var voxels = terrain.Select((pos) => new Voxell(pos)).ToHashSet();
 
@@ -287,8 +287,6 @@ public static class CaveViewer
 
         var timer = CaveUtils.StartTimer();
         var cachedPrefabs = CaveBuilder.GetRandomPrefabs(CaveBuilder.PREFAB_COUNT);
-
-        CaveBuilder.Debug();
 
         Log.Out("Start solving graph...");
 
@@ -469,31 +467,31 @@ public static class CaveViewer
 
     public static void ClusterizeCommand(string[] args)
     {
-        // var playerPos = new Vector3i(958, 26, -1440);
-        // CaveDebugConsoleCmd.FindClusters(playerPos);
+        // // var playerPos = new Vector3i(958, 26, -1440);
+        // // CaveDebugConsoleCmd.FindClusters(playerPos);
 
-        var timer = CaveUtils.StartTimer();
+        // var timer = CaveUtils.StartTimer();
 
-        var path = @"C:\SteamLibrary\steamapps\common\7 Days To Die\Data\Prefabs\RWGTiles\rwg_tile_downtown_straight.tts";
-        var points = TTSReader.GetUndergroundObstacles(path, -16);
+        // var path = @"C:\SteamLibrary\steamapps\common\7 Days To Die\Data\Prefabs\RWGTiles\rwg_tile_downtown_straight.tts";
+        // var points = TTSReader.GetUndergroundObstacles(path, -16);
 
-        Log.Out($"{points.Count} points");
+        // Log.Out($"{points.Count} points");
 
-        var clusters = TTSReader.ClusterizeBlocks(points.ToHashSet());
+        // var clusters = TTSReader.ClusterizeBlocks(points.ToHashSet());
 
-        Log.Out($"timer: {timer.ElapsedMilliseconds}ms");
+        // Log.Out($"timer: {timer.ElapsedMilliseconds}ms");
 
-        // var voxels = new HashSet<Voxell>();
-        var voxels = points.Select(pos => new Voxell(pos, WaveFrontMaterial.LightBlue)).ToHashSet();
+        // // var voxels = new HashSet<Voxell>();
+        // var voxels = points.Select(pos => new Voxell(pos, WaveFrontMaterial.LightBlue)).ToHashSet();
 
-        foreach (var cluster in clusters)
-        {
-            Log.Out($"min: {cluster.start}, max: {cluster.end}");
-            voxels.Add(new Voxell(cluster.start, cluster.Size, WaveFrontMaterial.DarkGreen) { force = true });
-            break;
-        }
+        // foreach (var cluster in clusters)
+        // {
+        //     Log.Out($"min: {cluster.start}, max: {cluster.end}");
+        //     voxels.Add(new Voxell(cluster.start, cluster.Size, WaveFrontMaterial.DarkGreen) { force = true });
+        //     break;
+        // }
 
-        GenerateObjFile("dbscan.obj", voxels, false);
+        // GenerateObjFile("dbscan.obj", voxels, false);
     }
 
     public static void Main(string[] args)
