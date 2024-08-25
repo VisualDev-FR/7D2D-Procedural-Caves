@@ -18,6 +18,9 @@ Optimization:
     ☐ work special vector3sbs(short, byte, short) as long as possible in cave tunneling, avoiding instanciating caveBlocks
     ☐ free cavemap memory after saving it, after game exit
 
+Bug:
+    ☐ can't place torch inside caveAir
+
 Cave generation:
     ✔ random pois placement @done(24-08-15 22:38)
     ✔ cave decoration @done(24-08-15 22:38)

@@ -34,6 +34,8 @@ public class CaveTunneler
         new Vector3(0.75f, 0.75f, 0.75f)
     };
 
+    private Vector3i HalfWorldSize => new Vector3i(CaveBuilder.worldSize / 2, 0, CaveBuilder.worldSize / 2);
+
     // public API
     public HashSet<CaveBlock> GenerateTunnel(Edge edge, PrefabCache cachedPrefabs, CaveMap cavemap)
     {
@@ -50,6 +52,18 @@ public class CaveTunneler
         var start = edge.node1.Normal(CaveUtils.FastMax(5, edge.node1.NodeRadius));
         var target = edge.node2.Normal(CaveUtils.FastMax(5, edge.node2.NodeRadius));
 
+        if (cachedPrefabs.MinSqrDistanceToPrefab(start) == 0)
+        {
+            Log.Warning($"[Cave] '{edge.Prefab1.Name}' ({start - HalfWorldSize}) intersect with another prefab");
+            return;
+        }
+
+        if (cachedPrefabs.MinSqrDistanceToPrefab(target) == 0)
+        {
+            Log.Warning($"[Cave] '{edge.Prefab2.Name}' ({target - HalfWorldSize}) intersect with another prefab");
+            return;
+        }
+
         var startNode = new AstarNode(start);
         var goalNode = new AstarNode(target);
 
@@ -64,7 +78,7 @@ public class CaveTunneler
 
         queue.Enqueue(startNode, float.MaxValue);
 
-        while (queue.Count > 0 && index++ < 100_000)
+        while (queue.Count > 0 && index++ < 1_000_000)
         {
             AstarNode currentNode = queue.Dequeue();
 
@@ -126,9 +140,8 @@ public class CaveTunneler
         var height1 = WorldBuilder.Instance.GetHeight(start.x, start.z);
         var height2 = WorldBuilder.Instance.GetHeight(target.x, target.z);
 
-        var half = new Vector3i(WorldBuilder.Instance.HalfWorldSize, 0, WorldBuilder.Instance.HalfWorldSize);
-        var p1 = start - half;
-        var p2 = target - half;
+        var p1 = start - HalfWorldSize;
+        var p2 = target - HalfWorldSize;
 
         Log.Warning($"No Path found from '{edge.Prefab1.Name}' ({p1} / {height1}) to '{edge.Prefab2.Name}' ({p2} / ({height2})) after {index} iterations ");
     }

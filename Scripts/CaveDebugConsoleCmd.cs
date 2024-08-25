@@ -105,15 +105,16 @@ public class CaveDebugConsoleCmd : ConsoleCmdAbstract
 
     public static List<Rect3D> FindClusters(Vector3 playerPos)
     {
-        var prefabInstance = GameManager.Instance.World.GetPOIAtPosition(playerPos, false);
-        var result = new List<Rect3D>();
+        var position = new Vector3i(playerPos);
+        position.y = GameManager.Instance.World.GetTerrainHeight(position.x, position.z);
+        var prefabInstance = GameManager.Instance.World.GetPOIAtPosition(position, false);
         var clusters = ReadClusters();
 
         var tilePosition = new Vector2i(prefabInstance.boundingBoxPosition.x, prefabInstance.boundingBoxPosition.z);
 
         Log.Out($"[Cluster] playerPos: [{playerPos}], tilePos: [{tilePosition}]");
 
-        if (!clusters.TryGetValue(tilePosition, out result))
+        if (!clusters.TryGetValue(tilePosition, out var result))
         {
             Log.Out($"[Cluster] No cluster found");
         }
