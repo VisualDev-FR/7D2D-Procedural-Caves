@@ -1,10 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Text.RegularExpressions;
+using System.Linq;
 using UnityEngine;
-using WorldGenerationEngineFinal;
-using Path = System.IO.Path;
 
 
 public class CaveDebugConsoleCmd : ConsoleCmdAbstract
@@ -66,57 +63,32 @@ public class CaveDebugConsoleCmd : ConsoleCmdAbstract
         return new Vector3i(int.Parse(array[0]), int.Parse(array[1]), int.Parse(array[2]));
     }
 
-    public static Dictionary<Vector2i, List<Rect3D>> ReadClusters()
-    {
-        var result = new Dictionary<Vector2i, List<Rect3D>>();
-        var tempDir = @"C:\Users\menan\AppData\Roaming\7DaysToDie\temp";
-        var path = $"{tempDir}/cluster.csv";
-
-        using (var reader = new StreamReader(path))
-        {
-            var datas = reader.ReadToEnd();
-
-            foreach (var row in datas.Split('\n'))
-            {
-                if (row == "")
-                    continue;
-
-                var splitted = row.Split('|');
-
-                var tilePos = ParseVector(splitted[0].Trim());
-                var start = ParseVector(splitted[1].Trim());
-                var end = ParseVector(splitted[2].Trim());
-
-                var key = new Vector2i(tilePos.x, tilePos.z);
-                var rect = new Rect3D(start, end);
-
-                if (!result.TryGetValue(key, out var list))
-                {
-                    list = new List<Rect3D>();
-                    result[key] = list;
-                }
-
-                list.Add(rect);
-            }
-        }
-
-        return result;
-    }
-
     public static List<Rect3D> FindClusters(Vector3 playerPos)
     {
         var position = new Vector3i(playerPos);
-        position.y = GameManager.Instance.World.GetTerrainHeight(position.x, position.z);
         var prefabInstance = GameManager.Instance.World.GetPOIAtPosition(position, false);
-        var clusters = ReadClusters();
 
-        var tilePosition = new Vector2i(prefabInstance.boundingBoxPosition.x, prefabInstance.boundingBoxPosition.z);
-
-        Log.Out($"[Cluster] playerPos: [{playerPos}], tilePos: [{tilePosition}]");
-
-        if (!clusters.TryGetValue(tilePosition, out var result))
+        if (prefabInstance == null)
         {
-            Log.Out($"[Cluster] No cluster found");
+            Log.Warning("[Cluster] not prefab found");
+            return new List<Rect3D>();
+        }
+
+        var blocks = TTSReader.GetUndergroundObstacles(prefabInstance.location.FullPath, prefabInstance.prefab.yOffset);
+        var clusters = TTSReader.ClusterizeBlocks(blocks.ToHashSet());
+
+        Log.Out($"[Cluster] player: [{playerPos}], prefab: [{prefabInstance.boundingBoxPosition}], rotation: {prefabInstance.rotation}");
+
+        if (clusters.Count == 0)
+        {
+            Log.Warning($"[Cluster] No cluster found for '{prefabInstance.name}'");
+        }
+
+        var result = new List<Rect3D>();
+
+        foreach (var rect in clusters)
+        {
+            result.Add(rect.Transform(prefabInstance.boundingBoxPosition, prefabInstance.rotation, prefabInstance.prefab.size));
         }
 
         return result;

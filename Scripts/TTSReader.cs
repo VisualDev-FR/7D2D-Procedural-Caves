@@ -30,7 +30,7 @@ public class Rect3D
 
         switch (rotation)
         {
-            case 1:
+            case 3:
                 {
                     int num = _x;
                     _x = _z;
@@ -41,7 +41,7 @@ public class Rect3D
                 _x = parentSize.x - _x - 1;
                 _z = parentSize.z - _z - 1;
                 break;
-            case 3:
+            case 1:
                 {
                     int num = _x;
                     _x = parentSize.z - _z - 1;

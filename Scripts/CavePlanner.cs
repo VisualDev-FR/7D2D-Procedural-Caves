@@ -264,23 +264,9 @@ public static class CavePlanner
         Log.Out($"[Cave] {cachedPrefabs.Count} cave prefabs added.");
     }
 
-    private static void SaveClusters(List<string> strClusters)
-    {
-        var path = $"{caveTempDir}/cluster.csv";
-
-        using (var writer = new StreamWriter(path))
-        {
-            foreach (var strCluster in strClusters)
-            {
-                writer.WriteLine(strCluster);
-            }
-        }
-    }
-
     private static void AddSurfacePrefabs(PrefabCache cachedPrefabs)
     {
         var rwgTilesClusters = new Dictionary<string, List<Rect3D>>();
-        var placedClusters = new List<string>();
 
         foreach (var pdi in PrefabManager.UsedPrefabsWorld)
         {
@@ -296,7 +282,7 @@ public static class CavePlanner
                     clusters = TTSReader.ClusterizeBlocks(terrainBlocks.ToHashSet());
                     rwgTilesClusters[pdi.prefab.Name] = clusters;
 
-                    Log.Out($"[Cave] {clusters.Count} clusters found for '{pdi.prefab.Name}'");
+                    // Log.Out($"[Cave] {clusters.Count} clusters found for '{pdi.prefab.Name}'");
                 }
 
                 foreach (var cluster in clusters)
@@ -305,7 +291,6 @@ public static class CavePlanner
                     var rectangle = cluster.Transform(position, pdi.rotation, pdi.prefab.size);
                     var cavePrefab = new CavePrefab(rectangle);
                     cachedPrefabs.AddPrefab(cavePrefab);
-                    placedClusters.Add($"{pdi.boundingBoxPosition} | {rectangle.start - HalfWorldSize} | {rectangle.end - HalfWorldSize}");
                 }
             }
             else if (!isUndergound)
@@ -313,8 +298,6 @@ public static class CavePlanner
                 cachedPrefabs.AddPrefab(new CavePrefab(cachedPrefabs.Count + 1, pdi, HalfWorldSize));
             }
         }
-
-        SaveClusters(placedClusters);
     }
 
     public static IEnumerator GenerateCaveMap()
