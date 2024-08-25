@@ -21,48 +21,6 @@ public class CaveDebugConsoleCmd : ConsoleCmdAbstract
         return getDescription();
     }
 
-    public static IEnumerable<Vector3i> BrowseSelectionPositions()
-    {
-        var selection = BlockToolSelection.Instance;
-
-        var start = selection.m_selectionStartPoint;
-        var end = selection.m_SelectionEndPoint;
-
-        int y = start.y;
-        while (true)
-        {
-            int x = start.x;
-            while (true)
-            {
-                int z = start.z;
-                while (true)
-                {
-                    yield return new Vector3i(x, y, z);
-
-                    if (z == end.z) break;
-                    z += Math.Sign(end.z - start.z);
-                }
-                if (x == end.x) break;
-                x += Math.Sign(end.x - start.x);
-            }
-            if (y == end.y) break;
-            y += Math.Sign(end.y - start.y);
-        }
-
-        yield break;
-    }
-
-    public static Vector3i ParseVector(string s)
-    {
-        string[] array = s.Split(',');
-        if (array.Length != 3)
-        {
-            return Vector3i.zero;
-        }
-
-        return new Vector3i(int.Parse(array[0]), int.Parse(array[1]), int.Parse(array[2]));
-    }
-
     public static List<Rect3D> FindClusters(Vector3 playerPos)
     {
         var position = new Vector3i(playerPos);
@@ -117,11 +75,6 @@ public class CaveDebugConsoleCmd : ConsoleCmdAbstract
         selection.SelectionStart = rectangle.start;
         selection.SelectionEnd = rectangle.end - Vector3i.one;
         selection.SelectionActive = true;
-    }
-
-    private void NotImplementedCommand(string commandName)
-    {
-        Log.Error($"Not implemented command: '{commandName}'");
     }
 
     public override void Execute(List<string> _params, CommandSenderInfo _senderInfo)

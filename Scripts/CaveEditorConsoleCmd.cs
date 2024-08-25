@@ -49,37 +49,6 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
         ";
     }
 
-    public static IEnumerable<Vector3i> BrowseSelectionPositions()
-    {
-        var selection = BlockToolSelection.Instance;
-
-        var start = selection.m_selectionStartPoint;
-        var end = selection.m_SelectionEndPoint;
-
-        int y = start.y;
-        while (true)
-        {
-            int x = start.x;
-            while (true)
-            {
-                int z = start.z;
-                while (true)
-                {
-                    yield return new Vector3i(x, y, z);
-
-                    if (z == end.z) break;
-                    z += Math.Sign(end.z - start.z);
-                }
-                if (x == end.x) break;
-                x += Math.Sign(end.x - start.x);
-            }
-            if (y == end.y) break;
-            y += Math.Sign(end.y - start.y);
-        }
-
-        yield break;
-    }
-
     public static PrefabInstance GetCurrentPrefab()
     {
         var prefabInstanceId = PrefabEditModeManager.Instance.prefabInstanceId;
@@ -173,7 +142,7 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
 
         var _gm = GameManager.Instance;
 
-        foreach (var position in BrowseSelectionPositions())
+        foreach (var position in BlockSelectionUtils.BrowseSelectionPositions())
         {
             var worldBlock = _gm.World.GetBlock(position);
             var clusterIndex = _gm.World.ChunkCache.ClusterIdx;
@@ -209,7 +178,7 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
 
         var _gm = GameManager.Instance;
 
-        foreach (var position in BrowseSelectionPositions())
+        foreach (var position in BlockSelectionUtils.BrowseSelectionPositions())
         {
             var worldBlock = _gm.World.GetBlock(position);
             var upperBlock = _gm.World.GetBlock(position + Vector3i.up);
@@ -238,7 +207,7 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
         var _gm = GameManager.Instance;
         var waterValue = args[1].ToLower() == "fill" ? WaterValue.Full : WaterValue.Empty;
 
-        foreach (var position in BrowseSelectionPositions())
+        foreach (var position in BlockSelectionUtils.BrowseSelectionPositions())
         {
             var worldBlock = _gm.World.GetBlock(position);
 
@@ -439,7 +408,7 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
 
         var _gm = GameManager.Instance;
 
-        foreach (var position in BrowseSelectionPositions())
+        foreach (var position in BlockSelectionUtils.BrowseSelectionPositions())
         {
             var worldBlock = _gm.World.GetBlock(position);
 

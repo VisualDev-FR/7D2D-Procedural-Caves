@@ -96,6 +96,7 @@
     <Compile Include="Harmony\H_WorldBuilder.cs" />
 
     <!-- WorldGen -->
+    <Compile Include="Scripts\BlockSelectionUtils.cs" />
     <Compile Include="Scripts\CaveDebugConsoleCmd.cs" />
     <Compile Include="Scripts\CaveEditorConsoleCmd.cs" />
     <Compile Include="Scripts\CaveEntrancesPlanner.cs" />
