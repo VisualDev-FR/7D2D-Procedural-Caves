@@ -9,8 +9,24 @@ using UnityEngine;
 // His purpose is to collect and clusterize non tunnelable blocks from rwg-street-tile prefabs
 public class TTSReader
 {
+    public static List<Rect3D> Clusterize(string fullPath, int yOffset)
+    {
+        var blocks = GetUndergroundObstacles(fullPath, yOffset);
+        var clusters = ClusterizeBlocks(blocks.ToHashSet());
+
+        return clusters;
+    }
+
+    public static List<Rect3D> Clusterize(PrefabInstance prefab)
+    {
+        var path = prefab.location.FullPath;
+        var yOffset = prefab.prefab.yOffset;
+
+        return Clusterize(path, yOffset);
+    }
+
     // NOTE: copied from Prefab.loadBlockData
-    public static List<Vector3i> GetUndergroundObstacles(string fullPath, int yOffset)
+    private static List<Vector3i> GetUndergroundObstacles(string fullPath, int yOffset)
     {
         try
         {
@@ -127,12 +143,12 @@ public class TTSReader
         return new Vector3i(x, y, z);
     }
 
-    public static bool IsObstacle(BlockValue block, Vector3 position, int yOffset)
+    private static bool IsObstacle(BlockValue block, Vector3 position, int yOffset)
     {
         return position.y < -yOffset - CaveBuilder.terrainMargin && (block.type > 255 || block.isWater || block.isair);
     }
 
-    public static bool IsInClusters(Vector3i pos, List<Rect3D> clusters)
+    private static bool IsInClusters(Vector3i pos, List<Rect3D> clusters)
     {
         foreach (var rect in clusters)
         {
@@ -145,11 +161,11 @@ public class TTSReader
         return false;
     }
 
-    public static List<Rect3D> ClusterizeBlocks(HashSet<Vector3i> points)
+    private static List<Rect3D> ClusterizeBlocks(HashSet<Vector3i> blockPositions)
     {
         var blockClusters = new List<Rect3D>();
 
-        foreach (var start in points)
+        foreach (var start in blockPositions)
         {
             if (IsInClusters(start, blockClusters))
                 continue;
@@ -180,7 +196,7 @@ public class TTSReader
                 {
                     var position = currentPosition + offset;
 
-                    if (!cluster.Contains(position) && points.Contains(position))
+                    if (!cluster.Contains(position) && blockPositions.Contains(position))
                     {
                         queue.Add(position);
                     }

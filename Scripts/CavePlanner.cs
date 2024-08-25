@@ -253,7 +253,7 @@ public static class CavePlanner
 
     private static void AddSurfacePrefabs(PrefabCache cachedPrefabs)
     {
-        var rwgTilesClusters = new Dictionary<string, List<Rect3D>>();
+        var rwgTileClusters = new Dictionary<string, List<Rect3D>>();
 
         foreach (var pdi in PrefabManager.UsedPrefabsWorld)
         {
@@ -262,12 +262,10 @@ public static class CavePlanner
 
             if (isRwgTile)
             {
-                if (!rwgTilesClusters.TryGetValue(pdi.prefab.Name, out var clusters))
+                if (!rwgTileClusters.TryGetValue(pdi.prefab.Name, out var clusters))
                 {
-                    var path = pdi.location.FullPath;
-                    var terrainBlocks = TTSReader.GetUndergroundObstacles(path, pdi.prefab.yOffset);
-                    clusters = TTSReader.ClusterizeBlocks(terrainBlocks.ToHashSet());
-                    rwgTilesClusters[pdi.prefab.Name] = clusters;
+                    clusters = TTSReader.Clusterize(pdi.location.FullPath, pdi.prefab.yOffset);
+                    rwgTileClusters[pdi.prefab.Name] = clusters;
                 }
 
                 foreach (var cluster in clusters)

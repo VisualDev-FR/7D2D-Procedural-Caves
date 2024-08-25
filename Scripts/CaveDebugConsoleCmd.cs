@@ -21,48 +21,31 @@ public class CaveDebugConsoleCmd : ConsoleCmdAbstract
         return getDescription();
     }
 
-    public static List<Rect3D> FindClusters(Vector3 playerPos)
-    {
-        var position = new Vector3i(playerPos);
-        var prefabInstance = GameManager.Instance.World.GetPOIAtPosition(position, false);
-
-        if (prefabInstance == null)
-        {
-            Log.Warning($"[Cluster] no prefab found at position [{position}]");
-            return new List<Rect3D>();
-        }
-
-        var blocks = TTSReader.GetUndergroundObstacles(prefabInstance.location.FullPath, prefabInstance.prefab.yOffset);
-        var clusters = TTSReader.ClusterizeBlocks(blocks.ToHashSet());
-
-        Log.Out($"[Cluster] player: [{playerPos}], prefab: [{prefabInstance.boundingBoxPosition}], rotation: {prefabInstance.rotation}");
-
-        if (clusters.Count == 0)
-        {
-            Log.Warning($"[Cluster] No cluster found for '{prefabInstance.name}'");
-        }
-
-        var result = new List<Rect3D>();
-
-        foreach (var rect in clusters)
-        {
-            result.Add(rect.Transform(prefabInstance.boundingBoxPosition, prefabInstance.rotation, prefabInstance.prefab.size));
-        }
-
-        return result;
-    }
-
     private static void ClusterCommand(List<string> _params)
     {
         var playerPos = GameManager.Instance.World.GetPrimaryPlayer().position;
-        var clusters = FindClusters(playerPos);
+        var prefabInstance = GameManager.Instance.World.GetPOIAtPosition(playerPos, false);
 
-        if (clusters == null)
+        if (prefabInstance == null)
+        {
+            Log.Warning($"[Cluster] no prefab found at position [{playerPos}]");
             return;
+        }
+
+        var clusters = TTSReader.Clusterize(prefabInstance);
+
+        Log.Out($"[Cluster] player: [{playerPos}], prefab: [{prefabInstance.boundingBoxPosition}], rotation: {prefabInstance.rotation}, name: '{prefabInstance.name}'");
+
+        if (clusters.Count == 0)
+        {
+            Log.Warning($"[Cluster] No cluster found.");
+            return;
+        }
 
         foreach (var cluster in clusters)
         {
-            Log.Out($"[Cluster] {cluster.start,18} | {cluster.end}");
+            var rect = cluster.Transform(prefabInstance.boundingBoxPosition, prefabInstance.rotation, prefabInstance.prefab.size);
+            Log.Out($"[Cluster] {rect.start,18} | {rect.end}");
         }
 
         if (_params.Count == 1)
