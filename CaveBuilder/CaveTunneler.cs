@@ -37,7 +37,7 @@ public class CaveTunneler
     private Vector3i HalfWorldSize => new Vector3i(CaveBuilder.worldSize / 2, 0, CaveBuilder.worldSize / 2);
 
     // public API
-    public HashSet<CaveBlock> GenerateTunnel(Edge edge, PrefabCache cachedPrefabs, CaveMap cavemap)
+    public HashSet<CaveBlock> GenerateTunnel(GraphEdge edge, PrefabCache cachedPrefabs, CaveMap cavemap)
     {
         FindPath(edge, cachedPrefabs);
         FindLocalMinimas();
@@ -47,7 +47,7 @@ public class CaveTunneler
     }
 
     // private API
-    private void FindPath(Edge edge, PrefabCache cachedPrefabs)
+    private void FindPath(GraphEdge edge, PrefabCache cachedPrefabs)
     {
         var start = edge.node1.Normal(CaveUtils.FastMax(5, edge.node1.NodeRadius));
         var target = edge.node2.Normal(CaveUtils.FastMax(5, edge.node2.NodeRadius));

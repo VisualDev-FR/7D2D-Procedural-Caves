@@ -60,7 +60,7 @@ public static class CaveViewer
         }
     }
 
-    public static void DrawEdges(Graphics graph, List<Edge> edges)
+    public static void DrawEdges(Graphics graph, List<GraphEdge> edges)
     {
         using (var pen = new Pen(TunnelsColor, 2))
         {
@@ -96,7 +96,7 @@ public static class CaveViewer
         int prefabCounts = args.Length > 1 ? int.Parse(args[1]) : CaveBuilder.PREFAB_COUNT;
 
         PrefabCache cachedPrefabs = CaveBuilder.GetRandomPrefabs(prefabCounts);
-        List<Edge> edges = Graph.Resolve(cachedPrefabs.Prefabs);
+        List<GraphEdge> edges = Graph.Resolve(cachedPrefabs.Prefabs);
 
         var voxels = new HashSet<Voxell>();
 
@@ -292,7 +292,7 @@ public static class CaveViewer
 
         Log.Out("Start solving graph...");
 
-        List<Edge> edges = Graph.Resolve(cachedPrefabs.Prefabs);
+        List<GraphEdge> edges = Graph.Resolve(cachedPrefabs.Prefabs);
 
         int index = 0;
 

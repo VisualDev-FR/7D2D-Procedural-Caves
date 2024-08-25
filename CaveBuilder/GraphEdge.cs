@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 
 
-public class Edge : IComparable<Edge>
+public class GraphEdge : IComparable<GraphEdge>
 {
     public float Weight;
 
@@ -40,14 +40,14 @@ public class Edge : IComparable<Edge>
         return result + 1;
     }
 
-    public Edge(GraphNode node1, GraphNode node2)
+    public GraphEdge(GraphNode node1, GraphNode node2)
     {
         this.node1 = node1;
         this.node2 = node2;
         Weight = GetWeight();
     }
 
-    public int CompareTo(Edge other)
+    public int CompareTo(GraphEdge other)
     {
         return Weight.CompareTo(other.Weight);
     }
@@ -85,7 +85,7 @@ public class Edge : IComparable<Edge>
 }
 
 
-public class EdgeWeightComparer : IComparer<Edge>
+public class EdgeWeightComparer : IComparer<GraphEdge>
 {
     private readonly Graph _graph;
 
@@ -94,7 +94,7 @@ public class EdgeWeightComparer : IComparer<Edge>
         _graph = graph;
     }
 
-    public int Compare(Edge x, Edge y)
+    public int Compare(GraphEdge x, GraphEdge y)
     {
         if (x == null || y == null)
         {

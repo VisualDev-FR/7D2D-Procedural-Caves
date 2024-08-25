@@ -4,7 +4,7 @@ using System.Linq;
 
 public class Graph
 {
-    public HashSet<Edge> Edges { get; set; }
+    public HashSet<GraphEdge> Edges { get; set; }
 
     public HashSet<GraphNode> Nodes { get; set; }
 
@@ -12,12 +12,12 @@ public class Graph
 
     public Graph()
     {
-        Edges = new HashSet<Edge>();
+        Edges = new HashSet<GraphEdge>();
         Nodes = new HashSet<GraphNode>();
         prefabsConnections = new Dictionary<string, int>();
     }
 
-    public int GetEdgeWeight(Edge edge)
+    public int GetEdgeWeight(GraphEdge edge)
     {
         prefabsConnections.TryGetValue(edge.HashPrefabs(), out int occurences);
 
@@ -33,7 +33,7 @@ public class Graph
         return (int)weight;
     }
 
-    public void AddPrefabConnection(Edge edge)
+    public void AddPrefabConnection(GraphEdge edge)
     {
         string hash = edge.HashPrefabs();
 
@@ -45,21 +45,21 @@ public class Graph
         // Log.Out($"{hash}: {prefabsConnections[hash]}");
     }
 
-    public void AddEdge(Edge edge)
+    public void AddEdge(GraphEdge edge)
     {
         Edges.Add(edge);
         Nodes.Add(edge.node1);
         Nodes.Add(edge.node2);
     }
 
-    public List<Edge> GetEdgesFromNode(GraphNode node)
+    public List<GraphEdge> GetEdgesFromNode(GraphNode node)
     {
         return Edges.Where(e => e.node1.Equals(node) || e.node2.Equals(node)).ToList();
     }
 
-    public List<Edge> FindMST()
+    public List<GraphEdge> FindMST()
     {
-        var graph = new List<Edge>();
+        var graph = new List<GraphEdge>();
         var nodes = new HashSet<GraphNode>();
 
         foreach (var node in Nodes)
@@ -99,11 +99,11 @@ public class Graph
             var node2 = triangle.Vertices[1].ToGraphNode();
             var node3 = triangle.Vertices[2].ToGraphNode();
 
-            var edges = new Edge[]
+            var edges = new GraphEdge[]
             {
-                new Edge(node1, node2),
-                new Edge(node1, node3),
-                new Edge(node2, node3),
+                new GraphEdge(node1, node2),
+                new GraphEdge(node1, node3),
+                new GraphEdge(node2, node3),
             };
 
             foreach (var edge in edges)
@@ -112,7 +112,7 @@ public class Graph
                 {
                     foreach (var nodeB in edge.Prefab2.nodes)
                     {
-                        graph.AddEdge(new Edge(nodeA, nodeB));
+                        graph.AddEdge(new GraphEdge(nodeA, nodeB));
                     }
                 }
             }
@@ -121,7 +121,7 @@ public class Graph
         return graph;
     }
 
-    public static List<Edge> Resolve(List<CavePrefab> prefabs)
+    public static List<GraphEdge> Resolve(List<CavePrefab> prefabs)
     {
         var timer = CaveUtils.StartTimer();
 

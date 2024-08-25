@@ -294,7 +294,7 @@ public static class CavePlanner
 
         SpawnUnderGroundPrefabs(CaveBuilder.PREFAB_COUNT, ref cachedPrefabs);
 
-        List<Edge> edges = Graph.Resolve(cachedPrefabs.Prefabs);
+        List<GraphEdge> edges = Graph.Resolve(cachedPrefabs.Prefabs);
 
         AddSurfacePrefabs(cachedPrefabs);
 
