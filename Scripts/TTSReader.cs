@@ -23,58 +23,42 @@ public class Rect3D
         return start.GetHashCode() + end.GetHashCode();
     }
 
-    public static Rect3D RotateRectangle(int _rotCount, Rect3D marker, Vector3i tileSize, bool _bLeft = true)
+    public Vector3i RotateCoords(Vector3i coord, int rotation, Vector3i parentSize)
     {
-        var rectangle = new Rect3D(marker.start, marker.end);
+        var _x = coord.x;
+        var _z = coord.z;
 
-        for (int i = 0; i < _rotCount; i++)
+        switch (rotation)
         {
-            Vector3i size = rectangle.Size;
-            Vector3i start = rectangle.start;
-            Vector3i end = start + size;
-
-            if (_bLeft)
-            {
-                start = new Vector3i(tileSize.z - start.z, start.y, start.x);
-                end = new Vector3i(tileSize.z - end.z, end.y, end.x);
-            }
-            else
-            {
-                start = new Vector3i(start.z, start.y, tileSize.x - start.x);
-                end = new Vector3i(end.z, end.y, tileSize.x - end.x);
-            }
-            if (start.x > end.x)
-            {
-                MathUtils.Swap(ref start.x, ref end.x);
-            }
-            if (start.z > end.z)
-            {
-                MathUtils.Swap(ref start.z, ref end.z);
-            }
-
-            rectangle.start = start;
-            MathUtils.Swap(ref size.x, ref size.z);
-            rectangle.end = start + size;
-
-            MathUtils.Swap(ref tileSize.x, ref tileSize.z);
+            case 1:
+                {
+                    int num = _x;
+                    _x = _z;
+                    _z = parentSize.x - num - 1;
+                    break;
+                }
+            case 2:
+                _x = parentSize.x - _x - 1;
+                _z = parentSize.z - _z - 1;
+                break;
+            case 3:
+                {
+                    int num = _x;
+                    _x = parentSize.z - _z - 1;
+                    _z = num;
+                    break;
+                }
         }
 
-        return rectangle;
+        return new Vector3i(_x, coord.y, _z);
     }
 
-    public Rect3D Transform(Vector3i position, byte rotation, Vector3i tileSize)
+    public Rect3D Transform(Vector3i position, byte rotation, Vector3i parentSize)
     {
-        var rectangle = RotateRectangle(rotation, this, tileSize);
+        var start = RotateCoords(this.start, rotation, parentSize) + position;
+        var end = RotateCoords(this.end, rotation, parentSize) + position;
 
-        rectangle.start.x += position.x;
-        rectangle.start.y += position.y;
-        rectangle.start.z += position.z;
-
-        rectangle.end.x += position.x;
-        rectangle.end.y += position.y;
-        rectangle.end.z += position.z;
-
-        return rectangle;
+        return new Rect3D(start, end);
     }
 }
 
@@ -192,10 +176,10 @@ public class TTSReader
     private static Vector3i OffsetToCoord(int _offset, int size_x, int size_y)
     {
         int num = size_x * size_y;
-        int x = _offset / num;
+        int z = _offset / num;
         _offset %= num;
         int y = _offset / size_x;
-        int z = _offset % size_x;
+        int x = _offset % size_x;
 
         return new Vector3i(x, y, z);
     }

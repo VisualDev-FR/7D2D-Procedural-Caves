@@ -469,31 +469,31 @@ public static class CaveViewer
 
     public static void ClusterizeCommand(string[] args)
     {
-        var playerPos = new Vector3i(958, 26, -1440);
-        CaveDebugConsoleCmd.FindClusters(playerPos);
+        // var playerPos = new Vector3i(958, 26, -1440);
+        // CaveDebugConsoleCmd.FindClusters(playerPos);
 
-        // var timer = CaveUtils.StartTimer();
+        var timer = CaveUtils.StartTimer();
 
-        // var path = @"C:\SteamLibrary\steamapps\common\7 Days To Die\Data\Prefabs\RWGTiles\rwg_tile_downtown_corner.tts";
-        // var points = TTSReader.GetUndergroundObstacles(path, -11);
+        var path = @"C:\SteamLibrary\steamapps\common\7 Days To Die\Data\Prefabs\RWGTiles\rwg_tile_downtown_straight.tts";
+        var points = TTSReader.GetUndergroundObstacles(path, -16);
 
-        // Log.Out($"{points.Count} points");
+        Log.Out($"{points.Count} points");
 
-        // var clusters = TTSReader.ClusterizeBlocks(points.ToHashSet());
+        var clusters = TTSReader.ClusterizeBlocks(points.ToHashSet());
 
-        // Log.Out($"timer: {timer.ElapsedMilliseconds}ms");
+        Log.Out($"timer: {timer.ElapsedMilliseconds}ms");
 
-        // // var voxels = new HashSet<Voxell>();
-        // var voxels = points.Select(pos => new Voxell(pos, WaveFrontMaterial.LightBlue)).ToHashSet();
+        // var voxels = new HashSet<Voxell>();
+        var voxels = points.Select(pos => new Voxell(pos, WaveFrontMaterial.LightBlue)).ToHashSet();
 
-        // foreach (var cluster in clusters)
-        // {
-        //     Log.Out($"min: {cluster.start}, max: {cluster.end}");
-        //     voxels.Add(new Voxell(cluster.start, cluster.Size, WaveFrontMaterial.DarkGreen) { force = true });
-        //     break;
-        // }
+        foreach (var cluster in clusters)
+        {
+            Log.Out($"min: {cluster.start}, max: {cluster.end}");
+            voxels.Add(new Voxell(cluster.start, cluster.Size, WaveFrontMaterial.DarkGreen) { force = true });
+            break;
+        }
 
-        // GenerateObjFile("dbscan.obj", voxels, false);
+        GenerateObjFile("dbscan.obj", voxels, false);
     }
 
     public static void Main(string[] args)
