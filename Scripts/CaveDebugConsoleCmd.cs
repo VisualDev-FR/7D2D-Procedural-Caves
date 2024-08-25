@@ -70,7 +70,7 @@ public class CaveDebugConsoleCmd : ConsoleCmdAbstract
 
         if (prefabInstance == null)
         {
-            Log.Warning("[Cluster] not prefab found");
+            Log.Warning($"[Cluster] no prefab found at position [{position}]");
             return new List<Rect3D>();
         }
 
