@@ -52,11 +52,6 @@ public static class PrefabManager_LoadPrefabs
             }
         }
 
-        if (CavePlanner.AllPrefabsCount == 0)
-        {
-            Log.Error($"[Cave] No cave prefab was loaded.");
-        }
-
         Log.Out($"LoadPrefabs {PrefabManager.AllPrefabDatas.Count} of {prefabs.Count} in {ms.ElapsedMilliseconds * 0.001f}");
     }
 

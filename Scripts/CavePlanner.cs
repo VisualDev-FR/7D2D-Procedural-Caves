@@ -21,28 +21,20 @@ public static class CavePlanner
 
     private static HashSet<string> usedEntrances = new HashSet<string>();
 
-    public static int AllPrefabsCount => allCavePrefabs.Count;
-
-    public static int EntrancePrefabCount => wildernessEntranceNames.Count;
-
-    public static int TargetEntranceCount => WorldBuilder.Instance.WorldSize / 20;
-
     private static WorldBuilder WorldBuilder => WorldBuilder.Instance;
 
     private static int WorldSize => WorldBuilder.Instance.WorldSize;
 
-    private static int Seed => WorldBuilder.Instance.Seed + WorldSize;
-
     private static Vector3i HalfWorldSize => new Vector3i(WorldBuilder.HalfWorldSize, 0, WorldBuilder.HalfWorldSize);
-
-    private static readonly int maxPlacementAttempts = 20;
 
     public static readonly string caveTempDir = $"{GameIO.GetUserGameDataDir()}/temp";
 
     public static void Init()
     {
+        var seed = WorldBuilder.Instance.Seed + WorldSize;
+
         CaveBuilder.worldSize = WorldSize;
-        CaveBuilder.rand = new Random(Seed);
+        CaveBuilder.rand = new Random(seed);
 
         usedEntrances = new HashSet<string>();
         wildernessEntranceNames = new List<string>();
@@ -189,9 +181,9 @@ public static class CavePlanner
 
     public static bool OverLaps2D(Vector3i position, Vector3i size, List<CavePrefab> others)
     {
-        foreach (var other in others)
+        foreach (var prefab in others)
         {
-            if (OverLaps2D(position, size, other))
+            if (OverLaps2D(position, size, prefab))
             {
                 return true;
             }
@@ -202,9 +194,9 @@ public static class CavePlanner
 
     private static PrefabDataInstance TrySpawnCavePrefab(PrefabData prefabData, PrefabCache others)
     {
-        int attempts = maxPlacementAttempts;
+        int maxPlacementAttempts = 20;
 
-        while (attempts-- > 0)
+        while (maxPlacementAttempts-- > 0)
         {
             int rotation = CaveBuilder.rand.Next(4);
 
