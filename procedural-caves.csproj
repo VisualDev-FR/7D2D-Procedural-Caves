@@ -90,6 +90,7 @@
     <Compile Include="Harmony\H_BlockToolSelection.cs" />
     <Compile Include="Harmony\H_DynamicPrefabDecorator.cs" />
     <Compile Include="Harmony\H_GameManager.cs" />
+    <Compile Include="Harmony\H_Prefab.cs" />
     <Compile Include="Harmony\H_PrefabManager.cs" />
     <Compile Include="Harmony\H_SpawnManagerBiomes.cs" />
     <Compile Include="Harmony\H_WildernessPlanner.cs" />
