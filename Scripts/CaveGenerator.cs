@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Xml;
+using System.Xml.Linq;
 using UnityEngine;
 
 public static class CaveGenerator
@@ -24,11 +26,33 @@ public static class CaveGenerator
 
         if (isEnabled)
         {
+            CaveBuilder.worldSize = GetWorldSize(worldName);
             caveBlocksProvider = new CaveBlocksProvider(worldName);
         }
         else
         {
             Log.Warning($"[Cave] no cavemap found for world '{worldName}'");
+        }
+    }
+
+    private static int GetWorldSize(string worldName)
+    {
+        string path = $"{GameIO.GetWorldDir(worldName)}/map_info.xml";
+
+        var xmlDoc = new XmlDocument();
+        xmlDoc.Load(path);
+
+        var node = xmlDoc.SelectSingleNode("//property[@name='HeightMapSize']");
+
+        if (node != null)
+        {
+            string heightMapSize = node.Attributes["value"].Value;
+
+            return int.Parse(heightMapSize.Split(',')[0]);
+        }
+        else
+        {
+            throw new Exception("World Size not found!");
         }
     }
 
