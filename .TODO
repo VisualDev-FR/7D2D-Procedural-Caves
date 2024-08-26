@@ -18,6 +18,9 @@ Optimization:
     ☐ work special vector3sbs(short, byte, short) as long as possible in cave tunneling, avoiding instanciating caveBlocks
     ☐ free cavemap memory after saving it, after game exit
 
+Testing:
+    ☐ block inside cave prefabs must be cave air (H_Prefab.cs)
+
 Bug:
     ☐ can't place torch inside caveAir
 

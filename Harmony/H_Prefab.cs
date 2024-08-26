@@ -8,7 +8,7 @@ public static class Prefab_GetBlock
     {
         if (__result.isair && !GameManager.Instance.IsEditMode() && __instance.tags.Test_AnySet(CaveConfig.tagCave))
         {
-            __result = new BlockValue((uint)Block.GetBlockByName("caveAir").blockID);
+            __result = CaveGenerator.caveAir;
         }
     }
 }

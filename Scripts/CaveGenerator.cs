@@ -12,7 +12,9 @@ public static class CaveGenerator
 
     public static bool isEnabled = false;
 
-    private static BlockValue caveAir = new BlockValue((uint)Block.GetBlockByName("caveAir").blockID);
+    public static int caveAirType = caveAir.type;
+
+    public static BlockValue caveAir = new BlockValue((uint)Block.GetBlockByName("caveAir").blockID);
 
     private static BlockValue concreteBlock = new BlockValue((uint)Block.GetBlockByName("concreteShapes:cube").blockID);
 

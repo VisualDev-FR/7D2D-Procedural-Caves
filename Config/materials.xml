@@ -7,6 +7,11 @@
             <property name="lightopacity" value="0"/>
             <property name="explosionresistance" value="1"/>
             <property name="ground_cover" value="true"/>
+            <property name="stability_glue" value="1000"/>
+            <property name="StabilitySupport" value="true"/>
+            <property name="Mass" type="int" value="0"/>
+            <property name="MaxDamage" value="50000"/>
+            <property name="CanDestroy" value="false" />
         </material>
 
     </append>

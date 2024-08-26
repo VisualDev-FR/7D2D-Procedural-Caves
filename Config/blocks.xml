@@ -2,8 +2,15 @@
 	<append xpath="/blocks">
 
 		<block name="caveAir">
+			<property name="CreativeMode" value="None"/>
 			<property name="Extends" value="air"/>
 			<property name="StabilityFull" value="true"/>
+			<property name="Shape" value="Invisible"/>
+			<property name="StabilitySupport" value="true"/>
+			<property name="stability_glue" value="10000"/>
+			<property name="MaxDamage" value="50000"/>
+			<property name="Collide" value="false"/>
+			<property name="CanDestroy" value="false" />
 			<property name="Material" value="McaveAir"/>
 			<drop event="Destroy" count="0"/>
 		</block>
