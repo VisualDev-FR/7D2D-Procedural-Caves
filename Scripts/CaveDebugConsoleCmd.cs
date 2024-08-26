@@ -38,10 +38,10 @@ public class CaveDebugConsoleCmd : ConsoleCmdAbstract
             return;
         }
 
-        foreach (var cluster in clusters)
+        for(int i = 0; i < clusters.Count; i++)
         {
-            var rect = cluster.Transform(prefabInstance.boundingBoxPosition, prefabInstance.rotation, prefabInstance.prefab.size);
-            Log.Out($"[Cluster] {rect.start,18} | {rect.end}");
+            clusters[i] = clusters[i].Transform(prefabInstance.boundingBoxPosition, prefabInstance.rotation, prefabInstance.prefab.size);
+            Log.Out($"[Cluster] {clusters[i].start,18} | {clusters[i].end}");
         }
 
         if (_params.Count == 1)
