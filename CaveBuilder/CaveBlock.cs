@@ -10,7 +10,7 @@ public class CaveBlock
 
     public sbyte density;
 
-    public bool isWater;
+    public byte rawData;
 
     public int x => (chunkPos.x << 4) + blockChunkPos.x;
 
@@ -18,13 +18,48 @@ public class CaveBlock
 
     public int z => (chunkPos.z << 4) + blockChunkPos.z;
 
+    public bool isWater
+    {
+        get => (rawData & 0b0000_0001) != 0;
+        set => rawData = (byte)(value ? (rawData | 0b0000_0001) : (rawData & 0b1111_1110));
+    }
+
+    public bool isFloor
+    {
+        get => (rawData & 0b0000_0010) != 0;
+        set => rawData = (byte)(value ? (rawData | 0b0000_0010) : (rawData & 0b1111_1101));
+    }
+
+    public bool isCeiling
+    {
+        get => (rawData & 0b0000_0100) != 0;
+        set => rawData = (byte)(value ? (rawData | 0b0000_0100) : (rawData & 0b1111_1011));
+    }
+
+    public bool isWallNorth
+    {
+        get => (rawData & 0b0000_1000) != 0;
+        set => rawData = (byte)(value ? (rawData | 0b0000_1000) : (rawData & 0b1111_0111));
+    }
+
+    public bool isWallSouth
+    {
+        get => (rawData & 0b0001_0000) != 0;
+        set => rawData = (byte)(value ? (rawData | 0b0001_0000) : (rawData & 0b1110_1111));
+    }
+
+    public bool isWallEast
+    {
+        get => (rawData & 0b0010_0000) != 0;
+        set => rawData = (byte)(value ? (rawData | 0b0010_0000) : (rawData & 0b1101_1111));
+    }
+
     public CaveBlock(Vector3i position, sbyte density = defaultDensity)
     {
         short chunk_x = (short)(position.x >> 4);
         short chunk_z = (short)(position.z >> 4);
 
         this.density = density;
-        isWater = false;
 
         chunkPos = new Vector2s(chunk_x, chunk_z);
 
@@ -41,7 +76,6 @@ public class CaveBlock
         short chunk_z = (short)(z >> 4);
 
         this.density = density;
-        isWater = false;
 
         chunkPos = new Vector2s(chunk_x, chunk_z);
 
@@ -57,7 +91,7 @@ public class CaveBlock
         chunkPos = new Vector2s(reader.ReadInt16(), reader.ReadInt16());
         blockChunkPos = new Vector3bf(reader.ReadUInt16());
         density = reader.ReadSByte();
-        isWater = reader.ReadBoolean();
+        rawData = reader.ReadByte();
     }
 
     public void ToBinaryStream(BinaryWriter writer)
@@ -66,7 +100,7 @@ public class CaveBlock
         writer.Write(chunkPos.z);
         writer.Write(blockChunkPos.value);
         writer.Write(density);
-        writer.Write(isWater);
+        writer.Write(rawData);
     }
 
     public Vector3i ToVector3i()
