@@ -38,10 +38,10 @@ public class CaveDebugConsoleCmd : ConsoleCmdAbstract
             return;
         }
 
-        for(int i = 0; i < clusters.Count; i++)
+        for (int i = 0; i < clusters.Count; i++)
         {
             clusters[i] = clusters[i].Transform(prefabInstance.boundingBoxPosition, prefabInstance.rotation, prefabInstance.prefab.size);
-            Log.Out($"[Cluster] {clusters[i].start,18} | {clusters[i].end}");
+            Log.Out($"[Cluster] {clusters[i].start,18} | {clusters[i].size}");
         }
 
         if (_params.Count == 1)
@@ -52,7 +52,7 @@ public class CaveDebugConsoleCmd : ConsoleCmdAbstract
         var selection = BlockToolSelection.Instance;
 
         selection.SelectionStart = rectangle.start;
-        selection.SelectionEnd = rectangle.end - Vector3i.one;
+        selection.SelectionEnd = rectangle.start + rectangle.size - Vector3i.one;
         selection.SelectionActive = true;
     }
 

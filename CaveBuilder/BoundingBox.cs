@@ -1,14 +1,17 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
 public class BoundingBox
 {
+    public BoundingBox parent;
+
     public Vector3i start;
+
     public Vector3i size;
 
-    public BoundingBox(Vector3i start, Vector3i size)
+    public BoundingBox(BoundingBox parent, Vector3i start, Vector3i size)
     {
+        this.parent = parent;
         this.start = start;
         this.size = size;
     }
@@ -29,14 +32,14 @@ public class BoundingBox
 
         List<BoundingBox> octants = new List<BoundingBox>
         {
-            new BoundingBox(start, halfSize),
-            new BoundingBox(new Vector3i(start.x + halfSize.x, start.y, start.z), new Vector3i(remainder.x, halfSize.y, halfSize.z)),
-            new BoundingBox(new Vector3i(start.x, start.y + halfSize.y, start.z), new Vector3i(halfSize.x, remainder.y, halfSize.z)),
-            new BoundingBox(new Vector3i(start.x + halfSize.x, start.y + halfSize.y, start.z), new Vector3i(remainder.x, remainder.y, halfSize.z)),
-            new BoundingBox(new Vector3i(start.x, start.y, start.z + halfSize.z), new Vector3i(halfSize.x, halfSize.y, remainder.z)),
-            new BoundingBox(new Vector3i(start.x + halfSize.x, start.y, start.z + halfSize.z), new Vector3i(remainder.x, halfSize.y, remainder.z)),
-            new BoundingBox(new Vector3i(start.x, start.y + halfSize.y, start.z + halfSize.z), new Vector3i(halfSize.x, remainder.y, remainder.z)),
-            new BoundingBox(new Vector3i(start.x + halfSize.x, start.y + halfSize.y, start.z + halfSize.z), remainder)
+            new BoundingBox(this, start, halfSize),
+            new BoundingBox(this, new Vector3i(start.x + halfSize.x, start.y, start.z), new Vector3i(remainder.x, halfSize.y, halfSize.z)),
+            new BoundingBox(this, new Vector3i(start.x, start.y + halfSize.y, start.z), new Vector3i(halfSize.x, remainder.y, halfSize.z)),
+            new BoundingBox(this, new Vector3i(start.x + halfSize.x, start.y + halfSize.y, start.z), new Vector3i(remainder.x, remainder.y, halfSize.z)),
+            new BoundingBox(this, new Vector3i(start.x, start.y, start.z + halfSize.z), new Vector3i(halfSize.x, halfSize.y, remainder.z)),
+            new BoundingBox(this, new Vector3i(start.x + halfSize.x, start.y, start.z + halfSize.z), new Vector3i(remainder.x, halfSize.y, remainder.z)),
+            new BoundingBox(this, new Vector3i(start.x, start.y + halfSize.y, start.z + halfSize.z), new Vector3i(halfSize.x, remainder.y, remainder.z)),
+            new BoundingBox(this, new Vector3i(start.x + halfSize.x, start.y + halfSize.y, start.z + halfSize.z), remainder)
         };
 
         return octants
@@ -57,6 +60,73 @@ public class BoundingBox
             }
 
         }
+    }
+
+    public int MaxSize()
+    {
+        if (size.x > size.y && size.x > size.z)
+            return size.x;
+
+        if (size.y > size.z)
+            return size.y;
+
+        return size.z;
+    }
+
+    public int MinSize()
+    {
+        if (size.x < size.y && size.x < size.z)
+            return size.x;
+
+        if (size.y < size.z)
+            return size.y;
+
+        return size.z;
+    }
+
+    public override int GetHashCode()
+    {
+        return start.GetHashCode() + size.GetHashCode();
+    }
+
+    public Vector3i RotateCoords(Vector3i coord, int rotation, Vector3i parentSize)
+    {
+        // TODO: switch to Prefab.RotatePOIMarkers if needed
+
+        var _x = coord.x;
+        var _z = coord.z;
+
+        switch (rotation)
+        {
+            case 3:
+                {
+                    int num = _x;
+                    _x = _z;
+                    _z = parentSize.x - num - 1;
+                    break;
+                }
+            case 2:
+                _x = parentSize.x - _x - 1;
+                _z = parentSize.z - _z - 1;
+                break;
+            case 1:
+                {
+                    int num = _x;
+                    _x = parentSize.z - _z - 1;
+                    _z = num;
+                    break;
+                }
+        }
+
+        return new Vector3i(_x, coord.y, _z);
+    }
+
+    public BoundingBox Transform(Vector3i position, byte rotation, Vector3i parentSize)
+    {
+        var start = RotateCoords(this.start, rotation, parentSize) + position;
+        var end = RotateCoords(this.start + size, rotation, parentSize) + position;
+
+        return new BoundingBox(null, start, end - start);
     }
 
 }

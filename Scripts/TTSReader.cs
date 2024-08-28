@@ -9,15 +9,66 @@ using UnityEngine;
 // His purpose is to collect and clusterize non tunnelable blocks from rwg-street-tile prefabs
 public class TTSReader
 {
-    public static List<Rect3D> Clusterize(string fullPath, int yOffset)
+    public static List<BoundingBox> Clusterize(string fullPath, int yOffset)
     {
-        var blocks = GetUndergroundObstacles(fullPath, yOffset);
-        var clusters = ClusterizeBlocks(blocks.ToHashSet());
+        var blocks = ReadUndergroundBlocks(fullPath, yOffset);
+        var clusters = ClusterizeBlocks(blocks);
+        var result = new List<BoundingBox>();
 
-        return clusters;
+        Log.Out($"{blocks.Count} blocks found.");
+
+        foreach (var cluster in clusters)
+        {
+            var subVolumes = DivideCluster(cluster, blocks, 3);
+
+            if (subVolumes.Count > 0)
+            {
+                result.AddRange(subVolumes);
+            }
+            else
+            {
+                result.Add(cluster);
+            }
+        }
+
+        return result;
     }
 
-    public static List<Rect3D> Clusterize(PrefabInstance prefab)
+    public static List<BoundingBox> DivideCluster(BoundingBox cluster, HashSet<Vector3i> blocks, int maxDeep)
+    {
+        var result = new List<BoundingBox>();
+
+        foreach (var bb in cluster.Octree())
+        {
+            bool containsBlock = false;
+
+            foreach (var pos in bb.IteratePoints())
+            {
+                if (blocks.Contains(pos))
+                {
+                    containsBlock = true;
+                    break;
+                }
+            }
+
+            if (containsBlock)
+            {
+                if (maxDeep > 0)
+                {
+                    result.AddRange(DivideCluster(bb, blocks, maxDeep - 1));
+                }
+                else
+                {
+                    result.Add(bb);
+                }
+            }
+        }
+
+        return result;
+    }
+
+
+    public static List<BoundingBox> Clusterize(PrefabInstance prefab)
     {
         var path = prefab.location.FullPath;
         var yOffset = prefab.prefab.yOffset;
@@ -26,7 +77,7 @@ public class TTSReader
     }
 
     // NOTE: copied from Prefab.loadBlockData
-    private static List<Vector3i> GetUndergroundObstacles(string fullPath, int yOffset)
+    public static HashSet<Vector3i> ReadUndergroundBlocks(string fullPath, int yOffset)
     {
         try
         {
@@ -41,7 +92,7 @@ public class TTSReader
 
                     uint version = reader.ReadUInt32();
 
-                    return GetUndergroundObstacles(reader, version, yOffset);
+                    return GetUndergroundObstacles(reader, version, yOffset).ToHashSet();
                 }
             }
         }
@@ -148,11 +199,11 @@ public class TTSReader
         return position.y < -yOffset - CaveBuilder.terrainMargin && (block.type > 255 || block.isWater || block.isair);
     }
 
-    private static bool IsInClusters(Vector3i pos, List<Rect3D> clusters)
+    private static bool IsInClusters(Vector3i pos, List<BoundingBox> clusters)
     {
         foreach (var rect in clusters)
         {
-            if (CaveUtils.Intersect3D(pos.x, pos.y, pos.z, rect.start, rect.Size))
+            if (CaveUtils.Intersect3D(pos.x, pos.y, pos.z, rect.start, rect.size))
             {
                 return true;
             }
@@ -161,9 +212,9 @@ public class TTSReader
         return false;
     }
 
-    private static List<Rect3D> ClusterizeBlocks(HashSet<Vector3i> blockPositions)
+    private static List<BoundingBox> ClusterizeBlocks(HashSet<Vector3i> blockPositions)
     {
-        var blockClusters = new List<Rect3D>();
+        var blockClusters = new List<BoundingBox>();
 
         foreach (var start in blockPositions)
         {
@@ -203,7 +254,7 @@ public class TTSReader
                 }
             }
 
-            blockClusters.Add(new Rect3D(clusterMin, clusterMax));
+            blockClusters.Add(new BoundingBox(null, clusterMin, clusterMax - clusterMin));
         }
 
         return blockClusters;

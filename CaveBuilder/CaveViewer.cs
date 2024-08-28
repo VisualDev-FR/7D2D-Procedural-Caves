@@ -467,38 +467,34 @@ public static class CaveViewer
 
     public static void ClusterizeCommand(string[] args)
     {
-        // // var playerPos = new Vector3i(958, 26, -1440);
-        // // CaveDebugConsoleCmd.FindClusters(playerPos);
+        var timer = CaveUtils.StartTimer();
 
-        // var timer = CaveUtils.StartTimer();
+        var prefabName = "rwg_tile_downtown_straight";
+        var path = $"C:/SteamLibrary/steamapps/common/7 Days To Die/Data/Prefabs/RWGTiles/{prefabName}.tts";
+        var yOffset = -16;
 
-        // var path = @"C:\SteamLibrary\steamapps\common\7 Days To Die\Data\Prefabs\RWGTiles\rwg_tile_downtown_straight.tts";
-        // var points = TTSReader.GetUndergroundObstacles(path, -16);
+        var clusters = TTSReader.Clusterize(path, yOffset);
 
-        // Log.Out($"{points.Count} points");
+        Log.Out($"{clusters.Count} clusters found, timer: {timer.ElapsedMilliseconds}ms");
 
-        // var clusters = TTSReader.ClusterizeBlocks(points.ToHashSet());
+        var voxels = new HashSet<Voxell>();
 
-        // Log.Out($"timer: {timer.ElapsedMilliseconds}ms");
+        // voxels = TTSReader.ReadUndergroundBlocks(path, yOffset).Select(pos => new Voxell(pos, WaveFrontMaterial.LightBlue)).ToHashSet();
 
-        // // var voxels = new HashSet<Voxell>();
-        // var voxels = points.Select(pos => new Voxell(pos, WaveFrontMaterial.LightBlue)).ToHashSet();
+        foreach (var cluster in clusters)
+        {
+            // Log.Out($"min: {cluster.start}, max: {cluster.size}");
+            voxels.Add(new Voxell(cluster.start, cluster.size, WaveFrontMaterial.DarkGreen) { force = true });
+        }
 
-        // foreach (var cluster in clusters)
-        // {
-        //     Log.Out($"min: {cluster.start}, max: {cluster.end}");
-        //     voxels.Add(new Voxell(cluster.start, cluster.Size, WaveFrontMaterial.DarkGreen) { force = true });
-        //     break;
-        // }
-
-        // GenerateObjFile("dbscan.obj", voxels, false);
+        GenerateObjFile("clusters.obj", voxels, false);
     }
 
     public static void BoundingCommands(string[] args)
     {
         var start = new Vector3i(0, 0, 0);
         var size = new Vector3i(9, 9, 25);
-        var bb = new BoundingBox(start, size);
+        var bb = new BoundingBox(null, start, size);
         var voxels = new HashSet<Voxell>();
 
         // var voxels = bb.IteratePoints().Select(pos => new Voxell(pos, WaveFrontMaterial.LightBlue) { force = true }).ToHashSet();
