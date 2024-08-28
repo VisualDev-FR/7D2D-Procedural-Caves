@@ -494,6 +494,24 @@ public static class CaveViewer
         // GenerateObjFile("dbscan.obj", voxels, false);
     }
 
+    public static void BoundingCommands(string[] args)
+    {
+        var start = new Vector3i(0, 0, 0);
+        var size = new Vector3i(8, 2, 2);
+        var bb = new BoundingBox(start, size);
+        var voxels = new HashSet<Voxell>();
+
+
+        // var voxels = bb.IteratePoints().Select(pos => new Voxell(pos, WaveFrontMaterial.LightBlue) { force = true }).ToHashSet();
+        var octree = bb.Octree(minSize: 2);
+        foreach (var rect in octree)
+        {
+            voxels.Add(new Voxell(rect.start, rect.size, WaveFrontMaterial.DarkGreen) { force = true });
+        }
+
+        GenerateObjFile("bounds.obj", voxels, false);
+    }
+
     public static void Main(string[] args)
     {
         switch (args[0])
@@ -533,6 +551,12 @@ public static class CaveViewer
 
             case "cluster":
                 ClusterizeCommand(args);
+                break;
+
+            case "boundingbox":
+            case "bounds":
+            case "bb":
+                BoundingCommands(args);
                 break;
 
             default:
