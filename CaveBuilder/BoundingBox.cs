@@ -21,21 +21,25 @@ public class BoundingBox
             size.z > minSize ? size.z / 2 : size.z
         );
 
+        Vector3i remainder = new Vector3i(
+            size.x > minSize ? size.x - halfSize.x : 0,
+            size.y > minSize ? size.y - halfSize.y : 0,
+            size.z > minSize ? size.z - halfSize.z : 0
+        );
+
         List<BoundingBox> octants = new List<BoundingBox>
         {
             new BoundingBox(start, halfSize),
-            new BoundingBox(new Vector3i(start.x + (size.x > minSize ? halfSize.x : 0), start.y, start.z), halfSize),
-            new BoundingBox(new Vector3i(start.x, start.y + (size.y > minSize ? halfSize.y : 0), start.z), halfSize),
-            new BoundingBox(new Vector3i(start.x + (size.x > minSize ? halfSize.x : 0), start.y + (size.y > minSize ? halfSize.y : 0), start.z), halfSize),
-            new BoundingBox(new Vector3i(start.x, start.y, start.z + (size.z > minSize ? halfSize.z : 0)), halfSize),
-            new BoundingBox(new Vector3i(start.x + (size.x > minSize ? halfSize.x : 0), start.y, start.z + (size.z > minSize ? halfSize.z : 0)), halfSize),
-            new BoundingBox(new Vector3i(start.x, start.y + (size.y > minSize ? halfSize.y : 0), start.z + (size.z > minSize ? halfSize.z : 0)), halfSize),
-            new BoundingBox(new Vector3i(start.x + (size.x > minSize ? halfSize.x : 0), start.y + (size.y > minSize ? halfSize.y : 0), start.z + (size.z > minSize ? halfSize.z : 0)), halfSize)
+            new BoundingBox(new Vector3i(start.x + halfSize.x, start.y, start.z), new Vector3i(remainder.x, halfSize.y, halfSize.z)),
+            new BoundingBox(new Vector3i(start.x, start.y + halfSize.y, start.z), new Vector3i(halfSize.x, remainder.y, halfSize.z)),
+            new BoundingBox(new Vector3i(start.x + halfSize.x, start.y + halfSize.y, start.z), new Vector3i(remainder.x, remainder.y, halfSize.z)),
+            new BoundingBox(new Vector3i(start.x, start.y, start.z + halfSize.z), new Vector3i(halfSize.x, halfSize.y, remainder.z)),
+            new BoundingBox(new Vector3i(start.x + halfSize.x, start.y, start.z + halfSize.z), new Vector3i(remainder.x, halfSize.y, remainder.z)),
+            new BoundingBox(new Vector3i(start.x, start.y + halfSize.y, start.z + halfSize.z), new Vector3i(halfSize.x, remainder.y, remainder.z)),
+            new BoundingBox(new Vector3i(start.x + halfSize.x, start.y + halfSize.y, start.z + halfSize.z), remainder)
         };
 
-        return octants
-            .Where(octant => octant.size.x >= minSize && octant.size.y >= minSize && octant.size.z >= minSize)
-            .ToArray();
+        return octants.Where(octant => octant.size.x >= minSize && octant.size.y >= minSize && octant.size.z >= minSize).ToArray();
     }
 
     public IEnumerable<Vector3i> IteratePoints()
