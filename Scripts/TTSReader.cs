@@ -13,7 +13,7 @@ public class TTSReader
     {
         var blocks = ReadUndergroundBlocks(fullPath, yOffset);
         var clusters = ClusterizeBlocks(blocks);
-        var result = new List<BoundingBox>();
+        var merged = new List<BoundingBox>();
 
         Log.Out($"{blocks.Count} blocks found.");
 
@@ -23,17 +23,17 @@ public class TTSReader
 
             if (subVolumes.Count > 0)
             {
-                result.AddRange(subVolumes);
+                merged.AddRange(subVolumes);
             }
             else
             {
-                result.Add(cluster);
+                merged.Add(cluster);
             }
         }
 
-        result = MergeBoundingBoxes(result);
+        merged = MergeBoundingBoxes(merged);
 
-        return result;
+        return merged;
     }
 
     public static List<BoundingBox> DivideCluster(BoundingBox cluster, HashSet<Vector3i> blocks, int maxDeep)
@@ -49,7 +49,7 @@ public class TTSReader
                 if (blocks.Contains(pos))
                 {
                     containsBlock = true;
-                    break;
+                    bb.blocksCount++;
                 }
             }
 
@@ -73,12 +73,12 @@ public class TTSReader
         {
             if (a.start.x + a.size.x == b.start.x)
             {
-                return new BoundingBox(a.start, new Vector3i(a.size.x + b.size.x, a.size.y, a.size.z));
+                return new BoundingBox(a.start, new Vector3i(a.size.x + b.size.x, a.size.y, a.size.z), a.blocksCount + b.blocksCount);
             }
 
             if (b.start.x + b.size.x == a.start.x)
             {
-                return new BoundingBox(b.start, new Vector3i(b.size.x + a.size.x, b.size.y, b.size.z));
+                return new BoundingBox(b.start, new Vector3i(b.size.x + a.size.x, b.size.y, b.size.z), a.blocksCount + b.blocksCount);
             }
         }
 
@@ -86,12 +86,12 @@ public class TTSReader
         {
             if (a.start.y + a.size.y == b.start.y)
             {
-                return new BoundingBox(a.start, new Vector3i(a.size.x, a.size.y + b.size.y, a.size.z));
+                return new BoundingBox(a.start, new Vector3i(a.size.x, a.size.y + b.size.y, a.size.z), a.blocksCount + b.blocksCount);
             }
 
             if (b.start.y + b.size.y == a.start.y)
             {
-                return new BoundingBox(b.start, new Vector3i(b.size.x, b.size.y + a.size.y, b.size.z));
+                return new BoundingBox(b.start, new Vector3i(b.size.x, b.size.y + a.size.y, b.size.z), a.blocksCount + b.blocksCount);
             }
         }
 
@@ -99,12 +99,12 @@ public class TTSReader
         {
             if (a.start.z + a.size.z == b.start.z)
             {
-                return new BoundingBox(a.start, new Vector3i(a.size.x, a.size.y, a.size.z + b.size.z));
+                return new BoundingBox(a.start, new Vector3i(a.size.x, a.size.y, a.size.z + b.size.z), a.blocksCount + b.blocksCount);
             }
 
             if (b.start.z + b.size.z == a.start.z)
             {
-                return new BoundingBox(b.start, new Vector3i(b.size.x, b.size.y, b.size.z + a.size.z));
+                return new BoundingBox(b.start, new Vector3i(b.size.x, b.size.y, b.size.z + a.size.z), a.blocksCount + b.blocksCount);
             }
         }
 
@@ -327,7 +327,12 @@ public class TTSReader
                 }
             }
 
-            blockClusters.Add(new BoundingBox(null, clusterMin, clusterMax - clusterMin));
+            var bb = new BoundingBox(null, clusterMin, clusterMax - clusterMin)
+            {
+                blocksCount = cluster.Count
+            };
+
+            blockClusters.Add(bb);
         }
 
         return blockClusters;

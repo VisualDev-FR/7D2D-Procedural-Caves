@@ -9,6 +9,10 @@ public class BoundingBox
 
     public Vector3i size;
 
+    public int blocksCount;
+
+    public float Density => (float)blocksCount / (size.x * size.y * size.z);
+
     public BoundingBox(BoundingBox parent, Vector3i start, Vector3i size)
     {
         this.parent = parent;
@@ -22,6 +26,12 @@ public class BoundingBox
         this.size = size;
     }
 
+    public BoundingBox(Vector3i start, Vector3i size, int blocksCount)
+    {
+        this.start = start;
+        this.size = size;
+        this.blocksCount = blocksCount;
+    }
 
     public BoundingBox[] Octree()
     {
