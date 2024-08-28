@@ -53,17 +53,15 @@ public class TTSReader
                 }
             }
 
-            if (containsBlock)
+            if (containsBlock && maxDeep > 0)
             {
-                if (maxDeep > 0)
-                {
-                    result.AddRange(DivideCluster(bb, blocks, maxDeep - 1));
-                }
-                else
-                {
-                    result.Add(bb);
-                }
+                result.AddRange(DivideCluster(bb, blocks, maxDeep - 1));
             }
+            else if (containsBlock)
+            {
+                result.Add(bb);
+            }
+
         }
 
         return result;
@@ -73,11 +71,12 @@ public class TTSReader
     {
         if (a.start.y == b.start.y && a.start.z == b.start.z && a.size.y == b.size.y && a.size.z == b.size.z)
         {
-            if (a.start.x + a.size.x == b.start.x) // b est directement à droite de a
+            if (a.start.x + a.size.x == b.start.x)
             {
                 return new BoundingBox(a.start, new Vector3i(a.size.x + b.size.x, a.size.y, a.size.z));
             }
-            else if (b.start.x + b.size.x == a.start.x) // a est directement à droite de b
+
+            if (b.start.x + b.size.x == a.start.x)
             {
                 return new BoundingBox(b.start, new Vector3i(b.size.x + a.size.x, b.size.y, b.size.z));
             }
@@ -85,11 +84,12 @@ public class TTSReader
 
         if (a.start.x == b.start.x && a.start.z == b.start.z && a.size.x == b.size.x && a.size.z == b.size.z)
         {
-            if (a.start.y + a.size.y == b.start.y) // b est directement au-dessus de a
+            if (a.start.y + a.size.y == b.start.y)
             {
                 return new BoundingBox(a.start, new Vector3i(a.size.x, a.size.y + b.size.y, a.size.z));
             }
-            else if (b.start.y + b.size.y == a.start.y) // a est directement au-dessus de b
+
+            if (b.start.y + b.size.y == a.start.y)
             {
                 return new BoundingBox(b.start, new Vector3i(b.size.x, b.size.y + a.size.y, b.size.z));
             }
@@ -97,11 +97,12 @@ public class TTSReader
 
         if (a.start.x == b.start.x && a.start.y == b.start.y && a.size.x == b.size.x && a.size.y == b.size.y)
         {
-            if (a.start.z + a.size.z == b.start.z) // b est directement devant a
+            if (a.start.z + a.size.z == b.start.z)
             {
                 return new BoundingBox(a.start, new Vector3i(a.size.x, a.size.y, a.size.z + b.size.z));
             }
-            else if (b.start.z + b.size.z == a.start.z) // a est directement devant b
+
+            if (b.start.z + b.size.z == a.start.z)
             {
                 return new BoundingBox(b.start, new Vector3i(b.size.x, b.size.y, b.size.z + a.size.z));
             }
