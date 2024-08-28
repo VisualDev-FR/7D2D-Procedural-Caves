@@ -19,7 +19,7 @@ public class TTSReader
 
         foreach (var cluster in clusters)
         {
-            var subVolumes = DivideCluster(cluster, blocks, 3);
+            var subVolumes = DivideCluster(cluster, blocks, 2);
 
             if (subVolumes.Count > 0)
             {
@@ -30,6 +30,8 @@ public class TTSReader
                 result.Add(cluster);
             }
         }
+
+        result = MergeBoundingBoxes(result);
 
         return result;
     }
@@ -67,6 +69,76 @@ public class TTSReader
         return result;
     }
 
+    public static BoundingBox TryMerge(BoundingBox a, BoundingBox b)
+    {
+        if (a.start.y == b.start.y && a.start.z == b.start.z && a.size.y == b.size.y && a.size.z == b.size.z)
+        {
+            if (a.start.x + a.size.x == b.start.x) // b est directement à droite de a
+            {
+                return new BoundingBox(a.start, new Vector3i(a.size.x + b.size.x, a.size.y, a.size.z));
+            }
+            else if (b.start.x + b.size.x == a.start.x) // a est directement à droite de b
+            {
+                return new BoundingBox(b.start, new Vector3i(b.size.x + a.size.x, b.size.y, b.size.z));
+            }
+        }
+
+        if (a.start.x == b.start.x && a.start.z == b.start.z && a.size.x == b.size.x && a.size.z == b.size.z)
+        {
+            if (a.start.y + a.size.y == b.start.y) // b est directement au-dessus de a
+            {
+                return new BoundingBox(a.start, new Vector3i(a.size.x, a.size.y + b.size.y, a.size.z));
+            }
+            else if (b.start.y + b.size.y == a.start.y) // a est directement au-dessus de b
+            {
+                return new BoundingBox(b.start, new Vector3i(b.size.x, b.size.y + a.size.y, b.size.z));
+            }
+        }
+
+        if (a.start.x == b.start.x && a.start.y == b.start.y && a.size.x == b.size.x && a.size.y == b.size.y)
+        {
+            if (a.start.z + a.size.z == b.start.z) // b est directement devant a
+            {
+                return new BoundingBox(a.start, new Vector3i(a.size.x, a.size.y, a.size.z + b.size.z));
+            }
+            else if (b.start.z + b.size.z == a.start.z) // a est directement devant b
+            {
+                return new BoundingBox(b.start, new Vector3i(b.size.x, b.size.y, b.size.z + a.size.z));
+            }
+        }
+
+        return null;
+    }
+
+    public static List<BoundingBox> MergeBoundingBoxes(List<BoundingBox> boxes)
+    {
+        bool merged;
+
+        do
+        {
+            merged = false;
+            for (int i = 0; i < boxes.Count; i++)
+            {
+                for (int j = i + 1; j < boxes.Count; j++)
+                {
+                    var newBox = TryMerge(boxes[i], boxes[j]);
+                    if (newBox != null)
+                    {
+                        boxes[i] = newBox;
+                        boxes.RemoveAt(j);
+                        merged = true;
+                        break; // Sort de la boucle intérieure après une fusion
+                    }
+                }
+                if (merged)
+                {
+                    break; // Sort de la boucle extérieure pour recommencer à zéro
+                }
+            }
+        } while (merged);
+
+        return boxes;
+    }
 
     public static List<BoundingBox> Clusterize(PrefabInstance prefab)
     {

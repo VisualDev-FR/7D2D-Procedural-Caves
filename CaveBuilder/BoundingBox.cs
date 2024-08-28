@@ -16,6 +16,13 @@ public class BoundingBox
         this.size = size;
     }
 
+    public BoundingBox(Vector3i start, Vector3i size)
+    {
+        this.start = start;
+        this.size = size;
+    }
+
+
     public BoundingBox[] Octree()
     {
         Vector3i halfSize = new Vector3i(

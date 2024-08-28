@@ -469,7 +469,7 @@ public static class CaveViewer
     {
         var timer = CaveUtils.StartTimer();
 
-        var prefabName = "rwg_tile_downtown_straight";
+        var prefabName = "rwg_tile_downtown_intersection_02";
         var path = $"C:/SteamLibrary/steamapps/common/7 Days To Die/Data/Prefabs/RWGTiles/{prefabName}.tts";
         var yOffset = -16;
 
@@ -477,17 +477,17 @@ public static class CaveViewer
 
         Log.Out($"{clusters.Count} clusters found, timer: {timer.ElapsedMilliseconds}ms");
 
-        var voxels = new HashSet<Voxell>();
+        var prefabVoxels = TTSReader.ReadUndergroundBlocks(path, yOffset).Select(pos => new Voxell(pos))
+            .ToHashSet();
 
-        // voxels = TTSReader.ReadUndergroundBlocks(path, yOffset).Select(pos => new Voxell(pos, WaveFrontMaterial.LightBlue)).ToHashSet();
+        GenerateObjFile("prefab.obj", prefabVoxels, false);
 
-        foreach (var cluster in clusters)
-        {
-            // Log.Out($"min: {cluster.start}, max: {cluster.size}");
-            voxels.Add(new Voxell(cluster.start, cluster.size, WaveFrontMaterial.DarkGreen) { force = true });
-        }
 
-        GenerateObjFile("clusters.obj", voxels, false);
+        var clusterVoxels = clusters
+            .Select(cluster => new Voxell(cluster.start, cluster.size, WaveFrontMaterial.DarkGreen) { force = true })
+            .ToHashSet();
+
+        GenerateObjFile("clusters.obj", clusterVoxels, false);
     }
 
     public static void BoundingCommands(string[] args)
