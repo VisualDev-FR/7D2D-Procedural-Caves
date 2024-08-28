@@ -13,18 +13,18 @@ public class BoundingBox
         this.size = size;
     }
 
-    public BoundingBox[] Octree(int minSize)
+    public BoundingBox[] Octree()
     {
         Vector3i halfSize = new Vector3i(
-            size.x > minSize ? size.x / 2 : size.x,
-            size.y > minSize ? size.y / 2 : size.y,
-            size.z > minSize ? size.z / 2 : size.z
+            size.x > 1 ? size.x / 2 : 1,
+            size.y > 1 ? size.y / 2 : 1,
+            size.z > 1 ? size.z / 2 : 1
         );
 
         Vector3i remainder = new Vector3i(
-            size.x > minSize ? size.x - halfSize.x : 0,
-            size.y > minSize ? size.y - halfSize.y : 0,
-            size.z > minSize ? size.z - halfSize.z : 0
+            size.x > 1 ? size.x - halfSize.x : 0,
+            size.y > 1 ? size.y - halfSize.y : 0,
+            size.z > 1 ? size.z - halfSize.z : 0
         );
 
         List<BoundingBox> octants = new List<BoundingBox>
@@ -39,7 +39,9 @@ public class BoundingBox
             new BoundingBox(new Vector3i(start.x + halfSize.x, start.y + halfSize.y, start.z + halfSize.z), remainder)
         };
 
-        return octants.Where(octant => octant.size.x >= minSize && octant.size.y >= minSize && octant.size.z >= minSize).ToArray();
+        return octants
+            .Where(bb => bb.size.x > 0 && bb.size.y > 0 && bb.size.z > 0)
+            .ToArray();
     }
 
     public IEnumerable<Vector3i> IteratePoints()

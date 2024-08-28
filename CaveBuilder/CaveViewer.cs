@@ -497,17 +497,18 @@ public static class CaveViewer
     public static void BoundingCommands(string[] args)
     {
         var start = new Vector3i(0, 0, 0);
-        var size = new Vector3i(9, 9, 2);
+        var size = new Vector3i(9, 9, 25);
         var bb = new BoundingBox(start, size);
         var voxels = new HashSet<Voxell>();
 
-
         // var voxels = bb.IteratePoints().Select(pos => new Voxell(pos, WaveFrontMaterial.LightBlue) { force = true }).ToHashSet();
-        var octree = bb.Octree(minSize: 2);
+        var octree = bb.Octree().ToList();
         foreach (var rect in octree)
         {
             voxels.Add(new Voxell(rect.start, rect.size, WaveFrontMaterial.DarkGreen) { force = true });
         }
+
+        Log.Out($"{octree.Count} sub-volumes found.");
 
         GenerateObjFile("bounds.obj", voxels, false);
     }
