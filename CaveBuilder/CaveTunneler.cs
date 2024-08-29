@@ -42,6 +42,7 @@ public class CaveTunneler
         FindPath(edge, cachedPrefabs);
         FindLocalMinimas();
         ThickenTunnel(edge.node1, edge.node2);
+        PostProcessTunnel();
 
         return tunnel;
     }
@@ -233,6 +234,35 @@ public class CaveTunneler
         path.Reverse();
     }
 
+    private void PostProcessTunnel()
+    {
+        var positions = tunnel.Select(block => block.ToVector3i()).ToHashSet();
+
+        foreach (CaveBlock block in tunnel)
+        {
+            var position = block.ToVector3i();
+            var lower = position + Vector3i.down;
+            var upper = position + Vector3i.up;
+
+            if (!positions.Contains(lower) && positions.Contains(upper))
+                block.isFloor = true;
+
+            if (!positions.Contains(upper) && positions.Contains(lower))
+                block.isCeiling = true;
+
+            block.isFlat = true;
+
+            foreach (var offset in CaveUtils.offsetsHorizontal8)
+            {
+                if (!positions.Contains(position + offset))
+                {
+                    block.isFlat = false;
+                    break;
+                }
+            }
+        }
+    }
+
     // static API
     public static IEnumerable<CaveBlock> GetSphere(CaveBlock center, float radius)
     {
@@ -240,7 +270,7 @@ public class CaveTunneler
 
         var centerPos = new Vector3i(center.x, center.y, center.z);
         var queue = new HashSet<Vector3i>() { centerPos };
-        var visited = new HashSet<Vector3i>();
+        var sphere = new HashSet<Vector3i>();
         var sqrRadius = radius * radius;
         var index = 100_000;
 
@@ -250,7 +280,7 @@ public class CaveTunneler
         {
             Vector3i currentPosition = queue.First();
 
-            visited.Add(currentPosition);
+            sphere.Add(currentPosition);
             queue.Remove(currentPosition);
 
             foreach (var offset in CaveUtils.offsets)
@@ -260,7 +290,7 @@ public class CaveTunneler
                 pos.z = currentPosition.z + offset.z;
 
                 bool shouldEnqueue =
-                    !visited.Contains(pos)
+                    !sphere.Contains(pos)
                     && pos.y > CaveBuilder.bedRockMargin
                     && pos.y + CaveBuilder.terrainMargin < WorldBuilder.Instance.GetHeight(pos.x, pos.z)
                     && CaveUtils.SqrEuclidianDistInt32(pos, centerPos) < sqrRadius;
@@ -272,7 +302,7 @@ public class CaveTunneler
             }
         }
 
-        return visited.Select(position => new CaveBlock(position));
+        return sphere.Select(position => new CaveBlock(position));
     }
 
     private static bool IsLocalMinima(List<CaveBlock> path, int i)

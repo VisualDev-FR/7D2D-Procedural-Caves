@@ -316,6 +316,8 @@ public static class CaveViewer
 
                     localMinimas.UnionWith(tunneler.localMinimas);
 
+                    // Log.Out($"floorCount: {tunnel.Count(block => block.isFloor)}");
+
                     lock (lockObject)
                     {
                         cavemap.UnionWith(tunnel);
@@ -340,15 +342,17 @@ public static class CaveViewer
         if (CaveBuilder.worldSize > 1024)
             return;
 
+        bool isFloor(CaveBlock block) => block.isFloor; // && block.isFlat;
+
         var voxels = cavemap
-            .Where(block => block.isWater)
+            .Where(isFloor)
             .Select(block => new Voxell(block.x, block.y, block.z, WaveFrontMaterial.LightBlue))
             .ToHashSet();
 
         Log.Out($"{voxels.Count} water blocks");
 
         var tunnels = cavemap
-            .Where(block => !block.isWater)
+            .Where(block => !isFloor(block))
             .Select(block => new Voxell(block.x, block.y, block.z, WaveFrontMaterial.DarkRed))
             .ToHashSet();
 

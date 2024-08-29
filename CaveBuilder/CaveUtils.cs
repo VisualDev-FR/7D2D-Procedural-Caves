@@ -47,6 +47,14 @@ public static class CaveUtils
         .Select(offset => PrefabCache.GetChunkHash(offset.x, offset.z))
         .ToArray();
 
+    public static readonly Vector3i[] offsetsHorizontal8 = offsets
+        .Where(offset => offset.y == 0)
+        .ToArray();
+
+    public static readonly Vector3i[] offsetsHorizontal4 = offsets
+        .Where(offset => offset.y == 0 && (offset.x == 0 || offset.z == 0))
+        .ToArray();
+
     public static readonly Vector3i[] offsetsNoDiagonal = offsets
         .Where(offset =>
                (offset.x == 0 && offset.y == 0)

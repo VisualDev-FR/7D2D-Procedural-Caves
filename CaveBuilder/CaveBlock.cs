@@ -54,6 +54,12 @@ public class CaveBlock
         set => rawData = (byte)(value ? (rawData | 0b0010_0000) : (rawData & 0b1101_1111));
     }
 
+    public bool isFlat
+    {
+        get => (rawData & 0b0100_0000) != 0;
+        set => rawData = (byte)(value ? (rawData | 0b0100_0000) : (rawData & 0b1011_1111));
+    }
+
     public CaveBlock(Vector3i position, sbyte density = defaultDensity)
     {
         short chunk_x = (short)(position.x >> 4);
