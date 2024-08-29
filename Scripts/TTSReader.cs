@@ -21,25 +21,25 @@ public class TTSReader
     {
         var blocks = ReadUndergroundBlocks(fullPath, yOffset);
         var clusters = ClusterizeBlocks(blocks);
-        var merged = new List<BoundingBox>();
+        // var merged = new List<BoundingBox>();
 
-        Log.Out($"{blocks.Count} blocks found.");
+        // Log.Out($"{blocks.Count} blocks found.");
 
-        foreach (var cluster in clusters)
-        {
-            var subVolumes = DivideCluster(cluster, blocks, 2);
+        // foreach (var cluster in clusters)
+        // {
+        //     var subVolumes = DivideCluster(cluster, blocks, 2);
 
-            if (subVolumes.Count > 0)
-            {
-                merged.AddRange(subVolumes);
-            }
-            else
-            {
-                merged.Add(cluster);
-            }
-        }
+        //     if (subVolumes.Count > 0)
+        //     {
+        //         merged.AddRange(subVolumes);
+        //     }
+        //     else
+        //     {
+        //         merged.Add(cluster);
+        //     }
+        // }
 
-        merged = MergeBoundingBoxes(merged);
+        // merged = MergeBoundingBoxes(merged);
 
         return clusters;
     }
@@ -327,12 +327,7 @@ public class TTSReader
                 }
             }
 
-            var bb = new BoundingBox(null, clusterMin, clusterMax - clusterMin)
-            {
-                blocksCount = cluster.Count
-            };
-
-            blockClusters.Add(bb);
+            blockClusters.Add(new BoundingBox(clusterMin, clusterMax - clusterMin, cluster.Count));
         }
 
         return blockClusters;

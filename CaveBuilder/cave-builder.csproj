@@ -13,7 +13,7 @@
   <ItemGroup>
     <!-- Assembly info -->
     <Compile Include="../Scripts/TTSReader.cs" />
-    <Compile Include="../Scripts/Rect3D.cs" />
+    <Compile Include="../Scripts/BlockSelectionUtils.cs" />
     <Compile Include="../Scripts/CaveDebugConsoleCmd.cs" />
   </ItemGroup>
 </Project>

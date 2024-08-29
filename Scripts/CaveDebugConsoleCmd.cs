@@ -40,12 +40,30 @@ public class CaveDebugConsoleCmd : ConsoleCmdAbstract
 
         for (int i = 0; i < clusters.Count; i++)
         {
-            clusters[i] = clusters[i].Transform(prefabInstance.boundingBoxPosition, prefabInstance.rotation, prefabInstance.prefab.size);
+            clusters[i] = clusters[i].Transform(prefabInstance);
             Log.Out($"[Cluster] {clusters[i].start,18} | {clusters[i].size}");
         }
         Log.Out($"[Cluster] {clusters.Count} clusters found.");
 
         BlockSelectionUtils.SelectBoxes(clusters);
+    }
+
+    private static void PrefabCommand(List<string> _params)
+    {
+        var playerPos = GameManager.Instance.World.GetPrimaryPlayer().position;
+        var prefabInstance = GameManager.Instance.World.GetPOIAtPosition(playerPos, false);
+
+        if (prefabInstance == null)
+        {
+            Log.Warning($"[Prefab] no prefab found at position [{playerPos}]");
+            return;
+        }
+
+        var bb = new BoundingBox(prefabInstance.boundingBoxPosition, prefabInstance.boundingBoxSize);
+
+        Log.Out($"[Prefab] '{prefabInstance.name}', start: [{bb.start}], size: [{bb.size}], rotation: {prefabInstance.rotation}");
+
+        BlockSelectionUtils.SelectBox(bb);
     }
 
     public override void Execute(List<string> _params, CommandSenderInfo _senderInfo)
@@ -60,6 +78,10 @@ public class CaveDebugConsoleCmd : ConsoleCmdAbstract
         {
             case "cluster":
                 ClusterCommand(_params);
+                break;
+
+            case "prefab":
+                PrefabCommand(_params);
                 break;
 
             default:

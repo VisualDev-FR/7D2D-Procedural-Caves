@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -31,6 +32,14 @@ public class BoundingBox
         this.start = start;
         this.size = size;
         this.blocksCount = blocksCount;
+    }
+
+    public BoundingBox(BoundingBox other)
+    {
+        start = new Vector3i(other.start);
+        size = new Vector3i(other.size);
+        parent = other.parent;
+        blocksCount = other.blocksCount;
     }
 
     public BoundingBox[] Octree()
@@ -111,44 +120,65 @@ public class BoundingBox
         return $"start: [{start}], size: [{size}]";
     }
 
-    public Vector3i RotateCoords(Vector3i coord, int rotation, Vector3i parentSize)
+    public BoundingBox Transform(PrefabInstance prefabInstance)
     {
-        // TODO: switch to Prefab.RotatePOIMarkers if needed
-
-        var _x = coord.x;
-        var _z = coord.z;
-
-        switch (rotation)
-        {
-            case 3:
-                {
-                    int num = _x;
-                    _x = _z;
-                    _z = parentSize.x - num - 1;
-                    break;
-                }
-            case 2:
-                _x = parentSize.x - _x - 1;
-                _z = parentSize.z - _z - 1;
-                break;
-            case 1:
-                {
-                    int num = _x;
-                    _x = parentSize.z - _z - 1;
-                    _z = num;
-                    break;
-                }
-        }
-
-        return new Vector3i(_x, coord.y, _z);
+        return Transform(
+            prefabInstance.boundingBoxPosition,
+            prefabInstance.rotation,
+            prefabInstance.prefab.size
+        );
     }
 
     public BoundingBox Transform(Vector3i position, byte rotation, Vector3i parentSize)
     {
-        var start = RotateCoords(this.start, rotation, parentSize) + position;
-        var end = RotateCoords(this.start + size, rotation, parentSize) + position;
+        // NOTE: see ./previews/doc_bb_rotation.png
 
-        return new BoundingBox(null, start, end - start);
+        var bb = new BoundingBox(this);
+
+        var px = parentSize.x;
+        var pz = parentSize.z;
+
+        var x = start.x;
+        var z = start.z;
+
+        var sx = size.x;
+        var sz = size.z;
+
+        switch (rotation)
+        {
+            case 0:
+                break;
+
+            case 1:
+                pz = parentSize.x;
+                bb.start.x = pz - z;
+                bb.start.z = x;
+                bb.size.x = -sz;
+                bb.size.z = sx;
+                break;
+
+            case 2:
+                bb.start.x = px - x;
+                bb.start.z = pz - z;
+                bb.size.x = -sx;
+                bb.size.z = -sz;
+                break;
+
+            case 3:
+                px = parentSize.z;
+                bb.start.x = z;
+                bb.start.z = px - x;
+                bb.size.x = sz;
+                bb.size.z = -sx;
+                break;
+
+            default:
+                throw new Exception($"Invalid rotation: '{rotation}'");
+        }
+
+        bb.start += position;
+
+        return bb;
     }
 
 }

@@ -469,8 +469,9 @@ public static class CaveViewer
     {
         var timer = CaveUtils.StartTimer();
 
-        var prefabName = "rwg_tile_commercial_corner";
-        var path = $"C:/SteamLibrary/steamapps/common/7 Days To Die/Data/Prefabs/RWGTiles/{prefabName}.tts";
+        var prefabName = "army_camp_01";
+        // var path = $"C:/SteamLibrary/steamapps/common/7 Days To Die/Data/Prefabs/RWGTiles/{prefabName}.tts";
+        var path = $"C:/SteamLibrary/steamapps/common/7 Days To Die/Data/Prefabs/POIs/{prefabName}.tts";
         var yOffset = -7;
 
         var clusters = TTSReader.Clusterize(path, yOffset);
@@ -494,7 +495,7 @@ public static class CaveViewer
     {
         var start = new Vector3i(0, 0, 0);
         var size = new Vector3i(9, 9, 25);
-        var bb = new BoundingBox(null, start, size);
+        var bb = new BoundingBox(start, size);
         var voxels = new HashSet<Voxell>();
 
         // var voxels = bb.IteratePoints().Select(pos => new Voxell(pos, WaveFrontMaterial.LightBlue) { force = true }).ToHashSet();
