@@ -9,6 +9,14 @@ using UnityEngine;
 // His purpose is to collect and clusterize non tunnelable blocks from rwg-street-tile prefabs
 public class TTSReader
 {
+    public static List<BoundingBox> Clusterize(PrefabInstance prefab)
+    {
+        var path = prefab.location.FullPath;
+        var yOffset = prefab.prefab.yOffset;
+
+        return Clusterize(path, yOffset);
+    }
+
     public static List<BoundingBox> Clusterize(string fullPath, int yOffset)
     {
         var blocks = ReadUndergroundBlocks(fullPath, yOffset);
@@ -33,7 +41,7 @@ public class TTSReader
 
         merged = MergeBoundingBoxes(merged);
 
-        return merged;
+        return clusters;
     }
 
     public static List<BoundingBox> DivideCluster(BoundingBox cluster, HashSet<Vector3i> blocks, int maxDeep)
@@ -139,14 +147,6 @@ public class TTSReader
         } while (merged);
 
         return boxes;
-    }
-
-    public static List<BoundingBox> Clusterize(PrefabInstance prefab)
-    {
-        var path = prefab.location.FullPath;
-        var yOffset = prefab.prefab.yOffset;
-
-        return Clusterize(path, yOffset);
     }
 
     // NOTE: copied from Prefab.loadBlockData

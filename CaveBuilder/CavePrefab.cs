@@ -62,6 +62,7 @@ public class CavePrefab
     {
         position = rectangle.start;
         Size = rectangle.size;
+        caveMarkers = new List<Prefab.Marker>();
     }
 
     public Prefab.Marker RandomMarker(Random rand, int rotation, int xMax, int yMax, int zMax)

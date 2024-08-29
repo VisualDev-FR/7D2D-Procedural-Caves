@@ -469,9 +469,9 @@ public static class CaveViewer
     {
         var timer = CaveUtils.StartTimer();
 
-        var prefabName = "rwg_tile_downtown_t";
+        var prefabName = "rwg_tile_commercial_corner";
         var path = $"C:/SteamLibrary/steamapps/common/7 Days To Die/Data/Prefabs/RWGTiles/{prefabName}.tts";
-        var yOffset = -11;
+        var yOffset = -7;
 
         var clusters = TTSReader.Clusterize(path, yOffset);
 

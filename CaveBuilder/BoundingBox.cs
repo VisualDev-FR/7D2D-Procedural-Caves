@@ -106,6 +106,11 @@ public class BoundingBox
         return start.GetHashCode() + size.GetHashCode();
     }
 
+    public override string ToString()
+    {
+        return $"start: [{start}], size: [{size}]";
+    }
+
     public Vector3i RotateCoords(Vector3i coord, int rotation, Vector3i parentSize)
     {
         // TODO: switch to Prefab.RotatePOIMarkers if needed

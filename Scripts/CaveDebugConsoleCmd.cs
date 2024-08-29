@@ -43,17 +43,9 @@ public class CaveDebugConsoleCmd : ConsoleCmdAbstract
             clusters[i] = clusters[i].Transform(prefabInstance.boundingBoxPosition, prefabInstance.rotation, prefabInstance.prefab.size);
             Log.Out($"[Cluster] {clusters[i].start,18} | {clusters[i].size}");
         }
+        Log.Out($"[Cluster] {clusters.Count} clusters found.");
 
-        if (_params.Count == 1)
-            return;
-
-        var index = int.Parse(_params[1]);
-        var rectangle = clusters[index];
-        var selection = BlockToolSelection.Instance;
-
-        selection.SelectionStart = rectangle.start;
-        selection.SelectionEnd = rectangle.start + rectangle.size - Vector3i.one;
-        selection.SelectionActive = true;
+        BlockSelectionUtils.SelectBoxes(clusters);
     }
 
     public override void Execute(List<string> _params, CommandSenderInfo _senderInfo)

@@ -5,13 +5,22 @@ using HarmonyLib;
 [HarmonyPatch(typeof(BlockToolSelection), "CheckKeys")]
 public class BlockToolSelection_CheckKeys
 {
-    // simple patch allowing to access the density modifier out of the edit mode
     public static void CheckKeys(BlockToolSelection instance, ItemInventoryData _data, WorldRayHitInfo _hitInfo, PlayerActionsLocal playerActions)
     {
         if (LocalPlayerUI.primaryUI.windowManager.IsInputActive())
         {
             return;
         }
+
+        // NOTE: Patch to clear selection from BlockSelectionUtils
+        // -------------------------------
+        if (playerActions.SelectionDelete.IsPressed)
+        {
+            BlockSelectionUtils.ClearSelection();
+        }
+        // -------------------------------
+
+
         instance.hitInfo = _hitInfo;
         Vector3i vector3i = _data.world.IsEditor() && playerActions.Run.IsPressed ? _hitInfo.hit.blockPos : _hitInfo.lastBlockPos;
 
@@ -54,7 +63,7 @@ public class BlockToolSelection_CheckKeys
             }
         }
 
-        // Patched
+        // NOTE: patch allowing to access the density modifier out of the edit mode
         // if (!GameManager.Instance.IsEditMode())
         // {
         //     return;
