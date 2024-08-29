@@ -6,6 +6,8 @@ Priority:
     ✔ Implement custom wilderness prefab spawning function @done(24-08-23 21:41)
     ✔ implement intersection detection inside rwg tiles @done(24-08-29 21:58)
     ☐ debug tunnels intersections with surface prefabs
+    ☐ reduce water spawns with a noise map
+    ☐ setup cave biomes (radiated, spores, water, else ?)
     ☐ check cave horde nights
     ☐ assert abs(prefab.yOffset) < prefab.size.y
     ☐ integrate small prefabs in tunnels (dirt, decoration, modeled terrain, stalactites, water well)
