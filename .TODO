@@ -1,25 +1,29 @@
 Priority:
+    ✘ implement tunneling with code of toolTerrainModelder @cancelled(24-08-29 21:59)
     ✔ debug cave prefab placements regarding surface prefabs @done(24-08-17 22:43)
     ✔ Implement connection regular town POIs to the cave network @done(24-08-18 22:22)
     ✔ implement prefab rename command in cave editor plugin @done(24-08-18 22:22)
     ✔ Implement custom wilderness prefab spawning function @done(24-08-23 21:41)
-    ☐ implement intersection detection inside rwg tiles
+    ✔ implement intersection detection inside rwg tiles @done(24-08-29 21:58)
+    ☐ debug tunnels intersections with surface prefabs
     ☐ check cave horde nights
     ☐ assert abs(prefab.yOffset) < prefab.size.y
     ☐ integrate small prefabs in tunnels (dirt, decoration, modeled terrain, stalactites, water well)
     ☐ implement multiple cave networks (good feature + performances hack)
     ☐ find a way to force rwg POIs choices
-    ☐ debug tunnels intersections with surface prefabs
     ☐ debug low caves zombies spawning
-    ☐ implement tunneling with code of toolTerrainModelder
     ☐ implement tunnel terrain smoothing
 
 Optimization:
     ☐ work special vector3sbs(short, byte, short) as long as possible in cave tunneling, avoiding instanciating caveBlocks
     ☐ free cavemap memory after saving it, after game exit
+    ☐ store all sphere offsets to avoid computing sqrDistance in critical sections
+        * one array with offsets of the bigger sphere
+        * another array containing indexes to pick for other diameters
 
 Testing:
     ☐ block inside cave prefabs must be cave air (H_Prefab.cs)
+    ☐ cluterization of prefabs where size.x != size.z
 
 Bug:
     ☐ can't place torch inside caveAir
@@ -65,13 +69,13 @@ Later:
     ☐ flooding event
     ☐ horde triggers (like police car ?)
     ☐ no oxygen event
-    ☐ zombie toxic spore events (with particule effects)
+    ☐ zombie toxic spore events (with particule effects like TLOS ?)
     ☐ radiation event
     ☐ cave fog
     ☐ artifact collections, only complete collection sellable to trader
     ☐ murals
     ☐ loot bioming
-    ☐ dedicated cave flora
+    ☐ new plants which grow in caves only
     ☐ mine structures (or else) along tunnels (via prefab parts ? make new cave parts group ?)
     ☐ tunnel treasure quest
     ☐ dedicated materials to explore caves (metal detector, gps, gazmask, nbc suit, flares, flare gun, ice axe)
