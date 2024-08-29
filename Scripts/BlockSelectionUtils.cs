@@ -4,6 +4,10 @@ using System.Collections.Generic;
 
 public class BlockSelectionUtils
 {
+    public static readonly string selectionBoxCategory = "BlockSelectionUtils";
+
+    public static readonly List<string> activeBoxNames = new List<string>();
+
     public static IEnumerable<Vector3i> BrowseSelectionPositions()
     {
         var selection = BlockToolSelection.Instance;
@@ -35,4 +39,58 @@ public class BlockSelectionUtils
         yield break;
     }
 
+    public static void SelectBox(BoundingBox box)
+    {
+        SelectBoxes(new List<BoundingBox>() { box });
+    }
+
+    public static SelectionCategory GetSelectionCategory()
+    {
+        var sbm = SelectionBoxManager.Instance;
+
+        if (!sbm.categories.ContainsKey(selectionBoxCategory))
+        {
+            sbm.CreateCategory(
+                _name: selectionBoxCategory,
+                _colSelected: SelectionBoxManager.ColSelectionActive,
+                _colUnselected: SelectionBoxManager.ColSelectionInactive,
+                _colFaceSelected: SelectionBoxManager.ColSelectionFaceSel,
+                _bCollider: false,
+                _tag: null
+            );
+        }
+
+        return sbm.categories[selectionBoxCategory];
+    }
+
+    public static void SelectBoxes(List<BoundingBox> boxes)
+    {
+        var selectionCat = GetSelectionCategory();
+
+        foreach (var bb in boxes)
+        {
+            string boxName = bb.ToString();
+
+            SelectionBox box = selectionCat.AddBox(boxName, bb.start, bb.size);
+            box.SetVisible(true);
+            box.SetSizeVisibility(_visible: true);
+
+            selectionCat.SetVisible(true);
+            // SelectionBoxManager.Instance.activate(selectionCat, box);
+
+            activeBoxNames.Add(boxName);
+        }
+    }
+
+    public static void ClearSelection()
+    {
+        var selectionCat = GetSelectionCategory();
+
+        foreach (var name in activeBoxNames)
+        {
+            selectionCat.RemoveBox(name);
+        }
+
+        activeBoxNames.Clear();
+    }
 }

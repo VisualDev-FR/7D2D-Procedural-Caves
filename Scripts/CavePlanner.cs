@@ -245,7 +245,7 @@ public static class CavePlanner
 
     private static void AddSurfacePrefabs(PrefabCache cachedPrefabs)
     {
-        var rwgTileClusters = new Dictionary<string, List<Rect3D>>();
+        var rwgTileClusters = new Dictionary<string, List<BoundingBox>>();
 
         foreach (var pdi in PrefabManager.UsedPrefabsWorld)
         {

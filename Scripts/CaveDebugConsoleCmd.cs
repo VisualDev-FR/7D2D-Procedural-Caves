@@ -38,22 +38,32 @@ public class CaveDebugConsoleCmd : ConsoleCmdAbstract
             return;
         }
 
-        for(int i = 0; i < clusters.Count; i++)
+        for (int i = 0; i < clusters.Count; i++)
         {
-            clusters[i] = clusters[i].Transform(prefabInstance.boundingBoxPosition, prefabInstance.rotation, prefabInstance.prefab.size);
-            Log.Out($"[Cluster] {clusters[i].start,18} | {clusters[i].end}");
+            clusters[i] = clusters[i].Transform(prefabInstance);
+            Log.Out($"[Cluster] {clusters[i].start,18} | {clusters[i].size}");
+        }
+        Log.Out($"[Cluster] {clusters.Count} clusters found.");
+
+        BlockSelectionUtils.SelectBoxes(clusters);
+    }
+
+    private static void PrefabCommand(List<string> _params)
+    {
+        var playerPos = GameManager.Instance.World.GetPrimaryPlayer().position;
+        var prefabInstance = GameManager.Instance.World.GetPOIAtPosition(playerPos, false);
+
+        if (prefabInstance == null)
+        {
+            Log.Warning($"[Prefab] no prefab found at position [{playerPos}]");
+            return;
         }
 
-        if (_params.Count == 1)
-            return;
+        var bb = new BoundingBox(prefabInstance.boundingBoxPosition, prefabInstance.boundingBoxSize);
 
-        var index = int.Parse(_params[1]);
-        var rectangle = clusters[index];
-        var selection = BlockToolSelection.Instance;
+        Log.Out($"[Prefab] '{prefabInstance.name}', start: [{bb.start}], size: [{bb.size}], rotation: {prefabInstance.rotation}");
 
-        selection.SelectionStart = rectangle.start;
-        selection.SelectionEnd = rectangle.end - Vector3i.one;
-        selection.SelectionActive = true;
+        BlockSelectionUtils.SelectBox(bb);
     }
 
     public override void Execute(List<string> _params, CommandSenderInfo _senderInfo)
@@ -68,6 +78,10 @@ public class CaveDebugConsoleCmd : ConsoleCmdAbstract
         {
             case "cluster":
                 ClusterCommand(_params);
+                break;
+
+            case "prefab":
+                PrefabCommand(_params);
                 break;
 
             default:

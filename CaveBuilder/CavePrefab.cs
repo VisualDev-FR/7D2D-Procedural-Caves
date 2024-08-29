@@ -58,10 +58,11 @@ public class CavePrefab
         );
     }
 
-    public CavePrefab(Rect3D rectangle)
+    public CavePrefab(BoundingBox rectangle)
     {
         position = rectangle.start;
-        Size = rectangle.Size;
+        Size = rectangle.size;
+        caveMarkers = new List<Prefab.Marker>();
     }
 
     public Prefab.Marker RandomMarker(Random rand, int rotation, int xMax, int yMax, int zMax)

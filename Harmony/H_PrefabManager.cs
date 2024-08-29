@@ -31,6 +31,11 @@ public static class PrefabManager_LoadPrefabs
 
             PrefabData prefabData = PrefabData.LoadPrefabData(location);
 
+            if (prefabData.size.x != prefabData.size.z)
+            {
+                Log.Out($"[Cave] not square prefab: '{prefabData.Name}'");
+            }
+
             if (prefabData == null || prefabData.Tags.IsEmpty)
                 Log.Warning("Could not load prefab data for " + location.Name);
 

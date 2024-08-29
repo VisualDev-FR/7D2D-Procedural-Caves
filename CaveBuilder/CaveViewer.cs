@@ -467,31 +467,47 @@ public static class CaveViewer
 
     public static void ClusterizeCommand(string[] args)
     {
-        // // var playerPos = new Vector3i(958, 26, -1440);
-        // // CaveDebugConsoleCmd.FindClusters(playerPos);
+        var timer = CaveUtils.StartTimer();
 
-        // var timer = CaveUtils.StartTimer();
+        var prefabName = "army_camp_01";
+        // var path = $"C:/SteamLibrary/steamapps/common/7 Days To Die/Data/Prefabs/RWGTiles/{prefabName}.tts";
+        var path = $"C:/SteamLibrary/steamapps/common/7 Days To Die/Data/Prefabs/POIs/{prefabName}.tts";
+        var yOffset = -7;
 
-        // var path = @"C:\SteamLibrary\steamapps\common\7 Days To Die\Data\Prefabs\RWGTiles\rwg_tile_downtown_straight.tts";
-        // var points = TTSReader.GetUndergroundObstacles(path, -16);
+        var clusters = TTSReader.Clusterize(path, yOffset);
 
-        // Log.Out($"{points.Count} points");
+        Log.Out($"{clusters.Count} clusters found, timer: {timer.ElapsedMilliseconds}ms");
 
-        // var clusters = TTSReader.ClusterizeBlocks(points.ToHashSet());
+        var prefabVoxels = TTSReader.ReadUndergroundBlocks(path, yOffset).Select(pos => new Voxell(pos))
+            .ToHashSet();
 
-        // Log.Out($"timer: {timer.ElapsedMilliseconds}ms");
+        GenerateObjFile("prefab.obj", prefabVoxels, false);
 
-        // // var voxels = new HashSet<Voxell>();
-        // var voxels = points.Select(pos => new Voxell(pos, WaveFrontMaterial.LightBlue)).ToHashSet();
 
-        // foreach (var cluster in clusters)
-        // {
-        //     Log.Out($"min: {cluster.start}, max: {cluster.end}");
-        //     voxels.Add(new Voxell(cluster.start, cluster.Size, WaveFrontMaterial.DarkGreen) { force = true });
-        //     break;
-        // }
+        var clusterVoxels = clusters
+            .Select(cluster => new Voxell(cluster.start, cluster.size, WaveFrontMaterial.DarkGreen) { force = true })
+            .ToHashSet();
 
-        // GenerateObjFile("dbscan.obj", voxels, false);
+        GenerateObjFile("clusters.obj", clusterVoxels, false);
+    }
+
+    public static void BoundingCommands(string[] args)
+    {
+        var start = new Vector3i(0, 0, 0);
+        var size = new Vector3i(9, 9, 25);
+        var bb = new BoundingBox(start, size);
+        var voxels = new HashSet<Voxell>();
+
+        // var voxels = bb.IteratePoints().Select(pos => new Voxell(pos, WaveFrontMaterial.LightBlue) { force = true }).ToHashSet();
+        var octree = bb.Octree().ToList();
+        foreach (var rect in octree)
+        {
+            voxels.Add(new Voxell(rect.start, rect.size, WaveFrontMaterial.DarkGreen) { force = true });
+        }
+
+        Log.Out($"{octree.Count} sub-volumes found.");
+
+        GenerateObjFile("bounds.obj", voxels, false);
     }
 
     public static void Main(string[] args)
@@ -533,6 +549,12 @@ public static class CaveViewer
 
             case "cluster":
                 ClusterizeCommand(args);
+                break;
+
+            case "boundingbox":
+            case "bounds":
+            case "bb":
+                BoundingCommands(args);
                 break;
 
             default:
