@@ -30,26 +30,6 @@
 			<property name="CreativeMode" value="Dev"/>
 		</block>
 
-		<block name="terrOreGold">
-			<property name="CanMobsSpawnOn" value="true"/>
-			<property name="DescriptionKey" value="terrainBlockGroupDesc"/>
-			<property name="DisplayType" value="blockTerrain"/>
-			<property name="CustomIcon" value="terrConcrete"/>
-			<property name="Map.Color" value="201,185,4"/>
-			<property name="CustomIconTint" value="FCE303"/>
-			<property name="Material" value="MoreMetal"/>
-			<property name="Shape" value="Terrain"/>
-			<property name="Mesh" value="terrain"/>
-			<property name="Texture" value="33"/>
-			<property name="ImposterExclude" value="true"/>
-			<drop event="Harvest" name="resourceGoldNugget" count="1" tag="oreWoodHarvest"/>
-			<drop event="Harvest" name="resourceRockSmall" count="14" tag="oreWoodHarvest"/>
-			<drop event="Destroy" count="0"/>
-			<drop event="Fall" name="resourceGoldNugget" count="1" prob="0.4" stick_chance="0"/>
-			<property name="Tags" value="ore,deepOre"/>
-			<property name="FilterTags" value="MC_outdoor,SC_terrain"/>
-		</block>
-
 		<!-- A20 Stalactites / stalagmites -->
 
 		<!-- <block name="stalactite01">

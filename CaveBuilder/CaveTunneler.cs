@@ -325,6 +325,7 @@ public class CaveTunneler
 
         return i < path.Count - 1 && path[i].y < path[i + 1].y;
     }
+
     private static IEnumerable<CaveBlock> GetSphereV2(CaveBlock center, float sphereRadius, CaveMap cavemap)
     {
         // adapted from ItemActionTerrainTool.RemoveTerrain
