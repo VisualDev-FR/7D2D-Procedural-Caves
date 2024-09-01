@@ -195,16 +195,16 @@ public class CavePrefab
         UpdateMarkers(rand);
     }
 
-    public bool OverLaps2D(CavePrefab other)
+    public bool OverLaps2D(CavePrefab other, int margin)
     {
-        return CaveUtils.OverLaps2D(position, Size, other.position, other.Size);
+        return CaveUtils.OverLaps2D(position, Size, other.position, other.Size, margin);
     }
 
-    public bool OverLaps2D(List<CavePrefab> others)
+    public bool OverLaps2D(List<CavePrefab> others, int margin)
     {
         foreach (var prefab in others)
         {
-            if (OverLaps2D(prefab))
+            if (OverLaps2D(prefab, margin))
                 return true;
         }
 

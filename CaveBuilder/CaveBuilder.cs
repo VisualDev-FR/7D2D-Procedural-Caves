@@ -48,7 +48,7 @@ public static class CaveBuilder
         {
             prefab.SetRandomPosition(rand, worldSize);
 
-            if (!prefab.OverLaps2D(others))
+            if (!prefab.OverLaps2D(others, overLapMargin))
             {
                 return true;
             }

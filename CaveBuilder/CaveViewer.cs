@@ -150,7 +150,7 @@ public static class CaveViewer
 
     public static void PathCommand(string[] args)
     {
-        CaveBuilder.worldSize = 200;
+        CaveBuilder.worldSize = 100;
         CaveBuilder.radiationZoneMargin = 0;
         // CaveBuilder.rand = new Random();
 
@@ -342,7 +342,7 @@ public static class CaveViewer
         if (CaveBuilder.worldSize > 1024)
             return;
 
-        bool isFloor(CaveBlock block) => block.isFloor; // && block.isFlat;
+        bool isFloor(CaveBlock block) => block.isFloor;
 
         var voxels = cavemap
             .Where(isFloor)
@@ -514,6 +514,51 @@ public static class CaveViewer
         GenerateObjFile("bounds.obj", voxels, false);
     }
 
+    public static void NoiseCommand(string[] args)
+    {
+        var roomNoise = new CaveNoise(
+            seed: CaveBuilder.SEED + 13,
+            octaves: 2,
+            frequency: 0.015f,
+            threshold: -0.4f,
+            invert: true,
+            noiseType: FastNoiseLite.NoiseType.Perlin,
+            fractalType: FastNoiseLite.FractalType.FBm
+        );
+        // using (var b = new Bitmap(CaveBuilder.worldSize, CaveBuilder.worldSize))
+        // {
+        //     using (Graphics g = Graphics.FromImage(b))
+        //     {
+        //         g.Clear(BackgroundColor);
+        //         DrawNoise(b, roomNoise);
+        //     }
+
+        //     b.Save("noise.png", ImageFormat.Png);
+        // }
+
+        var width = 200;
+        var size = new Vector3i(width, 50, width);
+        var voxels = new HashSet<Voxell>();
+
+        for (int x = 0; x < size.x; x++)
+        {
+            for (int y = 0; y < size.y; y++)
+            {
+                for (int z = 0; z < size.z; z++)
+                {
+                    if (CaveNoise.pathingNoise.IsTerrain(x, y, z))
+                    {
+                        voxels.Add(new Voxell(x, y, z));
+                    }
+                }
+            }
+        }
+
+        Log.Out($"{voxels.Count} cave blocks generated");
+
+        GenerateObjFile("noise.obj", voxels, false);
+    }
+
     public static void Main(string[] args)
     {
         switch (args[0])
@@ -549,6 +594,10 @@ public static class CaveViewer
 
             case "region":
                 RegionCommand(args);
+                break;
+
+            case "noise":
+                NoiseCommand(args);
                 break;
 
             case "cluster":

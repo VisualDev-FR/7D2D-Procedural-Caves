@@ -1,3 +1,13 @@
+// TODO: test those pathing noises:
+//
+//     seed: CaveBuilder.SEED,
+//     octaves: 1,
+//     frequency: 0.04f,
+//     threshold: -0.9f,
+//     invert: true,
+//     noiseType: FastNoiseLite.NoiseType.Perlin,
+//     fractalType: FastNoiseLite.FractalType.Ridged
+
 public class CaveNoise
 {
     public FastNoiseLite noise;
@@ -6,11 +16,23 @@ public class CaveNoise
 
     public int seed;
 
+    public float scale = 1f;
+
     public static CaveNoise pathingNoise = new CaveNoise(
         seed: CaveBuilder.SEED,
         octaves: 1,
         frequency: 0.15f,
         threshold: -0.2f,
+        invert: true,
+        noiseType: FastNoiseLite.NoiseType.Perlin,
+        fractalType: FastNoiseLite.FractalType.None
+    );
+
+    public static CaveNoise waterNoise = new CaveNoise(
+        seed: CaveBuilder.SEED + 13,
+        octaves: 1,
+        frequency: 0.002f,
+        threshold: -0.3f,
         invert: true,
         noiseType: FastNoiseLite.NoiseType.Perlin,
         fractalType: FastNoiseLite.FractalType.None
@@ -67,12 +89,12 @@ public class CaveNoise
 
     public float GetNoise(int x, int y, int z)
     {
-        return noise.GetNoise(x, y, z);
+        return noise.GetNoise(x, y, z) * scale;
     }
 
     public float GetNoise(int x, int z)
     {
-        return noise.GetNoise(x, z);
+        return noise.GetNoise(x, z) * scale;
     }
 }
 

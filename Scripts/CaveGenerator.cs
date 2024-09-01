@@ -20,6 +20,8 @@ public static class CaveGenerator
 
     private static BlockValue cntCaveFloor = new BlockValue((uint)Block.GetBlockByName("cntCaveFloor").blockID);
 
+    private static BlockValue cntCaveFloorFlat = new BlockValue((uint)Block.GetBlockByName("cntCaveFloorFlat").blockID);
+
     private static BlockValue cntCaveCeiling = new BlockValue((uint)Block.GetBlockByName("cntCaveCeiling").blockID);
 
     public static void Init(string worldName)
@@ -117,22 +119,20 @@ public static class CaveGenerator
                 Log.Error($"[Cave] {e.GetType()} (Chunk={caveBlock.chunkPos}, block={caveBlock.blockChunkPos})");
             }
 
-            var under = blockChunkPos.ToVector3() + new Vector3(0, -1, 0);
-            var above = blockChunkPos.ToVector3() + new Vector3(0, +1, 0);
-
-            bool isFloor = !positions.Contains(under);
-            bool isCeiling = !positions.Contains(above);
-
             var worldX = chunkWorldPos.x + blockChunkPos.x;
             var worldZ = chunkWorldPos.z + blockChunkPos.z;
 
             BlockValue blockValue = concreteBlock;
 
-            if (isFloor)
+            if (caveBlock.isFloor && caveBlock.isFlat)
+            {
+                blockValue = BlockPlaceholderMap.Instance.Replace(cntCaveFloorFlat, random, worldX, worldZ);
+            }
+            else if (caveBlock.isFloor)
             {
                 blockValue = BlockPlaceholderMap.Instance.Replace(cntCaveFloor, random, worldX, worldZ);
             }
-            else if (isCeiling)
+            else if (caveBlock.isCeiling)
             {
                 blockValue = BlockPlaceholderMap.Instance.Replace(cntCaveCeiling, random, worldX, worldZ);
             }
@@ -141,10 +141,7 @@ public static class CaveGenerator
                 continue;
             }
 
-            if (CanDecorateFlatCave(blockValue, caveBlock.ToWorldPos()))
-            {
-                chunk.SetBlock(GameManager.Instance.World, blockChunkPos.x, blockChunkPos.y, blockChunkPos.z, blockValue);
-            }
+            chunk.SetBlock(GameManager.Instance.World, blockChunkPos.x, blockChunkPos.y, blockChunkPos.z, blockValue);
         }
 
         HashSet<CaveBlock> waterBlocks = caveBlocks.Where(block => block.isWater).ToHashSet();
