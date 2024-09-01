@@ -24,6 +24,8 @@ public static class CaveGenerator
 
     private static BlockValue cntCaveCeiling = new BlockValue((uint)Block.GetBlockByName("cntCaveCeiling").blockID);
 
+    private static BlockValue terrGravel = new BlockValue((uint)Block.GetBlockByName("terrGravel").blockID);
+
     public static void Init(string worldName)
     {
         isEnabled = Directory.Exists($"{GameIO.GetWorldDir(worldName)}/cavemap");
@@ -32,6 +34,8 @@ public static class CaveGenerator
         {
             CaveBuilder.worldSize = GetWorldSize(worldName);
             caveBlocksProvider = new CaveBlocksProvider(worldName);
+
+            Log.Out($"[Cave] init caveGenerator for world '{worldName}', size: {CaveBuilder.worldSize}");
         }
         else
         {
@@ -60,31 +64,118 @@ public static class CaveGenerator
         }
     }
 
-    private static bool CanDecorateFlatCave(BlockValue _blockValue, Vector3i _blockPos)
+    private static bool IsFlatFloor(Vector3i cavePos)
     {
-        var block = _blockValue.Block;
+        int x0 = cavePos.x - 1;
+        int z0 = cavePos.z - 1;
+        int x1 = cavePos.x + 1;
+        int z1 = cavePos.z + 1;
+        int y = cavePos.y - 1;
 
-        if (!block.isMultiBlock)
+        for (int x = x0; x < x1; x++)
         {
-            foreach (var below in CaveUtils.offsetsBelow)
+            for (int z = z0; z < z1; z++)
             {
-                Vector3i position = _blockPos + below;
-
-                if (caveBlocksProvider.IsCave(position))
+                if (caveBlocksProvider.IsCave(x, y, z))
                 {
                     return false;
                 }
             }
-
-            return true;
         }
 
-        return false;
+        return true;
+    }
 
-        // Bounds bounds = block.multiBlockPos.CalcBounds(_blockValue.type, _blockValue.rotation);
-        // bounds.center += _blockPos.ToVector3();
+    private static bool CanPlaceDecoration(BlockValue blockValue, Vector3i worldPos)
+    {
+        var size = Vector3i.one;
 
-        // return true;
+        if (blockValue.Block.isMultiBlock)
+        {
+            size = blockValue.Block.multiBlockPos.dim - Vector3i.one;
+        }
+
+        if (blockValue.Block.BigDecorationRadius > 0)
+        {
+            size = new Vector3i(
+                blockValue.Block.BigDecorationRadius,
+                1,
+                blockValue.Block.BigDecorationRadius
+            );
+        }
+
+        int x0 = worldPos.x - 1;
+        int z0 = worldPos.z - 1;
+        int x1 = worldPos.x + size.x + 1;
+        int z1 = worldPos.z + size.z + 1;
+        int y = worldPos.y - 1;
+
+        for (int x = x0; x < x1; x++)
+        {
+            for (int z = z0; z < z1; z++)
+            {
+                if (caveBlocksProvider.IsCave(x, y, z))
+                {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    public static BlockValue SpawnDecoration(HashSet<Vector3i> chunkBlocks, CaveBlock caveBlock, GameRandom random, int worldX, int worldY, int worldZ)
+    {
+        random.InternalSetSeed(worldX * 13 + worldZ);
+
+        Vector3i worldPos = new Vector3i(worldX, worldY, worldZ);
+        Vector3i blockPos = caveBlock.ToVector3i();
+        Vector3i lower = blockPos + Vector3i.down;
+        Vector3i upper = blockPos + Vector3i.up;
+
+        bool isFloor = !chunkBlocks.Contains(lower) && chunkBlocks.Contains(upper);
+        bool isCeiling = chunkBlocks.Contains(lower) && !chunkBlocks.Contains(upper);
+        bool isFlatFloor = IsFlatFloor(worldPos);
+        bool isWater = caveBlock.isWater;
+
+        BlockValue placeHolder;
+
+        if (isWater)
+            placeHolder = cntCaveFloor;
+
+        else if (isFlatFloor)
+            placeHolder = cntCaveFloorFlat;
+
+        else if (isFloor)
+            placeHolder = cntCaveFloor;
+
+        else if (isCeiling)
+            placeHolder = cntCaveCeiling;
+
+        else
+            return caveAir;
+
+        int maxTries = 20;
+
+        while (maxTries-- > 0)
+        {
+            var blockValue = BlockPlaceholderMap.Instance.Replace(placeHolder, random, worldX, worldZ);
+
+            if (!isFlatFloor)
+            {
+                return blockValue;
+            }
+            else if (blockValue.type == caveAir.type)
+            {
+                return BlockPlaceholderMap.Instance.Replace(cntCaveFloor, random, worldX, worldZ);
+            }
+            else if (CanPlaceDecoration(blockValue, worldPos))
+            {
+                return blockValue;
+            }
+        }
+
+        return caveAir;
     }
 
     public static void GenerateCave(Chunk chunk)
@@ -103,7 +194,9 @@ public static class CaveGenerator
         if (caveBlocks == null)
             return;
 
-        HashSet<Vector3> positions = caveBlocks.Select(block => block.blockChunkPos.ToVector3()).ToHashSet();
+        HashSet<Vector3i> positions = caveBlocks?
+            .Select(block => block.ToVector3i())
+            .ToHashSet();
 
         foreach (CaveBlock caveBlock in caveBlocks)
         {
@@ -113,53 +206,44 @@ public static class CaveGenerator
             {
                 chunk.SetBlockRaw(blockChunkPos.x, blockChunkPos.y, blockChunkPos.z, caveAir);
                 chunk.SetDensity(blockChunkPos.x, blockChunkPos.y, blockChunkPos.z, caveBlock.density);
+
+                if (caveBlock.isFloor && caveBlock.isFlat)
+                {
+                    chunk.SetBlockRaw(blockChunkPos.x, blockChunkPos.y - 1, blockChunkPos.z, terrGravel);
+                    chunk.SetDensity(blockChunkPos.x, blockChunkPos.y - 1, blockChunkPos.z, MarchingCubes.DensityTerrain);
+                }
             }
             catch (Exception e)
             {
                 Log.Error($"[Cave] {e.GetType()} (Chunk={caveBlock.chunkPos}, block={caveBlock.blockChunkPos})");
             }
 
-            var worldX = chunkWorldPos.x + blockChunkPos.x;
-            var worldZ = chunkWorldPos.z + blockChunkPos.z;
-
-            BlockValue blockValue = concreteBlock;
-
-            if (caveBlock.isFloor && caveBlock.isFlat)
-            {
-                blockValue = BlockPlaceholderMap.Instance.Replace(cntCaveFloorFlat, random, worldX, worldZ);
-            }
-            else if (caveBlock.isFloor)
-            {
-                blockValue = BlockPlaceholderMap.Instance.Replace(cntCaveFloor, random, worldX, worldZ);
-            }
-            else if (caveBlock.isCeiling)
-            {
-                blockValue = BlockPlaceholderMap.Instance.Replace(cntCaveCeiling, random, worldX, worldZ);
-            }
-            else
-            {
+            if (!caveBlock.isWater)
                 continue;
-            }
-
-            chunk.SetBlock(GameManager.Instance.World, blockChunkPos.x, blockChunkPos.y, blockChunkPos.z, blockValue);
-        }
-
-        HashSet<CaveBlock> waterBlocks = caveBlocks.Where(block => block.isWater).ToHashSet();
-        foreach (CaveBlock waterBlock in waterBlocks)
-        {
-            var blockPos = waterBlock.blockChunkPos;
 
             try
             {
-                chunk.SetWaterRaw(blockPos.x, blockPos.y, blockPos.z, WaterValue.Full);
-                // chunk.SetBlockRaw(blockPos.x, blockPos.y, blockPos.z, concreteBlock);
+                chunk.SetWaterRaw(blockChunkPos.x, blockChunkPos.y, blockChunkPos.z, WaterValue.Full);
             }
             catch (Exception e)
             {
-                Log.Error($"[Cave] {e.GetType()} (Chunk={waterBlock.chunkPos}, block={waterBlock.blockChunkPos})");
+                Log.Error($"[Cave] {e.GetType()} (Chunk={caveBlock.chunkPos}, block={caveBlock.blockChunkPos})");
             }
         }
 
-    }
+        foreach (CaveBlock caveBlock in caveBlocks)
+        {
+            Vector3bf blockChunkPos = caveBlock.blockChunkPos;
 
+            var worldX = chunkWorldPos.x + blockChunkPos.x;
+            var worldZ = chunkWorldPos.z + blockChunkPos.z;
+
+            var blockValue = SpawnDecoration(positions, caveBlock, random, worldX, blockChunkPos.y, worldZ);
+
+            if (blockValue.type != caveAir.type)
+            {
+                chunk.SetBlock(GameManager.Instance.World, blockChunkPos.x, blockChunkPos.y, blockChunkPos.z, blockValue);
+            }
+        }
+    }
 }

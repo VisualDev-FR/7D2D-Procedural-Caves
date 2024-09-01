@@ -342,7 +342,7 @@ public static class CaveViewer
         if (CaveBuilder.worldSize > 1024)
             return;
 
-        bool isFloor(CaveBlock block) => block.isFloor;
+        bool isFloor(CaveBlock block) => block.isFloor && block.isFlat;
 
         var voxels = cavemap
             .Where(isFloor)

@@ -77,6 +77,11 @@ public class CaveBlocksProvider
         return GetCaveBlocks(chunkPos);
     }
 
+    public bool IsCave(int x, int y, int z)
+    {
+        return IsCave(new Vector3i(x, y, z));
+    }
+
     public bool IsCave(Vector3i worldPos)
     {
         var worldSize = CaveBuilder.worldSize;
