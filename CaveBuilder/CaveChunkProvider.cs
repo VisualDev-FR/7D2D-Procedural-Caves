@@ -98,7 +98,7 @@ public class CaveBlocksProvider
         return caveBlocks.Contains(new CaveBlock(caveBlockPosition));
     }
 
-    public List<CaveBlock> GetSpawnPositions(Vector3 worldPosition)
+    public List<CaveBlock> GetSpawnPositionsFromPlayer(Vector3 worldPosition)
     {
         var caveBlocks = new HashSet<CaveBlock>();
         var worldSize = CaveBuilder.worldSize;
@@ -107,8 +107,8 @@ public class CaveBlocksProvider
         foreach (var offset in CaveUtils.offsets)
         {
             var neighborChunkPos = new Vector2s(
-                (short)(chunkPos.x + offset.x),
-                (short)(chunkPos.y + offset.z)
+                (short)(chunkPos.x + 2 * offset.x),
+                (short)(chunkPos.y + 2 * offset.z)
             );
 
             var blocks = GetCaveBlocks(neighborChunkPos);

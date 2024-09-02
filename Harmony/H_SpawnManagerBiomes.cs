@@ -180,7 +180,7 @@ public class SpawnManagerBiomes_Update
         // TODO: see world.GetRandomSpawnPositionInAreaMinMaxToPlayers
 
         GameRandom random = GameRandomManager.instance.CreateGameRandom(playerPosition.GetHashCode());
-        List<CaveBlock> spawnPositions = CaveGenerator.caveBlocksProvider.GetSpawnPositions(playerPosition);
+        List<CaveBlock> spawnPositions = CaveGenerator.caveBlocksProvider.GetSpawnPositionsFromPlayer(playerPosition);
 
         if (spawnPositions.Count == 0)
             return Vector3.zero;
