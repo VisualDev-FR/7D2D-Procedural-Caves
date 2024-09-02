@@ -127,13 +127,7 @@ public class CaveBlock
 
     public Vector3i ToWorldPos()
     {
-        Vector3i chunkPos = new Vector3i(
-            blockChunkPos.x - CaveBuilder.worldSize / 32,
-            0,
-            blockChunkPos.z - CaveBuilder.worldSize / 32
-        );
-
-        return 16 * chunkPos + blockChunkPos.ToVector3i();
+        return ToVector3i() - CaveBuilder.HalfWorldSize;
     }
 
     public override string ToString()

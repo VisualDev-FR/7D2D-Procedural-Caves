@@ -85,8 +85,7 @@ public class CaveBlocksProvider
     public bool IsCave(Vector3i worldPos)
     {
         var worldSize = CaveBuilder.worldSize;
-        Vector2i chunkPos = World.toChunkXZ(worldPos) + new Vector2i(worldSize / 32, worldSize / 32);
-
+        var chunkPos = World.toChunkXZ(worldPos) + new Vector2i(worldSize / 32, worldSize / 32);
         var caveBlocks = GetCaveBlocks(new Vector2s(chunkPos));
 
         if (caveBlocks == null)
@@ -102,26 +101,22 @@ public class CaveBlocksProvider
     public List<CaveBlock> GetSpawnPositions(Vector3 worldPosition)
     {
         var caveBlocks = new HashSet<CaveBlock>();
-        var chunkPos = new Vector2s(
-            (int)worldPosition.x / 16 + CaveBuilder.worldSize / 32,
-            (int)worldPosition.z / 16 + CaveBuilder.worldSize / 32
-        );
+        var worldSize = CaveBuilder.worldSize;
+        var chunkPos = World.toChunkXZ(worldPosition) + new Vector2i(worldSize / 32, worldSize / 32);
 
-        for (int dx = -1; dx <= 1; dx++)
+        foreach (var offset in CaveUtils.offsets)
         {
-            for (int dz = -1; dz <= 1; dz++)
-            {
-                if (dx == 0 && dz == 0)
-                    continue;
+            var neighborChunkPos = new Vector2s(
+                (short)(chunkPos.x + offset.x),
+                (short)(chunkPos.y + offset.z)
+            );
 
-                var neighborChunkPos = new Vector2s(chunkPos.x + dx, chunkPos.z + dz);
-                var blocks = GetCaveBlocks(neighborChunkPos);
+            var blocks = GetCaveBlocks(neighborChunkPos);
 
-                if (blocks == null)
-                    continue;
+            if (blocks == null)
+                continue;
 
-                caveBlocks.UnionWith(blocks.Where(block => block.isFloor));
-            }
+            caveBlocks.UnionWith(blocks.Where(block => block.isFloor && block.isFlat && !block.isWater));
         }
 
         return caveBlocks.ToList();

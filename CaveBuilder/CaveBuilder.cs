@@ -12,6 +12,8 @@ public static class CaveBuilder
 
     public static int worldSize = 2048;
 
+    public static Vector3i HalfWorldSize => new Vector3i(worldSize / 2, 0, worldSize / 2);
+
     public static int regionGridSize => worldSize / RegionSize;
 
     public static int chunkRegionGridSize => RegionSize / ChunkSize;
