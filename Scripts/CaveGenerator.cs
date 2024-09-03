@@ -140,13 +140,14 @@ public static class CaveGenerator
 
         BlockValue placeHolder;
 
-        if (isWater)
-            placeHolder = cntCaveFloor;
-
-        else if (isFlatFloor)
+        if (isFloor && isWater)
+            // TODO: pimp water decoration
             placeHolder = cntCaveFloorFlat;
 
-        else if (isFloor)
+        else if (isFlatFloor && !isWater)
+            placeHolder = cntCaveFloorFlat;
+
+        else if (isFloor && !isWater)
             placeHolder = cntCaveFloor;
 
         else if (isCeiling)
