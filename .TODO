@@ -5,20 +5,21 @@ Priority:
     ✔ implement prefab rename command in cave editor plugin @done(24-08-18 22:22)
     ✔ Implement custom wilderness prefab spawning function @done(24-08-23 21:41)
     ✔ implement intersection detection inside rwg tiles @done(24-08-29 21:58)
-    ☐ implmement ore layers
+    ☐ check cave horde nights
     ☐ debug tunnels intersections with surface prefabs
     ☐ reduce water spawns with a noise map
     ☐ setup cave biomes (radiated, spores, water, else ?)
-    ☐ check cave horde nights
     ☐ assert abs(prefab.yOffset) < prefab.size.y
     ☐ integrate small prefabs in tunnels (dirt, decoration, modeled terrain, stalactites, water well)
     ☐ implement multiple cave networks (good feature + performances hack)
     ☐ find a way to force rwg POIs choices
     ☐ debug low caves zombies spawning
     ☐ implement tunnel terrain smoothing
+    ☐ setup rwg user interface
+    ☐ implmement ore layers
 
 Optimization:
-    ☐ work special vector3sbs(short, byte, short) as long as possible in cave tunneling, avoiding instanciating caveBlocks
+    ☐ work special vector3sbs(short, byte, short) class as long as possible in cave tunneling, avoiding instanciating caveBlocks
     ☐ free cavemap memory after saving it, after game exit
     ☐ store all sphere offsets to avoid computing sqrDistance in critical sections
         * one array with offsets of the bigger sphere

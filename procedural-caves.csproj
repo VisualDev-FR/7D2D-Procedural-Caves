@@ -87,6 +87,7 @@
 
     <!-- Harmony -->
     <Compile Include="Harmony\ModApi.cs" />
+    <Compile Include="Harmony\H_AIDirectorBloodMoonParty.cs" />
     <Compile Include="Harmony\H_BlockToolSelection.cs" />
     <Compile Include="Harmony\H_DynamicPrefabDecorator.cs" />
     <Compile Include="Harmony\H_GameManager.cs" />
