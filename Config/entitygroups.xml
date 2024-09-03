@@ -8,23 +8,20 @@
         </entitygroup>
 
         <entitygroup name="ZombiesCaveDay">
-            zombieSpider, 1
-            zombieSpiderFeral, 0.25
-            zombieBurnt, 1
-            zombieSoldier, 0.25
-            zombieMaleHazmat, 0.25
-            zombieSteveCrawler, 2
-            zombieWightFeral, 0.10
-            zombieMutated, 0.10
-            zombieBoe, 1
-            zombieBoeFeral, 0.25
+            zombieSteveCrawler, 3.00
+            animalSnake, 2.00
+            zombieBurnt, 2.00
+            zombieSpider, 1.00
+            zombieMaleHazmat, 1.00
+            zombieMutated, 0.25
             zombieDemolition, 0.25
-            animalSnake, 2
-            animalWolf, 0.50
-            animalBearSmall, 0.25
-            animalZombieDog, 0.50
-            animalDireWolf, 0.10
-            none, 1
+            zombieSoldier, 0.25
+            zombieSpiderFeral, 0.25
+            animalWolf, 0.25
+            animalZombieDog, 0.25
+            animalBearSmall, 0.10
+            zombieWightFeral, 0.10
+            animalDireWolf, 0.05
         </entitygroup>
 
     </append>

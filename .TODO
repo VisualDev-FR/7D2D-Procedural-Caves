@@ -5,6 +5,7 @@ Priority:
     ✔ implement prefab rename command in cave editor plugin @done(24-08-18 22:22)
     ✔ Implement custom wilderness prefab spawning function @done(24-08-23 21:41)
     ✔ implement intersection detection inside rwg tiles @done(24-08-29 21:58)
+    ☐ implmement ore layers
     ☐ debug tunnels intersections with surface prefabs
     ☐ reduce water spawns with a noise map
     ☐ setup cave biomes (radiated, spores, water, else ?)
