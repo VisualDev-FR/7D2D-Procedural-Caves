@@ -98,25 +98,65 @@ public class CaveBlocksProvider
         return caveBlocks.Contains(new CaveBlock(caveBlockPosition));
     }
 
+    // public List<CaveBlock> GetSpawnPositionsFromPlayer(Vector3 worldPosition)
+    // {
+    //     var caveBlocks = new HashSet<CaveBlock>();
+    //     var worldSize = CaveBuilder.worldSize;
+    //     var chunkPos = World.toChunkXZ(worldPosition) + new Vector2i(worldSize / 32, worldSize / 32);
+
+    //     foreach (var offset in CaveUtils.offsets)
+    //     {
+    //         var neighborChunkPos = new Vector2s(
+    //             (short)(chunkPos.x + 2 * offset.x),
+    //             (short)(chunkPos.y + 2 * offset.z)
+    //         );
+
+    //         var blocks = GetCaveBlocks(neighborChunkPos);
+
+    //         if (blocks == null)
+    //             continue;
+
+    //         caveBlocks.UnionWith(blocks.Where(block => block.isFloor && block.isFlat && !block.isWater));
+    //     }
+
+    //     return caveBlocks.ToList();
+    // }
+
     public List<CaveBlock> GetSpawnPositionsFromPlayer(Vector3 worldPosition)
     {
         var caveBlocks = new HashSet<CaveBlock>();
+        var visitedChunks = new HashSet<Vector2s>();
         var worldSize = CaveBuilder.worldSize;
         var chunkPos = World.toChunkXZ(worldPosition) + new Vector2i(worldSize / 32, worldSize / 32);
 
-        foreach (var offset in CaveUtils.offsets)
+        var queue = new Queue<Vector2s>();
+        queue.Enqueue(new Vector2s((short)chunkPos.x, (short)chunkPos.y));
+        visitedChunks.Add(new Vector2s((short)chunkPos.x, (short)chunkPos.y));
+
+        while (queue.Count > 0 && caveBlocks.Count == 0)
         {
-            var neighborChunkPos = new Vector2s(
-                (short)(chunkPos.x + 2 * offset.x),
-                (short)(chunkPos.y + 2 * offset.z)
-            );
+            var currentChunkPos = queue.Dequeue();
 
-            var blocks = GetCaveBlocks(neighborChunkPos);
+            var blocks = GetCaveBlocks(currentChunkPos);
 
-            if (blocks == null)
-                continue;
+            if (blocks != null)
+            {
+                caveBlocks.UnionWith(blocks.Where(block => block.isFloor && block.isFlat && !block.isWater));
+            }
 
-            caveBlocks.UnionWith(blocks.Where(block => block.isFloor && block.isFlat && !block.isWater));
+            foreach (var offset in CaveUtils.offsets)
+            {
+                var neighborChunkPos = new Vector2s(
+                    (short)(currentChunkPos.x + offset.x),
+                    (short)(currentChunkPos.z + offset.z)
+                );
+
+                if (!visitedChunks.Contains(neighborChunkPos))
+                {
+                    queue.Enqueue(neighborChunkPos);
+                    visitedChunks.Add(neighborChunkPos);
+                }
+            }
         }
 
         return caveBlocks.ToList();

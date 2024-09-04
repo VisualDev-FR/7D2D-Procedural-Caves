@@ -1,5 +1,6 @@
 using HarmonyLib;
 using UnityEngine;
+using static AIDirectorBloodMoonParty;
 
 
 [HarmonyPatch(typeof(AIDirectorBloodMoonParty), "SpawnZombie")]
@@ -9,14 +10,17 @@ public class AIDirectorBloodMoonParty_SpawnZombie
 
     private static EntityPlayer target;
 
-    public static bool Prefix(World _world, EntityPlayer _target, Vector3 _focusPos, Vector3 _radiusV, ref bool __result)
+    private static AIDirectorBloodMoonParty Instance;
+
+    public static bool Prefix(ref AIDirectorBloodMoonParty __instance, World _world, EntityPlayer _target, Vector3 _focusPos, Vector3 _radiusV, ref bool __result)
     {
         if (!CaveGenerator.isEnabled)
             return true;
 
-        if (_target.position.y > _world.GetHeight(_target.position.x, _target.position.z))
+        if (_target.position.y > _world.GetHeight((int)_target.position.x, (int)_target.position.z))
             return true;
 
+        Instance = __instance;
         world = _world;
         target = _target;
 
@@ -27,36 +31,40 @@ public class AIDirectorBloodMoonParty_SpawnZombie
 
     private static bool SpawnBloodMoonCaveZombie()
     {
-        if (!CalcSpawnPos(_world, _focusPos, _radiusV, out var spawnPos))
+        var spawnPositions = CaveGenerator.caveBlocksProvider.GetSpawnPositionsFromPlayer(target.position);
+
+        if (spawnPositions.Count == 0)
         {
-            return false;
+            Log.Error($"[Cave] no spawn position found for BloodMoonParty.");
         }
-        bool flag = true;
-        int et = EntityGroups.GetRandomFromGroup(partySpawner.spawnGroupName, ref lastClassId);
-        if ((bool)_target.AttachedToEntity && controller.Random.RandomFloat < 0.5f)
-        {
-            flag = false;
-            et = EntityClass.FromString("animalZombieVultureRadiated");
-        }
+        var randomIndex = Instance.controller.Random.Next(spawnPositions.Count);
+        var spawnPos = spawnPositions[randomIndex].ToWorldPos();
+
+        int et = EntityGroups.GetRandomFromGroup(Instance.partySpawner.spawnGroupName, ref Instance.lastClassId);
+
         EntityEnemy entityEnemy = (EntityEnemy)EntityFactory.CreateEntity(et, spawnPos);
-        _world.SpawnEntityInWorld(entityEnemy);
+        world.SpawnEntityInWorld(entityEnemy);
         entityEnemy.SetSpawnerSource(EnumSpawnerSource.Dynamic);
         entityEnemy.IsHordeZombie = true;
         entityEnemy.IsBloodMoon = true;
         entityEnemy.bIsChunkObserver = true;
         entityEnemy.timeStayAfterDeath /= 3;
-        if (flag && ++bonusLootSpawnCount >= partySpawner.bonusLootEvery)
+
+        if (++Instance.bonusLootSpawnCount >= Instance.partySpawner.bonusLootEvery)
         {
-            bonusLootSpawnCount = 0;
+            Instance.bonusLootSpawnCount = 0;
             entityEnemy.lootDropProb *= GameStageDefinition.LootBonusScale;
         }
-        ManagedZombie managedZombie = new ManagedZombie(entityEnemy, _target);
-        zombies.Add(managedZombie);
-        SeekTarget(managedZombie);
-        partySpawner.IncSpawnCount();
+
+        ManagedZombie managedZombie = new ManagedZombie(entityEnemy, target);
+        Instance.zombies.Add(managedZombie);
+        Instance.SeekTarget(managedZombie);
+        Instance.partySpawner.IncSpawnCount();
+
         AstarManager.Instance.AddLocation(spawnPos, 40);
-        var (num, num2, num3) = GameUtils.WorldTimeToElements(_world.worldTime);
-        Log.Out("BloodMoonParty: SpawnZombie grp {0}, cnt {1}, {2}, loot {3}, at player {4}, day/time {5} {6:D2}:{7:D2}", partySpawner.ToString(), zombies.Count, entityEnemy.EntityName, entityEnemy.lootDropProb, _target.entityId, num, num2, num3);
+        var (day, hour, minute) = GameUtils.WorldTimeToElements(world.worldTime);
+
+        Log.Out($"BloodMoonParty: SpawnZombie grp {Instance.partySpawner}, cnt {Instance.zombies.Count}, {entityEnemy.EntityName}, loot {entityEnemy.lootDropProb}, at player {target.entityId}, day/time {day} {hour:D2}:{minute:D2}");
         return true;
     }
 }
