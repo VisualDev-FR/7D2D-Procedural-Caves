@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEngine;
+using WorldGenerationEngineFinal;
 
 public class CaveBlocksProvider
 {
@@ -98,12 +99,20 @@ public class CaveBlocksProvider
         return caveBlocks.Contains(new CaveBlock(caveBlockPosition));
     }
 
-    public List<CaveBlock> GetSpawnPositionsFromPlayer(Vector3 worldPosition)
+    public bool CanSpawnEnemyAt(CaveBlock block, Vector3 playerpos, int minSpawnDist)
+    {
+        if (!block.isFloor || !block.isFlat || block.isWater)
+            return false;
+
+        return CaveUtils.SqrEuclidianDist(block.ToWorldPos(), playerpos) > minSpawnDist * minSpawnDist;
+    }
+
+    public List<CaveBlock> GetSpawnPositionsFromPlayer(Vector3 playerPosition, int minSpawnDist)
     {
         var caveBlocks = new HashSet<CaveBlock>();
         var visitedChunks = new HashSet<Vector2s>();
         var worldSize = CaveBuilder.worldSize;
-        var chunkPos = World.toChunkXZ(worldPosition) + new Vector2i(worldSize / 32, worldSize / 32);
+        var chunkPos = World.toChunkXZ(playerPosition) + new Vector2i(worldSize / 32, worldSize / 32);
 
         var queue = new Queue<Vector2s>();
         queue.Enqueue(new Vector2s((short)chunkPos.x, (short)chunkPos.y));
@@ -117,7 +126,7 @@ public class CaveBlocksProvider
 
             if (blocks != null)
             {
-                caveBlocks.UnionWith(blocks.Where(block => block.isFloor && block.isFlat && !block.isWater));
+                caveBlocks.UnionWith(blocks.Where(block => CanSpawnEnemyAt(block, playerPosition, minSpawnDist)));
             }
 
             foreach (var offset in CaveUtils.offsets)

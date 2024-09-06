@@ -12,6 +12,8 @@ public class AIDirectorBloodMoonParty_SpawnZombie
 
     private static AIDirectorBloodMoonParty Instance;
 
+    private static readonly int minEnemySpawnDist = 40;
+
     public static bool Prefix(ref AIDirectorBloodMoonParty __instance, World _world, EntityPlayer _target, Vector3 _focusPos, Vector3 _radiusV, ref bool __result)
     {
         if (!CaveGenerator.isEnabled)
@@ -31,7 +33,7 @@ public class AIDirectorBloodMoonParty_SpawnZombie
 
     private static bool SpawnBloodMoonCaveZombie()
     {
-        var spawnPositions = CaveGenerator.caveBlocksProvider.GetSpawnPositionsFromPlayer(target.position);
+        var spawnPositions = CaveGenerator.caveBlocksProvider.GetSpawnPositionsFromPlayer(target.position, minEnemySpawnDist);
 
         if (spawnPositions.Count == 0)
         {

@@ -8,6 +8,8 @@ public class SpawnManagerBiomes_Update
 {
     private static SpawnManagerBiomes spawnManagerBiome;
 
+    private static readonly int minEnemySpawnDist = 40;
+
     public static bool Prefix(SpawnManagerBiomes __instance, string _spawnerName, bool _bSpawnEnemyEntities, object _userData)
     {
         if (!GameUtils.IsPlaytesting() && CaveGenerator.isEnabled)
@@ -180,7 +182,7 @@ public class SpawnManagerBiomes_Update
         // TODO: see world.GetRandomSpawnPositionInAreaMinMaxToPlayers
 
         GameRandom random = GameRandomManager.instance.CreateGameRandom(playerPosition.GetHashCode());
-        List<CaveBlock> spawnPositions = CaveGenerator.caveBlocksProvider.GetSpawnPositionsFromPlayer(playerPosition);
+        List<CaveBlock> spawnPositions = CaveGenerator.caveBlocksProvider.GetSpawnPositionsFromPlayer(playerPosition, minEnemySpawnDist);
 
         if (spawnPositions.Count == 0)
             return Vector3.zero;

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using UnityEngine;
 using WorldGenerationEngineFinal;
 
 
@@ -136,6 +137,16 @@ public static class CaveUtils
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float SqrEuclidianDist(Vector3 p1, Vector3 p2)
+    {
+        float dx = p1.x - p2.x;
+        float dy = p1.y - p2.y;
+        float dz = p1.z - p2.z;
+
+        return dx * dx + dy * dy + dz * dz;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int SqrEuclidianDistInt32(Vector3i p1, Vector3i p2)
     {
         int dx = p1.x - p2.x;
@@ -202,7 +213,7 @@ public static class CaveUtils
         return validNeighbors;
     }
 
-    public static Vector3i RandomVector3i(Random rand, int xMax, int yMax, int zMax)
+    public static Vector3i RandomVector3i(System.Random rand, int xMax, int yMax, int zMax)
     {
         int x = rand.Next(xMax);
         int y = rand.Next(yMax);

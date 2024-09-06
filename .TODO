@@ -5,9 +5,13 @@ Priority:
     ✔ implement prefab rename command in cave editor plugin @done(24-08-18 22:22)
     ✔ Implement custom wilderness prefab spawning function @done(24-08-23 21:41)
     ✔ implement intersection detection inside rwg tiles @done(24-08-29 21:58)
+    ☐ find an efficient way to check if a path exists between two cave blocks (for zombie spawning)
+    ☐ refactoring: introduce caveChunk object
     ☐ check cave horde nights
     ☐ debug tunnels intersections with surface prefabs
     ☐ reduce water spawns with a noise map
+    ☐ setup water decoration
+    ☐ attemps to add trapped terrain blocks
     ☐ setup cave biomes (radiated, spores, water, else ?)
     ☐ assert abs(prefab.yOffset) < prefab.size.y
     ☐ integrate small prefabs in tunnels (dirt, decoration, modeled terrain, stalactites, water well)
@@ -31,6 +35,8 @@ Testing:
 
 Bug:
     ☐ can't place torch inside caveAir
+    ☐ floating blocks at tunnels intersections
+    ☐ man in terrain (bugged decoration)
 
 Cave generation:
     ✔ random pois placement @done(24-08-15 22:38)
