@@ -1,9 +1,0 @@
-<configs>
-	<append xpath="/xui/ruleset[@name='default']">
-
-		<window_group name="caveConfigWindowGroup">
-			<window name="caveConfigWindow" />
-		</window_group>
-
-	</append>
-</configs>
