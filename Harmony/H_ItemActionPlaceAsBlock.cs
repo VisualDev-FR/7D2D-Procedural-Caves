@@ -27,18 +27,20 @@ public class ItemActionPlaceAsBlock_ExecuteAction
         }
         BlockValue block = invData.world.GetBlock(lastBlockPos);
 
-        // NOTE: Patch this condition to allow item placement like torchs
+        // -------------------------------------------------------------
+        // NOTE: Patch this condition to allow any item replacing caveAir
         bool isAir = block.isair || block.type == CaveGenerator.caveAir.type;
-
         if (!isAir || (!invData.world.IsEditor() && GameUtils.IsColliderWithinBlock(lastBlockPos, block)))
         {
             return;
         }
+        // -------------------------------------------------------------
+
         BlockValue blockValue = invData.item.OnConvertToBlockValue(invData.itemValue, __instance.blockToPlace);
         WorldRayHitInfo worldRayHitInfo = invData.hitInfo.Clone();
         worldRayHitInfo.hit.blockPos = lastBlockPos;
         int placementDistanceSq = blockValue.Block.GetPlacementDistanceSq();
-        if (invData.hitInfo.hit.distanceSq > (float)placementDistanceSq)
+        if (invData.hitInfo.hit.distanceSq > placementDistanceSq)
         {
             return;
         }
