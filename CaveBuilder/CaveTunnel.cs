@@ -5,13 +5,15 @@ using System.Linq;
 using UnityEngine;
 using WorldGenerationEngineFinal;
 
-public class CaveTunneler
+public class CaveTunnel
 {
+    public MutableInt16 id;
+
     public readonly List<CaveBlock> path = new List<CaveBlock>();
 
     public readonly HashSet<CaveBlock> localMinimas = new HashSet<CaveBlock>();
 
-    public readonly HashSet<CaveBlock> tunnel = new HashSet<CaveBlock>();
+    public readonly HashSet<CaveBlock> blocks = new HashSet<CaveBlock>();
 
     private static readonly Vector3[] INNER_POINTS = new Vector3[17]
     {
@@ -36,15 +38,24 @@ public class CaveTunneler
 
     private Vector3i HalfWorldSize => new Vector3i(CaveBuilder.worldSize / 2, 0, CaveBuilder.worldSize / 2);
 
-    // public API
-    public HashSet<CaveBlock> GenerateTunnel(GraphEdge edge, PrefabCache cachedPrefabs, CaveMap cavemap)
+    public CaveTunnel(int id, GraphEdge edge, PrefabCache cachedPrefabs)
     {
+        this.id = new MutableInt16(id);
+
         FindPath(edge, cachedPrefabs);
         FindLocalMinimas();
         ThickenTunnel(edge.node1, edge.node2);
         PostProcessTunnel();
+    }
 
-        return tunnel;
+    public void SetID(int id)
+    {
+        this.id.value = (short)id;
+    }
+
+    public void SetID(MutableInt16 id)
+    {
+        this.id.value = id.value;
     }
 
     // private API
@@ -167,8 +178,8 @@ public class CaveTunneler
 
     private void ThickenTunnel(GraphNode start, GraphNode target)
     {
-        tunnel.UnionWith(start.GetSphere());
-        tunnel.UnionWith(target.GetSphere());
+        blocks.UnionWith(start.GetSphere());
+        blocks.UnionWith(target.GetSphere());
 
         int r1 = start.NodeRadius;
         int r2 = target.NodeRadius;
@@ -178,18 +189,18 @@ public class CaveTunneler
             var tunnelRadius = r1 + (r2 - r1) * ((float)i / path.Count);
             var sphere = GetSphere(path[i], tunnelRadius);
 
-            tunnel.UnionWith(sphere);
+            blocks.UnionWith(sphere);
         }
     }
 
     private HashSet<CaveBlock> SmoothTunnel()
     {
-        var dictionary = tunnel.ToDictionary(
+        var dictionary = blocks.ToDictionary(
             block => block.GetHashCode(),
             block => block
         );
 
-        foreach (var block in tunnel.ToList())
+        foreach (var block in blocks.ToList())
         {
             int neighborsCount = 0;
             int totalDensity = 0;
@@ -211,7 +222,7 @@ public class CaveTunneler
 
             if (neighborsCount < 2)
             {
-                tunnel.Remove(block);
+                blocks.Remove(block);
             }
             else
             {
@@ -219,7 +230,7 @@ public class CaveTunneler
             }
         }
 
-        return tunnel;
+        return blocks;
     }
 
     private void ReconstructPath(AstarNode currentNode)
@@ -236,10 +247,12 @@ public class CaveTunneler
 
     private void PostProcessTunnel()
     {
-        var positions = tunnel.Select(block => block.ToVector3i()).ToHashSet();
+        var positions = blocks.Select(block => block.ToVector3i()).ToHashSet();
 
-        foreach (CaveBlock block in tunnel)
+        foreach (CaveBlock block in blocks)
         {
+            block.tunnelID = id;
+
             var position = block.ToVector3i();
             var lower = position + Vector3i.down;
             var upper = position + Vector3i.up;

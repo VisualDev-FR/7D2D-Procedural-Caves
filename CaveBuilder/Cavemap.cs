@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Policy;
 using WorldGenerationEngineFinal;
 
@@ -14,7 +15,11 @@ public class CaveMap : IEnumerable<CaveBlock>
 
     private readonly Dictionary<int, CaveBlock> caveblocks;
 
+    public readonly Dictionary<int, CaveTunnel> tunnels;
+
     public int Count => caveblocks.Count;
+
+    public int TunnelsCount => tunnels.Count;
 
     public CaveMap(Vector3i position, Vector3i size, PrefabCache cachedPrefabs)
     {
@@ -28,6 +33,7 @@ public class CaveMap : IEnumerable<CaveBlock>
     public CaveMap()
     {
         caveblocks = new Dictionary<int, CaveBlock>();
+        tunnels = new Dictionary<int, CaveTunnel>();
     }
 
     public bool TryGetValue(int hashcode, out CaveBlock block)
@@ -76,12 +82,70 @@ public class CaveMap : IEnumerable<CaveBlock>
         return MarchingCubes.DensityTerrain;
     }
 
-    public void UnionWith(HashSet<CaveBlock> others)
+    public void AddTunnel(CaveTunnel tunnel)
     {
-        foreach (var block in others)
+        tunnel.SetID(tunnels.Count);
+        tunnels[tunnels.Count] = tunnel;
+
+        foreach (var block in tunnel.blocks)
         {
             caveblocks[block.GetHashCode()] = block;
         }
+    }
+
+    public void __AddTunnel(CaveTunnel tunnel)
+    {
+        var intersectedTunnels = new HashSet<int>() { tunnel.id.value };
+
+        foreach (var block in tunnel.blocks)
+        {
+            int hashcode = block.GetHashCode();
+
+            if (caveblocks.ContainsKey(hashcode))
+            {
+                intersectedTunnels.Add(caveblocks[hashcode].tunnelID.value);
+            }
+            else
+            {
+                caveblocks[hashcode] = block;
+            }
+        }
+
+        Log.Out($"existing tunnels: {string.Join(", ", tunnels.Keys)}");
+        CaveUtils.Assert(!tunnels.ContainsKey(tunnel.id.value), $"existing key: {tunnel.id.value}");
+
+        tunnels.Add(tunnel.id.value, tunnel);
+
+        Log.Out($"add tunnel {tunnel.id}");
+
+        if (intersectedTunnels.Count > 1)
+        {
+            MergeTunnels(intersectedTunnels);
+        }
+    }
+
+    private void MergeTunnels(HashSet<int> tunnelIDs)
+    {
+        Log.Out($"merge tunnels {string.Join(", ", tunnelIDs)}");
+
+        var mainTunnelID = tunnelIDs.Min();
+        var mainTunnel = tunnels[mainTunnelID];
+
+        foreach (var tunnelID in tunnelIDs)
+        {
+            if (tunnelID == mainTunnelID || !tunnels.ContainsKey(tunnelID))
+                continue;
+
+            CaveUtils.Assert(tunnels.ContainsKey(tunnelID), $"MissingKey: {tunnelID}");
+
+            mainTunnel.blocks.UnionWith(tunnels[tunnelID].blocks);
+            tunnels[tunnelID].SetID(mainTunnelID);
+            tunnels.Remove(tunnelID);
+
+            Log.Out($"remove tunnel {tunnelID}");
+        }
+
+        Log.Out($"remaining tunnels: {string.Join(", ", tunnels.Keys)}");
     }
 
     public void Save(string dirname)

@@ -12,6 +12,8 @@ public class CaveBlock
 
     public byte rawData;
 
+    public MutableInt16 tunnelID;
+
     public int x => (chunkPos.x << 4) + blockChunkPos.x;
 
     public int y => blockChunkPos.y;
@@ -98,6 +100,7 @@ public class CaveBlock
         blockChunkPos = new Vector3bf(reader.ReadUInt16());
         density = reader.ReadSByte();
         rawData = reader.ReadByte();
+        tunnelID = new MutableInt16(reader.ReadInt16());
     }
 
     public void ToBinaryStream(BinaryWriter writer)
@@ -107,6 +110,7 @@ public class CaveBlock
         writer.Write(blockChunkPos.value);
         writer.Write(density);
         writer.Write(rawData);
+        writer.Write(tunnelID.value);
     }
 
     public Vector3i ToVector3i()

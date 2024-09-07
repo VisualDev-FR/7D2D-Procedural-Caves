@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Linq;
 using System.Collections;
 using System.Numerics;
+using System.Threading;
 
 
 public static class CaveViewer
@@ -189,21 +190,20 @@ public static class CaveViewer
         var cavemap = new CaveMap();
 
         var timer = CaveUtils.StartTimer();
-        var tunneler = new CaveTunneler();
-        var tunnel = tunneler.GenerateTunnel(edge, cachedPrefabs, cavemap);
+        var tunnel = new CaveTunnel(0, edge, cachedPrefabs);
 
-        cavemap.UnionWith(tunnel);
-        cavemap.SetWater(tunneler.localMinimas, cachedPrefabs);
+        cavemap.AddTunnel(tunnel);
+        cavemap.SetWater(tunnel.localMinimas, cachedPrefabs);
 
-        Log.Out($"{p1.position} -> {p2.position} | Astar dist: {tunneler.path.Count}, eucl dist: {CaveUtils.EuclidianDist(p1.position, p2.position)}, timer: {timer.ElapsedMilliseconds}ms");
-        Log.Out($"{tunneler.localMinimas.Count} water blocks found");
+        Log.Out($"{p1.position} -> {p2.position} | Astar dist: {tunnel.path.Count}, eucl dist: {CaveUtils.EuclidianDist(p1.position, p2.position)}, timer: {timer.ElapsedMilliseconds}ms");
+        Log.Out($"{tunnel.localMinimas.Count} water blocks found");
 
         var voxels = new HashSet<Voxell>(){
             new Voxell(p1.position, p1.Size, WaveFrontMaterial.DarkGreen) { force = true },
             new Voxell(p2.position, p2.Size, WaveFrontMaterial.DarkGreen) { force = true },
         };
 
-        foreach (var block in tunnel)
+        foreach (var block in tunnel.blocks)
         {
             if (cavemap.GetBlock(block.GetHashCode()).isWater)
             {
@@ -246,7 +246,7 @@ public static class CaveViewer
 
             var position = new Vector3i(pos, 20, 20);
             var caveBlock = new CaveBlock(position);
-            var sphere = CaveTunneler.GetSphere(caveBlock, radius);
+            var sphere = CaveTunnel.GetSphere(caveBlock, radius);
 
             foreach (var block in sphere)
             {
@@ -309,20 +309,15 @@ public static class CaveViewer
 
                 Parallel.ForEach(edges, edge =>
                 {
-                    Log.Out($"Cave tunneling: {100.0f * ++index / edges.Count:F0}% ({index} / {edges.Count}) {cavemap.Count:N0}");
+                    Log.Out($"Cave tunneling: {100.0f * index++ / edges.Count:F0}% ({index} / {edges.Count}) {cavemap.Count:N0}");
 
-                    var tunneler = new CaveTunneler();
-                    var tunnel = tunneler.GenerateTunnel(edge, cachedPrefabs, cavemap);
-
-                    localMinimas.UnionWith(tunneler.localMinimas);
-
-                    // Log.Out($"floorCount: {tunnel.Count(block => block.isFloor)}");
+                    var tunnel = new CaveTunnel(index, edge, cachedPrefabs);
 
                     lock (lockObject)
                     {
-                        cavemap.UnionWith(tunnel);
+                        cavemap.AddTunnel(tunnel);
 
-                        foreach (CaveBlock caveBlock in tunnel)
+                        foreach (CaveBlock caveBlock in tunnel.blocks)
                         {
                             b.SetPixel(caveBlock.x, caveBlock.z, TunnelsColor);
                         }
@@ -336,7 +331,7 @@ public static class CaveViewer
 
         // cavemap.SetWater(localMinimas, cachedPrefabs);
 
-        Log.Out($"{cavemap.Count:N0} cave blocks generated, timer={CaveUtils.TimeFormat(timer)}, memory={(GC.GetTotalMemory(true) - memoryBefore) / 1_048_576.0:F1}MB.");
+        Log.Out($"{cavemap.Count:N0} cave blocks generated ({cavemap.TunnelsCount} unique tunnels), timer={timer.ElapsedMilliseconds:N0}ms, memory={(GC.GetTotalMemory(true) - memoryBefore) / 1_048_576.0:F1}MB.");
         Log.Out($"{localMinimas.Count} local minimas");
 
         if (CaveBuilder.worldSize > 1024)
@@ -351,25 +346,34 @@ public static class CaveViewer
 
         Log.Out($"{voxels.Count} water blocks");
 
-        var tunnels = cavemap
-            .Where(block => !isFloor(block))
-            .Select(block => new Voxell(block.x, block.y, block.z, WaveFrontMaterial.DarkRed))
-            .ToHashSet();
+        // var tunnels = cavemap.tunnels.ElementAt(0).Value.blocks
+        //     .Where(block => !isFloor(block))
+        //     .Select(block => new Voxell(block.x, block.y, block.z, WaveFrontMaterial.DarkRed))
+        //     .ToHashSet();
 
-        voxels.UnionWith(tunnels);
-
-        foreach (var prefab in cachedPrefabs.Prefabs)
+        foreach (var tunnel in cavemap.tunnels.Values)
         {
-            voxels.Add(new Voxell(prefab.position, prefab.Size, WaveFrontMaterial.DarkGreen) { force = true });
+            var tunnelBlocks = tunnel.blocks
+                .Select(block => new Voxell(block.x, block.y, block.z, WaveFrontMaterial.DarkRed))
+                .ToHashSet();
 
-            foreach (var marker in prefab.caveMarkers)
-            {
-                voxels.Add(new Voxell(prefab.position + marker.start, marker.size, WaveFrontMaterial.Orange) { force = true });
-            }
+            GenerateObjFile($"wavefront/tunnel_{tunnel.id.value}.obj", tunnelBlocks, false);
         }
 
+        // voxels.UnionWith(tunnels);
+        // voxels = tunnels;
 
-        GenerateObjFile("cave.obj", voxels, false);
+        // foreach (var prefab in cachedPrefabs.Prefabs)
+        // {
+        //     voxels.Add(new Voxell(prefab.position, prefab.Size, WaveFrontMaterial.DarkGreen) { force = true });
+
+        //     foreach (var marker in prefab.caveMarkers)
+        //     {
+        //         voxels.Add(new Voxell(prefab.position + marker.start, marker.size, WaveFrontMaterial.Orange) { force = true });
+        //     }
+        // }
+
+        // GenerateObjFile("cave.obj", voxels, false);
     }
 
     public static void CaveMapToWaveFront()

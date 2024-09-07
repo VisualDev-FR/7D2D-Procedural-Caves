@@ -315,11 +315,10 @@ public static class CavePlanner
             var start = edge.node1;
             var target = edge.node2;
 
-            var tunneler = new CaveTunneler();
-            var tunnel = tunneler.GenerateTunnel(edge, cachedPrefabs, cavemap);
+            var tunnel = new CaveTunnel(0, edge, cachedPrefabs);
 
-            localMinimas.UnionWith(tunneler.localMinimas);
-            cavemap.UnionWith(tunnel);
+            localMinimas.UnionWith(tunnel.localMinimas);
+            cavemap.AddTunnel(tunnel);
         }
 
         yield return cavemap.SetWaterCoroutine(localMinimas, cachedPrefabs);
