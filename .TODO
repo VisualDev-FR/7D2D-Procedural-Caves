@@ -20,6 +20,7 @@ Priority:
     ☐ implement tunnel terrain smoothing
     ☐ setup rwg user interface
     ☐ implmement ore layers
+    ☐ Increase terrain heightmap
 
 Optimization:
     ☐ work special vector3sbs(short, byte, short) class as long as possible in cave tunneling, avoiding instanciating caveBlocks
