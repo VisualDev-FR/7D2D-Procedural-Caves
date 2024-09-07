@@ -150,11 +150,21 @@ public class CaveBlock
 
     public static bool operator ==(CaveBlock p1, CaveBlock p2)
     {
+        if (p1 == null || p2 == null)
+        {
+            return false;
+        }
+
         return p1.x == p2.x && p1.y == p2.y && p1.z == p2.z;
     }
 
     public static bool operator !=(CaveBlock p1, CaveBlock p2)
     {
+        if (p1 == null || p2 == null)
+        {
+            return false;
+        }
+
         return p1.x != p2.x || p1.y != p2.y || p1.z != p2.z;
     }
 

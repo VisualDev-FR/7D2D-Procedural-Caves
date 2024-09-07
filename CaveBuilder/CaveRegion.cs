@@ -3,13 +3,13 @@ using System.IO;
 
 public class CaveRegion
 {
-    private readonly Dictionary<Vector2s, HashSet<CaveBlock>> CaveChunks;
+    private readonly Dictionary<Vector2s, CaveChunk> CaveChunks;
 
     public int ChunkCount => CaveChunks.Count;
 
     public CaveRegion(string filename)
     {
-        CaveChunks = new Dictionary<Vector2s, HashSet<CaveBlock>>();
+        CaveChunks = new Dictionary<Vector2s, CaveChunk>();
 
         using (var stream = new FileStream(filename, FileMode.Open))
         {
@@ -21,10 +21,10 @@ public class CaveRegion
 
                     if (!CaveChunks.ContainsKey(caveBlock.chunkPos))
                     {
-                        CaveChunks[caveBlock.chunkPos] = new HashSet<CaveBlock>();
+                        CaveChunks[caveBlock.chunkPos] = new CaveChunk();
                     }
 
-                    CaveChunks[caveBlock.chunkPos].Add(caveBlock);
+                    CaveChunks[caveBlock.chunkPos].AddBlock(caveBlock);
                 }
             }
         }
@@ -32,9 +32,19 @@ public class CaveRegion
 
     public HashSet<CaveBlock> GetCaveBlocks(Vector2s chunkPos)
     {
-        if (CaveChunks.TryGetValue(chunkPos, out var positions))
+        if (CaveChunks.TryGetValue(chunkPos, out var caveChunk))
         {
-            return positions;
+            return caveChunk.GetBlocks();
+        }
+
+        return null;
+    }
+
+    public CaveChunk GetCaveChunk(Vector2s chunkPos)
+    {
+        if (CaveChunks.TryGetValue(chunkPos, out var caveChunk))
+        {
+            return caveChunk;
         }
 
         return null;

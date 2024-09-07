@@ -7,7 +7,7 @@ using System.Xml;
 
 public static class CaveGenerator
 {
-    public static CaveBlocksProvider caveBlocksProvider;
+    public static CaveChunksProvider caveChunksProvider;
 
     public static bool isEnabled = false;
 
@@ -32,7 +32,7 @@ public static class CaveGenerator
         if (isEnabled)
         {
             CaveBuilder.worldSize = GetWorldSize(worldName);
-            caveBlocksProvider = new CaveBlocksProvider(worldName);
+            caveChunksProvider = new CaveChunksProvider(worldName);
 
             Log.Out($"[Cave] init caveGenerator for world '{worldName}', size: {CaveBuilder.worldSize}");
         }
@@ -63,19 +63,19 @@ public static class CaveGenerator
         }
     }
 
-    private static bool IsFlatFloor(Vector3i cavePos)
+    private static bool IsFlatFloor(Vector3i worldPos)
     {
-        int x0 = cavePos.x - 1;
-        int z0 = cavePos.z - 1;
-        int x1 = cavePos.x + 1;
-        int z1 = cavePos.z + 1;
-        int y = cavePos.y - 1;
+        int x0 = worldPos.x - 1;
+        int z0 = worldPos.z - 1;
+        int x1 = worldPos.x + 1;
+        int z1 = worldPos.z + 1;
+        int y = worldPos.y - 1;
 
         for (int x = x0; x < x1; x++)
         {
             for (int z = z0; z < z1; z++)
             {
-                if (caveBlocksProvider.IsCave(x, y, z))
+                if (caveChunksProvider.IsCave(x, y, z))
                 {
                     return false;
                 }
@@ -113,7 +113,7 @@ public static class CaveGenerator
         {
             for (int z = z0; z < z1; z++)
             {
-                if (caveBlocksProvider.IsCave(x, y, z))
+                if (caveChunksProvider.IsCave(x, y, z))
                 {
                     return false;
                 }
@@ -123,17 +123,17 @@ public static class CaveGenerator
         return true;
     }
 
-    public static BlockValue SpawnDecoration(HashSet<Vector3i> chunkBlocks, CaveBlock caveBlock, GameRandom random, int worldX, int worldY, int worldZ)
+    public static BlockValue SpawnDecoration(CaveBlock caveBlock, GameRandom random, int worldX, int worldY, int worldZ)
     {
         random.InternalSetSeed(worldX * 13 + worldZ);
 
         Vector3i worldPos = new Vector3i(worldX, worldY, worldZ);
-        Vector3i blockPos = caveBlock.ToVector3i();
-        Vector3i lower = blockPos + Vector3i.down;
-        Vector3i upper = blockPos + Vector3i.up;
 
-        bool isFloor = !chunkBlocks.Contains(lower) && chunkBlocks.Contains(upper);
-        bool isCeiling = chunkBlocks.Contains(lower) && !chunkBlocks.Contains(upper);
+        bool lowerIsCave = caveChunksProvider.IsCave(worldX, worldY - 1, worldZ);
+        bool upperIsCave = caveChunksProvider.IsCave(worldX, worldY + 1, worldZ);
+
+        bool isFloor = !lowerIsCave && upperIsCave;
+        bool isCeiling = lowerIsCave && !upperIsCave;
         bool isFlatFloor = IsFlatFloor(worldPos);
         bool isWater = caveBlock.isWater;
 
@@ -187,16 +187,11 @@ public static class CaveGenerator
         }
 
         GameRandom random = Utils.RandomFromSeedOnPos(chunk.ChunkPos.x, chunk.ChunkPos.z, GameManager.Instance.World.Seed);
+        HashSet<CaveBlock> caveBlocks = caveChunksProvider.GetCaveBlocks(chunk);
         Vector3i chunkWorldPos = chunk.GetWorldPos();
-
-        HashSet<CaveBlock> caveBlocks = caveBlocksProvider.GetCaveBlocks(chunk);
 
         if (caveBlocks == null)
             return;
-
-        HashSet<Vector3i> positions = caveBlocks?
-            .Select(block => block.ToVector3i())
-            .ToHashSet();
 
         foreach (CaveBlock caveBlock in caveBlocks)
         {
@@ -238,7 +233,7 @@ public static class CaveGenerator
             var worldX = chunkWorldPos.x + blockChunkPos.x;
             var worldZ = chunkWorldPos.z + blockChunkPos.z;
 
-            var blockValue = SpawnDecoration(positions, caveBlock, random, worldX, blockChunkPos.y, worldZ);
+            var blockValue = SpawnDecoration(caveBlock, random, worldX, blockChunkPos.y, worldZ);
 
             if (blockValue.type != caveAir.type)
             {

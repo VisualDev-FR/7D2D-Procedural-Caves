@@ -1,22 +1,23 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEngine;
-using WorldGenerationEngineFinal;
 
-public class CaveBlocksProvider
+
+public class CaveChunksProvider
 {
     public string cavemapDir;
 
     public Dictionary<int, CaveRegion> regions;
 
-    public CaveBlocksProvider(string worldName)
+    public CaveChunksProvider(string worldName)
     {
         regions = new Dictionary<int, CaveRegion>();
         cavemapDir = $"{GameIO.GetWorldDir(worldName)}/cavemap";
     }
 
-    public int GetRegionID(Vector2s chunkPos)
+    public static int GetRegionID(Vector2s chunkPos)
     {
         var region_x = chunkPos.x / CaveBuilder.chunkRegionGridSize;
         var region_z = chunkPos.z / CaveBuilder.chunkRegionGridSize;
@@ -26,13 +27,57 @@ public class CaveBlocksProvider
         return regionID;
     }
 
+    public static int HashCodeFromWorldPos(Vector3 worldPos)
+    {
+        return HashCodeFromWorldPos(
+            (int)worldPos.x,
+            (int)worldPos.y,
+            (int)worldPos.z
+        );
+    }
+
+    public static int HashCodeFromWorldPos(int x, int y, int z)
+    {
+        int halfWorldSize = CaveBuilder.worldSize / 2;
+
+        return CaveBlock.GetHashCode(
+            x + halfWorldSize,
+            y,
+            z + halfWorldSize
+        );
+    }
+
+    public static Vector2s GetChunkPos(Chunk chunk)
+    {
+        return new Vector2s(
+            (short)(chunk.ChunkPos.x + (CaveBuilder.worldSize >> 5)),
+            (short)(chunk.ChunkPos.z + (CaveBuilder.worldSize >> 5))
+        );
+    }
+
+    public static Vector2s GetChunkPos(Vector3 worldPos)
+    {
+        return GetChunkPos(
+            (short)worldPos.x,
+            (short)worldPos.z
+        );
+    }
+
+    public static Vector2s GetChunkPos(short worldX, short worldZ)
+    {
+        return new Vector2s(
+            (short)((worldX >> 4) + (CaveBuilder.worldSize >> 5)),
+            (short)((worldZ >> 4) + (CaveBuilder.worldSize >> 5))
+        );
+    }
+
     private CaveRegion CreateCaveRegion(int regionID)
     {
         string filename = $"{cavemapDir}/region_{regionID}.bin";
 
         if (!File.Exists(filename))
         {
-            Log.Warning($"[Cave] cave region not found '{filename}'");
+            Log.Warning($"[Cave] cave region not found 'region_{regionID}'");
             return null;
         }
 
@@ -41,8 +86,10 @@ public class CaveBlocksProvider
         return regions[regionID];
     }
 
-    public CaveRegion GetRegion(int regionID)
+    public CaveRegion GetRegion(Vector2s chunkPos)
     {
+        int regionID = GetRegionID(chunkPos);
+
         if (regions.TryGetValue(regionID, out var region))
         {
             return region;
@@ -51,18 +98,33 @@ public class CaveBlocksProvider
         return CreateCaveRegion(regionID);
     }
 
-    public static Vector2s GetChunkPos(Chunk chunk)
+    public CaveChunk GetCaveChunk(Vector3 worldPos)
     {
-        return new Vector2s(
-            (short)(chunk.ChunkPos.x + CaveBuilder.worldSize / 32),
-            (short)(chunk.ChunkPos.z + CaveBuilder.worldSize / 32)
+        return GetCaveChunk(
+            (short)worldPos.x,
+            (short)worldPos.z
         );
+    }
+
+    public CaveChunk GetCaveChunk(Chunk chunk)
+    {
+        var chunkPos = GetChunkPos(chunk);
+        var caveRegion = GetRegion(chunkPos);
+
+        return caveRegion?.GetCaveChunk(chunkPos);
+    }
+
+    public CaveChunk GetCaveChunk(short worldX, short worldZ)
+    {
+        var chunkPos = GetChunkPos(worldX, worldZ);
+        var caveRegion = GetRegion(chunkPos);
+
+        return caveRegion?.GetCaveChunk(chunkPos);
     }
 
     public HashSet<CaveBlock> GetCaveBlocks(Vector2s chunkPos)
     {
-        var regionID = GetRegionID(chunkPos);
-        var caveRegion = GetRegion(regionID);
+        var caveRegion = GetRegion(chunkPos);
 
         if (caveRegion == null)
         {
@@ -78,30 +140,44 @@ public class CaveBlocksProvider
         return GetCaveBlocks(chunkPos);
     }
 
-    public bool IsCave(int x, int y, int z)
+    public CaveBlock GetCaveBlock(Vector3 worldPos)
     {
-        return IsCave(new Vector3i(x, y, z));
+        var caveChunk = GetCaveChunk(worldPos);
+        var hashcode = HashCodeFromWorldPos(worldPos);
+
+        if (caveChunk == null)
+            return null;
+
+        return caveChunk.GetBlock(hashcode);
     }
 
-    public bool IsCave(Vector3i worldPos)
+    public bool IsCave(int worldX, int worldY, int worldZ)
     {
-        var worldSize = CaveBuilder.worldSize;
-        var chunkPos = World.toChunkXZ(worldPos) + new Vector2i(worldSize / 32, worldSize / 32);
-        var caveBlocks = GetCaveBlocks(new Vector2s(chunkPos));
+        var caveChunk = GetCaveChunk((short)worldX, (short)worldZ);
+        var hashcode = HashCodeFromWorldPos(worldX, worldY, worldZ);
 
-        if (caveBlocks == null)
-        {
+        if (caveChunk == null)
             return false;
+
+        return caveChunk.Exists(hashcode);
+    }
+
+    public HashSet<int> GetTunnelsNearPosition(Vector3 playerPosition)
+    {
+        var caveBlock = GetCaveBlock(playerPosition);
+        var result = new HashSet<int>();
+
+        if (caveBlock != null)
+        {
+            result.Add(caveBlock.tunnelID.value);
         }
 
-        var caveBlockPosition = worldPos + new Vector3i(worldSize / 2, 0, worldSize / 2);
-
-        return caveBlocks.Contains(new CaveBlock(caveBlockPosition));
+        return result;
     }
 
-    public bool CanSpawnEnemyAt(CaveBlock block, Vector3 playerpos, int minSpawnDist)
+    public bool CanSpawnEnemyAt(CaveBlock block, Vector3 playerpos, int minSpawnDist, HashSet<int> tunnelIDs)
     {
-        if (!block.isFloor || !block.isFlat || block.isWater)
+        if (!block.isFloor || !block.isFlat || block.isWater) //  || !tunnelIDs.Contains(block.tunnelID.value)
             return false;
 
         return CaveUtils.SqrEuclidianDist(block.ToWorldPos(), playerpos) > minSpawnDist * minSpawnDist;
@@ -112,11 +188,12 @@ public class CaveBlocksProvider
         var caveBlocks = new HashSet<CaveBlock>();
         var visitedChunks = new HashSet<Vector2s>();
         var worldSize = CaveBuilder.worldSize;
-        var chunkPos = World.toChunkXZ(playerPosition) + new Vector2i(worldSize / 32, worldSize / 32);
+        var chunkPos = GetChunkPos(playerPosition);
+        // var tunnelIDs = GetTunnelsNearPosition(playerPosition);
 
         var queue = new Queue<Vector2s>();
-        queue.Enqueue(new Vector2s((short)chunkPos.x, (short)chunkPos.y));
-        visitedChunks.Add(new Vector2s((short)chunkPos.x, (short)chunkPos.y));
+        queue.Enqueue(chunkPos);
+        visitedChunks.Add(chunkPos);
 
         while (queue.Count > 0 && caveBlocks.Count == 0)
         {
@@ -126,7 +203,8 @@ public class CaveBlocksProvider
 
             if (blocks != null)
             {
-                caveBlocks.UnionWith(blocks.Where(block => CanSpawnEnemyAt(block, playerPosition, minSpawnDist)));
+                var spawnableBlocks = blocks.Where(block => CanSpawnEnemyAt(block, playerPosition, minSpawnDist, new HashSet<int>()));
+                caveBlocks.UnionWith(spawnableBlocks);
             }
 
             foreach (var offset in CaveUtils.offsets)
