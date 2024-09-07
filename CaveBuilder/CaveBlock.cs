@@ -150,7 +150,7 @@ public class CaveBlock
 
     public static bool operator ==(CaveBlock p1, CaveBlock p2)
     {
-        if (p1 == null || p2 == null)
+        if (p1 is null || p2 is null)
         {
             return false;
         }
@@ -160,7 +160,7 @@ public class CaveBlock
 
     public static bool operator !=(CaveBlock p1, CaveBlock p2)
     {
-        if (p1 == null || p2 == null)
+        if (p1 is null || p2 is null)
         {
             return false;
         }

@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -145,7 +144,7 @@ public class CaveChunksProvider
         var caveChunk = GetCaveChunk(worldPos);
         var hashcode = HashCodeFromWorldPos(worldPos);
 
-        if (caveChunk == null)
+        if (caveChunk is null)
             return null;
 
         return caveChunk.GetBlock(hashcode);
@@ -162,23 +161,44 @@ public class CaveChunksProvider
         return caveChunk.Exists(hashcode);
     }
 
-    public HashSet<int> GetTunnelsNearPosition(Vector3 playerPosition)
+    public HashSet<int> GetTunnelsAroundPrefab(PrefabInstance prefabInstance)
     {
-        var caveBlock = GetCaveBlock(playerPosition);
         var result = new HashSet<int>();
 
-        if (caveBlock != null)
+        foreach (var marker in prefabInstance.prefab.POIMarkers)
         {
-            result.Add(caveBlock.tunnelID.value);
+            if (!marker.tags.Test_AnySet(CaveConfig.tagCaveMarker))
+            {
+                continue;
+            }
+
+
         }
 
-        return result;
+        return result.Count > 0 ? result : null;
+    }
+
+    public HashSet<int> GetTunnelsNearPosition(Vector3 playerPosition)
+    {
+        if (GetCaveBlock(playerPosition) is CaveBlock block)
+        {
+            return new HashSet<int>() { block.tunnelID.value };
+        }
+
+        if (GameManager.Instance.World.GetPOIAtPosition(playerPosition) is PrefabInstance prefabInstance)
+        {
+            return GetTunnelsAroundPrefab(prefabInstance);
+        }
+
+        return null;
     }
 
     public bool CanSpawnEnemyAt(CaveBlock block, Vector3 playerpos, int minSpawnDist, HashSet<int> tunnelIDs)
     {
-        if (!block.isFloor || !block.isFlat || block.isWater) //  || !tunnelIDs.Contains(block.tunnelID.value)
+        if (!block.isFloor || !block.isFlat || block.isWater || (tunnelIDs != null && !tunnelIDs.Contains(block.tunnelID.value)))
+        {
             return false;
+        }
 
         return CaveUtils.SqrEuclidianDist(block.ToWorldPos(), playerpos) > minSpawnDist * minSpawnDist;
     }
@@ -189,7 +209,7 @@ public class CaveChunksProvider
         var visitedChunks = new HashSet<Vector2s>();
         var worldSize = CaveBuilder.worldSize;
         var chunkPos = GetChunkPos(playerPosition);
-        // var tunnelIDs = GetTunnelsNearPosition(playerPosition);
+        var tunnelIDs = GetTunnelsNearPosition(playerPosition);
 
         var queue = new Queue<Vector2s>();
         queue.Enqueue(chunkPos);
@@ -203,7 +223,7 @@ public class CaveChunksProvider
 
             if (blocks != null)
             {
-                var spawnableBlocks = blocks.Where(block => CanSpawnEnemyAt(block, playerPosition, minSpawnDist, new HashSet<int>()));
+                var spawnableBlocks = blocks.Where(block => CanSpawnEnemyAt(block, playerPosition, minSpawnDist, tunnelIDs));
                 caveBlocks.UnionWith(spawnableBlocks);
             }
 

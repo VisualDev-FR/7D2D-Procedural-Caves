@@ -6,7 +6,7 @@ Priority:
     ✔ Implement custom wilderness prefab spawning function @done(24-08-23 21:41)
     ✔ implement intersection detection inside rwg tiles @done(24-08-29 21:58)
     ✔ check cave horde nights @done(24-09-06 19:00)
-    ☐ find an efficient way to check if a path exists between two cave blocks (for zombie spawning)
+    ✔ find an efficient way to check if a path exists between two cave blocks (for zombie spawning) @done(24-09-07 22:33)
     ☐ debug tunnels intersections with surface prefabs
     ☐ reduce water spawns with a noise map
     ☐ setup water decoration
@@ -21,6 +21,7 @@ Priority:
     ☐ setup rwg user interface
     ☐ implmement ore layers
     ☐ Increase terrain heightmap
+    ☐ set variant boolean attribute on cave prefab to avoid repetion with vanilla ones
 
 Optimization:
     ☐ work special vector3sbs(short, byte, short) class as long as possible in cave tunneling, avoiding instanciating caveBlocks

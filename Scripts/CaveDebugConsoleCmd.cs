@@ -66,6 +66,21 @@ public class CaveDebugConsoleCmd : ConsoleCmdAbstract
         BlockSelectionUtils.SelectBox(bb);
     }
 
+    private static void TunnelIDCommand(List<string> _params)
+    {
+        var playerPos = GameManager.Instance.World.GetPrimaryPlayer().position;
+        var tunnelIDs = CaveGenerator.caveChunksProvider.GetTunnelsNearPosition(playerPos);
+
+        if (tunnelIDs == null)
+        {
+            Log.Out($"[Cave] no tunnel found at position {playerPos}");
+        }
+        else
+        {
+            Log.Out($"[Cave] tunnels IDs: [{string.Join(", ", tunnelIDs)}]");
+        }
+    }
+
     public override void Execute(List<string> _params, CommandSenderInfo _senderInfo)
     {
         if (_params.Count == 0)
@@ -82,6 +97,10 @@ public class CaveDebugConsoleCmd : ConsoleCmdAbstract
 
             case "prefab":
                 PrefabCommand(_params);
+                break;
+
+            case "tunnel":
+                TunnelIDCommand(_params);
                 break;
 
             default:
