@@ -69,7 +69,7 @@ public class CaveDebugConsoleCmd : ConsoleCmdAbstract
     private static void TunnelIDCommand(List<string> _params)
     {
         var playerPos = GameManager.Instance.World.GetPrimaryPlayer().position;
-        var tunnelIDs = CaveGenerator.caveChunksProvider.GetTunnelsNearPosition(playerPos);
+        var tunnelIDs = CaveGenerator.caveChunksProvider.FindTunnelsNearPosition(playerPos);
 
         if (tunnelIDs == null)
         {

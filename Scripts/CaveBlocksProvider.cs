@@ -164,6 +164,17 @@ public class CaveChunksProvider
         return caveChunk.Exists(hashcode);
     }
 
+    public bool IsCave(Vector3 worldPos)
+    {
+        var caveChunk = GetCaveChunk((short)worldPos.x, (short)worldPos.x);
+        var hashcode = HashCodeFromWorldPos(worldPos);
+
+        if (caveChunk == null)
+            return false;
+
+        return caveChunk.Exists(hashcode);
+    }
+
     public HashSet<int> GetTunnelsAroundPrefab(PrefabInstance prefabInstance)
     {
         if (caveGraph.graph.TryGetValue(prefabInstance.id, out var tunnelIDs))
@@ -174,7 +185,7 @@ public class CaveChunksProvider
         return null;
     }
 
-    public HashSet<int> GetTunnelsNearPosition(Vector3 playerPosition)
+    public HashSet<int> FindTunnelsNearPosition(Vector3 playerPosition)
     {
         if (GetCaveBlock(playerPosition) is CaveBlock block)
         {
@@ -184,6 +195,40 @@ public class CaveChunksProvider
         if (GameManager.Instance.World.GetPOIAtPosition(playerPosition) is PrefabInstance prefabInstance)
         {
             return GetTunnelsAroundPrefab(prefabInstance);
+        }
+
+        var queue = new HashSet<Vector3>() { playerPosition };
+        var visited = new HashSet<Vector3>() { };
+        var maxRolls = 1000;
+
+        while (queue.Count > 0 && maxRolls-- > 0)
+        {
+            var currentPos = queue.First();
+
+            if (GetCaveBlock(currentPos) is CaveBlock caveBlock)
+            {
+                return new HashSet<int>() { caveBlock.tunnelID.value };
+            }
+
+            visited.Add(currentPos);
+            queue.Remove(currentPos);
+
+            foreach (var offset in CaveUtils.offsets)
+            {
+                var position = currentPos + offset;
+
+                if (visited.Contains(position))
+                    continue;
+
+                var blockType = GameManager.Instance.World.GetBlock((int)position.x, (int)position.y, (int)position.z).type;
+
+                if (blockType > 0 && blockType < 255 && position.y < GameManager.Instance.World.GetHeight((int)position.x, (int)position.z))
+                {
+                    continue;
+                }
+
+                queue.Add(position);
+            }
         }
 
         return null;
@@ -205,7 +250,7 @@ public class CaveChunksProvider
         var visitedChunks = new HashSet<Vector2s>();
         var worldSize = CaveBuilder.worldSize;
         var chunkPos = GetChunkPos(playerPosition);
-        var tunnelIDs = GetTunnelsNearPosition(playerPosition);
+        var tunnelIDs = FindTunnelsNearPosition(playerPosition);
 
         var queue = new Queue<Vector2s>();
         queue.Enqueue(chunkPos);

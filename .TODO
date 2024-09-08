@@ -7,6 +7,7 @@ Priority:
     ✔ implement intersection detection inside rwg tiles @done(24-08-29 21:58)
     ✔ check cave horde nights @done(24-09-06 19:00)
     ✔ find an efficient way to check if a path exists between two cave blocks (for zombie spawning) @done(24-09-07 22:33)
+    ✔ debug low caves zombies spawning @done(24-09-08 15:21)
     ☐ debug tunnels intersections with surface prefabs
     ☐ reduce water spawns with a noise map
     ☐ setup water decoration
@@ -16,7 +17,6 @@ Priority:
     ☐ integrate small prefabs in tunnels (dirt, decoration, modeled terrain, stalactites, water well)
     ☐ implement multiple cave networks (good feature + performances hack)
     ☐ find a way to force rwg POIs choices
-    ☐ debug low caves zombies spawning
     ☐ implement tunnel terrain smoothing
     ☐ setup rwg user interface
     ☐ implmement ore layers
