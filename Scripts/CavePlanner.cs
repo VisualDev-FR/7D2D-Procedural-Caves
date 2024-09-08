@@ -315,7 +315,7 @@ public static class CavePlanner
             var start = edge.node1;
             var target = edge.node2;
 
-            var tunnel = new CaveTunnel(0, edge, cachedPrefabs);
+            var tunnel = new CaveTunnel(edge, cachedPrefabs);
 
             localMinimas.UnionWith(tunnel.localMinimas);
             cavemap.AddTunnel(tunnel);

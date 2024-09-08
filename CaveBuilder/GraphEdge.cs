@@ -4,6 +4,8 @@ using System.Collections.Generic;
 
 public class GraphEdge : IComparable<GraphEdge>
 {
+    public int id;
+
     public float Weight;
 
     public GraphNode node1;
@@ -36,6 +38,14 @@ public class GraphEdge : IComparable<GraphEdge>
 
     public GraphEdge(GraphNode node1, GraphNode node2)
     {
+        this.node1 = node1;
+        this.node2 = node2;
+        Weight = CaveUtils.SqrEuclidianDist(node1.position, node2.position);
+    }
+
+    public GraphEdge(int id, GraphNode node1, GraphNode node2)
+    {
+        this.id = id;
         this.node1 = node1;
         this.node2 = node2;
         Weight = CaveUtils.SqrEuclidianDist(node1.position, node2.position);

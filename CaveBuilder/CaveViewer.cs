@@ -190,7 +190,7 @@ public static class CaveViewer
         var cavemap = new CaveMap();
 
         var timer = CaveUtils.StartTimer();
-        var tunnel = new CaveTunnel(0, edge, cachedPrefabs);
+        var tunnel = new CaveTunnel(edge, cachedPrefabs);
 
         cavemap.AddTunnel(tunnel);
         cavemap.SetWater(tunnel.localMinimas, cachedPrefabs);
@@ -311,7 +311,7 @@ public static class CaveViewer
                 {
                     Log.Out($"Cave tunneling: {100.0f * index++ / edges.Count:F0}% ({index} / {edges.Count}) {cavemap.Count:N0}");
 
-                    var tunnel = new CaveTunnel(index, edge, cachedPrefabs);
+                    var tunnel = new CaveTunnel(edge, cachedPrefabs);
 
                     lock (lockObject)
                     {

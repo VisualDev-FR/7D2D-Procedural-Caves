@@ -44,11 +44,13 @@ public class Graph
         // Log.Out($"{hash}: {prefabsConnections[hash]}");
     }
 
-    public void AddEdge(GraphEdge edge)
+    public void AddEdge(GraphNode node1, GraphNode node2)
     {
+        var edge = new GraphEdge(Edges.Count, node1, node2);
+
         Edges.Add(edge);
-        Nodes.Add(edge.node1);
-        Nodes.Add(edge.node2);
+        Nodes.Add(node1);
+        Nodes.Add(node2);
     }
 
     private List<GraphEdge> GetEdgesFromNode(GraphNode node)
@@ -111,7 +113,7 @@ public class Graph
                 {
                     foreach (var nodeB in edge.Prefab2.nodes)
                     {
-                        graph.AddEdge(new GraphEdge(nodeA, nodeB));
+                        graph.AddEdge(nodeA, nodeB);
                     }
                 }
             }

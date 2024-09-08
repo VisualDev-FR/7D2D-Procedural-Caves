@@ -38,9 +38,9 @@ public class CaveTunnel
 
     private Vector3i HalfWorldSize => new Vector3i(CaveBuilder.worldSize / 2, 0, CaveBuilder.worldSize / 2);
 
-    public CaveTunnel(int id, GraphEdge edge, PrefabCache cachedPrefabs)
+    public CaveTunnel(GraphEdge edge, PrefabCache cachedPrefabs)
     {
-        this.id = new MutableInt16(id);
+        id = new MutableInt16(edge.id);
 
         FindPath(edge, cachedPrefabs);
         FindLocalMinimas();
