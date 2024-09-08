@@ -97,7 +97,7 @@ public static class CaveViewer
         int prefabCounts = args.Length > 1 ? int.Parse(args[1]) : CaveBuilder.PREFAB_COUNT;
 
         PrefabCache cachedPrefabs = CaveBuilder.GetRandomPrefabs(prefabCounts);
-        List<GraphEdge> edges = Graph.Resolve(cachedPrefabs.Prefabs);
+        Graph graph = Graph.Resolve(cachedPrefabs.Prefabs);
 
         var voxels = new HashSet<Voxell>();
 
@@ -116,11 +116,11 @@ public static class CaveViewer
             using (Graphics g = Graphics.FromImage(b))
             {
                 g.Clear(BackgroundColor);
-                DrawEdges(g, edges);
+                DrawEdges(g, graph.Edges.ToList());
                 DrawPrefabs(g, cachedPrefabs.Prefabs);
             }
 
-            Log.Out($"{edges.Count} Generated edges.");
+            Log.Out($"{graph.Edges.Count} Generated edges.");
 
             b.Save(@"graph.png", ImageFormat.Png);
         }
@@ -290,7 +290,7 @@ public static class CaveViewer
 
         Log.Out("Start solving graph...");
 
-        List<GraphEdge> edges = Graph.Resolve(cachedPrefabs.Prefabs);
+        Graph graph = Graph.Resolve(cachedPrefabs.Prefabs);
 
         int index = 0;
 
@@ -307,9 +307,9 @@ public static class CaveViewer
             {
                 g.Clear(BackgroundColor);
 
-                Parallel.ForEach(edges, edge =>
+                Parallel.ForEach(graph.Edges, edge =>
                 {
-                    Log.Out($"Cave tunneling: {100.0f * index++ / edges.Count:F0}% ({index} / {edges.Count}) {cavemap.Count:N0}");
+                    Log.Out($"Cave tunneling: {100.0f * index++ / graph.Edges.Count:F0}% ({index} / {graph.Edges.Count}) {cavemap.Count:N0}");
 
                     var tunnel = new CaveTunnel(edge, cachedPrefabs);
 

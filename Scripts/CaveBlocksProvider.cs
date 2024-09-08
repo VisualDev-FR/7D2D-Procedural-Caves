@@ -8,12 +8,15 @@ public class CaveChunksProvider
 {
     public string cavemapDir;
 
+    public CaveGraph caveGraph;
+
     public Dictionary<int, CaveRegion> regions;
 
     public CaveChunksProvider(string worldName)
     {
         regions = new Dictionary<int, CaveRegion>();
         cavemapDir = $"{GameIO.GetWorldDir(worldName)}/cavemap";
+        caveGraph = new CaveGraph($"{GameIO.GetWorldDir(worldName)}/cavegraph.txt");
     }
 
     public static int GetRegionID(Vector2s chunkPos)
@@ -163,19 +166,12 @@ public class CaveChunksProvider
 
     public HashSet<int> GetTunnelsAroundPrefab(PrefabInstance prefabInstance)
     {
-        var result = new HashSet<int>();
-
-        foreach (var marker in prefabInstance.prefab.POIMarkers)
+        if (caveGraph.graph.TryGetValue(prefabInstance.id, out var tunnelIDs))
         {
-            if (!marker.tags.Test_AnySet(CaveConfig.tagCaveMarker))
-            {
-                continue;
-            }
-
-
+            return tunnelIDs.ToHashSet();
         }
 
-        return result.Count > 0 ? result : null;
+        return null;
     }
 
     public HashSet<int> GetTunnelsNearPosition(Vector3 playerPosition)

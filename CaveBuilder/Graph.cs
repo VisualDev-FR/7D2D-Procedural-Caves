@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 public class Graph
@@ -53,35 +54,36 @@ public class Graph
         Nodes.Add(node2);
     }
 
+    public void AddEdge(GraphEdge edge)
+    {
+        edge.id = Edges.Count;
+
+        Edges.Add(edge);
+        Nodes.Add(edge.node1);
+        Nodes.Add(edge.node2);
+    }
+
     private List<GraphEdge> GetEdgesFromNode(GraphNode node)
     {
         return Edges.Where(e => e.node1.Equals(node) || e.node2.Equals(node)).ToList();
     }
 
-    private List<GraphEdge> FindMST()
+    private Graph FindMST()
     {
-        var graph = new List<GraphEdge>();
-        var nodes = new HashSet<GraphNode>();
+        var graph = new Graph();
 
         foreach (var node in Nodes)
         {
-            if (nodes.Contains(node))
+            if (graph.Nodes.Contains(node))
                 continue;
 
             var relatedEdges = GetEdgesFromNode(node);
 
-            // CaveUtils.Assert(node.direction != Direction.None);
-
             relatedEdges.Sort(new EdgeWeightComparer(this));
 
-            graph.Add(relatedEdges[0]);
-
-            nodes.Add(relatedEdges[0].node1);
-            nodes.Add(relatedEdges[0].node1);
+            graph.AddEdge(relatedEdges[0]);
 
             AddPrefabConnection(relatedEdges[0]);
-
-            // Log.Out(prefabsConnections[relatedEdges[0].HashPrefabs()].ToString());
         }
 
         return graph;
@@ -122,7 +124,7 @@ public class Graph
         return graph;
     }
 
-    public static List<GraphEdge> Resolve(List<CavePrefab> prefabs)
+    public static Graph Resolve(List<CavePrefab> prefabs)
     {
         var timer = CaveUtils.StartTimer();
 
@@ -130,11 +132,30 @@ public class Graph
 
         Log.Out($"[Cave] primary graph: edges={graph.Edges.Count}, nodes={graph.Nodes.Count}");
 
-        var edges = graph.FindMST();
+        graph = graph.FindMST();
 
-        Log.Out($"Graph resolved in {CaveUtils.TimeFormat(timer)}, edges={edges.Count}");
+        Log.Out($"Graph resolved in {CaveUtils.TimeFormat(timer)}, edges={graph.Edges.Count}");
 
-        return edges; //graph.Edges.ToList();
+        return graph;
     }
 
+    public void Save(string filename)
+    {
+        using (var stream = new StreamWriter(filename))
+        {
+            stream.WriteLine(Edges.Count);
+
+            foreach (var edges in Edges)
+            {
+                var pdi1 = edges.node1.prefab.prefabDataInstance;
+                var pdi2 = edges.node2.prefab.prefabDataInstance;
+
+                stream.WriteLine(edges.id);
+                stream.WriteLine($"{pdi1.id}");
+                stream.WriteLine($"{pdi2.id}");
+                stream.WriteLine($"{pdi1.prefab.Name}");
+                stream.WriteLine($"{pdi2.prefab.Name}");
+            }
+        }
+    }
 }

@@ -15,6 +15,8 @@ public static class CavePlanner
 {
     private static CaveMap cavemap;
 
+    private static Graph caveGraph;
+
     private static readonly Dictionary<string, PrefabData> allCavePrefabs = new Dictionary<string, PrefabData>();
 
     private static List<string> wildernessEntranceNames = new List<string>();
@@ -214,7 +216,7 @@ public static class CavePlanner
 
             position.y = CaveBuilder.rand.Next(CaveBuilder.bedRockMargin, minTerrainHeight - prefabData.size.y - CaveBuilder.terrainMargin);
 
-            return new PrefabDataInstance(-1, position - HalfWorldSize, (byte)rotation, prefabData);
+            return new PrefabDataInstance(PrefabManager.PrefabInstanceId++, position - HalfWorldSize, (byte)rotation, prefabData);
         }
 
         return null;
@@ -294,7 +296,7 @@ public static class CavePlanner
 
         SpawnUnderGroundPrefabs(CaveBuilder.PREFAB_COUNT, ref cachedPrefabs);
 
-        List<GraphEdge> edges = Graph.Resolve(cachedPrefabs.Prefabs);
+        caveGraph = Graph.Resolve(cachedPrefabs.Prefabs);
 
         AddSurfacePrefabs(cachedPrefabs);
 
@@ -303,9 +305,9 @@ public static class CavePlanner
         var localMinimas = new HashSet<CaveBlock>();
         int index = 0;
 
-        foreach (var edge in edges)
+        foreach (var edge in caveGraph.Edges)
         {
-            string message = $"Cave tunneling: {100f * index++ / edges.Count:F0}% ({index} / {edges.Count})";
+            string message = $"Cave tunneling: {100f * index++ / caveGraph.Edges.Count:F0}% ({index} / {caveGraph.Edges.Count})";
 
             yield return WorldBuilder.SetMessage(message);
 
@@ -421,6 +423,7 @@ public static class CavePlanner
     public static void SaveCaveMap()
     {
         cavemap.Save($"{WorldBuilder.WorldPath}/cavemap");
+        caveGraph.Save($"{WorldBuilder.WorldPath}/cavegraph.txt");
     }
 
 }
