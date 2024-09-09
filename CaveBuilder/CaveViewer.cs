@@ -393,15 +393,16 @@ public static class CaveViewer
 
     public static void PrefabCommand(string[] args)
     {
-        PrefabLoader.LoadPrefabs();
-        // var prefabs = PrefabLoader.GetPrefabPaths();
+        var prefabs = PrefabLoader.LoadPrefabs();
 
-        // foreach (var prefab in prefabs)
-        // {
-        //     Log.Out(prefab.FullPath);
-        // }
+        foreach (var entry in prefabs)
+        {
+            var prefab = entry.Value;
 
-        // Log.Out($"{prefabs.Count} prefabs found.");
+            Log.Out($"{entry.Key}: {prefab.POIMarkers.Count}");
+        }
+
+        Log.Out($"{prefabs.Count} prefabs found.");
     }
 
     public static void HexToRgb(string[] args)

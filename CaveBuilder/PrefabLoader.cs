@@ -10,7 +10,21 @@ public class PrefabLoader
 {
     private static readonly string userDataPath = @"C:\Users\menan\AppData\Roaming\7DaysToDie";
 
-    public static List<PathAbstractions.AbstractedLocation> GetPrefabPaths(string directory)
+    public static Dictionary<string, PrefabData> LoadPrefabs()
+    {
+        var AllPrefabDatas = new Dictionary<string, PrefabData>();
+
+        foreach (var location in GetPrefabPaths())
+        {
+            var prefabData = NewPrefabData(location);
+
+            AllPrefabDatas[prefabData.Name] = prefabData;
+        }
+
+        return AllPrefabDatas;
+    }
+
+    private static List<PathAbstractions.AbstractedLocation> GetPrefabPaths(string directory)
     {
         var paths = new List<PathAbstractions.AbstractedLocation>();
 
@@ -41,27 +55,13 @@ public class PrefabLoader
         return paths;
     }
 
-    public static List<PathAbstractions.AbstractedLocation> GetPrefabPaths()
+    private static List<PathAbstractions.AbstractedLocation> GetPrefabPaths()
     {
         var prefabPaths = Path.Combine(userDataPath, "LocalPrefabs");
         return GetPrefabPaths(prefabPaths);
     }
 
-    public static Dictionary<string, PrefabData> LoadPrefabs()
-    {
-        var AllPrefabDatas = new Dictionary<string, PrefabData>();
-
-        foreach (var location in GetPrefabPaths())
-        {
-            var prefabData = NewPrefabData(location);
-
-            Log.Out($"{prefabData.location.Name}, {prefabData.size}");
-        }
-
-        return AllPrefabDatas;
-    }
-
-    public static PrefabData NewPrefabData(PathAbstractions.AbstractedLocation location)
+    private static PrefabData NewPrefabData(PathAbstractions.AbstractedLocation location)
     {
         var prefabData = (PrefabData)FormatterServices.GetUninitializedObject(typeof(PrefabData));
 
@@ -100,13 +100,13 @@ public class PrefabLoader
         return prefabData;
     }
 
-    public static void SetField(PrefabData instance, string fieldName, object value)
+    private static void SetField(PrefabData instance, string fieldName, object value)
     {
         var field = typeof(PrefabData).GetField(fieldName, BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic);
         field.SetValue(instance, value);
     }
 
-    public static int ParsePropertyInt(string key, Dictionary<string, string> properties, int @default = 0)
+    private static int ParsePropertyInt(string key, Dictionary<string, string> properties, int @default = 0)
     {
         if (properties.ContainsKey(key))
         {
@@ -116,7 +116,7 @@ public class PrefabLoader
         return @default;
     }
 
-    public static Vector3i ParseVector(string str)
+    private static Vector3i ParseVector(string str)
     {
         var value = str.Split(',');
 
@@ -127,7 +127,7 @@ public class PrefabLoader
         );
     }
 
-    public static List<Prefab.Marker> ParsePOIMarkers(Dictionary<string, string> properties)
+    private static List<Prefab.Marker> ParsePOIMarkers(Dictionary<string, string> properties)
     {
         var markers = new List<Prefab.Marker>();
 
@@ -164,7 +164,7 @@ public class PrefabLoader
         return markers;
     }
 
-    public static Dictionary<string, string> ReadXML(string path)
+    private static Dictionary<string, string> ReadXML(string path)
     {
         var properties = new Dictionary<string, string>();
 
