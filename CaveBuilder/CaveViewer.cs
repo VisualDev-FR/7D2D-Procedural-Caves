@@ -7,9 +7,6 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Linq;
 using System.Collections;
-using System.Numerics;
-using System.Threading;
-
 
 public static class CaveViewer
 {
@@ -396,23 +393,15 @@ public static class CaveViewer
 
     public static void PrefabCommand(string[] args)
     {
-        if (args[0] == "") { }
+        PrefabLoader.LoadPrefabs();
+        // var prefabs = PrefabLoader.GetPrefabPaths();
 
-        CaveBuilder.rand = new Random();
+        // foreach (var prefab in prefabs)
+        // {
+        //     Log.Out(prefab.FullPath);
+        // }
 
-        var rand = CaveBuilder.rand;
-        var prefab = new CavePrefab(0, rand);
-
-        var voxels = new HashSet<Voxell>(){
-            new Voxell(prefab.position, prefab.Size, WaveFrontMaterial.DarkGreen){ force = true },
-        };
-
-        foreach (var point in prefab.GetMarkerPoints())
-        {
-            voxels.Add(new Voxell(point, WaveFrontMaterial.Orange));
-        }
-
-        GenerateObjFile("prefab.obj", voxels, true);
+        // Log.Out($"{prefabs.Count} prefabs found.");
     }
 
     public static void HexToRgb(string[] args)
