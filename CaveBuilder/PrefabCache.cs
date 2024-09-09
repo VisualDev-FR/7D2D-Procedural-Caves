@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using UnityEngine;
 
 public class PrefabCache
 {
@@ -7,10 +8,10 @@ public class PrefabCache
     // all prefabs grouped by chunk, where key is the hashcode of the chunk
     public readonly Dictionary<int, List<CavePrefab>> groupedCavePrefabs;
 
-    public readonly Dictionary<int, List<CavePrefab>> groupedVanillaPrefabs;
-
     // a dictionary to store the nearest prefabs for each chunk, where key is chunk hashcode, and values are the nearest prefabs
     public readonly Dictionary<int, HashSet<CavePrefab>> nearestPrefabs;
+
+    public readonly Dictionary<string, List<Vector3i>> prefabPlacements;
 
     public readonly List<CavePrefab> Prefabs;
 
@@ -21,6 +22,7 @@ public class PrefabCache
         Prefabs = new List<CavePrefab>();
         groupedCavePrefabs = new Dictionary<int, List<CavePrefab>>();
         nearestPrefabs = new Dictionary<int, HashSet<CavePrefab>>();
+        prefabPlacements = new Dictionary<string, List<Vector3i>>();
     }
 
     public static int GetChunkHash(int x, int z)
@@ -31,6 +33,13 @@ public class PrefabCache
     public void AddPrefab(CavePrefab prefab)
     {
         Prefabs.Add(prefab);
+
+        if (!prefabPlacements.ContainsKey(prefab.Name))
+        {
+            prefabPlacements[prefab.Name] = new List<Vector3i>();
+        }
+
+        prefabPlacements[prefab.Name].Add(prefab.GetCenter());
 
         foreach (var chunkHash in prefab.GetOverlappingChunkHashes())
         {
@@ -54,6 +63,28 @@ public class PrefabCache
                 nearestPrefabs[neighborHashcode].Add(prefab);
             }
         }
+    }
+
+
+    public bool IsNearSamePrefab(CavePrefab prefab, int minDist)
+    {
+        if (!prefabPlacements.TryGetValue(prefab.Name, out var positions))
+        {
+            return false;
+        }
+
+        var center = prefab.GetCenter();
+        var sqrMinDist = minDist * minDist;
+
+        foreach (var other in Prefabs)
+        {
+            if (CaveUtils.SqrEuclidianDist(center, other.GetCenter()) < sqrMinDist)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private HashSet<CavePrefab> GetNearestPrefabsFrom(int x, int z)

@@ -42,15 +42,16 @@ public static class CaveBuilder
 
     public static int terrainMargin = 2;
 
-    public static bool TryPlacePrefab(ref CavePrefab prefab, List<CavePrefab> others)
+    public static bool TryPlacePrefab(ref CavePrefab prefab, PrefabCache others)
     {
         int maxTries = 10;
+        int minDist = prefab.prefabDataInstance.prefab.DuplicateRepeatDistance;
 
         while (maxTries-- > 0)
         {
             prefab.SetRandomPosition(rand, worldSize);
 
-            if (!prefab.OverLaps2D(others, overLapMargin))
+            if (!prefab.OverLaps2D(others.Prefabs, overLapMargin) && !others.IsNearSamePrefab(prefab, minDist))
             {
                 return true;
             }
@@ -69,7 +70,7 @@ public static class CaveBuilder
         {
             var prefab = new CavePrefab(prefabCache.Count + 1, rand);
 
-            if (TryPlacePrefab(ref prefab, prefabCache.Prefabs))
+            if (TryPlacePrefab(ref prefab, prefabCache))
             {
                 prefabCache.AddPrefab(prefab);
             }
