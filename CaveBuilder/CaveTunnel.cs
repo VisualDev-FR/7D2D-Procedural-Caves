@@ -6,6 +6,7 @@ using System.Linq;
 using UnityEngine;
 using WorldGenerationEngineFinal;
 
+
 public class CaveTunnel
 {
     public MutableInt16 id;
@@ -42,6 +43,8 @@ public class CaveTunnel
     public CaveTunnel(GraphEdge edge, PrefabCache cachedPrefabs)
     {
         id = new MutableInt16(edge.id);
+
+        // CaveNoise.pathingNoise.SetSeed(CaveBuilder.SEED + id.value);
 
         FindPath(edge, cachedPrefabs);
         FindLocalMinimas();

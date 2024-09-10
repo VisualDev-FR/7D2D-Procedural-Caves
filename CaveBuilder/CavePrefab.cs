@@ -113,10 +113,6 @@ public class CavePrefab
         position = pdi.boundingBoxPosition + offset;
         Size = CaveUtils.GetRotatedSize(pdi.boundingBoxSize, rotation);
 
-        CaveUtils.Assert(position.x > 0, $"offset: {offset}");
-        CaveUtils.Assert(position.y > 0, $"offset: {offset}");
-        CaveUtils.Assert(position.z > 0, $"offset: {offset}");
-
         UpdateMarkers(pdi);
     }
 

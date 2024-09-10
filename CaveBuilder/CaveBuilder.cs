@@ -2,6 +2,7 @@
 
 
 using System.Collections.Generic;
+using System.Linq;
 using WorldGenerationEngineFinal;
 using Random = System.Random;
 
@@ -65,10 +66,12 @@ public static class CaveBuilder
         Log.Out("Start POIs placement...");
 
         var prefabCache = new PrefabCache();
+        var prefabs = PrefabLoader.LoadPrefabs().Values.ToList();
 
         for (int i = 0; i < count; i++)
         {
-            var prefab = new CavePrefab(prefabCache.Count + 1, rand);
+            var pdi = new PrefabDataInstance(prefabCache.Count + 1, Vector3i.zero, (byte)rand.Next(4), prefabs[i % prefabs.Count]);
+            var prefab = new CavePrefab(pdi.id, pdi, Vector3i.zero);
 
             if (TryPlacePrefab(ref prefab, prefabCache))
             {
