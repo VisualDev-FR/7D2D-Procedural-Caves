@@ -62,14 +62,4 @@ public class GraphNodeTests
         Assert.AreNotEqual(p1, p2, $"{p1.blockChunkPos}({p1.blockChunkPos.GetHashCode()}) | {p2.blockChunkPos}({p2.blockChunkPos.GetHashCode()})");
     }
 
-    public static void Test_prefabGrouping()
-    {
-        long memoryBefore = GC.GetTotalMemory(true);
-
-        PrefabCache prefabCache = CaveBuilder.GetRandomPrefabs(CaveBuilder.PREFAB_COUNT);
-
-        long memoryUsed = GC.GetTotalMemory(true) - memoryBefore;
-
-        Log.Out($"Cave map size: {memoryUsed:N0} Bytes ({memoryUsed / 1_048_576.0:F1} MB)");
-    }
 }

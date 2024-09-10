@@ -22,14 +22,15 @@ Priority:
     ☐ implmement ore layers
     ☐ Increase terrain heightmap
     ☐ set variant boolean attribute on cave prefab to avoid repetion with vanilla ones
+    ☐ allow cave markers inside poi bounds, combining octree cluster parsing + marker directions
+    ☐ allow tunneling inside rwg tiles
 
 Optimization:
+    ✔ store all sphere offsets to avoid computing sqrDistance in critical sections @done(24-09-10 22:16)
     ☐ https://chatgpt.com/share/e5a3ac47-58a9-4971-bece-792fcc9fca21
     ☐ work special vector3sbs(short, byte, short) class as long as possible in cave tunneling, avoiding instanciating caveBlocks
     ☐ free cavemap memory after saving it, after game exit
-    ☐ store all sphere offsets to avoid computing sqrDistance in critical sections
-        * one array with offsets of the bigger sphere
-        * another array containing indexes to pick for other diameters
+    ☐ handle cave regions loading / unloading
 
 Testing:
     ☐ block inside cave prefabs must be cave air (H_Prefab.cs)

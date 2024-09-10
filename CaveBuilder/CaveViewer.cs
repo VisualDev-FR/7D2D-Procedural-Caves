@@ -93,7 +93,8 @@ public static class CaveViewer
 
         int prefabCounts = args.Length > 1 ? int.Parse(args[1]) : CaveBuilder.PREFAB_COUNT;
 
-        PrefabCache cachedPrefabs = CaveBuilder.GetRandomPrefabs(prefabCounts);
+        var prefabs = PrefabLoader.LoadPrefabs().Values.ToList();
+        PrefabCache cachedPrefabs = CaveBuilder.GetRandomPrefabs(prefabCounts, prefabs);
         Graph graph = Graph.Resolve(cachedPrefabs.Prefabs);
 
         var voxels = new HashSet<Voxell>();
@@ -284,7 +285,8 @@ public static class CaveViewer
             CaveBuilder.worldSize = int.Parse(args[1]);
 
         var timer = CaveUtils.StartTimer();
-        var cachedPrefabs = CaveBuilder.GetRandomPrefabs(CaveBuilder.PREFAB_COUNT);
+        var prefabs = PrefabLoader.LoadPrefabs().Values.ToList();
+        var cachedPrefabs = CaveBuilder.GetRandomPrefabs(CaveBuilder.PREFAB_COUNT, prefabs);
 
         Log.Out("Start solving graph...");
 

@@ -61,12 +61,11 @@ public static class CaveBuilder
         return false;
     }
 
-    public static PrefabCache GetRandomPrefabs(int count)
+    public static PrefabCache GetRandomPrefabs(int count, List<PrefabData> prefabs)
     {
         Log.Out("Start POIs placement...");
 
         var prefabCache = new PrefabCache();
-        var prefabs = PrefabLoader.LoadPrefabs().Values.ToList();
 
         for (int i = 0; i < count; i++)
         {
