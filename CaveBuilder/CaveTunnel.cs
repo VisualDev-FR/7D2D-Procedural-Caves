@@ -280,7 +280,7 @@ public class CaveTunnel
     // static API
     public static readonly int minRadius = 2;
 
-    public static readonly int maxRadius = 20;
+    public static readonly int maxRadius = 30;
 
     public static readonly Dictionary<int, HashSet<int>> spheresMapping = new Dictionary<int, HashSet<int>>();
 

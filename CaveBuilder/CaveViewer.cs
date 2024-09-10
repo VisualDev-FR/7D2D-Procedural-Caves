@@ -245,7 +245,7 @@ public static class CaveViewer
             var caveBlock = new CaveBlock(position);
             var sphere = CaveTunnel.GetSphere(caveBlock, radius);
 
-            Log.Out($"radius: {radius}, blocks: {sphere.ToList().Count}, timer: {timer.ElapsedMilliseconds} ms, stored: {CaveTunnel.spheresMapping[radius].Count}");
+            Log.Out($"radius: {radius}, blocks: {sphere.ToList().Count}, timer: {timer.ElapsedMilliseconds} ms");
 
             foreach (var block in sphere)
             {
