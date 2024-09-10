@@ -24,6 +24,7 @@ Priority:
     ☐ set variant boolean attribute on cave prefab to avoid repetion with vanilla ones
 
 Optimization:
+    ☐ https://chatgpt.com/share/e5a3ac47-58a9-4971-bece-792fcc9fca21
     ☐ work special vector3sbs(short, byte, short) class as long as possible in cave tunneling, avoiding instanciating caveBlocks
     ☐ free cavemap memory after saving it, after game exit
     ☐ store all sphere offsets to avoid computing sqrDistance in critical sections

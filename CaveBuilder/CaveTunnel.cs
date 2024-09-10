@@ -1,5 +1,6 @@
 // # pragma warning disable CS0436
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -277,24 +278,30 @@ public class CaveTunnel
     }
 
     // static API
-    public static IEnumerable<CaveBlock> GetSphere(CaveBlock center, float radius)
-    {
-        if (radius < 2) radius = 2;
+    public static readonly int minRadius = 2;
 
-        var centerPos = new Vector3i(center.x, center.y, center.z);
-        var queue = new HashSet<Vector3i>() { centerPos };
-        var sphere = new HashSet<Vector3i>();
-        var sqrRadius = radius * radius;
-        var index = 100_000;
+    public static readonly int maxRadius = 20;
+
+    public static readonly Dictionary<int, HashSet<int>> spheresMapping = new Dictionary<int, HashSet<int>>();
+
+    public static readonly Dictionary<int, Vector3i> spheres = InitSpheres();
+
+    public static Dictionary<int, Vector3i> InitSpheres()
+    {
+        var spheres = new Dictionary<int, Vector3i>() { { 0, Vector3i.zero } };
+        var queue = new HashSet<Vector3i>() { Vector3i.zero };
+        var visited = new HashSet<Vector3i>();
 
         Vector3i pos = new Vector3i();
 
-        while (queue.Count > 0 && index-- > 0)
+        for (int i = minRadius; i <= maxRadius; i++)
+        {
+            spheresMapping[i] = new HashSet<int>() { Vector3i.zero.GetHashCode() };
+        }
+
+        while (queue.Count > 0)
         {
             Vector3i currentPosition = queue.First();
-
-            sphere.Add(currentPosition);
-            queue.Remove(currentPosition);
 
             foreach (var offset in CaveUtils.offsets)
             {
@@ -302,20 +309,50 @@ public class CaveTunnel
                 pos.y = currentPosition.y + offset.y;
                 pos.z = currentPosition.z + offset.z;
 
-                bool shouldEnqueue =
-                    !sphere.Contains(pos)
-                    && pos.y > CaveBuilder.bedRockMargin
-                    && pos.y + CaveBuilder.terrainMargin < WorldBuilder.Instance.GetHeight(pos.x, pos.z)
-                    && CaveUtils.SqrEuclidianDistInt32(pos, centerPos) < sqrRadius;
+                if (visited.Contains(pos))
+                    continue;
 
-                if (shouldEnqueue)
+                int magnitude = (int)Math.Sqrt(pos.x * pos.x + pos.y * pos.y + pos.z * pos.z);
+
+                if (magnitude >= maxRadius)
+                    continue;
+
+                for (int radius = magnitude + 1; radius <= maxRadius; radius++)
                 {
-                    queue.Add(pos);
+                    if (spheresMapping.ContainsKey(radius))
+                    {
+                        spheresMapping[radius].Add(pos.GetHashCode());
+                    }
                 }
+
+                spheres[pos.GetHashCode()] = pos;
+                queue.Add(pos);
             }
+
+            visited.Add(currentPosition);
+            queue.Remove(currentPosition);
         }
 
-        return sphere.Select(position => new CaveBlock(position));
+        return spheres;
+    }
+
+    public static IEnumerable<CaveBlock> GetSphere(CaveBlock _center, float _radius)
+    {
+        var radius = (int)Utils.FastClamp(_radius, minRadius, maxRadius);
+        var center = _center.ToVector3i();
+
+        foreach (var hashcode in spheresMapping[radius])
+        {
+            var position = center + spheres[hashcode];
+
+            if (
+                   position.y > CaveBuilder.bedRockMargin
+                && position.y + CaveBuilder.terrainMargin < (int)WorldBuilder.Instance.GetHeight(position.x, position.z)
+            )
+            {
+                yield return new CaveBlock(position);
+            }
+        }
     }
 
     private static bool IsLocalMinima(List<CaveBlock> path, int i)

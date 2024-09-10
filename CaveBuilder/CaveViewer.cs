@@ -233,17 +233,19 @@ public static class CaveViewer
 
     public static void SphereCommand(string[] args)
     {
-        var timer = CaveUtils.StartTimer();
         var voxels = new HashSet<Voxell>();
 
-        for (int i = 1; i < 15; i++)
+        for (int i = CaveTunnel.minRadius; i <= CaveTunnel.maxRadius; i++)
         {
             int radius = i;
             int pos = i * radius * 3;
 
+            var timer = CaveUtils.StartTimer();
             var position = new Vector3i(pos, 20, 20);
             var caveBlock = new CaveBlock(position);
             var sphere = CaveTunnel.GetSphere(caveBlock, radius);
+
+            Log.Out($"radius: {radius}, blocks: {sphere.ToList().Count}, timer: {timer.ElapsedMilliseconds} ms, stored: {CaveTunnel.spheresMapping[radius].Count}");
 
             foreach (var block in sphere)
             {
@@ -251,7 +253,6 @@ public static class CaveViewer
             }
         }
 
-        Log.Out($"{voxels.Count} voxels generated, timer = {CaveUtils.TimeFormat(timer)}");
 
         GenerateObjFile("sphere.obj", voxels, false);
     }
