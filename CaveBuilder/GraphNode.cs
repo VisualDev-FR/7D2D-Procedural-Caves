@@ -113,8 +113,7 @@ public class GraphNode
 
             yield return new CaveBlock(currentPosition);
 
-            // TODO: add more specifics offsets, one for each direction and
-            // -> take it according to the node direction.
+            // TODO: use tunnels.GetSphere
             foreach (Vector3i offset in CaveUtils.offsets)
             {
                 Vector3i pos = currentPosition + offset;

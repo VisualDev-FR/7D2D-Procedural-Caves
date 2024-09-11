@@ -34,12 +34,15 @@ public class PrefabCache
     {
         Prefabs.Add(prefab);
 
-        // if (!prefabPlacements.ContainsKey(prefab.Name))
-        // {
-        //     prefabPlacements[prefab.Name] = new List<Vector3i>();
-        // }
+        if (prefab?.Name != null)
+        {
+            if (!prefabPlacements.ContainsKey(prefab.Name))
+            {
+                prefabPlacements[prefab.Name] = new List<Vector3i>();
+            }
 
-        // prefabPlacements[prefab.Name].Add(prefab.GetCenter());
+            prefabPlacements[prefab.Name].Add(prefab.GetCenter());
+        }
 
         foreach (var chunkHash in prefab.GetOverlappingChunkHashes())
         {
@@ -69,7 +72,6 @@ public class PrefabCache
     public bool IsNearSamePrefab(CavePrefab prefab, int minDist)
     {
         // TODO: hanlde surface prefabs which have null pdi
-        return false;
 
         if (!prefabPlacements.TryGetValue(prefab.Name, out var positions))
         {
