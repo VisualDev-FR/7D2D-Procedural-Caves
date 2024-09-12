@@ -28,6 +28,8 @@ public static class WorldBuilder_GenerateData
 
     public static IEnumerator GenerateData()
     {
+        PatchWaterHeight();
+
         yield return worldBuilder.Init();
         yield return worldBuilder.SetMessage(string.Format(Localization.Get("xuiWorldGenerationGenerating"), worldBuilder.WorldName), _logToConsole: true);
         yield return worldBuilder.generateTerrain();
