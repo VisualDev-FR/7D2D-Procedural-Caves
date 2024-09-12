@@ -261,13 +261,15 @@ public static class CaveEntrancesPlanner
         {
             WildernessPlanner.WildernessPathInfos.Add(
                 new WorldBuilder.WildernessPathInfo(
-                    new Vector2i(rotatedPosition),
+                    new Vector2i(
+                        (int)rotatedPosition.x + CaveBuilder.worldSize / 2,
+                        (int)rotatedPosition.y + CaveBuilder.worldSize / 2
+                    ),
                     pdi.id,
                     roadRadius,
-                    WorldBuilder.Instance.GetBiome((int)rotatedPosition.x,
-                    (int)rotatedPosition.y
+                    WorldBuilder.Instance.GetBiome((int)rotatedPosition.x, (int)rotatedPosition.y)
                 )
-            ));
+            );
         }
     }
 
