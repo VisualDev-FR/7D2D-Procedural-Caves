@@ -7,6 +7,8 @@ using WorldGenerationEngineFinal;
 [HarmonyPatch(typeof(WorldBuilder), "GenerateData")]
 public static class WorldBuilder_GenerateData
 {
+    private static readonly FastTags<TagGroup.Poi> streetTileTag = FastTags<TagGroup.Poi>.Parse("streettile");
+
     private static readonly WorldBuilder worldBuilder = WorldBuilder.Instance;
 
     private static float[] HeightMap;
@@ -26,14 +28,9 @@ public static class WorldBuilder_GenerateData
 
     public static IEnumerator GenerateData()
     {
-        PatchWaterHeight();
-
         yield return worldBuilder.Init();
         yield return worldBuilder.SetMessage(string.Format(Localization.Get("xuiWorldGenerationGenerating"), worldBuilder.WorldName), _logToConsole: true);
         yield return worldBuilder.generateTerrain();
-
-        StoreHeightMaps();
-        PatchHeightMaps();
 
         if (worldBuilder.IsCanceled)
             yield break;
@@ -54,6 +51,9 @@ public static class WorldBuilder_GenerateData
         {
             PrefabManager.ClearDisplayed();
         }
+
+        StoreHeightMaps();
+        PatchHeightMaps();
 
         if (worldBuilder.Towns != 0)
         {
@@ -151,9 +151,18 @@ public static class WorldBuilder_GenerateData
         for (int i = 0; i < worldBuilder.HeightMap.Length; i++)
         {
             worldBuilder.HeightMap[i] = CaveUtils.ClampHeight(worldBuilder.HeightMap[i]);
-            worldBuilder.waterDest[i] = CaveUtils.ClampHeight(worldBuilder.waterDest[i] * 255f) / 255f;
-            worldBuilder.terrainDest[i] = CaveUtils.ClampHeight(worldBuilder.terrainDest[i] * 255f) / 255f;
-            worldBuilder.terrainWaterDest[i] = CaveUtils.ClampHeight(worldBuilder.terrainWaterDest[i] * 255f) / 255f;
+            // worldBuilder.waterDest[i] = CaveUtils.ClampHeight(worldBuilder.waterDest[i] * 255f) / 255f;
+            // worldBuilder.terrainDest[i] = CaveUtils.ClampHeight(worldBuilder.terrainDest[i] * 255f) / 255f;
+            // worldBuilder.terrainWaterDest[i] = CaveUtils.ClampHeight(worldBuilder.terrainWaterDest[i] * 255f) / 255f;
+        }
+    }
+
+    private static void PatchSteetTiles()
+    {
+        foreach (var pdi in PrefabManager.UsedPrefabsWorld)
+        {
+            Log.Out($"[Cave] patch pdi height of '{pdi.prefab.Name}'");
+            pdi.boundingBoxPosition.y = (int)CaveUtils.ClampHeight(pdi.boundingBoxPosition.y);
         }
     }
 
