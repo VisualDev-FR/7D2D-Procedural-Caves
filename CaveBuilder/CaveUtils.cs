@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 using WorldGenerationEngineFinal;
@@ -330,6 +331,19 @@ public static class CaveUtils
         int dz = FastMax(min.z - point.z, 0, point.z - max.z);
 
         return dx * dx + dy * dy + dz * dz;
+    }
+
+    public static void SetField<T>(object instance, string fieldName, object value)
+    {
+        var field = typeof(T).GetField(fieldName, BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic);
+        field.SetValue(instance, value);
+    }
+
+    public static readonly float terrainOffset = 50;
+
+    public static float ClampHeight(float height)
+    {
+        return terrainOffset + (255f - terrainOffset) * height / 255f;
     }
 
 }
