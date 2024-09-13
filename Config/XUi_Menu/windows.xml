@@ -1,6 +1,7 @@
 <configs>
 
     <remove xpath="/windows/window[@name='worldGeneration']//grid/rect[16]" />
+    <remove xpath="/windows/window[@name='worldGeneration']//grid/rect[14]" />
     <remove xpath="/windows/window[@name='worldGeneration']//grid/rect[13]" />
     <remove xpath="/windows/window[@name='worldGeneration']//grid/rect[12]" />
     <remove xpath="/windows/window[@name='worldGeneration']//grid/rect[11]" />
@@ -11,6 +12,12 @@
         <!-- separator -->
         <rect>
             <sprite name="backgroundMain" depth="0" width="350" height="4" pos="6,-10" sprite="menu_empty3px" color="[black]" type="sliced" fillcenter="true" />
+        </rect>
+
+        <!-- terrain offset -->
+        <rect>
+            <label depth="4" width="150" height="30" style="hover" tooltip_key="xuiTerrainOffsetDesc" text_key="xuiTerrainOffset" font_size="28" color="[white]" justify="right" pivot="topleft" />
+            <combobox name="terrainOffset" depth="108" pos="155,0" width="200" height="32" type="ComboBoxInt" value_min="0" value_max="255" value="5" value_increment="5" value_wrap="false" />
         </rect>
 
         <!-- cave networks count -->

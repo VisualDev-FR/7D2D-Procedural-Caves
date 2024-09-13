@@ -60,3 +60,5 @@ xuiCaveWaterDesc,The amount of water generated in cave tunnels,La quantité d'ea
 xuiCaveWater,Cave water,Humidité des grottes
 xuiCavePreviewDesc,Switch between vanilla preview and cave preview,Affiche l'aperçu du jeu de base ou l'aperçu des grottes
 xuiCavePreview,Preview type,Type d'aperçu
+xuiTerrainOffsetDesc,increase vanilla terrain height,Augmente la profondeur de base du terrain
+xuiTerrainOffset,Terrain offset,Décalage du terrain
