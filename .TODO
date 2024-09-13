@@ -24,6 +24,7 @@ Priority:
     ☐ set variant boolean attribute on cave prefab to avoid repetion with vanilla ones
     ☐ allow cave markers inside poi bounds, combining octree cluster parsing + marker directions
     ☐ allow tunneling inside rwg tiles
+    ☐ store terrain offset in worldinfos.xml
 
 Optimization:
     ✔ store all sphere offsets to avoid computing sqrDistance in critical sections @done(24-09-10 22:16)
