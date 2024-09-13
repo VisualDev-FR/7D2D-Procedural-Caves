@@ -7,8 +7,6 @@ using WorldGenerationEngineFinal;
 [HarmonyPatch(typeof(WorldBuilder), "GenerateData")]
 public static class WorldBuilder_GenerateData
 {
-    private static readonly FastTags<TagGroup.Poi> streetTileTag = FastTags<TagGroup.Poi>.Parse("streettile");
-
     private static readonly WorldBuilder worldBuilder = WorldBuilder.Instance;
 
     private static float[] HeightMap;
@@ -138,11 +136,15 @@ public static class WorldBuilder_GenerateData
         var arraySizes = worldBuilder.HeightMap.Length;
 
         HeightMap = new float[worldBuilder.HeightMap.Length];
+
+        // TODO: Try to remove those lines
         waterDest = new float[worldBuilder.waterDest.Length];
         terrainDest = new float[worldBuilder.terrainDest.Length];
         terrainWaterDest = new float[worldBuilder.terrainWaterDest.Length];
 
         Array.Copy(worldBuilder.HeightMap, HeightMap, arraySizes);
+
+        // TODO: Try to remove those lines
         Array.Copy(worldBuilder.waterDest, waterDest, arraySizes);
         Array.Copy(worldBuilder.terrainDest, terrainDest, arraySizes);
         Array.Copy(worldBuilder.terrainWaterDest, terrainWaterDest, arraySizes);
@@ -153,18 +155,6 @@ public static class WorldBuilder_GenerateData
         for (int i = 0; i < worldBuilder.HeightMap.Length; i++)
         {
             worldBuilder.HeightMap[i] = CaveUtils.ClampHeight(worldBuilder.HeightMap[i]);
-            // worldBuilder.waterDest[i] = CaveUtils.ClampHeight(worldBuilder.waterDest[i] * 255f) / 255f;
-            // worldBuilder.terrainDest[i] = CaveUtils.ClampHeight(worldBuilder.terrainDest[i] * 255f) / 255f;
-            // worldBuilder.terrainWaterDest[i] = CaveUtils.ClampHeight(worldBuilder.terrainWaterDest[i] * 255f) / 255f;
-        }
-    }
-
-    private static void PatchSteetTiles()
-    {
-        foreach (var pdi in PrefabManager.UsedPrefabsWorld)
-        {
-            Log.Out($"[Cave] patch pdi height of '{pdi.prefab.Name}'");
-            pdi.boundingBoxPosition.y = (int)CaveUtils.ClampHeight(pdi.boundingBoxPosition.y);
         }
     }
 
@@ -173,44 +163,11 @@ public static class WorldBuilder_GenerateData
         var arraySizes = worldBuilder.HeightMap.Length;
 
         Array.Copy(HeightMap, worldBuilder.HeightMap, arraySizes);
+
+        // TODO: Try to remove those lines
         Array.Copy(terrainDest, worldBuilder.terrainDest, arraySizes);
         Array.Copy(terrainWaterDest, worldBuilder.terrainWaterDest, arraySizes);
         Array.Copy(waterDest, worldBuilder.waterDest, arraySizes);
     }
 
 }
-
-
-// [HarmonyPatch(typeof(WorldBuilder), "initStreetTiles")]
-// public static class WorldBuilder_initStreetTiles
-// {
-//     public static void Postfix()
-//     {
-
-//         foreach (var st in WorldBuilder.Instance.StreetTileMap)
-//         {
-//             Log.Out($"[Cave] streetTile: '{st.PrefabName}', position: {st.WorldPosition}, height: {st.PositionHeight}");
-//             // st.PositionHeight =
-//             st.PositionHeight = CaveUtils.ClampHeight(st.PositionHeight);
-//         }
-//     }
-// }
-
-// [HarmonyPatch(typeof(POISmoother), "SmoothStreetTiles")]
-// public static class WildernessPlanner_Plan
-// {
-//     public static bool Prefix()
-//     {
-//         var worldBuilder = WorldBuilder.Instance;
-
-//         for (int i = 0; i < worldBuilder.HeightMap.Length; i++)
-//         {
-//             worldBuilder.HeightMap[i] = CaveUtils.ClampHeight(worldBuilder.HeightMap[i]);
-//             worldBuilder.terrainDest[i] = CaveUtils.ClampHeight(worldBuilder.terrainDest[i] * 255f) / 255f;
-//             worldBuilder.terrainWaterDest[i] = CaveUtils.ClampHeight(worldBuilder.terrainWaterDest[i] * 255f) / 255f;
-//             worldBuilder.waterDest[i] = CaveUtils.ClampHeight(worldBuilder.waterDest[i] * 255f) / 255f;
-//         }
-
-//         return true;
-//     }
-// }

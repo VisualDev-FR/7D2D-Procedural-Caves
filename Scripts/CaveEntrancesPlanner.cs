@@ -20,9 +20,9 @@ public static class CaveEntrancesPlanner
         var spawnedEntrances = new List<PrefabData>();
         var wildernessTiles = GetShuffledWildernessTiles();
         var maxEntrancesCount = wildernessTiles.Count / 2;
+        var usedTileIndexes = new HashSet<int>();
         var maxRolls = 1_000;
         var tileIndex = 0;
-        var usedTileIndexes = new HashSet<int>();
 
         if (wildernessTiles.Count == 0)
         {
@@ -32,16 +32,19 @@ public static class CaveEntrancesPlanner
 
         while (usedTileIndexes.Count < maxEntrancesCount && --maxRolls > 0)
         {
+            Log.Out($"[Cave] {wildernessTiles.Count} wilderness tiles available");
+
+            if (usedTileIndexes.Contains(++tileIndex))
+                continue;
+
             var tile = wildernessTiles[tileIndex % wildernessTiles.Count];
             var prefab = CavePlanner.SelectRandomWildernessEntrance();
-            var succeed = SpawnWildernessCaveEntrance(tile, prefab);
 
-            if (succeed)
+            if (TrySpawnWildernessCaveEntrance(tile, prefab))
             {
                 Log.Out($"[Cave] Entrance spawned: '{prefab.Name}' on tile '{tile.GridPosition}'");
                 spawnedEntrances.Add(prefab);
                 usedTileIndexes.Add(tileIndex);
-                tileIndex++;
             }
             else
             {
@@ -339,6 +342,8 @@ public static class CaveEntrancesPlanner
             (int)prefabRectangle.center.y
         ));
 
+        Log.Out($"[Cave] median Height: {medianHeight}");
+
         if (medianHeight + wildernessPrefab.yOffset < 2)
         {
             return false;
@@ -399,7 +404,7 @@ public static class CaveEntrancesPlanner
         return true;
     }
 
-    private static bool SpawnWildernessCaveEntrance(StreetTile tile, PrefabData wildernessPrefab)
+    private static bool TrySpawnWildernessCaveEntrance(StreetTile tile, PrefabData wildernessPrefab)
     {
         Vector2i worldPositionCenter = tile.WorldPositionCenter;
         Vector2i worldPosition = tile.WorldPosition;
