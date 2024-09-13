@@ -26,6 +26,7 @@ public static class WorldBuilder_GenerateData
 
     public static IEnumerator GenerateData()
     {
+        CavePlanner.Init();
         PatchWaterHeight();
 
         yield return worldBuilder.Init();
@@ -112,6 +113,8 @@ public static class WorldBuilder_GenerateData
             yield return WorldBuilder.smoothRoadTerrain(worldBuilder.dest, worldBuilder.HeightMap, worldBuilder.WorldSize);
         }
 
+        yield return CavePlanner.GenerateCaveMap();
+
         worldBuilder.paths.Clear();
         worldBuilder.wildernessPaths.Clear();
 
@@ -170,4 +173,15 @@ public static class WorldBuilder_GenerateData
         Array.Copy(waterDest, worldBuilder.waterDest, arraySizes);
     }
 
+}
+
+
+[HarmonyPatch(typeof(WorldBuilder), "saveRawHeightmap")]
+public static class WorldBuilder_saveRawHeightmap
+{
+    public static bool Prefix()
+    {
+        CavePlanner.SaveCaveMap();
+        return true;
+    }
 }
