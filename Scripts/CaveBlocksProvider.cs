@@ -246,6 +246,9 @@ public class CaveChunksProvider
 
     public List<CaveBlock> GetSpawnPositionsFromPlayer(Vector3 playerPosition, int minSpawnDist)
     {
+        // TODO: debug game crashes on 8k maps
+        return new List<CaveBlock>();
+
         var caveBlocks = new HashSet<CaveBlock>();
         var visitedChunks = new HashSet<Vector2s>();
         var worldSize = CaveBuilder.worldSize;

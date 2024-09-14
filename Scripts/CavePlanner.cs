@@ -9,6 +9,7 @@ using UnityEngine;
 using UnityEngine.Experimental.Rendering;
 
 using Random = System.Random;
+using System.Threading;
 
 
 public static class CavePlanner
@@ -277,6 +278,20 @@ public static class CavePlanner
         }
     }
 
+    private static List<List<T>> SplitList<T>(List<T> parent, int count)
+    {
+        List<List<T>> resultat = new List<List<T>>();
+        int subListSize = (int)Math.Ceiling((double)parent.Count / count);
+
+        for (int i = 0; i < parent.Count; i += subListSize)
+        {
+            List<T> subList = parent.GetRange(i, Math.Min(subListSize, parent.Count - i));
+            resultat.Add(subList);
+        }
+
+        return resultat;
+    }
+
     public static IEnumerator GenerateCaveMap()
     {
         if (WorldBuilder.IsCanceled)
@@ -302,25 +317,63 @@ public static class CavePlanner
 
         cavemap = new CaveMap();
 
+        var threads = new List<Thread>();
+        var subLists = SplitList(caveGraph.Edges.ToList(), 6);
         var localMinimas = new HashSet<CaveBlock>();
+        var lockObject = new object();
         int index = 0;
 
-        foreach (var edge in caveGraph.Edges)
+        foreach (var edgeList in subLists)
         {
-            string message = $"Cave tunneling: {100f * index++ / caveGraph.Edges.Count:F0}% ({index} / {caveGraph.Edges.Count})";
+            var thread = new Thread(() =>
+            {
+                foreach (var edge in edgeList)
+                {
+                    string message = $"Cave tunneling: {100f * index++ / caveGraph.Edges.Count:F0}% ({index} / {caveGraph.Edges.Count})";
 
-            yield return WorldBuilder.SetMessage(message);
+                    if (WorldBuilder.IsCanceled)
+                        return;
 
-            if (WorldBuilder.IsCanceled)
-                yield break;
+                    var start = edge.node1;
+                    var target = edge.node2;
 
-            var start = edge.node1;
-            var target = edge.node2;
+                    var tunnel = new CaveTunnel(edge, cachedPrefabs);
 
-            var tunnel = new CaveTunnel(edge, cachedPrefabs);
+                    lock (lockObject)
+                    {
+                        localMinimas.UnionWith(tunnel.localMinimas);
+                        cavemap.AddTunnel(tunnel);
+                    }
+                }
+            })
+            {
+                Priority = System.Threading.ThreadPriority.Highest
+            };
 
-            localMinimas.UnionWith(tunnel.localMinimas);
-            cavemap.AddTunnel(tunnel);
+            thread.Start();
+            threads.Add(thread);
+        }
+
+        while (true)
+        {
+            bool isThreadAlive = false;
+            foreach (var th in threads)
+            {
+                if (th.IsAlive)
+                {
+                    isThreadAlive = true;
+                    break;
+                }
+            }
+
+            if (isThreadAlive)
+            {
+                yield return WorldBuilder.SetMessage("Cave tunneling...");
+            }
+            else
+            {
+                break;
+            }
         }
 
         yield return cavemap.SetWaterCoroutine(localMinimas, cachedPrefabs);
