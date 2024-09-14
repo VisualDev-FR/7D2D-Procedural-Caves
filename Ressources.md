@@ -5,6 +5,13 @@
 * [AK-Saigyouji - Procedural Cave Generator](https://github.com/AK-Saigyouji/Procedural-Cave-Generator)
 * [Sphereii Caves Mod](https://github.com/SphereII/SphereII.Mods/tree/master/0-SCore)
 
+
+# bitwise tricks
+
+* [bitwisecmd.com](https://bitwisecmd.com/)
+* [bitwise hacks for competitive programming](https://www.geeksforgeeks.org/bitwise-hacks-for-competitive-programming/)
+* [Bit Twiddling Hacks](https://graphics.stanford.edu/~seander/bithacks.html)
+
 # Youtube
 
 * [Reinventing Minecraft world generation by Henrik Kniberg](https://www.youtube.com/watch?v=ob3VwY4JyzE)
