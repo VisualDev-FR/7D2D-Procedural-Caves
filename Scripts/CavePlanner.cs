@@ -368,7 +368,7 @@ public static class CavePlanner
 
             if (isThreadAlive)
             {
-                yield return WorldBuilder.SetMessage("Cave tunneling...");
+                yield return WorldBuilder.SetMessage($"Cave tunneling {100f * cavemap.TunnelsCount / caveGraph.Edges.Count:F0}%");
             }
             else
             {

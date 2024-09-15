@@ -17,6 +17,8 @@ public static class WorldBuilder_GenerateData
 
     private static float[] waterDest;
 
+    public static readonly float terrainOffset = 50;
+
     public static bool Prefix(ref IEnumerator __result)
     {
         Log.Out("Patch rand world generator!");
@@ -125,12 +127,17 @@ public static class WorldBuilder_GenerateData
         Log.Out("RWG final in {0}:{1:00}, r={2:x}", worldBuilder.totalMS.Elapsed.Minutes, worldBuilder.totalMS.Elapsed.Seconds, Rand.Instance.PeekSample());
     }
 
+    private static float ClampHeight(float height)
+    {
+        return terrainOffset + (255f - terrainOffset) * height / 255f;
+    }
+
     private static void PatchWaterHeight()
     {
         CaveUtils.SetField<WorldBuilder>(
             WorldBuilder.Instance,
             "WaterHeight",
-            (int)CaveUtils.ClampHeight(WorldBuilder.Instance.WaterHeight)
+            (int)ClampHeight(WorldBuilder.Instance.WaterHeight)
         );
     }
 
@@ -157,7 +164,7 @@ public static class WorldBuilder_GenerateData
     {
         for (int i = 0; i < worldBuilder.HeightMap.Length; i++)
         {
-            worldBuilder.HeightMap[i] = CaveUtils.ClampHeight(worldBuilder.HeightMap[i]);
+            worldBuilder.HeightMap[i] = ClampHeight(worldBuilder.HeightMap[i]);
         }
     }
 

@@ -338,12 +338,4 @@ public static class CaveUtils
         var field = typeof(T).GetField(fieldName, BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic);
         field.SetValue(instance, value);
     }
-
-    public static readonly float terrainOffset = 50;
-
-    public static float ClampHeight(float height)
-    {
-        return terrainOffset + (255f - terrainOffset) * height / 255f;
-    }
-
 }
