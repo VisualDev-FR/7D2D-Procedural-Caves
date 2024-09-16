@@ -376,6 +376,11 @@ public static class CaveViewer
         // GenerateObjFile("cave.obj", voxels, false);
     }
 
+    public static void CellularAutomaCommand(string[] args)
+    {
+        CellAut.Execute(args);
+    }
+
     public static void CaveMapToWaveFront()
     {
         throw new NotImplementedException();
@@ -599,6 +604,11 @@ public static class CaveViewer
 
             case "cluster":
                 ClusterizeCommand(args);
+                break;
+
+            case "cellaut":
+            case "cell":
+                CellularAutomaCommand(args);
                 break;
 
             case "boundingbox":
