@@ -244,7 +244,7 @@ public static class CaveViewer
             var timer = CaveUtils.StartTimer();
             var position = new Vector3i(pos, 20, 20);
             var caveBlock = new CaveBlock(position);
-            var sphere = CaveTunnel.GetSphere(caveBlock, radius);
+            var sphere = CaveTunnel.GetSphere(caveBlock.ToVector3i(), radius);
 
             Log.Out($"radius: {radius}, blocks: {sphere.ToList().Count}, timer: {timer.ElapsedMilliseconds} ms");
 

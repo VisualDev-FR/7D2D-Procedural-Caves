@@ -1,14 +1,15 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 
 public class CellAut
 {
-    public static int width = 60;
+    public static int width = 100;
 
     public static int height = 30;
 
-    public static Vector3i size = new Vector3i(width, width / 3, width / 2);
+    public static Vector3i size = new Vector3i(50, 100, 50);
 
     public static string seed = "";
 
@@ -74,8 +75,6 @@ public class CellAut
 
     public static void RandomFillMap()
     {
-        var sqrRadius = (width >> 1) * (width >> 1);
-
         for (int x = 1; x < size.x - 1; x++)
         {
             for (int y = 1; y < size.y - 1; y++)
@@ -83,6 +82,31 @@ public class CellAut
                 for (int z = 1; z < size.z - 1; z++)
                 {
                     map[x, y, z] = (byte)(pseudoRandom.Next(0, 100) < randomFillPercent ? 1 : 0);
+                }
+            }
+        }
+    }
+
+    public static void AddMarkers()
+    {
+        var points = new Vector3i[]
+        {
+            new Vector3i(0, 10, 25),
+            new Vector3i(25, 10, 0),
+            new Vector3i(25, 10, 50),
+        };
+
+        foreach (var pos in points)
+        {
+            foreach (var p in CaveTunnel.GetSphere(pos, 5f))
+            {
+                int x = p.x;
+                int y = p.y;
+                int z = p.z;
+
+                if (x > 0 && y > 0 && z > 0 && x < size.x && y < size.y && z < size.z)
+                {
+                    map[p.x, p.y, p.z] = 1;
                 }
             }
         }

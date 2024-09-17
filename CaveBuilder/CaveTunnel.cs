@@ -191,7 +191,7 @@ public class CaveTunnel
         for (int i = 0; i < path.Count; i++)
         {
             var tunnelRadius = r1 + (r2 - r1) * ((float)i / path.Count);
-            var sphere = GetSphere(path[i], tunnelRadius);
+            var sphere = GetSphere(path[i].ToVector3i(), tunnelRadius);
 
             blocks.UnionWith(sphere);
         }
@@ -339,10 +339,9 @@ public class CaveTunnel
         return spheres;
     }
 
-    public static IEnumerable<CaveBlock> GetSphere(CaveBlock _center, float _radius)
+    public static IEnumerable<CaveBlock> GetSphere(Vector3i center, float _radius)
     {
         var radius = (int)Utils.FastClamp(_radius, minRadius, maxRadius);
-        var center = _center.ToVector3i();
 
         foreach (var hashcode in spheresMapping[radius])
         {
