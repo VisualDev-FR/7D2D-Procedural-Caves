@@ -19,7 +19,7 @@ public class CellAut
 
     public static int criteria = 13;
 
-    public static Random pseudoRandom;
+    public static Random rand;
 
     public static byte[,,] map;
 
@@ -27,9 +27,11 @@ public class CellAut
     {
         long memoryBefore = GC.GetTotalMemory(true);
 
-        map = new byte[size.x, size.y, size.z];
-        pseudoRandom = InitRandom();
+        rand = InitRandom();
 
+        passes = rand.Next(10, 15);
+        size = new Vector3i(rand.Next(20, 100), rand.Next(20, 50), rand.Next(20, 100));
+        map = new byte[size.x, size.y, size.z];
         var timer = CaveUtils.StartTimer();
 
         RandomFillMap();
@@ -81,7 +83,7 @@ public class CellAut
             {
                 for (int z = 1; z < size.z - 1; z++)
                 {
-                    map[x, y, z] = (byte)(pseudoRandom.Next(0, 100) < randomFillPercent ? 1 : 0);
+                    map[x, y, z] = (byte)(rand.Next(0, 100) < randomFillPercent ? 1 : 0);
                 }
             }
         }
@@ -130,7 +132,7 @@ public class CellAut
                     }
                     else if (neighbourWallTiles > (criteria - 1))
                     {
-                        newMap[x, y, z] = (byte)(pseudoRandom.Next(0, 100) < 50 ? 1 : 0);
+                        newMap[x, y, z] = (byte)(rand.Next(0, 100) < 50 ? 1 : 0);
                     }
                     else
                     {
