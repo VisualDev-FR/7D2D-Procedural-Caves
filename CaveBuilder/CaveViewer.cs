@@ -378,7 +378,15 @@ public static class CaveViewer
 
     public static void CellularAutomaCommand(string[] args)
     {
-        CellAut.Execute(args);
+        var seed = -1;
+        var size = new Vector3i(50, 20, 50);
+        var room = new CaveRoom(Vector3i.zero, size, seed);
+
+        var voxels = room.GetBlocks()
+            .Select(block => new Voxell(block.ToVector3i()))
+            .ToHashSet();
+
+        GenerateObjFile("cellular.obj", voxels, false);
     }
 
     public static void CaveMapToWaveFront()
