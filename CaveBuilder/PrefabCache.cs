@@ -27,7 +27,7 @@ public class PrefabCache
 
     public static int GetChunkHash(int x, int z)
     {
-        return x + z * 1031;
+        return CaveUtils.GetChunkHash(x, z);
     }
 
     public void AddPrefab(CavePrefab prefab)

@@ -308,63 +308,6 @@ public class CavePrefab
         return points.ToList();
     }
 
-    public HashSet<Vector3i> CreateBoundNoise(Vector3i center, int radius)
-    {
-        var queue = new HashSet<Vector3i>() { center };
-        var visited = new HashSet<Vector3i>();
-
-        while (queue.Count > 0)
-        {
-            foreach (var pos in queue.ToArray())
-            {
-                queue.Remove(pos);
-
-                if (visited.Contains(pos))
-                    continue;
-
-                if (Intersect3D(pos))
-                    continue;
-
-                visited.Add(pos);
-
-                if (CaveUtils.SqrEuclidianDist(pos, center) >= radius)
-                    continue;
-
-                queue.UnionWith(CaveUtils.GetValidNeighbors(pos));
-            }
-        }
-
-        return visited;
-    }
-
-    public HashSet<Vector3i> GetBoundingNoise()
-    {
-        var boundingPoints = GetBoundingPoints();
-        var coveredPoints = boundingPoints.ToHashSet();
-        var noiseMap = new HashSet<Vector3i>();
-
-        int rolls = 0;
-
-        while (coveredPoints.Count > 0)
-        {
-            rolls++;
-
-            int index = CaveBuilder.rand.Next(boundingPoints.Count);
-            int radius = CaveBuilder.rand.Next(5, 10);
-
-            Vector3i center = boundingPoints[index];
-
-            var noise = CreateBoundNoise(center, radius); // CaveBuilder.ParseCircle(center, radius)
-
-            noiseMap.UnionWith(noise);
-            coveredPoints.ExceptWith(noise);
-        }
-
-        Log.Out($"{rolls} iterations");
-
-        return noiseMap;
-    }
-
     public Vector3i GetCenter()
     {
         return new Vector3i(

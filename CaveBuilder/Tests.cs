@@ -38,19 +38,6 @@ public class GraphNodeTests
     }
 
     [TestMethod]
-    public void Test_CaveBlockNeighbors()
-    {
-        var block = new CaveBlock(10, 10, 10);
-
-        foreach (var pos in CaveUtils.GetValidNeighbors(block.ToVector3i()))
-        {
-            Assert.IsTrue(pos.x == 9 || pos.x == 11 || pos.x == 10, $"{pos}");
-            Assert.IsTrue(pos.y == 9 || pos.y == 11 || pos.y == 10, $"{pos}");
-            Assert.IsTrue(pos.z == 9 || pos.z == 11 || pos.z == 10, $"{pos}");
-        }
-    }
-
-    [TestMethod]
     public void Test_CaveBlockEquals()
     {
         var p1 = new CaveBlock(0, 1, 2);

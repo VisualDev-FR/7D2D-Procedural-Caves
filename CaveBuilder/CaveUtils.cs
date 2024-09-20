@@ -5,8 +5,6 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using UnityEngine;
-using WorldGenerationEngineFinal;
-
 
 public static class CaveUtils
 {
@@ -41,12 +39,12 @@ public static class CaveUtils
     };
 
     public static readonly int[] offsetHashes = offsets
-        .Select(offset => CaveBlock.GetHashCode(offset.x, offset.y, offset.z))
+        .Select(offset => PositionHashCode(offset.x, offset.y, offset.z))
         .ToArray();
 
     public static readonly int[] offsetsHorizontalHashes = offsets
         .Where(offset => offset.y == 0)
-        .Select(offset => PrefabCache.GetChunkHash(offset.x, offset.z))
+        .Select(offset => GetChunkHash(offset.x, offset.z))
         .ToArray();
 
     public static readonly Vector3i[] offsetsHorizontal8 = offsets
@@ -71,6 +69,17 @@ public static class CaveUtils
     public static readonly Vector3i[] offsetsBelow = offsets
         .Where(offset => offset.y == -1)
         .ToArray();
+
+    public static int PositionHashCode(int x, int y, int z)
+    {
+        // Hashing function of Vector3i
+        return x * 8976890 + y * 981131 + z;
+    }
+
+    public static int GetChunkHash(int x, int z)
+    {
+        return x + z * 1031;
+    }
 
     public static Stopwatch StartTimer()
     {
@@ -122,12 +131,6 @@ public static class CaveUtils
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static float SqrEuclidianDist(AstarNode nodeA, AstarNode nodeB)
-    {
-        return SqrEuclidianDist(nodeA.position, nodeB.position);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float SqrEuclidianDist(Vector3i p1, Vector3i p2)
     {
         float dx = p1.x - p2.x;
@@ -157,22 +160,6 @@ public static class CaveUtils
         return dx * dx + dy * dy + dz * dz;
     }
 
-    public static float SqrEuclidianDist2D(Vector3i p1, Vector3i p2)
-    {
-        float dx = p1.x - p2.x;
-        float dz = p1.z - p2.z;
-
-        return dx * dx + dz * dz;
-    }
-
-    public static int FastAbs(int value)
-    {
-        if (value > 0)
-            return value;
-
-        return -value;
-    }
-
     public static float FastAbs(float value)
     {
         if (value > 0)
@@ -184,43 +171,6 @@ public static class CaveUtils
     public static float EuclidianDist(Vector3i p1, Vector3i p2)
     {
         return (float)Math.Sqrt(SqrEuclidianDist(p1, p2));
-    }
-
-    public static bool PositionIsValid(Vector3i pos)
-    {
-        return (
-               pos.x > 0 && pos.x < CaveBuilder.worldSize
-            && pos.z > 0 && pos.z < CaveBuilder.worldSize
-            && pos.y > 0 && pos.y < WorldBuilder.Instance.GetHeight(pos.x, pos.z)
-        );
-    }
-
-    public static List<Vector3i> GetValidNeighbors(Vector3i position)
-    {
-        List<Vector3i> validNeighbors = new List<Vector3i>();
-
-        foreach (var offset in offsets)
-        {
-            Vector3i neighbor = position + offset;
-
-            CaveUtils.Assert(neighbor != null, "null neighbor");
-
-            if (PositionIsValid(neighbor))
-            {
-                validNeighbors.Add(neighbor);
-            }
-        }
-
-        return validNeighbors;
-    }
-
-    public static Vector3i RandomVector3i(System.Random rand, int xMax, int yMax, int zMax)
-    {
-        int x = rand.Next(xMax);
-        int y = rand.Next(yMax);
-        int z = rand.Next(zMax);
-
-        return new Vector3i(x, y, z);
     }
 
     public static HashSet<Vector3i> GetPointsInside(Vector3i p1, Vector3i p2)

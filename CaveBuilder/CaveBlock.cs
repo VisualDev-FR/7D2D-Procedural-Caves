@@ -125,8 +125,7 @@ public class CaveBlock
 
     public static int GetHashCode(int x, int y, int z)
     {
-        // same as Vector3i.GetHashCode(), to make a caveblock comparable to Vector3i
-        return x * 8976890 + y * 981131 + z;
+        return CaveUtils.PositionHashCode(x,y,z);
     }
 
     public Vector3i ToWorldPos()
