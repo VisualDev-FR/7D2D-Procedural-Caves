@@ -89,6 +89,7 @@
 
     <!-- Cave Builder -->
     <Compile Include="CaveBuilder\CaveConfig.cs" />
+    <Compile Include="CaveBuilder\CaveRoom.cs" />
     <Compile Include="CaveBuilder\FastNoiseLite.cs" />
 
   </ItemGroup>

@@ -382,9 +382,14 @@ public static class CaveViewer
         var size = new Vector3i(50, 20, 50);
         var room = new CaveRoom(Vector3i.zero, size, seed);
 
+        var timer = CaveUtils.StartTimer();
+        var memoryBefore = GC.GetTotalMemory(true);
+
         var voxels = room.GetBlocks()
-            .Select(block => new Voxell(block.ToVector3i()))
+            .Select(pos => new Voxell(pos))
             .ToHashSet();
+
+        Log.Out($"{voxels.Count:N0} blocks, timer: {timer.ElapsedMilliseconds}ms, memory: {GC.GetTotalMemory(true) - memoryBefore:N0} bytes");
 
         GenerateObjFile("cellular.obj", voxels, false);
     }

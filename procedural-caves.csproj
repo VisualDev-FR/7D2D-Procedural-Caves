@@ -123,6 +123,7 @@
     <Compile Include="CaveBuilder\CavePrefab.cs" />
     <Compile Include="CaveBuilder\CavePrefabGenerator.cs" />
     <Compile Include="CaveBuilder\CaveRegion.cs" />
+    <Compile Include="CaveBuilder\CaveRoom.cs" />
     <Compile Include="CaveBuilder\CaveTunnel.cs" />
     <Compile Include="CaveBuilder\CaveUtils.cs" />
     <Compile Include="CaveBuilder\Delauney.cs" />

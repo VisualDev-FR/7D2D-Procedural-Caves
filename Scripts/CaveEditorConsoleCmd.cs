@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 using UnityEngine;
-
+using WorldGenerationEngineFinal;
 using Path = System.IO.Path;
 
 
@@ -28,7 +28,9 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
             - replaceground, rg: replace all terrain blocks inside the selection box, which have air above them with the selected item.
             - replaceterrain, rt: Replace all terrain blocks in the selection with the selected item.
             - rename [name]: rename all files of the current prefab with the given new name
-            - room: create an empty room of selected item in the selection box.
+            - room [options]: create an empty room of selected item in the selection box.
+                * 'empty': genrate a square empty room with wall width = 1 block.
+                * 'proc': generate procedural cave room in the selection box
             - selectall, sa: add all the prefab volume to the selection box.
             - setwater, sw [mode]:
                 * 'empty': set all water blocks of the selection to air.
@@ -236,7 +238,7 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
         selection.SelectionActive = true;
     }
 
-    private void RoomCommand()
+    private void RoomCommand(List<string> args)
     {
         var selection = BlockToolSelection.Instance;
         var isActive = selection.SelectionActive;
@@ -262,9 +264,6 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
         block.OnBlockPlaceBefore(GameManager.Instance.World, ref _bpResult, primaryPlayer, GameManager.Instance.World.GetGameRandom());
         blockValue = _bpResult.blockValue;
 
-        List<BlockChangeInfo> list = new List<BlockChangeInfo>();
-
-        var _gm = GameManager.Instance;
         var _density = blockValue.Block.shape.IsTerrain() ? MarchingCubes.DensityTerrain : MarchingCubes.DensityAir;
         var _textureFull = holdingItemItemValue.Texture;
 
@@ -277,43 +276,62 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
             return;
         }
 
-        int y = start.y;
-        while (true)
+        if (args.Count > 1 && args[1] == "proc")
         {
-            int x = start.x;
-            while (true)
+            var seed = DateTime.Now.GetHashCode();
+
+            if (args.Count == 3)
             {
-                int z = start.z;
-                while (true)
-                {
-                    var position = new Vector3i(x, y, z);
-
-                    BlockChangeInfo blockChangeInfo = new BlockChangeInfo(position, blockValue, _density)
-                    {
-                        textureFull = _textureFull,
-                        bChangeTexture = true
-                    };
-
-                    bool bound_x = x == start.x || x == end.x;
-                    bool bound_y = y == start.y || y == end.y;
-                    bool bound_z = z == start.z || z == end.z;
-
-                    if (bound_x || bound_y || bound_z)
-                    {
-                        list.Add(blockChangeInfo);
-                    }
-
-                    if (z == end.z) break;
-                    z += Math.Sign(end.z - start.z);
-                }
-                if (x == end.x) break;
-                x += Math.Sign(end.x - start.x);
+                seed = args[3].GetHashCode();
             }
-            if (y == end.y) break;
-            y += Math.Sign(end.y - start.y);
+
+            RoomCellular(seed, selection, blockValue, _density);
+        }
+        else
+        {
+            RoomEmpty(start, end, blockValue, _density);
+        }
+    }
+
+    private void RoomCellular(int seed, BlockToolSelection selection, BlockValue blockValue, sbyte _density)
+    {
+        var start = selection.SelectionMin;
+        var size = selection.SelectionSize;
+
+        var list = new List<BlockChangeInfo>();
+        var room = new CaveRoom(start, size, seed);
+
+        foreach (var pos in room.GetBlocks(invert: true))
+        {
+            list.Add(new BlockChangeInfo(pos, blockValue, _density));
         }
 
-        _gm.SetBlocksRPC(list);
+        GameManager.Instance.SetBlocksRPC(list);
+    }
+
+    private void RoomEmpty(Vector3i start, Vector3i end, BlockValue blockValue, sbyte _density)
+    {
+        List<BlockChangeInfo> list = new List<BlockChangeInfo>();
+
+        foreach (var pos in BlockSelectionUtils.BrowseSelectionPositions())
+        {
+            BlockChangeInfo blockChangeInfo = new BlockChangeInfo(pos, blockValue, _density)
+            {
+                // textureFull = _textureFull,
+                bChangeTexture = true
+            };
+
+            bool bound_x = pos.x == start.x || pos.x == end.x;
+            bool bound_y = pos.y == start.y || pos.y == end.y;
+            bool bound_z = pos.z == start.z || pos.z == end.z;
+
+            if (bound_x || bound_y || bound_z)
+            {
+                list.Add(blockChangeInfo);
+            }
+        }
+
+        GameManager.Instance.SetBlocksRPC(list);
     }
 
     private void CreateCommand()
@@ -556,7 +574,7 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
                 break;
 
             case "room":
-                RoomCommand();
+                RoomCommand(_params);
                 break;
 
             case "extend":

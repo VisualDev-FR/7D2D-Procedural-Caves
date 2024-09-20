@@ -20,13 +20,14 @@ public class CaveRoom
 
     public CaveRoom(Vector3i start, Vector3i size, int seed = -1)
     {
+        Log.Out($"start: {start}, size: {size}, seed: {seed}");
         this.size = size;
         offset = start == null ? Vector3i.zero : start;
         rand = new Random(seed);
         map = new bool[size.x, size.y, size.z];
     }
 
-    public IEnumerable<CaveBlock> GetBlocks()
+    public IEnumerable<Vector3i> GetBlocks(bool invert = false)
     {
         RandomFillMap();
 
@@ -35,15 +36,21 @@ public class CaveRoom
             SmoothMap();
         }
 
+        var temp = new Vector3i();
+
         for (int x = 0; x < size.x; x++)
         {
             for (int y = 0; y < size.y; y++)
             {
                 for (int z = 0; z < size.z; z++)
                 {
-                    if (map[x, y, z])
+                    if ((map[x, y, z] && !invert) || (!map[x, y, z] && invert))
                     {
-                        yield return new CaveBlock(x + offset.x, y + offset.y, z + offset.z);
+                        temp.x = x + offset.x;
+                        temp.y = y + offset.y;
+                        temp.z = z + offset.z;
+
+                        yield return temp;
                     }
                 }
             }
