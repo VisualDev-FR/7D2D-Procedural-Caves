@@ -288,4 +288,14 @@ public static class CaveUtils
         var field = typeof(T).GetField(fieldName, BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic);
         field.SetValue(instance, value);
     }
+
+    public static string ToBinaryString(int value, int bits = 32)
+    {
+        return Convert.ToString(value, 2).PadLeft(bits, '0');
+    }
+
+    public static string ToHexString(int value, int bits = 8)
+    {
+        return value.ToString($"x{bits}");
+    }
 }

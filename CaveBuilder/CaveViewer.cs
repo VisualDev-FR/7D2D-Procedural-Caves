@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Linq;
 using System.Collections;
+using System.Numerics;
 
 public static class CaveViewer
 {
@@ -458,6 +459,31 @@ public static class CaveViewer
         Console.WriteLine($"Kd {r:F2} {g:F2} {b:F2}".Replace(",", "."));
     }
 
+
+    public static void BitCommand()
+    {
+        var memoryBefore = GC.GetTotalMemory(true);
+        var size = new Vector3i(512, 256, 512);
+        var array = new BitArray(size.x * size.y * size.z);
+
+        int Index(int x, int y, int z) => x + (y * size.x) + (z * size.x * size.y);
+
+        foreach (var offset in CaveUtils.offsets)
+        {
+            var p1 = new Vector3i(10, 10, 10);
+            var p2 = p1 + offset;
+
+            var idx1 = Index(p1.x, p1.y, p1.z);
+            var idx2 = Index(p2.x, p2.y, p2.z);
+
+            var idxOffset = Index(offset.x, offset.y, offset.z);
+
+            Log.Out($"{idx1 + idxOffset}, {idx2}");
+        }
+
+        Log.Out($"memory: {(GC.GetTotalMemory(true) - memoryBefore) / 1_048_000:N0}MB");
+    }
+
     public static void GenerateObjFile(string filename, HashSet<Voxell> voxels, bool openFile = false)
     {
         int index = 0;
@@ -633,6 +659,10 @@ public static class CaveViewer
             case "cellaut":
             case "cell":
                 CellularAutomaCommand(args);
+                break;
+
+            case "bit":
+                BitCommand();
                 break;
 
             case "boundingbox":
