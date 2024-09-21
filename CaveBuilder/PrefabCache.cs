@@ -68,7 +68,6 @@ public class PrefabCache
         }
     }
 
-
     public bool IsNearSamePrefab(CavePrefab prefab, int minDist)
     {
         // TODO: hanlde surface prefabs which have null pdi

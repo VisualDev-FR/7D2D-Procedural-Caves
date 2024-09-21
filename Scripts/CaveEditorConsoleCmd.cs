@@ -299,7 +299,14 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
         var size = selection.SelectionSize;
 
         var list = new List<BlockChangeInfo>();
-        var room = new CaveRoom(start, size, seed);
+
+        var prefab = new CavePrefab(0)
+        {
+            Size = size,
+            position = start,
+        };
+        prefab.UpdateMarkers(new System.Random(seed));
+        var room = new CaveRoom(prefab, seed);
 
         foreach (var pos in room.GetBlocks(invert: true))
         {

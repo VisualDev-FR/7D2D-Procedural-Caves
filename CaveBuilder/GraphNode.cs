@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 public class GraphNode
 {
@@ -28,6 +29,7 @@ public class GraphNode
         CaveUtils.Assert(marker.size != null, $"null marker size");
 
         NodeRadius = CaveUtils.FastMax(1, CaveUtils.FastMin(CaveUtils.FastMax(marker.size.x, marker.size.z), marker.size.y) / 2);
+
         sqrRadius = NodeRadius * NodeRadius;
 
         // TODO: find a way to ensure that the node is in the marker volume
@@ -39,6 +41,15 @@ public class GraphNode
         direction = GetDirection();
 
         CaveUtils.Assert(direction != Direction.None, $"None direction: {prefab.Name}, marker start: [{marker.start}], prefab size:[{prefab.Size}]");
+    }
+
+    public Vector3i MarkerCenter()
+    {
+        return new Vector3i(
+            (int)(marker.start.x + marker.size.x / 2f),
+            (int)(marker.start.y + marker.size.y / 2f),
+            (int)(marker.start.z + marker.size.z / 2f)
+        );
     }
 
     public GraphNode(Vector3i position, CavePrefab prefab)

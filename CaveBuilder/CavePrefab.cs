@@ -46,16 +46,19 @@ public class CavePrefab
         nodes = new List<GraphNode>();
     }
 
-    public CavePrefab(int index, Random rand)
+    public CavePrefab(int index, Vector3i position, Random rand)
     {
         id = index;
         nodes = new List<GraphNode>();
+        this.position = position;
 
         Size = new Vector3i(
             rand.Next(CaveBuilder.MIN_PREFAB_SIZE, CaveBuilder.MAX_PREFAB_SIZE),
             rand.Next(CaveBuilder.MIN_PREFAB_SIZE, CaveBuilder.MAX_PREFAB_SIZE),
             rand.Next(CaveBuilder.MIN_PREFAB_SIZE, CaveBuilder.MAX_PREFAB_SIZE)
         );
+
+        UpdateMarkers(rand);
     }
 
     public CavePrefab(BoundingBox rectangle)
@@ -65,16 +68,27 @@ public class CavePrefab
         caveMarkers = new List<Prefab.Marker>();
     }
 
+    public CavePrefab(int index, PrefabDataInstance pdi, Vector3i offset)
+    {
+        id = index;
+        rotation = pdi.rotation;
+        prefabDataInstance = pdi;
+        position = pdi.boundingBoxPosition + offset;
+        Size = CaveUtils.GetRotatedSize(pdi.boundingBoxSize, rotation);
+
+        UpdateMarkers(pdi);
+    }
+
     public Prefab.Marker RandomMarker(Random rand, int rotation, int xMax, int yMax, int zMax)
     {
         var markerType = Prefab.Marker.MarkerTypes.None;
         var tags = FastTags<TagGroup.Poi>.none;
         var groupName = "";
-        var maxMarkerSize = 10;
 
-        int sizeX = rand.Next(CaveUtils.FastMin(2, xMax), CaveUtils.FastMin(maxMarkerSize, xMax));
-        int sizeY = rand.Next(CaveUtils.FastMin(2, yMax), CaveUtils.FastMin(maxMarkerSize, yMax));
-        int sizeZ = rand.Next(CaveUtils.FastMin(2, zMax), CaveUtils.FastMin(maxMarkerSize, zMax));
+        // var maxMarkerSize = 10;
+        int sizeX = CaveUtils.FastMin(5, xMax); // rand.Next(CaveUtils.FastMin(2, xMax), CaveUtils.FastMin(maxMarkerSize, xMax));
+        int sizeY = CaveUtils.FastMin(5, yMax); // rand.Next(CaveUtils.FastMin(2, yMax), CaveUtils.FastMin(maxMarkerSize, yMax));
+        int sizeZ = CaveUtils.FastMin(5, zMax); // rand.Next(CaveUtils.FastMin(2, zMax), CaveUtils.FastMin(maxMarkerSize, zMax));
 
         int px = rand.Next(Size.x - sizeX);
         int py = rand.Next(Size.y - sizeY);
@@ -105,26 +119,10 @@ public class CavePrefab
         return new Prefab.Marker(markerStart, markerSize, markerType, groupName, tags);
     }
 
-    public CavePrefab(int index, PrefabDataInstance pdi, Vector3i offset)
-    {
-        id = index;
-        rotation = pdi.rotation;
-        prefabDataInstance = pdi;
-        position = pdi.boundingBoxPosition + offset;
-        Size = CaveUtils.GetRotatedSize(pdi.boundingBoxSize, rotation);
-
-        UpdateMarkers(pdi);
-    }
-
     public void UpdateMarkers(PrefabDataInstance pdi)
     {
         nodes = new List<GraphNode>();
         caveMarkers = new List<Prefab.Marker>();
-
-        // if (pdi.prefab.POIMarkers.Count > 0 && pdi.prefab.Tags.Test_AnySet(CaveConfig.tagCave))
-        // {
-        //     Log.Warning($"prefab {pdi.prefab.Name} has not cave marker.");
-        // }
 
         foreach (var marker in pdi.prefab.RotatePOIMarkers(true, rotation))
         {

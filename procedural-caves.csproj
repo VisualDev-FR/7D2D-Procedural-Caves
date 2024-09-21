@@ -121,7 +121,6 @@
     <Compile Include="CaveBuilder\CaveMap.cs" />
     <Compile Include="CaveBuilder\CaveNoise.cs" />
     <Compile Include="CaveBuilder\CavePrefab.cs" />
-    <Compile Include="CaveBuilder\CavePrefabGenerator.cs" />
     <Compile Include="CaveBuilder\CaveRegion.cs" />
     <Compile Include="CaveBuilder\CaveRoom.cs" />
     <Compile Include="CaveBuilder\CaveTunnel.cs" />

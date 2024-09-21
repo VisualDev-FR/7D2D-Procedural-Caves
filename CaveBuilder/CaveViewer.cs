@@ -260,21 +260,32 @@ public static class CaveViewer
 
     public static void RoomCommand(string[] args)
     {
-        const int vecSize = 50;
+        var _ = CaveTunnel.spheres.Count;
 
         var timer = CaveUtils.StartTimer();
-        var position = new Vector3i(0, 0, 0);
-        var size = new Vector3i(vecSize, 10, vecSize);
-        var seed = new Random().Next();
-        var terrain = CavePrefabGenerator.GenerateRoomV3(position, size);
+        var seed = DateTime.Now.GetHashCode();
+        var random = new Random(seed);
+        var size = new Vector3i(50, 20, 50);
+        var prefab = new CavePrefab(0)
+        {
+            Size = size,
+            position = new Vector3i(0, 20, 0),
+        };
+        prefab.UpdateMarkers(random);
+        var room = new CaveRoom(prefab, seed);
 
-        var voxels = terrain.Select((pos) => new Voxell(pos)).ToHashSet();
+        var voxels = room.GetBlocks().Select(pos => new Voxell(pos)).ToHashSet();
 
-        voxels.Add(new Voxell(position, size, WaveFrontMaterial.DarkGreen) { force = true });
+        Log.Out($"timer: {timer.ElapsedMilliseconds}ms");
 
-        Log.Out($"{voxels.Count} voxels generated, timer = {CaveUtils.TimeFormat(timer)}");
+        // var voxels = new HashSet<Voxell>
+        // {
+        //     new Voxell(prefab.position, prefab.Size, WaveFrontMaterial.DarkGreen)
+        // };
 
-        GenerateObjFile("room.obj", voxels, true);
+        // voxels.UnionWith(prefab.caveMarkers.Select(marker => new Voxell(position + marker.start, marker.size, WaveFrontMaterial.Orange)));
+
+        GenerateObjFile("room.obj", voxels, false);
     }
 
     public static void CaveCommand(string[] args)
@@ -379,7 +390,7 @@ public static class CaveViewer
     public static void CellularAutomaCommand(string[] args)
     {
         var seed = -1;
-        var size = new Vector3i(50, 20, 50);
+        var size = new Vector3i(50, 20, 100);
         var room = new CaveRoom(Vector3i.zero, size, seed);
 
         var timer = CaveUtils.StartTimer();
