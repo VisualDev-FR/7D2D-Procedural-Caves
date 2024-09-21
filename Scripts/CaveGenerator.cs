@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Xml;
 
 
@@ -125,6 +124,11 @@ public static class CaveGenerator
 
     public static BlockValue SpawnDecoration(CaveBlock caveBlock, GameRandom random, int worldX, int worldY, int worldZ)
     {
+        if (caveBlock.isRoom)
+        {
+            return caveAir;
+        }
+
         random.InternalSetSeed(worldX * 13 + worldZ);
 
         Vector3i worldPos = new Vector3i(worldX, worldY, worldZ);
