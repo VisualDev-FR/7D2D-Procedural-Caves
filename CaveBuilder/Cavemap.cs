@@ -82,6 +82,17 @@ public class CaveMap : IEnumerable<CaveBlock>
         return MarchingCubes.DensityTerrain;
     }
 
+    public void AddRoom(CaveRoom room)
+    {
+        foreach (var pos in room.GetBlocks())
+        {
+            caveblocks[pos.GetHashCode()] = new CaveBlock(pos)
+            {
+                isRoom = true,
+            };
+        }
+    }
+
     public void AddTunnel(CaveTunnel tunnel)
     {
         tunnel.SetID(tunnels.Count);

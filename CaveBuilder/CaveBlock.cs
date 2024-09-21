@@ -62,6 +62,12 @@ public class CaveBlock
         set => rawData = (byte)(value ? (rawData | 0b0100_0000) : (rawData & 0b1011_1111));
     }
 
+    public bool isRoom
+    {
+        get => (rawData & 0b1000_0000) != 0;
+        set => rawData = (byte)(value ? (rawData | 0b1000_0000) : (rawData & 0b0111_1111));
+    }
+
     public CaveBlock(Vector3i position, sbyte density = defaultDensity)
     {
         short chunk_x = (short)(position.x >> 4);
@@ -100,7 +106,7 @@ public class CaveBlock
         blockChunkPos = new Vector3bf(reader.ReadUInt16());
         density = reader.ReadSByte();
         rawData = reader.ReadByte();
-        tunnelID = new MutableInt16(reader.ReadInt16());
+        // tunnelID = new MutableInt16(reader.ReadInt16());
     }
 
     public void ToBinaryStream(BinaryWriter writer)
@@ -110,7 +116,7 @@ public class CaveBlock
         writer.Write(blockChunkPos.value);
         writer.Write(density);
         writer.Write(rawData);
-        writer.Write(tunnelID.value);
+        // writer.Write(tunnelID.value);
     }
 
     public Vector3i ToVector3i()
@@ -125,7 +131,7 @@ public class CaveBlock
 
     public static int GetHashCode(int x, int y, int z)
     {
-        return CaveUtils.PositionHashCode(x,y,z);
+        return CaveUtils.PositionHashCode(x, y, z);
     }
 
     public Vector3i ToWorldPos()

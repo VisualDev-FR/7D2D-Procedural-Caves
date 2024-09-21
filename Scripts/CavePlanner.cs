@@ -166,12 +166,10 @@ public static class CavePlanner
         );
     }
 
-    public static bool OverLaps2D(Vector3i position, Vector3i size, CavePrefab other)
+    public static bool OverLaps2D(Vector3i position, Vector3i size, CavePrefab other, int overlapMargin)
     {
         var otherSize = CaveUtils.GetRotatedSize(other.Size, other.rotation);
         var otherPos = other.position;
-
-        int overlapMargin = CaveBuilder.overLapMargin;
 
         if (position.x + size.x + overlapMargin < otherPos.x || otherPos.x + otherSize.x + overlapMargin < position.x)
             return false;
@@ -182,11 +180,11 @@ public static class CavePlanner
         return true;
     }
 
-    public static bool OverLaps2D(Vector3i position, Vector3i size, List<CavePrefab> others)
+    public static bool OverLaps2D(Vector3i position, Vector3i size, List<CavePrefab> others, int overlapMargin)
     {
         foreach (var prefab in others)
         {
-            if (OverLaps2D(position, size, prefab))
+            if (OverLaps2D(position, size, prefab, overlapMargin))
             {
                 return true;
             }
@@ -212,7 +210,7 @@ public static class CavePlanner
             if (!canBePlacedUnderTerrain)
                 continue;
 
-            if (OverLaps2D(position, rotatedSize, others.Prefabs))
+            if (OverLaps2D(position, rotatedSize, others.Prefabs, CaveBuilder.overLapMargin))
                 continue;
 
             position.y = CaveBuilder.rand.Next(CaveBuilder.bedRockMargin, minTerrainHeight - prefabData.size.y - CaveBuilder.terrainMargin);
@@ -223,7 +221,7 @@ public static class CavePlanner
         return null;
     }
 
-    public static void SpawnUnderGroundPrefabs(int count, ref PrefabCache cachedPrefabs)
+    public static IEnumerator SpawnUnderGroundPrefabs(int count, PrefabCache cachedPrefabs)
     {
         var undergroundPrefabs = GetUndergroundPrefabs();
 
@@ -244,6 +242,7 @@ public static class CavePlanner
         }
 
         Log.Out($"[Cave] {cachedPrefabs.Count} cave prefabs added.");
+        yield return null;
     }
 
     private static void AddSurfacePrefabs(PrefabCache cachedPrefabs)
@@ -292,6 +291,52 @@ public static class CavePlanner
         return resultat;
     }
 
+    private static IEnumerator SpawnCaveRooms(int count, PrefabCache cachedPrefabs)
+    {
+        for (int i = 0; i < count; i++)
+        {
+            int maxTries = 5;
+
+            for (int j = 0; j < maxTries; j++)
+            {
+                Vector3i size = new Vector3i(
+                    CaveBuilder.rand.Next(20, 50),
+                    CaveBuilder.rand.Next(15, 30),
+                    CaveBuilder.rand.Next(30, 100)
+                );
+
+                Vector3i position = GetRandomPositionFor(size);
+
+                var minTerrainHeight = GetMinTerrainHeight(position, size);
+                var canBePlacedUnderTerrain = minTerrainHeight > (CaveBuilder.bedRockMargin + size.y + CaveBuilder.terrainMargin);
+
+                if (!canBePlacedUnderTerrain)
+                    continue;
+
+                if (OverLaps2D(position, size, cachedPrefabs.Prefabs, 30))
+                    continue;
+
+                position.y = CaveBuilder.rand.Next(CaveBuilder.bedRockMargin, minTerrainHeight - size.y - CaveBuilder.terrainMargin);
+
+                var prefab = new CavePrefab(0)
+                {
+                    Size = size,
+                    position = position,
+                };
+
+                prefab.UpdateMarkers(CaveBuilder.rand);
+                var room = new CaveRoom(prefab, CaveBuilder.rand.Next());
+
+                cavemap.AddRoom(room);
+                cachedPrefabs.AddPrefab(prefab);
+
+                Log.Out($"Room added at '{position - CaveBuilder.HalfWorldSize}', size: '{size}'");
+                break;
+            }
+        }
+        yield return null;
+    }
+
     public static IEnumerator GenerateCaveMap()
     {
         if (WorldBuilder.IsCanceled)
@@ -307,15 +352,16 @@ public static class CavePlanner
         var timer = new Stopwatch();
         timer.Start();
 
+        cavemap = new CaveMap();
+
         yield return WorldBuilder.SetMessage("Spawning cave prefabs...", _logToConsole: true);
 
-        SpawnUnderGroundPrefabs(CaveBuilder.PREFAB_COUNT, ref cachedPrefabs);
+        yield return SpawnUnderGroundPrefabs(CaveBuilder.PREFAB_COUNT, cachedPrefabs);
+        yield return SpawnCaveRooms(1000, cachedPrefabs);
 
         caveGraph = Graph.Resolve(cachedPrefabs.Prefabs);
 
         AddSurfacePrefabs(cachedPrefabs);
-
-        cavemap = new CaveMap();
 
         var threads = new List<Thread>();
         var subLists = SplitList(caveGraph.Edges.ToList(), 6);

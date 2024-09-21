@@ -141,14 +141,22 @@ public class Graph
 
     public void Save(string filename)
     {
+        var edgesCount = Edges.Count(edge => edge.node1.prefab.prefabDataInstance != null && edge.node2.prefab.prefabDataInstance != null);
+
         using (var stream = new StreamWriter(filename))
         {
-            stream.WriteLine(Edges.Count);
+            stream.WriteLine(edgesCount);
 
             foreach (var edges in Edges)
             {
                 var pdi1 = edges.node1.prefab.prefabDataInstance;
                 var pdi2 = edges.node2.prefab.prefabDataInstance;
+
+                // TODO: filter cave rooms prefabs to avoid that ugly fix
+                if (pdi1 == null || pdi2 == null)
+                {
+                    continue;
+                }
 
                 stream.WriteLine(edges.id);
                 stream.WriteLine($"{pdi1.id}");
