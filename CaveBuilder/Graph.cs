@@ -18,7 +18,7 @@ public class Graph
         prefabsConnections = new Dictionary<string, int>();
     }
 
-    public int GetEdgeWeight(GraphEdge edge)
+    public double GetEdgeWeight(GraphEdge edge)
     {
         prefabsConnections.TryGetValue(edge.HashPrefabs(), out int occurences);
 
@@ -30,7 +30,7 @@ public class Graph
         weight *= Math.Pow(occurences + 1, occurencesCoef);
         weight *= Math.Pow(edge.GetOrientationWeight(), orientationCoef);
 
-        return (int)weight;
+        return weight;
     }
 
     public void AddPrefabConnection(GraphEdge edge)
@@ -63,12 +63,7 @@ public class Graph
         Nodes.Add(edge.node2);
     }
 
-    private List<GraphEdge> GetEdgesFromNode(GraphNode node)
-    {
-        return Edges.Where(e => e.node1.Equals(node) || e.node2.Equals(node)).ToList();
-    }
-
-    private Graph FindMST()
+    private Graph PruneGraph()
     {
         var graph = new Graph();
 
@@ -77,13 +72,14 @@ public class Graph
             if (graph.Nodes.Contains(node))
                 continue;
 
-            var relatedEdges = GetEdgesFromNode(node);
+            var minEdgeWeight = Edges
+                .Where(e => e.node1.Equals(node) || e.node2.Equals(node))
+                .OrderBy(edge => GetEdgeWeight(edge))
+                .First();
 
-            relatedEdges.Sort(new EdgeWeightComparer(this));
+            graph.AddEdge(minEdgeWeight);
 
-            graph.AddEdge(relatedEdges[0]);
-
-            AddPrefabConnection(relatedEdges[0]);
+            AddPrefabConnection(minEdgeWeight);
         }
 
         return graph;
@@ -130,11 +126,11 @@ public class Graph
 
         Graph graph = BuildDelauneyGraph(prefabs);
 
-        Log.Out($"[Cave] primary graph: edges={graph.Edges.Count}, nodes={graph.Nodes.Count}");
+        Log.Out($"[Cave] primary graph : edges: {graph.Edges.Count}, nodes: {graph.Nodes.Count}");
 
-        graph = graph.FindMST();
+        graph = graph.PruneGraph();
 
-        Log.Out($"Graph resolved in {CaveUtils.TimeFormat(timer)}, edges={graph.Edges.Count}");
+        Log.Out($"[Cave] secondary graph: edges: {graph.Edges.Count}, nodes: {graph.Nodes.Count}, timer: {timer.ElapsedMilliseconds:N0}ms");
 
         return graph;
     }

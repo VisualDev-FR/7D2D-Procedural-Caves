@@ -68,24 +68,3 @@ public class GraphEdge : IComparable<GraphEdge>
         return hash;
     }
 }
-
-
-public class EdgeWeightComparer : IComparer<GraphEdge>
-{
-    private readonly Graph _graph;
-
-    public EdgeWeightComparer(Graph graph)
-    {
-        _graph = graph;
-    }
-
-    public int Compare(GraphEdge x, GraphEdge y)
-    {
-        if (x == null || y == null)
-        {
-            throw new ArgumentException("Comparing null objects is not supported.");
-        }
-
-        return _graph.GetEdgeWeight(x).CompareTo(_graph.GetEdgeWeight(y));
-    }
-}

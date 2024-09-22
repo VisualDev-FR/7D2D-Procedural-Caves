@@ -7,7 +7,6 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Linq;
 using System.Collections;
-using System.Numerics;
 
 public static class CaveViewer
 {
@@ -87,10 +86,7 @@ public static class CaveViewer
 
     public static void GraphCommand(string[] args)
     {
-        CaveBuilder.worldSize = 6144;
-        // CaveBuilder.radiationSize = 0;
-        // CaveBuilder.radiationZoneMargin = 0;
-        // CaveBuilder.PREFAB_COUNT = 1000;
+        CaveBuilder.worldSize = 2048;
 
         int prefabCounts = args.Length > 1 ? int.Parse(args[1]) : CaveBuilder.PREFAB_COUNT;
 
@@ -118,8 +114,6 @@ public static class CaveViewer
                 DrawEdges(g, graph.Edges.ToList());
                 DrawPrefabs(g, cachedPrefabs.Prefabs);
             }
-
-            Log.Out($"{graph.Edges.Count} Generated edges.");
 
             b.Save(@"graph.png", ImageFormat.Png);
         }
@@ -458,7 +452,6 @@ public static class CaveViewer
 
         Console.WriteLine($"Kd {r:F2} {g:F2} {b:F2}".Replace(",", "."));
     }
-
 
     public static void BitCommand()
     {
