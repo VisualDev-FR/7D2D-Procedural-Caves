@@ -365,4 +365,14 @@ public class CavePrefab
         return GetHashCode() == other.GetHashCode();
     }
 
+    public IEnumerable<DelauneyPoint> DelauneyPoints()
+    {
+        foreach (var node in nodes)
+        {
+            var pos = node.position;
+
+            yield return new DelauneyPoint(pos.x, pos.y, pos.z, this);
+        }
+    }
+
 }

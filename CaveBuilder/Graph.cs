@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -63,6 +64,24 @@ public class Graph
         Nodes.Add(edge.node2);
     }
 
+    public void AddEdge(DelauneyPoint point1, DelauneyPoint point2)
+    {
+        if (point1.prefab == point2.prefab)
+        {
+            return;
+        }
+
+        var node1 = new GraphNode(point1.ToVector3i(0), point1.prefab);
+        var node2 = new GraphNode(point2.ToVector3i(0), point2.prefab);
+
+        var edge = new GraphEdge(Edges.Count, node1, node2);
+
+        Edges.Add(edge);
+        Nodes.Add(node1);
+        Nodes.Add(node2);
+    }
+
+
     private Graph PruneGraph()
     {
         var graph = new Graph();
@@ -87,34 +106,16 @@ public class Graph
 
     private static Graph BuildDelauneyGraph(List<CavePrefab> prefabs)
     {
-        var points = prefabs.Select((prefab) => new DelauneyPoint(prefab));
+        var points = prefabs.SelectMany(prefab => prefab.DelauneyPoints());
         var triangulator = new DelaunayTriangulator();
         var worldSize = CaveBuilder.worldSize;
         var graph = new Graph();
 
         foreach (var triangle in triangulator.BowyerWatson(points, worldSize, worldSize))
         {
-            var node1 = triangle.Vertices[0].ToGraphNode();
-            var node2 = triangle.Vertices[1].ToGraphNode();
-            var node3 = triangle.Vertices[2].ToGraphNode();
-
-            var edges = new GraphEdge[]
-            {
-                new GraphEdge(node1, node2),
-                new GraphEdge(node1, node3),
-                new GraphEdge(node2, node3),
-            };
-
-            foreach (var edge in edges)
-            {
-                foreach (var nodeA in edge.Prefab1.nodes)
-                {
-                    foreach (var nodeB in edge.Prefab2.nodes)
-                    {
-                        graph.AddEdge(nodeA, nodeB);
-                    }
-                }
-            }
+            graph.AddEdge(triangle.Vertices[0], triangle.Vertices[1]);
+            graph.AddEdge(triangle.Vertices[0], triangle.Vertices[2]);
+            graph.AddEdge(triangle.Vertices[1], triangle.Vertices[2]);
         }
 
         return graph;
@@ -122,8 +123,8 @@ public class Graph
 
     public static Graph Resolve(List<CavePrefab> prefabs)
     {
-        var timer = CaveUtils.StartTimer();
 
+        var timer = CaveUtils.StartTimer();
         Graph graph = BuildDelauneyGraph(prefabs);
 
         Log.Out($"[Cave] primary graph : edges: {graph.Edges.Count}, nodes: {graph.Nodes.Count}");

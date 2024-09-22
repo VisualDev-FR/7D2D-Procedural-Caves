@@ -65,9 +65,9 @@ public static class CaveViewer
             foreach (var edge in edges)
             {
                 graph.DrawCurve(pen, new PointF[2]{
-                ParsePointF(edge.node1.position),
-                ParsePointF(edge.node2.position),
-            });
+                    ParsePointF(edge.node1.position),
+                    ParsePointF(edge.node2.position),
+                });
             }
         }
     }
@@ -86,7 +86,7 @@ public static class CaveViewer
 
     public static void GraphCommand(string[] args)
     {
-        CaveBuilder.worldSize = 2048;
+        CaveBuilder.worldSize = 1024 * 6;
 
         int prefabCounts = args.Length > 1 ? int.Parse(args[1]) : CaveBuilder.PREFAB_COUNT;
 
