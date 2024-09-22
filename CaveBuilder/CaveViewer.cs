@@ -75,9 +75,11 @@ public static class CaveViewer
 
     public static void DrawEdges(Graphics graph, List<GraphEdge> edges)
     {
-        using (var pen = new Pen(TunnelsColor, 2))
+        foreach (var edge in edges)
         {
-            foreach (var edge in edges)
+            var color = edge.isVirtual ? RoomColor : TunnelsColor;
+
+            using (var pen = new Pen(color, 2))
             {
                 graph.DrawCurve(pen, new PointF[2]{
                     ParsePointF(edge.node1.position),
@@ -101,13 +103,14 @@ public static class CaveViewer
 
     public static void GraphCommand(string[] args)
     {
-        CaveBuilder.worldSize = 1024 * 2;
+        CaveBuilder.worldSize = 1024 * 6;
 
         int prefabCounts = args.Length > 1 ? int.Parse(args[1]) : CaveBuilder.PREFAB_COUNT;
 
-        var prefabs = PrefabLoader.LoadPrefabs().Values.ToList();
-        PrefabCache cachedPrefabs = CaveBuilder.GetRandomPrefabs(prefabCounts, prefabs);
+        // var prefabs = PrefabLoader.LoadPrefabs().Values.ToList();
 
+        var random = new Random(1337);
+        var cachedPrefabs = CaveBuilder.GetRandomPrefabs(prefabCounts, random);
         var graph = new Graph(cachedPrefabs.Prefabs);
         var voxels = new HashSet<Voxell>();
 

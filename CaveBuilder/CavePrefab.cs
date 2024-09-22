@@ -36,7 +36,7 @@ public class CavePrefab
 
     public string Name => prefabDataInstance?.prefab.Name;
 
-    public FastTags<TagGroup.Poi> Tags => prefabDataInstance.prefab.Tags;
+    public FastTags<TagGroup.Poi> Tags => prefabDataInstance == null ? FastTags<TagGroup.Poi>.none : prefabDataInstance.prefab.Tags;
 
     public bool isEntrance => Tags.Test_AnySet(CaveConfig.tagCaveEntrance);
 
@@ -68,6 +68,21 @@ public class CavePrefab
         Size = CaveUtils.GetRotatedSize(pdi.boundingBoxSize, rotation);
 
         UpdateMarkers(pdi);
+    }
+
+    public CavePrefab(int index, Vector3i position, Random rand)
+    {
+        id = index;
+        nodes = new List<GraphNode>();
+        this.position = position;
+
+        Size = new Vector3i(
+            rand.Next(CaveBuilder.MIN_PREFAB_SIZE, CaveBuilder.MAX_PREFAB_SIZE),
+            rand.Next(CaveBuilder.MIN_PREFAB_SIZE, CaveBuilder.MAX_PREFAB_SIZE),
+            rand.Next(CaveBuilder.MIN_PREFAB_SIZE, CaveBuilder.MAX_PREFAB_SIZE)
+        );
+
+        UpdateMarkers(rand);
     }
 
     public Prefab.Marker RandomMarker(Random rand, int rotation, int xMax, int yMax, int zMax)

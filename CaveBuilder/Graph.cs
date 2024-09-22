@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using UnityEngine;
 
 public class Graph
 {
@@ -56,7 +57,9 @@ public class Graph
 
     private void Prune()
     {
-        var groupedEdges = new Dictionary<int, List<GraphEdge>>();
+        var groupedEdges = new Dictionary<int, HashSet<GraphEdge>>();
+        var groupedNodes = new Dictionary<int, HashSet<GraphEdge>>();
+        var nodesBefore = Nodes.ToList();
 
         foreach (var edge in Edges)
         {
@@ -67,13 +70,31 @@ public class Graph
 
             if (!groupedEdges.ContainsKey(hashcode))
             {
-                groupedEdges[hashcode] = new List<GraphEdge>();
+                groupedEdges[hashcode] = new HashSet<GraphEdge>();
+            }
+            groupedEdges[hashcode].Add(edge);
+
+            var nodeHash1 = edge.node1.GetHashCode();
+            var nodeHash2 = edge.node2.GetHashCode();
+
+            if (!groupedNodes.ContainsKey(nodeHash1))
+            {
+                groupedNodes[nodeHash1] = new HashSet<GraphEdge>();
             }
 
-            groupedEdges[hashcode].Add(edge);
+            if (!groupedNodes.ContainsKey(nodeHash2))
+            {
+                groupedNodes[nodeHash2] = new HashSet<GraphEdge>();
+            }
+
+            groupedNodes[nodeHash1].Add(edge);
+            groupedNodes[nodeHash2].Add(edge);
         }
 
+        return;
+
         Edges.Clear();
+        Nodes.Clear();
 
         foreach (var edgeGroup in groupedEdges.Values)
         {
@@ -126,4 +147,5 @@ public class Graph
             }
         }
     }
+
 }
