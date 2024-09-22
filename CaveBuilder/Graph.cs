@@ -1,5 +1,3 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -17,42 +15,6 @@ public class Graph
         Edges = new HashSet<GraphEdge>();
         Nodes = new HashSet<GraphNode>();
         prefabsConnections = new Dictionary<string, int>();
-    }
-
-    public double GetEdgeWeight(GraphEdge edge)
-    {
-        prefabsConnections.TryGetValue(edge.HashPrefabs(), out int occurences);
-
-        const float occurencesCoef = 2f;
-        const float orientationCoef = 2f;
-
-        double weight = 1d; // Math.Pow(edge.Weight, distCoef);
-
-        weight *= Math.Pow(occurences + 1, occurencesCoef);
-        weight *= Math.Pow(edge.GetOrientationWeight(), orientationCoef);
-
-        return weight;
-    }
-
-    public void AddPrefabConnection(GraphEdge edge)
-    {
-        string hash = edge.HashPrefabs();
-
-        if (!prefabsConnections.ContainsKey(hash))
-            prefabsConnections[hash] = 0;
-
-        prefabsConnections[hash] += 1;
-
-        // Log.Out($"{hash}: {prefabsConnections[hash]}");
-    }
-
-    public void AddEdge(GraphNode node1, GraphNode node2)
-    {
-        var edge = new GraphEdge(Edges.Count, node1, node2);
-
-        Edges.Add(edge);
-        Nodes.Add(node1);
-        Nodes.Add(node2);
     }
 
     public void AddEdge(GraphEdge edge)
@@ -81,24 +43,29 @@ public class Graph
         Nodes.Add(node2);
     }
 
-
     private Graph PruneGraph()
     {
         var graph = new Graph();
+        var groupedEdges = new Dictionary<int, List<GraphEdge>>();
 
-        foreach (var node in Nodes)
+        foreach (var edge in Edges)
         {
-            if (graph.Nodes.Contains(node))
-                continue;
+            int idx1 = edge.Prefab1.GetHashCode();
+            int idx2 = edge.Prefab2.GetHashCode();
 
-            var minEdgeWeight = Edges
-                .Where(e => e.node1.Equals(node) || e.node2.Equals(node))
-                .OrderBy(edge => GetEdgeWeight(edge))
-                .First();
+            int hashcode = idx1 ^ idx2;
 
-            graph.AddEdge(minEdgeWeight);
+            if (!groupedEdges.ContainsKey(hashcode))
+            {
+                groupedEdges[hashcode] = new List<GraphEdge>();
+            }
 
-            AddPrefabConnection(minEdgeWeight);
+            groupedEdges[hashcode].Add(edge);
+        }
+
+        foreach (var edgeGroup in groupedEdges.Values)
+        {
+            graph.AddEdge(edgeGroup.First());
         }
 
         return graph;
