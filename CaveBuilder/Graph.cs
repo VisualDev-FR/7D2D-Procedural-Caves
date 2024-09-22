@@ -65,7 +65,11 @@ public class Graph
 
         foreach (var edgeGroup in groupedEdges.Values)
         {
-            graph.AddEdge(edgeGroup.First());
+            var shortestEdge = edgeGroup
+                .OrderBy(edge => edge.Weight)
+                .First();
+
+            graph.AddEdge(shortestEdge);
         }
 
         return graph;

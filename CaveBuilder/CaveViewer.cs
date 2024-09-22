@@ -86,7 +86,7 @@ public static class CaveViewer
 
     public static void GraphCommand(string[] args)
     {
-        CaveBuilder.worldSize = 1024 * 6;
+        CaveBuilder.worldSize = 1024 * 2;
 
         int prefabCounts = args.Length > 1 ? int.Parse(args[1]) : CaveBuilder.PREFAB_COUNT;
 
@@ -117,29 +117,6 @@ public static class CaveViewer
 
             b.Save(@"graph.png", ImageFormat.Png);
         }
-
-        // return;
-        // int index = 0;
-
-        // using (StreamWriter writer = new StreamWriter("graph.obj"))
-        // {
-        //     writer.WriteLine("mtllib materials.mtl");
-
-        //     foreach (var voxel in voxels)
-        //     {
-        //         string strVoxel = voxel.ToWavefront(ref index, voxels);
-
-        //         if (strVoxel != "")
-        //             writer.WriteLine(strVoxel);
-        //     }
-
-        //     foreach (var tetra in edges)
-        //     {
-        //         string strTetra = tetra.ToWaveFront(ref index);
-
-        //         writer.WriteLine(strTetra);
-        //     }
-        // }
     }
 
     public static void PathCommand(string[] args)
