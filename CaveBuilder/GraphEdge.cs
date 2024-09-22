@@ -16,26 +16,6 @@ public class GraphEdge : IComparable<GraphEdge>
 
     public CavePrefab Prefab2 => node2.prefab;
 
-    public string HashPrefabs()
-    {
-        int index1 = CaveUtils.FastMin(Prefab1.id, Prefab2.id);
-        int index2 = CaveUtils.FastMax(Prefab1.id, Prefab2.id);
-
-        return $"{index1};{index2}";
-    }
-
-    public int GetOrientationWeight()
-    {
-        Vector3i p1 = node1.position;
-        Vector3i p2 = node2.position;
-
-        var segment = new Segment(p1, p2);
-
-        int result = Prefab1.CountIntersections(segment) + Prefab2.CountIntersections(segment);
-
-        return result + 1;
-    }
-
     public GraphEdge(GraphNode node1, GraphNode node2)
     {
         this.node1 = node1;
@@ -66,26 +46,5 @@ public class GraphEdge : IComparable<GraphEdge>
         hash = hash * 23 + hash1 + hash2;
 
         return hash;
-    }
-}
-
-
-public class EdgeWeightComparer : IComparer<GraphEdge>
-{
-    private readonly Graph _graph;
-
-    public EdgeWeightComparer(Graph graph)
-    {
-        _graph = graph;
-    }
-
-    public int Compare(GraphEdge x, GraphEdge y)
-    {
-        if (x == null || y == null)
-        {
-            throw new ArgumentException("Comparing null objects is not supported.");
-        }
-
-        return _graph.GetEdgeWeight(x).CompareTo(_graph.GetEdgeWeight(y));
     }
 }

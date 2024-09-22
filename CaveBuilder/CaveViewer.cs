@@ -7,7 +7,6 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Linq;
 using System.Collections;
-using System.Numerics;
 
 public static class CaveViewer
 {
@@ -66,9 +65,9 @@ public static class CaveViewer
             foreach (var edge in edges)
             {
                 graph.DrawCurve(pen, new PointF[2]{
-                ParsePointF(edge.node1.position),
-                ParsePointF(edge.node2.position),
-            });
+                    ParsePointF(edge.node1.position),
+                    ParsePointF(edge.node2.position),
+                });
             }
         }
     }
@@ -87,17 +86,14 @@ public static class CaveViewer
 
     public static void GraphCommand(string[] args)
     {
-        CaveBuilder.worldSize = 6144;
-        // CaveBuilder.radiationSize = 0;
-        // CaveBuilder.radiationZoneMargin = 0;
-        // CaveBuilder.PREFAB_COUNT = 1000;
+        CaveBuilder.worldSize = 1024 * 2;
 
         int prefabCounts = args.Length > 1 ? int.Parse(args[1]) : CaveBuilder.PREFAB_COUNT;
 
         var prefabs = PrefabLoader.LoadPrefabs().Values.ToList();
         PrefabCache cachedPrefabs = CaveBuilder.GetRandomPrefabs(prefabCounts, prefabs);
-        Graph graph = Graph.Resolve(cachedPrefabs.Prefabs);
 
+        var graph = new Graph(cachedPrefabs.Prefabs);
         var voxels = new HashSet<Voxell>();
 
         foreach (var prefab in cachedPrefabs.Prefabs)
@@ -119,33 +115,8 @@ public static class CaveViewer
                 DrawPrefabs(g, cachedPrefabs.Prefabs);
             }
 
-            Log.Out($"{graph.Edges.Count} Generated edges.");
-
             b.Save(@"graph.png", ImageFormat.Png);
         }
-
-        // return;
-        // int index = 0;
-
-        // using (StreamWriter writer = new StreamWriter("graph.obj"))
-        // {
-        //     writer.WriteLine("mtllib materials.mtl");
-
-        //     foreach (var voxel in voxels)
-        //     {
-        //         string strVoxel = voxel.ToWavefront(ref index, voxels);
-
-        //         if (strVoxel != "")
-        //             writer.WriteLine(strVoxel);
-        //     }
-
-        //     foreach (var tetra in edges)
-        //     {
-        //         string strTetra = tetra.ToWaveFront(ref index);
-
-        //         writer.WriteLine(strTetra);
-        //     }
-        // }
     }
 
     public static void PathCommand(string[] args)
@@ -302,11 +273,9 @@ public static class CaveViewer
 
         Log.Out("Start solving graph...");
 
-        Graph graph = Graph.Resolve(cachedPrefabs.Prefabs);
-
-        int index = 0;
-
-        long memoryBefore = GC.GetTotalMemory(true);
+        var memoryBefore = GC.GetTotalMemory(true);
+        var graph = new Graph(cachedPrefabs.Prefabs);
+        var index = 0;
 
         object lockObject = new object();
 
@@ -458,7 +427,6 @@ public static class CaveViewer
 
         Console.WriteLine($"Kd {r:F2} {g:F2} {b:F2}".Replace(",", "."));
     }
-
 
     public static void BitCommand()
     {

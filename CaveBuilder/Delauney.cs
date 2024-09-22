@@ -30,7 +30,6 @@ using UnityEngine;
 
 public class DelaunayTriangulator
 {
-
     public IEnumerable<DelauneyTriangle> BowyerWatson(IEnumerable<DelauneyPoint> points, int xMax, int yMax)
     {
         var point0 = new DelauneyPoint(0, 0, 0, null);
