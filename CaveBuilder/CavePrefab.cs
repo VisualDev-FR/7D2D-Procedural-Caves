@@ -326,9 +326,7 @@ public class CavePrefab
     {
         foreach (var node in nodes)
         {
-            var pos = node.position;
-
-            yield return new DelauneyPoint(pos.x, pos.y, pos.z, this);
+            yield return new DelauneyPoint(node);
         }
     }
 

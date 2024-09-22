@@ -318,7 +318,7 @@ public static class CavePlanner
 
                 position.y = CaveBuilder.rand.Next(CaveBuilder.bedRockMargin, minTerrainHeight - size.y - CaveBuilder.terrainMargin);
 
-                var prefab = new CavePrefab(0)
+                var prefab = new CavePrefab(cachedPrefabs.Count + 1)
                 {
                     Size = size,
                     position = position,
@@ -359,7 +359,12 @@ public static class CavePlanner
         yield return SpawnUnderGroundPrefabs(CaveBuilder.PREFAB_COUNT, cachedPrefabs);
         yield return SpawnCaveRooms(1000, cachedPrefabs);
 
-        caveGraph = Graph.Resolve(cachedPrefabs.Prefabs);
+        caveGraph = new Graph(cachedPrefabs.Prefabs);
+
+        foreach (var edge in caveGraph.Edges)
+        {
+            Log.Out($"[Cave] [{edge.node1.position}], [{edge.node2.position}]");
+        }
 
         AddSurfacePrefabs(cachedPrefabs);
 
@@ -479,7 +484,7 @@ public static class CavePlanner
             from StreetTile st in WorldBuilder.Instance.StreetTileMap
             where st.Used
             select st
-            ).ToList();
+        ).ToList();
 
         foreach (var st in usedTiles)
         {

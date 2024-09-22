@@ -50,7 +50,7 @@ public class CaveRoom
         rand = new Random(seed);
         map = new bool[size.x, size.y, size.z];
         markers = prefab.nodes
-            .Select(node => new CaveMarker(node.MarkerCenter(), 3))
+            .Select(node => new CaveMarker(GraphNode.MarkerCenter(node.marker), 3))
             .ToList();
     }
 

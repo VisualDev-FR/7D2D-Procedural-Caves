@@ -32,10 +32,10 @@ public class DelaunayTriangulator
 {
     public IEnumerable<DelauneyTriangle> BowyerWatson(IEnumerable<DelauneyPoint> points, int xMax, int yMax)
     {
-        var point0 = new DelauneyPoint(0, 0, 0, null);
-        var point1 = new DelauneyPoint(0, 0, yMax, null);
-        var point2 = new DelauneyPoint(xMax, 0, yMax, null);
-        var point3 = new DelauneyPoint(xMax, 0, 0, null);
+        var point0 = new DelauneyPoint(0, 0, 0);
+        var point1 = new DelauneyPoint(0, 0, yMax);
+        var point2 = new DelauneyPoint(xMax, 0, yMax);
+        var point3 = new DelauneyPoint(xMax, 0, 0);
 
         var tri1 = new DelauneyTriangle(point0, point1, point2);
         var tri2 = new DelauneyTriangle(point0, point2, point3);
@@ -140,6 +140,7 @@ public class DelauneyTriangle
         Vertices[0].AdjacentTriangles.Add(this);
         Vertices[1].AdjacentTriangles.Add(this);
         Vertices[2].AdjacentTriangles.Add(this);
+
         UpdateCircumcircle();
     }
 
@@ -160,10 +161,12 @@ public class DelauneyTriangle
 
         if (div == 0)
         {
+            Log.Out($"[Cave] {p0.prefab.Name}, {p1.prefab.Name}, {p2.prefab.Name}");
+            Log.Out($"[Cave] {p0.position}, {p1.position}, {p2.position}");
             throw new DivideByZeroException();
         }
 
-        var center = new DelauneyPoint(aux1 / div, 0, aux2 / div, null);
+        var center = new DelauneyPoint(aux1 / div, 0, aux2 / div);
         Circumcenter = center;
         RadiusSquared = (center.X - p0.X) * (center.X - p0.X) + (center.Z - p0.Z) * (center.Z - p0.Z);
     }
@@ -211,31 +214,22 @@ public class DelauneyPoint
 
     public float Z => position.z;
 
+    public Prefab.Marker marker;
+
     public HashSet<DelauneyTriangle> AdjacentTriangles { get; } = new HashSet<DelauneyTriangle>();
 
-    public DelauneyPoint(float x, float y, float z, CavePrefab prefab)
+    public DelauneyPoint(GraphNode node)
+    {
+        position = node.position.ToVector3();
+        marker = node.marker;
+        prefab = node.prefab;
+    }
+
+    public DelauneyPoint(float x, float y, float z)
     {
         position = new Vector3(x, y, z);
-        this.prefab = prefab;
     }
 
-    public DelauneyPoint(CavePrefab prefab)
-    {
-        var center = prefab.GetCenter();
-        position = new Vector3(center.x, center.y, center.z);
-        this.prefab = prefab;
-    }
-
-    public Vector3i ToVector3i(int y)
-    {
-        return new Vector3i((int)X, y, (int)Z);
-    }
-
-    public GraphNode ToGraphNode()
-    {
-        var pos = new Vector3i((int)position.x, (int)position.x, (int)position.x);
-        return new GraphNode(pos, prefab);
-    }
 }
 
 

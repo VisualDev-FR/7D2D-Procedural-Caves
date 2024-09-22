@@ -40,20 +40,13 @@ public class GraphNode
         CaveUtils.Assert(direction != Direction.None, $"None direction: {prefab.Name}, marker start: [{marker.start}], prefab size:[{prefab.Size}]");
     }
 
-    public Vector3i MarkerCenter()
+    public static Vector3i MarkerCenter(Prefab.Marker marker)
     {
         return new Vector3i(
             (int)(marker.start.x + marker.size.x / 2f),
             (int)(marker.start.y + marker.size.y / 2f),
             (int)(marker.start.z + marker.size.z / 2f)
         );
-    }
-
-    public GraphNode(Vector3i position, CavePrefab prefab)
-    {
-        this.prefab = prefab;
-        this.position = position;
-        direction = Direction.None;
     }
 
     private Direction GetDirection()

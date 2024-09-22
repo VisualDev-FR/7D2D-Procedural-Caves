@@ -44,8 +44,8 @@ public class Graph
             return;
         }
 
-        var node1 = new GraphNode(point1.ToVector3i(0), point1.prefab);
-        var node2 = new GraphNode(point2.ToVector3i(0), point2.prefab);
+        var node1 = new GraphNode(point1.marker, point1.prefab);
+        var node2 = new GraphNode(point2.marker, point2.prefab);
 
         var edge = new GraphEdge(Edges.Count, node1, node2);
 

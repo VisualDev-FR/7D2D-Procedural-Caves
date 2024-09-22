@@ -1,26 +1,59 @@
+using System.Linq;
+
 public class CavePrefabChecker
 {
     public static bool IsValid(PrefabData prefabData)
     {
+        var result = true;
+
         if (!HasRequiredTags(prefabData))
         {
             Log.Warning(SkippingBecause(prefabData.Name, $"missing cave type tag: {prefabData.Tags}"));
-            return false;
+            result = false;
         }
 
         if (!ContainsCaveMarkers(prefabData))
         {
             Log.Warning(SkippingBecause(prefabData.Name, "no cave marker was found."));
-            return false;
+            result = false;
         }
 
         if (!PrefabMarkersAreValid(prefabData))
         {
             Log.Warning(SkippingBecause(prefabData.Name, "at least one marker is invalid."));
-            return false;
+            result = false;
         }
 
-        return true;
+        if (HasOverlappingMarkers(prefabData))
+        {
+            Log.Warning(SkippingBecause(prefabData.Name, "cave markers overlaps"));
+            result = false;
+        }
+
+        return result;
+    }
+
+    private static bool HasOverlappingMarkers(PrefabData prefab)
+    {
+        var markers = prefab.POIMarkers
+            .Where(marker => marker.tags.Test_AnySet(CaveConfig.tagCaveMarker))
+            .ToList();
+
+        for (int i = 0; i < markers.Count; i++)
+        {
+            for (int j = i + 1; j < markers.Count; j++)
+            {
+                var center1 = GraphNode.MarkerCenter(markers[i]);
+                var center2 = GraphNode.MarkerCenter(markers[j]);
+
+                if (center1.x == center2.x && center1.z == center2.z)
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     private static bool HasRequiredTags(PrefabData prefab)
