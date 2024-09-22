@@ -36,6 +36,12 @@ public class CavePrefab
 
     public string Name => prefabDataInstance?.prefab.Name;
 
+    public FastTags<TagGroup.Poi> Tags => prefabDataInstance.prefab.Tags;
+
+    public bool isEntrance => Tags.Test_AnySet(CaveConfig.tagCaveEntrance);
+
+    public bool isRoom = false;
+
     public List<GraphNode> nodes;
 
     public List<Prefab.Marker> caveMarkers;

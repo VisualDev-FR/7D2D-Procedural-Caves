@@ -16,7 +16,11 @@ public static class CaveViewer
 
     public static readonly Color NodeColor = Color.Yellow;
 
-    public static readonly Color PrefabBoundsColor = Color.Green;
+    public static readonly Color UnderGroundColor = Color.Green;
+
+    public static readonly Color EntranceColor = Color.Yellow;
+
+    public static readonly Color RoomColor = Color.Purple;
 
     public static readonly Color NoiseColor = Color.FromArgb(84, 84, 82);
 
@@ -38,14 +42,25 @@ public static class CaveViewer
 
     public static void DrawPrefabs(Graphics graph, List<CavePrefab> prefabs)
     {
-        // throw new NotImplementedException("obsolete, has to be updated.");
-        using (var pen = new Pen(PrefabBoundsColor, 1))
+        foreach (var prefab in prefabs)
         {
-            foreach (var prefab in prefabs)
+            // var baseColor = Color.FromArgb(prefab.Name.GetHashCode());
+            // var color = Color.FromArgb(255, baseColor);
+
+            var color = UnderGroundColor;
+
+            if (prefab.isRoom)
+            {
+                color = RoomColor;
+            }
+            else if (prefab.isEntrance)
+            {
+                color = EntranceColor;
+            }
+
+            using (var pen = new Pen(color, 1))
             {
                 graph.DrawRectangle(pen, prefab.position.x, prefab.position.z, prefab.Size.x, prefab.Size.z);
-
-                // DrawPoints(b, new HashSet<Vector3i>(prefab.nodes), NodeColor);
             }
         }
     }
