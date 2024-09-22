@@ -92,8 +92,8 @@ public static class CaveViewer
 
         var prefabs = PrefabLoader.LoadPrefabs().Values.ToList();
         PrefabCache cachedPrefabs = CaveBuilder.GetRandomPrefabs(prefabCounts, prefabs);
-        Graph graph = Graph.Resolve(cachedPrefabs.Prefabs);
 
+        var graph = new Graph(cachedPrefabs.Prefabs);
         var voxels = new HashSet<Voxell>();
 
         foreach (var prefab in cachedPrefabs.Prefabs)
@@ -273,11 +273,9 @@ public static class CaveViewer
 
         Log.Out("Start solving graph...");
 
-        Graph graph = Graph.Resolve(cachedPrefabs.Prefabs);
-
-        int index = 0;
-
-        long memoryBefore = GC.GetTotalMemory(true);
+        var memoryBefore = GC.GetTotalMemory(true);
+        var graph = new Graph(cachedPrefabs.Prefabs);
+        var index = 0;
 
         object lockObject = new object();
 

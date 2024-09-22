@@ -10,14 +10,25 @@ public class Graph
 
     public Dictionary<string, int> prefabsConnections;
 
-    public Graph()
+    public Graph(List<CavePrefab> prefabs)
     {
         Edges = new HashSet<GraphEdge>();
         Nodes = new HashSet<GraphNode>();
         prefabsConnections = new Dictionary<string, int>();
+
+        var timer = CaveUtils.StartTimer();
+
+        BuildDelauneyGraph(prefabs);
+
+        Log.Out($"[Cave] primary graph : edges: {Edges.Count}, nodes: {Nodes.Count}");
+
+        Prune();
+
+        Log.Out($"[Cave] secondary graph: edges: {Edges.Count}, nodes: {Nodes.Count}, timer: {timer.ElapsedMilliseconds:N0}ms");
+
     }
 
-    public void AddEdge(GraphEdge edge)
+    private void AddEdge(GraphEdge edge)
     {
         edge.id = Edges.Count;
 
@@ -26,7 +37,7 @@ public class Graph
         Nodes.Add(edge.node2);
     }
 
-    public void AddEdge(DelauneyPoint point1, DelauneyPoint point2)
+    private void AddEdge(DelauneyPoint point1, DelauneyPoint point2)
     {
         if (point1.prefab == point2.prefab)
         {
@@ -43,17 +54,16 @@ public class Graph
         Nodes.Add(node2);
     }
 
-    private Graph PruneGraph()
+    private void Prune()
     {
-        var graph = new Graph();
         var groupedEdges = new Dictionary<int, List<GraphEdge>>();
 
         foreach (var edge in Edges)
         {
-            int idx1 = edge.Prefab1.GetHashCode();
-            int idx2 = edge.Prefab2.GetHashCode();
+            int hash1 = edge.Prefab1.GetHashCode();
+            int hash2 = edge.Prefab2.GetHashCode();
 
-            int hashcode = idx1 ^ idx2;
+            int hashcode = hash1 ^ hash2;
 
             if (!groupedEdges.ContainsKey(hashcode))
             {
@@ -63,48 +73,30 @@ public class Graph
             groupedEdges[hashcode].Add(edge);
         }
 
+        Edges.Clear();
+
         foreach (var edgeGroup in groupedEdges.Values)
         {
             var shortestEdge = edgeGroup
                 .OrderBy(edge => edge.Weight)
                 .First();
 
-            graph.AddEdge(shortestEdge);
+            AddEdge(shortestEdge);
         }
-
-        return graph;
     }
 
-    private static Graph BuildDelauneyGraph(List<CavePrefab> prefabs)
+    private void BuildDelauneyGraph(List<CavePrefab> prefabs)
     {
         var points = prefabs.SelectMany(prefab => prefab.DelauneyPoints());
         var triangulator = new DelaunayTriangulator();
         var worldSize = CaveBuilder.worldSize;
-        var graph = new Graph();
 
         foreach (var triangle in triangulator.BowyerWatson(points, worldSize, worldSize))
         {
-            graph.AddEdge(triangle.Vertices[0], triangle.Vertices[1]);
-            graph.AddEdge(triangle.Vertices[0], triangle.Vertices[2]);
-            graph.AddEdge(triangle.Vertices[1], triangle.Vertices[2]);
+            AddEdge(triangle.Vertices[0], triangle.Vertices[1]);
+            AddEdge(triangle.Vertices[0], triangle.Vertices[2]);
+            AddEdge(triangle.Vertices[1], triangle.Vertices[2]);
         }
-
-        return graph;
-    }
-
-    public static Graph Resolve(List<CavePrefab> prefabs)
-    {
-
-        var timer = CaveUtils.StartTimer();
-        Graph graph = BuildDelauneyGraph(prefabs);
-
-        Log.Out($"[Cave] primary graph : edges: {graph.Edges.Count}, nodes: {graph.Nodes.Count}");
-
-        graph = graph.PruneGraph();
-
-        Log.Out($"[Cave] secondary graph: edges: {graph.Edges.Count}, nodes: {graph.Nodes.Count}, timer: {timer.ElapsedMilliseconds:N0}ms");
-
-        return graph;
     }
 
     public void Save(string filename)

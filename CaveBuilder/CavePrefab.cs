@@ -46,21 +46,6 @@ public class CavePrefab
         nodes = new List<GraphNode>();
     }
 
-    public CavePrefab(int index, Vector3i position, Random rand)
-    {
-        id = index;
-        nodes = new List<GraphNode>();
-        this.position = position;
-
-        Size = new Vector3i(
-            rand.Next(CaveBuilder.MIN_PREFAB_SIZE, CaveBuilder.MAX_PREFAB_SIZE),
-            rand.Next(CaveBuilder.MIN_PREFAB_SIZE, CaveBuilder.MAX_PREFAB_SIZE),
-            rand.Next(CaveBuilder.MIN_PREFAB_SIZE, CaveBuilder.MAX_PREFAB_SIZE)
-        );
-
-        UpdateMarkers(rand);
-    }
-
     public CavePrefab(BoundingBox rectangle)
     {
         position = rectangle.start;
@@ -234,34 +219,6 @@ public class CavePrefab
             return false;
 
         return true;
-    }
-
-    public int CountIntersections(Segment segment)
-    {
-        int intersectionsCount = 0;
-
-        int x0 = position.x;
-        int z0 = position.z;
-
-        int x1 = x0 + Size.x;
-        int z1 = z0 + Size.z;
-
-        var edges = new List<Segment>(){
-            new Segment(x0, z0, x0, z1),
-            new Segment(x0, z0, x1, z0),
-            new Segment(x1, z1, x0, z1),
-            new Segment(x1, z1, x1, z0),
-        };
-
-        foreach (var edge in edges)
-        {
-            if (segment.Intersect(edge))
-            {
-                intersectionsCount++;
-            }
-        }
-
-        return intersectionsCount;
     }
 
     private List<Vector3i> GetBoundingPoints()
