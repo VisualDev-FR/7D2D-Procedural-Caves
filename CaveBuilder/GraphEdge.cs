@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 
 
 public class GraphEdge : IComparable<GraphEdge>
@@ -19,6 +18,8 @@ public class GraphEdge : IComparable<GraphEdge>
     public Vector3i center;
 
     public bool isVirtual = false;
+
+    public string colorName = "DarkRed";
 
     public GraphEdge(GraphNode node1, GraphNode node2)
     {

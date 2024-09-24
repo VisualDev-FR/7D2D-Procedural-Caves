@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using UnityEngine;
 
 public class Graph
 {
@@ -9,13 +8,13 @@ public class Graph
 
     public HashSet<GraphNode> Nodes { get; set; }
 
-    public Dictionary<string, int> prefabsConnections;
+    public Dictionary<GraphNode, HashSet<GraphEdge>> relatedNodes;
 
     public Graph(List<CavePrefab> prefabs)
     {
         Edges = new HashSet<GraphEdge>();
         Nodes = new HashSet<GraphNode>();
-        prefabsConnections = new Dictionary<string, int>();
+        relatedNodes = new Dictionary<GraphNode, HashSet<GraphEdge>>();
 
         var timer = CaveUtils.StartTimer();
 
@@ -36,6 +35,19 @@ public class Graph
         Edges.Add(edge);
         Nodes.Add(edge.node1);
         Nodes.Add(edge.node2);
+
+        if (!relatedNodes.ContainsKey(edge.node1))
+        {
+            relatedNodes[edge.node1] = new HashSet<GraphEdge>();
+        }
+
+        if (!relatedNodes.ContainsKey(edge.node2))
+        {
+            relatedNodes[edge.node2] = new HashSet<GraphEdge>();
+        }
+
+        relatedNodes[edge.node1].Add(edge);
+        relatedNodes[edge.node2].Add(edge);
     }
 
     private void AddEdge(DelauneyPoint point1, DelauneyPoint point2)
@@ -50,16 +62,15 @@ public class Graph
 
         var edge = new GraphEdge(Edges.Count, node1, node2);
 
-        Edges.Add(edge);
-        Nodes.Add(node1);
-        Nodes.Add(node2);
+        AddEdge(edge);
     }
 
     private void Prune()
     {
         var groupedEdges = new Dictionary<int, HashSet<GraphEdge>>();
-        var groupedNodes = new Dictionary<int, HashSet<GraphEdge>>();
+        var groupedNodes = new Dictionary<GraphNode, HashSet<GraphEdge>>();
         var nodesBefore = Nodes.ToList();
+        var edgesBefore = Edges.ToList();
 
         foreach (var edge in Edges)
         {
@@ -74,24 +85,21 @@ public class Graph
             }
             groupedEdges[hashcode].Add(edge);
 
-            var nodeHash1 = edge.node1.GetHashCode();
-            var nodeHash2 = edge.node2.GetHashCode();
-
-            if (!groupedNodes.ContainsKey(nodeHash1))
+            if (!groupedNodes.ContainsKey(edge.node1))
             {
-                groupedNodes[nodeHash1] = new HashSet<GraphEdge>();
+                groupedNodes[edge.node1] = new HashSet<GraphEdge>();
             }
 
-            if (!groupedNodes.ContainsKey(nodeHash2))
+            if (!groupedNodes.ContainsKey(edge.node2))
             {
-                groupedNodes[nodeHash2] = new HashSet<GraphEdge>();
+                groupedNodes[edge.node2] = new HashSet<GraphEdge>();
             }
 
-            groupedNodes[nodeHash1].Add(edge);
-            groupedNodes[nodeHash2].Add(edge);
+            groupedNodes[edge.node1].Add(edge);
+            groupedNodes[edge.node2].Add(edge);
         }
 
-        return;
+        // return;
 
         Edges.Clear();
         Nodes.Clear();
@@ -104,6 +112,33 @@ public class Graph
 
             AddEdge(shortestEdge);
         }
+
+        foreach (var node in nodesBefore.Where(node => !Nodes.Contains(node)))
+        {
+            var shortestEdge = edgesBefore
+                .Where(edge => edge.node1 == node || edge.node2 == node)
+                .OrderBy(edge => edge.Weight)
+                .First();
+
+            shortestEdge.colorName = "Purple";
+            AddEdge(shortestEdge);
+
+            var hash1 = shortestEdge.Prefab1.GetHashCode();
+            var hash2 = shortestEdge.Prefab2.GetHashCode();
+            var hashcode = hash1 ^ hash2;
+
+            var replacedEdge = groupedEdges[hashcode]
+                .Where(edge => Edges.Contains(edge) && edge != shortestEdge);
+
+            foreach (var edge in replacedEdge)
+            {
+                edge.colorName = "Yellow";
+                // Edges.Remove(edge);
+            }
+        }
+
+        // TODO: fix this invalid condition. Search for the nodes wich are not linked to an edge instead
+        Log.Out($"{nodesBefore.Where(node => !Nodes.Contains(node)).Count()} missing nodes.");
     }
 
     private void BuildDelauneyGraph(List<CavePrefab> prefabs)

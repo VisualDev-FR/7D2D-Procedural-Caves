@@ -96,9 +96,9 @@ public class CavePrefab
         int sizeY = CaveUtils.FastMin(5, yMax); // rand.Next(CaveUtils.FastMin(2, yMax), CaveUtils.FastMin(maxMarkerSize, yMax));
         int sizeZ = CaveUtils.FastMin(5, zMax); // rand.Next(CaveUtils.FastMin(2, zMax), CaveUtils.FastMin(maxMarkerSize, zMax));
 
-        int px = rand.Next(Size.x - sizeX);
-        int py = rand.Next(Size.y - sizeY);
-        int pz = rand.Next(Size.z - sizeZ);
+        int px = Size.x / 2;
+        int py = Size.y / 2;
+        int pz = Size.z / 2;
 
         switch (rotation)
         {
@@ -149,15 +149,20 @@ public class CavePrefab
             RandomMarker(rand, 3, 1, Size.y, Size.z - 2),
         };
 
-        UpdateMarkers(caveMarkers);
+        UpdateMarkers(rand, caveMarkers);
     }
 
-    public void UpdateMarkers(List<Prefab.Marker> markers)
+    public void UpdateMarkers(Random rand, List<Prefab.Marker> markers)
     {
         nodes = new List<GraphNode>();
 
         foreach (var marker in markers)
         {
+            // if (rand.Next(0, 100) < 50)
+            // {
+            //     continue;
+            // }
+
             CaveUtils.Assert(marker != null, "null marker");
             CaveUtils.Assert(marker.size != null, "null marker size");
 

@@ -77,7 +77,8 @@ public static class CaveViewer
     {
         foreach (var edge in edges)
         {
-            var color = edge.isVirtual ? RoomColor : TunnelsColor;
+            // var color = edge.isVirtual ? RoomColor : TunnelsColor;
+            var color = Color.FromName(edge.colorName);
 
             using (var pen = new Pen(color, 2))
             {
