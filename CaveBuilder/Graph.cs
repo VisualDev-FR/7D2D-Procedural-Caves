@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+
 
 public class Graph
 {
@@ -125,72 +127,117 @@ public class Graph
         Edges.Remove(edge);
     }
 
+    private void MergeEdge(GraphEdge edge1, GraphEdge edge2, GraphNode node)
+    {
+        // edge1.SetNode(node.prefab, node);
+
+        if (edge1.Prefab1.Equals(node.prefab))
+        {
+            edge1.node1 = node;
+            return;
+        }
+        else if (edge1.Prefab2.Equals(node.prefab))
+        {
+            edge1.node2 = node;
+            return;
+        }
+        else
+        {
+            throw new Exception("prefab not on edge");
+        }
+    }
+
+    private IEnumerable<GraphNode> GetPrunedNodes()
+    {
+        return Nodes.Where(node => relatedEdges[node].Count(edge => !edge.prune) == 0);
+    }
+
     private void Prune()
     {
-        var graphBefore = new Graph(this);
-
-        Clear();
-
-        foreach (var edgeGroup in graphBefore.relatedPrefabs.Values)
+        // return;
+        foreach (var edgeGroup in relatedPrefabs.Values)
         {
             var shortestEdge = edgeGroup
                 .OrderBy(edge => edge.Weight)
                 .First();
 
-            AddEdge(shortestEdge);
+            shortestEdge.prune = false;
         }
 
+        var prunedNodes = GetPrunedNodes();
         int notFound = 0;
 
-        foreach (var node in graphBefore.Nodes.Where(node => !Nodes.Contains(node)))
+        foreach (var node in prunedNodes)
         {
-            var eligibleEdges = graphBefore.relatedEdges[node].OrderBy(edge => edge.Weight);
+            var eligibleEdges = relatedEdges[node].OrderBy(edge => edge.Weight);
             var found = false;
 
             foreach (var edge in eligibleEdges)
             {
                 edge.colorName = "Purple";
 
-                // AddEdge(edge);
-                // continue;
-
                 if (TryReplaceEdge(edge))
                 {
                     found = true;
-                    AddEdge(edge);
+                    edge.prune = false;
+                    break;
+                }
+                else if (TryMergeEdge(edge, node))
+                {
+                    found = true;
                     break;
                 }
             }
 
-            if (!found) notFound++;
+            if (!found)
+            {
+                // eligibleEdges.First().prune = false;
+                // eligibleEdges.First().colorName = "Yellow";
+                notFound++;
+            }
         }
 
-        Log.Out($"{notFound} nodes not found");
-        Log.Out($"{graphBefore.Nodes.Where(node => !Nodes.Contains(node)).Count()} missing nodes.");
+        Log.Out($"{GetPrunedNodes().Count()} pruned Nodes, {notFound} not found");
+
+        foreach (var edge in Edges.Where(e => e.prune).ToList())
+        {
+            RemoveEdge(edge);
+        }
+    }
+
+    private bool TryMergeEdge(GraphEdge edge, GraphNode node)
+    {
+        var sisterEdges = relatedPrefabs[edge.PrefabHash].Where(e => !e.prune);
+        var sisterEdge = sisterEdges.First();
+
+        CaveUtils.Assert(sisterEdges.Count() == 1, $"{sisterEdges.Count()} edges, expected: 1");
+
+        var commonNode = sisterEdge.GetNode(node.prefab);
+
+        if (relatedEdges[commonNode].Count(e => !e.prune) > 1)
+        {
+            sisterEdge.colorName = "Green";
+            MergeEdge(sisterEdge, edge, node);
+            return true;
+        }
+
+        return false;
     }
 
     private bool TryReplaceEdge(GraphEdge edge)
     {
-        var hashCode = edge.PrefabHash;
-
-        var sisterEdges = relatedPrefabs[hashCode].Where(_edge => Edges.Contains(_edge));
-
-        if (sisterEdges.Count() == 0)
-        {
-            return true;
-        }
-
-        CaveUtils.Assert(sisterEdges.Count() == 1, $"{sisterEdges.Count()} edges");
-
+        var sisterEdges = relatedPrefabs[edge.PrefabHash].Where(e => !e.prune);
         var sisterEdge = sisterEdges.First();
 
-        bool cond1 = relatedEdges[sisterEdge.node1].Count > 1 || sisterEdge.node1 == edge.node1 || sisterEdge.node1 == edge.node2;
-        bool cond2 = relatedEdges[sisterEdge.node2].Count > 1 || sisterEdge.node2 == edge.node1 || sisterEdge.node2 == edge.node2;
+        // CaveUtils.Assert(sisterEdges.Count() == 1, $"{sisterEdges.Count()} edges, expected: 1");
+
+        bool cond1 = relatedEdges[sisterEdge.node1].Count(e => !e.prune) > 1 || sisterEdge.node1 == edge.node1 || sisterEdge.node1 == edge.node2;
+        bool cond2 = relatedEdges[sisterEdge.node2].Count(e => !e.prune) > 1 || sisterEdge.node2 == edge.node1 || sisterEdge.node2 == edge.node2;
 
         if (cond1 && cond2)
         {
             sisterEdge.colorName = "Yellow";
-            RemoveEdge(sisterEdge);
+            sisterEdge.prune = true;
             return true;
         }
 

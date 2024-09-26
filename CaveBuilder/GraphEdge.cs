@@ -23,6 +23,8 @@ public class GraphEdge : IComparable<GraphEdge>
 
     public int PrefabHash => Prefab1.GetHashCode() ^ Prefab2.GetHashCode();
 
+    public bool prune = true;
+
     public GraphEdge(GraphNode node1, GraphNode node2)
     {
         this.node1 = node1;
@@ -46,6 +48,30 @@ public class GraphEdge : IComparable<GraphEdge>
             (node1.position.y + node2.position.y) >> 1,
             (node1.position.z + node2.position.z) >> 1
         );
+    }
+
+    public GraphNode GetNode(CavePrefab prefab)
+    {
+        if (Prefab1.Equals(prefab)) return node1;
+        if (Prefab2.Equals(prefab)) return node2;
+
+        throw new Exception("prefab not on edge");
+    }
+
+    public void SetNode(CavePrefab prefab, GraphNode node)
+    {
+        if (Prefab1.Equals(prefab))
+        {
+            node1 = node;
+            return;
+        }
+        if (Prefab2.Equals(prefab))
+        {
+            node2 = node;
+            return;
+        }
+
+        throw new Exception("prefab not on edge");
     }
 
     public int CompareTo(GraphEdge other)
