@@ -21,6 +21,8 @@ public class GraphEdge : IComparable<GraphEdge>
 
     public string colorName = "DarkRed";
 
+    public int PrefabHash => Prefab1.GetHashCode() ^ Prefab2.GetHashCode();
+
     public GraphEdge(GraphNode node1, GraphNode node2)
     {
         this.node1 = node1;

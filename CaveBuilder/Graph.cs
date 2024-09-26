@@ -10,11 +10,14 @@ public class Graph
 
     public Dictionary<GraphNode, HashSet<GraphEdge>> relatedEdges;
 
+    public Dictionary<int, HashSet<GraphEdge>> relatedPrefabs;
+
     public Graph(List<CavePrefab> prefabs)
     {
         Edges = new HashSet<GraphEdge>();
         Nodes = new HashSet<GraphNode>();
         relatedEdges = new Dictionary<GraphNode, HashSet<GraphEdge>>();
+        relatedPrefabs = new Dictionary<int, HashSet<GraphEdge>>();
 
         var timer = CaveUtils.StartTimer();
 
@@ -26,6 +29,25 @@ public class Graph
 
         Log.Out($"[Cave] secondary graph: edges: {Edges.Count}, nodes: {Nodes.Count}, timer: {timer.ElapsedMilliseconds:N0}ms");
 
+    }
+
+    private Graph(Graph other)
+    {
+        relatedPrefabs = new Dictionary<int, HashSet<GraphEdge>>();
+        relatedEdges = new Dictionary<GraphNode, HashSet<GraphEdge>>();
+        Nodes = other.Nodes.ToHashSet();
+        Edges = other.Edges.ToHashSet();
+
+        other.relatedPrefabs.CopyTo(relatedPrefabs);
+        other.relatedEdges.CopyTo(relatedEdges);
+    }
+
+    private void Clear()
+    {
+        Edges.Clear();
+        Nodes.Clear();
+        relatedEdges.Clear();
+        relatedPrefabs.Clear();
     }
 
     private void AddEdge(GraphEdge edge)
@@ -48,6 +70,30 @@ public class Graph
 
         relatedEdges[edge.node1].Add(edge);
         relatedEdges[edge.node2].Add(edge);
+
+        var prefabHash = edge.PrefabHash;
+
+        if (!relatedPrefabs.ContainsKey(prefabHash))
+        {
+            relatedPrefabs[prefabHash] = new HashSet<GraphEdge>();
+        }
+
+        relatedPrefabs[prefabHash].Add(edge);
+    }
+
+    private void AddEdge(DelauneyPoint point1, DelauneyPoint point2)
+    {
+        if (point1.prefab == point2.prefab)
+        {
+            return;
+        }
+
+        var node1 = new GraphNode(point1.marker, point1.prefab);
+        var node2 = new GraphNode(point2.marker, point2.prefab);
+
+        var edge = new GraphEdge(Edges.Count, node1, node2);
+
+        AddEdge(edge);
     }
 
     private void RemoveEdge(GraphEdge edge)
@@ -67,64 +113,25 @@ public class Graph
             Nodes.Remove(edge.node2);
         }
 
-        Edges.Remove(edge);
-    }
+        var prefabHash = edge.PrefabHash;
 
-    private void AddEdge(DelauneyPoint point1, DelauneyPoint point2)
-    {
-        if (point1.prefab == point2.prefab)
+        relatedPrefabs[prefabHash].Remove(edge);
+
+        if (relatedPrefabs[prefabHash].Count == 0)
         {
-            return;
+            relatedPrefabs.Remove(prefabHash);
         }
 
-        var node1 = new GraphNode(point1.marker, point1.prefab);
-        var node2 = new GraphNode(point2.marker, point2.prefab);
-
-        var edge = new GraphEdge(Edges.Count, node1, node2);
-
-        AddEdge(edge);
+        Edges.Remove(edge);
     }
 
     private void Prune()
     {
-        var groupedEdges = new Dictionary<int, HashSet<GraphEdge>>();
-        var groupedNodes = new Dictionary<GraphNode, HashSet<GraphEdge>>();
-        var nodesBefore = Nodes.ToList();
-        var edgesBefore = Edges.ToList();
+        var graphBefore = new Graph(this);
 
-        foreach (var edge in Edges)
-        {
-            int hash1 = edge.Prefab1.GetHashCode();
-            int hash2 = edge.Prefab2.GetHashCode();
+        Clear();
 
-            int hashcode = hash1 ^ hash2;
-
-            if (!groupedEdges.ContainsKey(hashcode))
-            {
-                groupedEdges[hashcode] = new HashSet<GraphEdge>();
-            }
-            groupedEdges[hashcode].Add(edge);
-
-            if (!groupedNodes.ContainsKey(edge.node1))
-            {
-                groupedNodes[edge.node1] = new HashSet<GraphEdge>();
-            }
-
-            if (!groupedNodes.ContainsKey(edge.node2))
-            {
-                groupedNodes[edge.node2] = new HashSet<GraphEdge>();
-            }
-
-            groupedNodes[edge.node1].Add(edge);
-            groupedNodes[edge.node2].Add(edge);
-        }
-
-        // return;
-        Edges.Clear();
-        Nodes.Clear();
-        relatedEdges.Clear();
-
-        foreach (var edgeGroup in groupedEdges.Values)
+        foreach (var edgeGroup in graphBefore.relatedPrefabs.Values)
         {
             var shortestEdge = edgeGroup
                 .OrderBy(edge => edge.Weight)
@@ -135,9 +142,9 @@ public class Graph
 
         int notFound = 0;
 
-        foreach (var node in nodesBefore.Where(node => !Nodes.Contains(node)))
+        foreach (var node in graphBefore.Nodes.Where(node => !Nodes.Contains(node)))
         {
-            var eligibleEdges = groupedNodes[node].OrderBy(edge => edge.Weight);
+            var eligibleEdges = graphBefore.relatedEdges[node].OrderBy(edge => edge.Weight);
             var found = false;
 
             foreach (var edge in eligibleEdges)
@@ -147,7 +154,7 @@ public class Graph
                 // AddEdge(edge);
                 // continue;
 
-                if (TryReplaceEdge(edge, groupedEdges))
+                if (TryReplaceEdge(edge))
                 {
                     found = true;
                     AddEdge(edge);
@@ -155,21 +162,18 @@ public class Graph
                 }
             }
 
-            if(!found) notFound++;
+            if (!found) notFound++;
         }
 
         Log.Out($"{notFound} nodes not found");
-        Log.Out($"{nodesBefore.Where(node => !Nodes.Contains(node)).Count()} missing nodes.");
+        Log.Out($"{graphBefore.Nodes.Where(node => !Nodes.Contains(node)).Count()} missing nodes.");
     }
 
-    private bool TryReplaceEdge(GraphEdge edge, Dictionary<int, HashSet<GraphEdge>> groupedEdges)
+    private bool TryReplaceEdge(GraphEdge edge)
     {
-        var hash1 = edge.Prefab1.GetHashCode();
-        var hash2 = edge.Prefab2.GetHashCode();
+        var hashCode = edge.PrefabHash;
 
-        var hashCode = hash1 ^ hash2;
-
-        var sisterEdges = groupedEdges[hashCode].Where(_edge => Edges.Contains(_edge));
+        var sisterEdges = relatedPrefabs[hashCode].Where(_edge => Edges.Contains(_edge));
 
         if (sisterEdges.Count() == 0)
         {
