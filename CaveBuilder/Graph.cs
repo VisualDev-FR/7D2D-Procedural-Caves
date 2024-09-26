@@ -8,19 +8,19 @@ public class Graph
 
     public HashSet<GraphNode> Nodes { get; set; }
 
-    public Dictionary<GraphNode, HashSet<GraphEdge>> relatedNodes;
+    public Dictionary<GraphNode, HashSet<GraphEdge>> relatedEdges;
 
     public Graph(List<CavePrefab> prefabs)
     {
         Edges = new HashSet<GraphEdge>();
         Nodes = new HashSet<GraphNode>();
-        relatedNodes = new Dictionary<GraphNode, HashSet<GraphEdge>>();
+        relatedEdges = new Dictionary<GraphNode, HashSet<GraphEdge>>();
 
         var timer = CaveUtils.StartTimer();
 
         BuildDelauneyGraph(prefabs);
 
-        Log.Out($"[Cave] primary graph : edges: {Edges.Count}, nodes: {Nodes.Count}");
+        Log.Out($"[Cave] primary graph : edges: {Edges.Count}, nodes: {Nodes.Count}, timer: {timer.ElapsedMilliseconds:N0}ms");
 
         Prune();
 
@@ -36,18 +36,38 @@ public class Graph
         Nodes.Add(edge.node1);
         Nodes.Add(edge.node2);
 
-        if (!relatedNodes.ContainsKey(edge.node1))
+        if (!relatedEdges.ContainsKey(edge.node1))
         {
-            relatedNodes[edge.node1] = new HashSet<GraphEdge>();
+            relatedEdges[edge.node1] = new HashSet<GraphEdge>();
         }
 
-        if (!relatedNodes.ContainsKey(edge.node2))
+        if (!relatedEdges.ContainsKey(edge.node2))
         {
-            relatedNodes[edge.node2] = new HashSet<GraphEdge>();
+            relatedEdges[edge.node2] = new HashSet<GraphEdge>();
         }
 
-        relatedNodes[edge.node1].Add(edge);
-        relatedNodes[edge.node2].Add(edge);
+        relatedEdges[edge.node1].Add(edge);
+        relatedEdges[edge.node2].Add(edge);
+    }
+
+    private void RemoveEdge(GraphEdge edge)
+    {
+        relatedEdges[edge.node1].Remove(edge);
+        relatedEdges[edge.node2].Remove(edge);
+
+        if (relatedEdges[edge.node1].Count == 0)
+        {
+            relatedEdges.Remove(edge.node1);
+            Nodes.Remove(edge.node1);
+        }
+
+        if (relatedEdges[edge.node2].Count == 0)
+        {
+            relatedEdges.Remove(edge.node2);
+            Nodes.Remove(edge.node2);
+        }
+
+        Edges.Remove(edge);
     }
 
     private void AddEdge(DelauneyPoint point1, DelauneyPoint point2)
@@ -100,9 +120,9 @@ public class Graph
         }
 
         // return;
-
         Edges.Clear();
         Nodes.Clear();
+        relatedEdges.Clear();
 
         foreach (var edgeGroup in groupedEdges.Values)
         {
@@ -113,32 +133,64 @@ public class Graph
             AddEdge(shortestEdge);
         }
 
+        int notFound = 0;
+
         foreach (var node in nodesBefore.Where(node => !Nodes.Contains(node)))
         {
-            var shortestEdge = edgesBefore
-                .Where(edge => edge.node1 == node || edge.node2 == node)
-                .OrderBy(edge => edge.Weight)
-                .First();
+            var eligibleEdges = groupedNodes[node].OrderBy(edge => edge.Weight);
+            var found = false;
 
-            shortestEdge.colorName = "Purple";
-            AddEdge(shortestEdge);
-
-            var hash1 = shortestEdge.Prefab1.GetHashCode();
-            var hash2 = shortestEdge.Prefab2.GetHashCode();
-            var hashcode = hash1 ^ hash2;
-
-            var replacedEdge = groupedEdges[hashcode]
-                .Where(edge => Edges.Contains(edge) && edge != shortestEdge);
-
-            foreach (var edge in replacedEdge)
+            foreach (var edge in eligibleEdges)
             {
-                edge.colorName = "Yellow";
-                // Edges.Remove(edge);
+                edge.colorName = "Purple";
+
+                // AddEdge(edge);
+                // continue;
+
+                if (TryReplaceEdge(edge, groupedEdges))
+                {
+                    found = true;
+                    AddEdge(edge);
+                    break;
+                }
             }
+
+            if(!found) notFound++;
         }
 
-        // TODO: fix this invalid condition. Search for the nodes wich are not linked to an edge instead
+        Log.Out($"{notFound} nodes not found");
         Log.Out($"{nodesBefore.Where(node => !Nodes.Contains(node)).Count()} missing nodes.");
+    }
+
+    private bool TryReplaceEdge(GraphEdge edge, Dictionary<int, HashSet<GraphEdge>> groupedEdges)
+    {
+        var hash1 = edge.Prefab1.GetHashCode();
+        var hash2 = edge.Prefab2.GetHashCode();
+
+        var hashCode = hash1 ^ hash2;
+
+        var sisterEdges = groupedEdges[hashCode].Where(_edge => Edges.Contains(_edge));
+
+        if (sisterEdges.Count() == 0)
+        {
+            return true;
+        }
+
+        CaveUtils.Assert(sisterEdges.Count() == 1, $"{sisterEdges.Count()} edges");
+
+        var sisterEdge = sisterEdges.First();
+
+        bool cond1 = relatedEdges[sisterEdge.node1].Count > 1 || sisterEdge.node1 == edge.node1 || sisterEdge.node1 == edge.node2;
+        bool cond2 = relatedEdges[sisterEdge.node2].Count > 1 || sisterEdge.node2 == edge.node1 || sisterEdge.node2 == edge.node2;
+
+        if (cond1 && cond2)
+        {
+            sisterEdge.colorName = "Yellow";
+            RemoveEdge(sisterEdge);
+            return true;
+        }
+
+        return false;
     }
 
     private void BuildDelauneyGraph(List<CavePrefab> prefabs)
