@@ -191,8 +191,8 @@ public class Graph
 
             if (!found)
             {
-                // eligibleEdges.First().prune = false;
-                // eligibleEdges.First().colorName = "Yellow";
+                eligibleEdges.First().prune = false;
+                eligibleEdges.First().colorName = "Yellow";
                 notFound++;
             }
         }
@@ -216,7 +216,7 @@ public class Graph
 
         if (relatedEdges[commonNode].Count(e => !e.prune) > 1)
         {
-            sisterEdge.colorName = "Green";
+            sisterEdge.colorName = "Purple";
             MergeEdge(sisterEdge, edge, node);
             return true;
         }
