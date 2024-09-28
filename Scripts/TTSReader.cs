@@ -215,11 +215,12 @@ public class TTSReader
                         blockValue.rawData = (uint)(tempBuf[cursor] | (tempBuf[cursor + 1] << 8) | (tempBuf[cursor + 2] << 16) | (tempBuf[cursor + 3] << 24));
                         cursor += 4;
 
-                        var position = new Vector3i(x, y, z);
+                        if (!IsUnderTerrain(y, yOffset))
+                            continue;
 
-                        if (IsObstacle(blockValue, position, yOffset))
+                        if (IsObstacle(blockValue))
                         {
-                            result.Add(position);
+                            result.Add(new Vector3i(x, y, z));
                         }
                     }
                 }
@@ -229,22 +230,22 @@ public class TTSReader
         {
             for (int i = 0; i < blockCount; i++)
             {
-                uint _rawData = (uint)(tempBuf[cursor] | (tempBuf[cursor + 1] << 8) | (tempBuf[cursor + 2] << 16) | (tempBuf[cursor + 3] << 24));
+                var position = OffsetToCoord(i, size_x, size_y);
+                var _rawData = (uint)(tempBuf[cursor] | (tempBuf[cursor + 1] << 8) | (tempBuf[cursor + 2] << 16) | (tempBuf[cursor + 3] << 24));
+
                 cursor += 4;
 
-                if (_rawData == 0)
-                {
+                if (!IsUnderTerrain(position.y, yOffset))
                     continue;
-                }
+
                 if (_version < 18)
                 {
                     _rawData = BlockValueV3.ConvertOldRawData(_rawData);
                 }
+
                 blockValue.rawData = _rawData;
 
-                var position = OffsetToCoord(i, size_x, size_y);
-
-                if (IsObstacle(blockValue, position, yOffset))
+                if (IsObstacle(blockValue))
                 {
                     result.Add(position);
                 }
@@ -253,6 +254,11 @@ public class TTSReader
         }
 
         return result;
+    }
+
+    private static bool IsUnderTerrain(int posY, int yOffset)
+    {
+        return posY < -yOffset - CaveBuilder.terrainMargin;
     }
 
     // NOTE: copied from Prefab.offsetToCoord
@@ -267,9 +273,9 @@ public class TTSReader
         return new Vector3i(x, y, z);
     }
 
-    private static bool IsObstacle(BlockValue block, Vector3 position, int yOffset)
+    private static bool IsObstacle(BlockValue block)
     {
-        return position.y < -yOffset - CaveBuilder.terrainMargin && (block.type > 255 || block.isWater || block.isair);
+        return block.rawData == 0 || block.type > 255 || block.isWater;
     }
 
     private static bool IsInClusters(Vector3i pos, List<BoundingBox> clusters)
