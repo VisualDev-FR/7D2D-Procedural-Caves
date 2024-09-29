@@ -164,7 +164,54 @@ public class Graph
     private void Prune()
     {
         // return;
+        var notFound = 0;
+
+        foreach (var node in Nodes)
+        {
+            if (!TryMergeEdgeAt(node.prefab))
+            {
+                notFound++;
+            }
+        }
+
         foreach (var edgeGroup in relatedPrefabs.Values)
+        {
+            var edges = edgeGroup.Where(e => !e.pruned).ToList();
+            int edgesCount = edges.Count;
+
+            if (edgesCount < 2) continue;
+
+            if (edgesCount > 2)
+            {
+                Log.Warning($"edge count: {edgesCount}");
+            }
+
+            foreach (var edge in edges)
+            {
+                if (edgesCount == 1)
+                {
+                    break;
+                }
+
+                bool cond1 = relatedEdges[edge.node1].Count(e => !e.pruned) > 1;
+                bool cond2 = relatedEdges[edge.node2].Count(e => !e.pruned) > 1;
+
+                if (cond1 && cond2)
+                {
+                    edge.pruned = true;
+                    edge.colorName = "Yellow";
+                    edgesCount--;
+                }
+            }
+
+            if(edgesCount == 2)
+            {
+                edges[0].colorName = "Yellow";
+                edges[1].colorName = "Yellow";
+            }
+        }
+
+        /* foreach (var edgeGroup in relatedPrefabs.Values)
         {
             var shortestEdge = edgeGroup
                 .OrderBy(edge => edge.Weight)
@@ -197,7 +244,7 @@ public class Graph
                 // sameNodeEdges.First().colorName = "Yellow";
                 notFound++;
             }
-        }
+        } */
 
         Log.Out($"{GetNodesAlone().Count()} pruned Nodes, {notFound} not found");
 
@@ -249,8 +296,7 @@ public class Graph
                 continue;
             }
 
-            var existingUsed = comb.Count(e => !e.pruned);
-            var weight = comb.Sum(e => e.Weight / existingUsed);
+            var weight = comb.Sum(e => e.Weight);
 
             if (weight < minWeight)
             {
@@ -266,7 +312,7 @@ public class Graph
 
         foreach (var edge in bestComb)
         {
-            edge.colorName = "White";
+            // edge.colorName = "White";
             edge.pruned = false;
         }
 
