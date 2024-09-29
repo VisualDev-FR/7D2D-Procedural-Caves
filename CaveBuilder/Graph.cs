@@ -192,17 +192,27 @@ public class Graph
 
             if (!found && !TryMergeEdgeAt(node))
             {
-                // sameNodeEdges.First().pruned = false;
-                // sameNodeEdges.First().colorName = "Yellow";
+                sameNodeEdges.First().pruned = false;
+                sameNodeEdges.First().colorName = "Yellow";
                 notFound++;
             }
         }
 
         Log.Out($"{GetNodesAlone().Count()} pruned Nodes, {notFound} not found");
 
-        foreach (var edge in Edges.Where(e => e.pruned).ToList())
+        foreach (var edge in Edges.ToList())
         {
-            RemoveEdge(edge);
+            if (edge.pruned)
+            {
+                RemoveEdge(edge);
+                edge.colorName = "DarkGray";
+                edge.width = 1;
+                edge.opacity = 50;
+            }
+            else
+            {
+                edge.colorName = "DarkRed";
+            }
         }
     }
 
