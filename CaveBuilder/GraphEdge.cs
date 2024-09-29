@@ -25,6 +25,10 @@ public class GraphEdge : IComparable<GraphEdge>
 
     public bool pruned = true;
 
+    public byte width = 2;
+
+    public byte opacity = 255;
+
     public GraphEdge(GraphNode node1, GraphNode node2)
     {
         this.node1 = node1;
@@ -68,16 +72,22 @@ public class GraphEdge : IComparable<GraphEdge>
         return Weight.CompareTo(other.Weight);
     }
 
+    public override bool Equals(object obj)
+    {
+        if (obj is GraphEdge other)
+        {
+            return other.GetHashCode() == GetHashCode();
+        }
+
+        return false;
+    }
+
     public override int GetHashCode()
     {
         int hash1 = node1.GetHashCode();
         int hash2 = node2.GetHashCode();
 
-        int hash = 17;
-        hash = hash * 23 + hash1 + hash2;
-        hash = hash * 23 + hash1 + hash2;
-
-        return hash;
+        return hash1 ^ hash2;
     }
 
 }

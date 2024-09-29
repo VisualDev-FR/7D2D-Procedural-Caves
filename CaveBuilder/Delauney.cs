@@ -64,7 +64,7 @@ public class DelaunayTriangulator
             }
         }
 
-        triangulation.RemoveWhere(triangle => triangle.Vertices.Any(vertice => vertice.prefab == null));
+        triangulation.RemoveWhere(triangle => triangle.Vertices.Any(vertice => vertice.node is null));
 
         return triangulation;
     }
@@ -94,26 +94,10 @@ public class DelaunayTriangulator
 public class DelauneyTriangle
 {
     public DelauneyPoint[] Vertices { get; } = new DelauneyPoint[3];
+
     public DelauneyPoint Circumcenter { get; private set; }
+
     public double RadiusSquared;
-
-    public IEnumerable<DelauneyTriangle> TrianglesWithSharedEdge
-    {
-        get
-        {
-            var neighbors = new HashSet<DelauneyTriangle>();
-            foreach (var vertex in Vertices)
-            {
-                var trianglesWithSharedEdge = vertex.AdjacentTriangles.Where(o =>
-                {
-                    return o != this && SharesEdgeWith(o);
-                });
-                neighbors.UnionWith(trianglesWithSharedEdge);
-            }
-
-            return neighbors;
-        }
-    }
 
     public DelauneyTriangle(DelauneyPoint point1, DelauneyPoint point2, DelauneyPoint point3)
     {
@@ -161,7 +145,7 @@ public class DelauneyTriangle
 
         if (div == 0)
         {
-            Log.Out($"[Cave] {p0.prefab.Name}, {p1.prefab.Name}, {p2.prefab.Name}");
+            Log.Out($"[Cave] {p0.Prefab.Name}, {p1.Prefab.Name}, {p2.Prefab.Name}");
             Log.Out($"[Cave] {p0.position}, {p1.position}, {p2.position}");
             throw new DivideByZeroException();
         }
@@ -195,34 +179,24 @@ public class DelauneyTriangle
 
 public class DelauneyPoint
 {
-    /// <summary>
-    /// Used only for generating a unique ID for each instance of this class that gets generated
-    /// </summary>
-    private static int _counter;
-
-    /// <summary>
-    /// Used for identifying an instance of a class; can be useful in troubleshooting when geometry goes weird
-    /// (e.g. when trying to identify when DelauneyTriangle objects are being created with the same DelauneyPoint object twice)
-    /// </summary>
-    private readonly int _instanceId = _counter++;
+    public HashSet<DelauneyTriangle> AdjacentTriangles { get; } = new HashSet<DelauneyTriangle>();
 
     public readonly Vector3 position;
-
-    public readonly CavePrefab prefab;
 
     public float X => position.x;
 
     public float Z => position.z;
 
-    public Prefab.Marker marker;
+    public GraphNode node;
 
-    public HashSet<DelauneyTriangle> AdjacentTriangles { get; } = new HashSet<DelauneyTriangle>();
+    public Prefab.Marker Marker => node.marker;
+
+    public CavePrefab Prefab => node.prefab;
 
     public DelauneyPoint(GraphNode node)
     {
-        position = node.position.ToVector3();
-        marker = node.marker;
-        prefab = node.prefab;
+        this.node = node;
+        this.position = node.position.ToVector3();
     }
 
     public DelauneyPoint(float x, float y, float z)
@@ -246,18 +220,16 @@ public class DelauneyEdge
 
     public override bool Equals(object obj)
     {
-        if (obj == null) return false;
-        if (obj.GetType() != GetType()) return false;
-        var edge = obj as DelauneyEdge;
+        if (obj is DelauneyEdge other)
+        {
+            return other.GetHashCode() == GetHashCode();
+        }
 
-        var samePoints = Point1 == edge.Point1 && Point2 == edge.Point2;
-        var samePointsReversed = Point1 == edge.Point2 && Point2 == edge.Point1;
-        return samePoints || samePointsReversed;
+        return false;
     }
 
     public override int GetHashCode()
     {
-        int hCode = (int)Point1.X ^ (int)Point1.Z ^ (int)Point2.X ^ (int)Point2.Z;
-        return hCode.GetHashCode();
+        return Point1.GetHashCode() ^ Point2.GetHashCode();
     }
 }

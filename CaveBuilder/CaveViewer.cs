@@ -80,7 +80,7 @@ public static class CaveViewer
             // var color = edge.isVirtual ? RoomColor : TunnelsColor;
             var color = Color.FromName(edge.colorName);
 
-            using (var pen = new Pen(color, 2))
+            using (var pen = new Pen(Color.FromArgb(edge.opacity, color), edge.width))
             {
                 graph.DrawCurve(pen, new PointF[2]{
                     ParsePointF(edge.node1.position),
