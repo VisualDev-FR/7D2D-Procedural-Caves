@@ -193,8 +193,8 @@ public class Graph
 
             if (!found && !TryMergeEdgeAt(node.prefab))
             {
-                sameNodeEdges.First().pruned = false;
-                sameNodeEdges.First().colorName = "Yellow";
+                // sameNodeEdges.First().pruned = false;
+                // sameNodeEdges.First().colorName = "Yellow";
                 notFound++;
             }
         }
@@ -219,65 +219,73 @@ public class Graph
 
     private bool TryMergeEdgeAt(CavePrefab prefab)
     {
-        var otherEdges = Edges.Where(e => e.IsRelatedToPrefab(prefab)).ToList();
-        var combinations = GenerateCombinations(prefab.nodes, otherEdges, new GraphEdge[prefab.nodes.Count], 0).ToList();
+        var otherEdges = Edges.Where(e => e.IsRelatedToPrefab(prefab));
+        var groupedEdges = new Dictionary<int, List<GraphEdge>>();
+
+        foreach (var edge in otherEdges)
+        {
+            var hashcode = edge.PrefabHash;
+
+            if (!groupedEdges.ContainsKey(hashcode))
+            {
+                groupedEdges[hashcode] = new List<GraphEdge>();
+            }
+
+            groupedEdges[hashcode].Add(edge);
+        }
+
+        var combinations = GenerateCombinations(prefab.nodes, groupedEdges.Values.ToList(), new GraphEdge[groupedEdges.Count], 0).ToList();
+        var bestComb = new List<GraphEdge>();
         var minWeight = float.MaxValue;
-        List<GraphEdge> bestComb = null;
-
-        Log.Out($"nodes: {prefab.nodes.Count}, edges: {otherEdges.Count}, combs: {combinations.Count}");
-
-        if (combinations.Count == 0)
-            return false;
 
         foreach (var comb in combinations)
         {
-            var prefabs = comb.SelectMany(edge => new CavePrefab[] { edge.Prefab1, edge.Prefab2 }).ToHashSet();
+            var nodes = comb.Select(e => e.GetNode(prefab)).ToHashSet();
 
-            if (prefabs.Count < prefab.nodes.Count + 1)
+            // Log.Out($"{nodes.Count()} < {prefab.nodes.Count}");
+
+            if (nodes.Count() < prefab.nodes.Count)
             {
                 continue;
             }
 
-            var weight = comb.Sum(edge => edge.Weight);
+            var existingUsed = comb.Count(e => !e.pruned);
+            var weight = comb.Sum(e => e.Weight / existingUsed);
 
             if (weight < minWeight)
             {
-                minWeight = weight;
                 bestComb = comb;
+                minWeight = weight;
             }
         }
 
-        if (bestComb == null) return false;
-
-        foreach (var edge in otherEdges)
+        if (bestComb == null)
         {
-            // edge.colorName = "White";
-            // edge.pruned = false;
+            Log.Warning("No valid comb found");
         }
 
         foreach (var edge in bestComb)
         {
-            edge.pruned = false;
             edge.colorName = "White";
+            edge.pruned = false;
         }
 
         return true;
     }
 
-    private IEnumerable<List<GraphEdge>> GenerateCombinations(List<GraphNode> nodes, List<GraphEdge> edges, GraphEdge[] currentCombination, int depth)
+    private IEnumerable<List<GraphEdge>> GenerateCombinations(List<GraphNode> nodes, List<List<GraphEdge>> edges, GraphEdge[] currentCombination, int depth)
     {
         // Log.Out($"depth: {depth}, nodes: {nodes.Count}, edges: {edges.Count}");
 
-        if (depth == nodes.Count)
+        if (depth == edges.Count)
         {
             yield return currentCombination.ToList();
             yield break;
         }
 
-        var node = nodes[depth];
-        var nodeEdges = edges.Where(e => e.node1.Equals(node) || e.node2.Equals(node)).ToList();
+        var edgesSelection = edges[depth];
 
-        foreach (var edge in nodeEdges)
+        foreach (var edge in edgesSelection)
         {
             currentCombination[depth] = edge;
 
