@@ -204,7 +204,7 @@ public class Graph
                 }
             }
 
-            if(edgesCount == 2)
+            if (edgesCount == 2)
             {
                 edges[0].colorName = "Yellow";
                 edges[1].colorName = "Yellow";
@@ -247,6 +247,16 @@ public class Graph
         } */
 
         Log.Out($"{GetNodesAlone().Count()} pruned Nodes, {notFound} not found");
+
+        foreach (var node in GetNodesAlone())
+        {
+            Log.Out($"Node alone at [{node.position}], related edges: {relatedEdges[node].Count}");
+            foreach (var edge in relatedEdges[node])
+            {
+                edge.colorName = "White";
+                edge.pruned = false;
+            }
+        }
 
         foreach (var edge in Edges.ToList())
         {
@@ -305,9 +315,10 @@ public class Graph
             }
         }
 
-        if (bestComb == null)
+        if (bestComb.Count == 0)
         {
             Log.Warning("No valid comb found");
+            return false;
         }
 
         foreach (var edge in bestComb)
