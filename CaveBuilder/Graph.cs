@@ -52,13 +52,13 @@ public class Graph
         relatedPrefabs.Clear();
     }
 
-    private void AddEdge(GraphEdge edge)
+    private void AddEdge(GraphNode node1, GraphNode node2)
     {
-        edge.id = Edges.Count;
+        var edge = new GraphEdge(Edges.Count, node1, node2);
 
         Edges.Add(edge);
-        Nodes.Add(edge.node1);
-        Nodes.Add(edge.node2);
+        Nodes.Add(node1);
+        Nodes.Add(node2);
 
         if (!relatedEdges.ContainsKey(edge.node1))
         {
@@ -85,17 +85,12 @@ public class Graph
 
     private void AddEdge(DelauneyPoint point1, DelauneyPoint point2)
     {
-        if (point1.prefab == point2.prefab)
+        if (point1.Prefab == point2.Prefab)
         {
             return;
         }
 
-        var node1 = new GraphNode(point1.marker, point1.prefab);
-        var node2 = new GraphNode(point2.marker, point2.prefab);
-
-        var edge = new GraphEdge(Edges.Count, node1, node2);
-
-        AddEdge(edge);
+        AddEdge(point1.node, point2.node);
     }
 
     private void RemoveEdge(GraphEdge edge)
