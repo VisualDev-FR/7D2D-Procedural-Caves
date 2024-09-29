@@ -204,24 +204,25 @@ public class Graph
         {
             if (edge.pruned)
             {
-                RemoveEdge(edge);
+                // RemoveEdge(edge);
                 edge.colorName = "DarkGray";
                 edge.width = 1;
                 edge.opacity = 50;
             }
             else
             {
-                edge.colorName = "DarkRed";
+                // edge.colorName = "DarkRed";
             }
         }
     }
 
     private bool TryMergeEdgeAt(GraphNode node)
     {
+        // return false;
         var otherEdges = Edges.Where(edge => !edge.pruned && edge.IsRelatedToPrefab(node.prefab) && relatedEdges[edge.GetNode(node.prefab)].Count(e => !e.pruned) > 1);
         var mergedEdges = otherEdges
             .Select(e => new { replace = e, by = new GraphEdge(node, !e.Prefab1.Equals(node.prefab) ? e.node1 : e.node2) })
-            .OrderBy(e => e.by.Weight);
+            .OrderBy(e => e.by.Weight - e.replace.Weight);
 
         if (mergedEdges.Count() == 0)
         {
