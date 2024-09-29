@@ -598,6 +598,12 @@ public static class CaveViewer
         GenerateObjFile("noise.obj", voxels, false);
     }
 
+    public static void GifCommand()
+    {
+        // clustering_02.png
+        GIFEncoder.Encode("output.gif", new string[] { "../previews/clustering_02.png", "../previews/clustering_03.png", "../previews/clustering_04.png", "../previews/clustering_05.png" });
+    }
+
     public static void Main(string[] args)
     {
         switch (args[0])
@@ -641,6 +647,10 @@ public static class CaveViewer
 
             case "cluster":
                 ClusterizeCommand(args);
+                break;
+
+            case "gif":
+                GifCommand();
                 break;
 
             case "cellaut":
