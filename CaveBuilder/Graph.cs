@@ -183,21 +183,16 @@ public class Graph
                     edgesCount--;
                 }
             }
+        }
 
-            if (edgesCount == 1)
-            {
-                continue;
-            }
+        var rejetons = relatedPrefabs.Values
+            .Where(group => group.Count(edge => !edge.pruned) != 1)
+            .SelectMany(edge => edge)
+            .ToList();
 
-            if (edgesCount == 2 && TryMergeEdges(edges[0], edges[1]))
-            {
-                continue;
-            }
-
-            foreach (var edge in edges)
-            {
-                edge.colorName = "Yellow";
-            }
+        foreach (var edge in rejetons)
+        {
+            edge.colorName = "Yellow";
         }
 
         /* foreach (var edgeGroup in relatedPrefabs.Values)
@@ -235,7 +230,7 @@ public class Graph
             }
         } */
 
-        Log.Out($"{GetNodesAlone().Count()} pruned Nodes, {notFound} not found");
+        Log.Out($"{GetNodesAlone().Count()} pruned Nodes, {notFound} not found, {rejetons.Count} rejetons");
 
         foreach (var node in GetNodesAlone())
         {
