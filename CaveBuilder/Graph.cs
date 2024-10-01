@@ -52,7 +52,7 @@ public class Graph
         relatedPrefabs.Clear();
     }
 
-    private void AddEdge(GraphNode node1, GraphNode node2)
+    private GraphEdge AddEdge(GraphNode node1, GraphNode node2)
     {
         var edge = new GraphEdge(Edges.Count, node1, node2);
 
@@ -81,16 +81,18 @@ public class Graph
         }
 
         relatedPrefabs[prefabHash].Add(edge);
+
+        return edge;
     }
 
-    private void AddEdge(DelauneyPoint point1, DelauneyPoint point2)
+    private GraphEdge AddEdge(DelauneyPoint point1, DelauneyPoint point2)
     {
         if (point1.Prefab == point2.Prefab)
         {
-            return;
+            return null;
         }
 
-        AddEdge(point1.node, point2.node);
+        return AddEdge(point1.node, point2.node);
     }
 
     private void RemoveEdge(GraphEdge edge)
@@ -120,28 +122,6 @@ public class Graph
         }
 
         Edges.Remove(edge);
-    }
-
-    private void MergeEdge(GraphEdge edge1, GraphNode node)
-    {
-        if (edge1.Prefab1.Equals(node.prefab))
-        {
-            relatedEdges[edge1.node1].Remove(edge1);
-            edge1.node1 = node;
-        }
-        else if (edge1.Prefab2.Equals(node.prefab))
-        {
-            relatedEdges[edge1.node2].Remove(edge1);
-            edge1.node2 = node;
-        }
-        else
-        {
-            throw new Exception("prefab not on edge");
-        }
-
-        relatedEdges[node].Add(edge1);
-        edge1.colorName = "White";
-        edge1.pruned = false;
     }
 
     private void ReplaceEdge(GraphEdge replace, GraphEdge by)
@@ -175,7 +155,7 @@ public class Graph
             }
         }
 
-        foreach (var edgeGroup in relatedPrefabs.Values)
+        foreach (var edgeGroup in relatedPrefabs.Values.ToList())
         {
             var edges = edgeGroup.Where(e => !e.pruned).ToList();
             int edgesCount = edges.Count;
@@ -200,15 +180,23 @@ public class Graph
                 if (cond1 && cond2)
                 {
                     edge.pruned = true;
-                    edge.colorName = "Yellow";
                     edgesCount--;
                 }
             }
 
-            if (edgesCount == 2)
+            if (edgesCount == 1)
             {
-                edges[0].colorName = "Yellow";
-                edges[1].colorName = "Yellow";
+                continue;
+            }
+
+            if (edgesCount == 2 && TryMergeEdges(edges[0], edges[1]))
+            {
+                continue;
+            }
+
+            foreach (var edge in edges)
+            {
+                edge.colorName = "Yellow";
             }
         }
 
@@ -252,11 +240,9 @@ public class Graph
         foreach (var node in GetNodesAlone())
         {
             Log.Out($"Node alone at [{node.position}], related edges: {relatedEdges[node].Count}");
-            foreach (var edge in relatedEdges[node])
-            {
-                edge.colorName = "White";
-                edge.pruned = false;
-            }
+            var edge = relatedEdges[node].OrderBy(e => e.Weight).First();
+            edge.colorName = "White";
+            edge.pruned = false;
         }
 
         foreach (var edge in Edges.ToList())
@@ -273,6 +259,59 @@ public class Graph
                 // edge.colorName = "DarkRed";
             }
         }
+    }
+
+    private bool TryMergeEdges(GraphEdge edge1, GraphEdge edge2)
+    {
+        GraphNode node1 = null;
+        GraphNode node2 = null;
+
+        if (edge1.node1.Equals(edge2.node1) || edge1.node1.Equals(edge2.node2) || edge1.node2.Equals(edge2.node1) || edge1.node2.Equals(edge2.node2))
+        {
+            return false;
+        }
+
+        if (relatedEdges[edge1.node1].Count(e => !e.pruned) == 1)
+        {
+            node1 = edge1.node1;
+        }
+        else if (relatedEdges[edge1.node2].Count(e => !e.pruned) == 1)
+        {
+            node1 = edge1.node2;
+        }
+        else
+        {
+            Log.Out("false1");
+            return false;
+        }
+
+        if (relatedEdges[edge2.node1].Count(e => !e.pruned) == 1)
+        {
+            node2 = edge2.node1;
+        }
+        else if (relatedEdges[edge2.node2].Count(e => !e.pruned) == 1)
+        {
+            node2 = edge2.node2;
+        }
+        else
+        {
+            Log.Out("false2");
+            return false;
+        }
+
+        if (node1.prefab.Equals(node2.prefab))
+        {
+            return false;
+        }
+
+        var edge = AddEdge(node1, node2);
+        edge.colorName = "Purple";
+        edge.pruned = false;
+
+        edge1.pruned = true;
+        edge2.pruned = true;
+
+        return true;
     }
 
     private bool TryMergeEdgeAt(CavePrefab prefab)
