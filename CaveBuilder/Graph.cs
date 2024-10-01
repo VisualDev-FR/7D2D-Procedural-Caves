@@ -164,11 +164,12 @@ public class Graph
     private void Prune()
     {
         // return;
+        var prefabs = Nodes.Select(node => node.prefab).ToHashSet();
         var notFound = 0;
 
-        foreach (var node in Nodes)
+        foreach (var prefab in prefabs)
         {
-            if (!TryMergeEdgeAt(node.prefab))
+            if (!TryMergeEdgeAt(prefab))
             {
                 notFound++;
             }
@@ -317,7 +318,7 @@ public class Graph
 
         if (bestComb.Count == 0)
         {
-            Log.Warning("No valid comb found");
+            // Log.Warning("No valid comb found");
             return false;
         }
 
