@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
-using UnityEngine;
+using System.Linq;
+using System.Numerics;
 
 public class PrefabCache
 {
@@ -71,7 +73,7 @@ public class PrefabCache
     public bool IsNearSamePrefab(CavePrefab prefab, int minDist)
     {
         // TODO: hanlde surface prefabs which have null pdi
-        if(prefab.prefabDataInstance == null)
+        if (prefab.prefabDataInstance == null)
         {
             return false;
         }
@@ -139,4 +141,61 @@ public class PrefabCache
 
         return false;
     }
+
+    public void SetupBoundaryPrefabs(Random rand, int worldSize, int tileSize)
+    {
+        var tileGridSize = worldSize / tileSize;
+        var uBound = 1;
+
+        for (int tileX = 1; tileX < tileGridSize - uBound + 1; tileX++)
+        {
+            for (int tileZ = 1; tileZ < tileGridSize - uBound + 1; tileZ++)
+            {
+                bool isBoundary = tileX == 1 || tileX == tileGridSize - uBound || tileZ == 1 || tileZ == tileGridSize - uBound;
+
+                if (!isBoundary)
+                    continue;
+
+                var prefab = new CavePrefab(Prefabs.Count)
+                {
+                    isRoom = true,
+                    position = new Vector3i(tileX * tileSize, 0, tileZ * tileSize),
+                    Size = new Vector3i(
+                        rand.Next(20, tileSize - 10),
+                        rand.Next(20, 30),
+                        rand.Next(20, tileSize - 10))
+                };
+
+                prefab.UpdateMarkers(rand);
+
+                if (tileX == 1)
+                {
+                    prefab.RemoveMarker(Direction.North);
+                }
+                else if (tileX == tileGridSize - uBound)
+                {
+                    prefab.RemoveMarker(Direction.South);
+                    prefab.position.x = tileSize * (tileGridSize - uBound + 1) - prefab.Size.x;
+                }
+
+                if (tileZ == 1)
+                {
+                    prefab.RemoveMarker(Direction.West);
+                }
+                else if (tileZ == tileGridSize - uBound)
+                {
+                    prefab.RemoveMarker(Direction.East);
+                    prefab.position.z = tileSize * (tileGridSize - uBound + 1) - prefab.Size.z;
+                }
+
+                foreach (var node in prefab.nodes)
+                {
+                    node.position = prefab.position + node.marker.start;
+                }
+
+                AddPrefab(prefab);
+            }
+        }
+    }
+
 }

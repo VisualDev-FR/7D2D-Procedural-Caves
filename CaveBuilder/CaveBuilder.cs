@@ -83,11 +83,9 @@ public static class CaveBuilder
         return prefabCache;
     }
 
-    public static PrefabCache GetRandomPrefabs(int count, Random random, int minMarkers = 4, int maxMarkers = 4)
+    public static void GetRandomPrefabs(int count, Random random, PrefabCache prefabCache, int minMarkers = 4, int maxMarkers = 4)
     {
         Log.Out("Start POIs placement...");
-
-        var prefabCache = new PrefabCache();
 
         for (int i = 0; i < count; i++)
         {
@@ -101,8 +99,6 @@ public static class CaveBuilder
         }
 
         Log.Out($"{prefabCache.Count} / {PREFAB_COUNT} prefabs added");
-
-        return prefabCache;
     }
 
 }
