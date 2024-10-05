@@ -40,7 +40,7 @@ public static class CaveViewer
         return new PointF(point.x, point.z);
     }
 
-    public static void DrawPrefabs(Graphics graph, List<CavePrefab> prefabs)
+    public static void DrawPrefabs(Bitmap b, Graphics graph, List<CavePrefab> prefabs)
     {
         foreach (var prefab in prefabs)
         {
@@ -62,6 +62,11 @@ public static class CaveViewer
             {
                 graph.DrawRectangle(pen, prefab.position.x, prefab.position.z, prefab.Size.x, prefab.Size.z);
             }
+
+            foreach (var node in prefab.nodes)
+            {
+                b.SetPixel(node.position.x, node.position.z, NodeColor);
+            }
         }
     }
 
@@ -75,9 +80,12 @@ public static class CaveViewer
 
     public static void DrawEdges(Graphics graph, List<GraphEdge> edges)
     {
-        using (var pen = new Pen(TunnelsColor, 2))
+        foreach (var edge in edges)
         {
-            foreach (var edge in edges)
+            // var color = edge.isVirtual ? RoomColor : TunnelsColor;
+            var color = Color.FromName(edge.colorName);
+
+            using (var pen = new Pen(Color.FromArgb(edge.opacity, color), edge.width))
             {
                 graph.DrawCurve(pen, new PointF[2]{
                     ParsePointF(edge.node1.position),
@@ -101,13 +109,17 @@ public static class CaveViewer
 
     public static void GraphCommand(string[] args)
     {
-        CaveBuilder.worldSize = 1024 * 2;
+        CaveBuilder.worldSize = 1024 * 6;
 
         int prefabCounts = args.Length > 1 ? int.Parse(args[1]) : CaveBuilder.PREFAB_COUNT;
 
-        var prefabs = PrefabLoader.LoadPrefabs().Values.ToList();
-        PrefabCache cachedPrefabs = CaveBuilder.GetRandomPrefabs(prefabCounts, prefabs);
+        // var prefabs = PrefabLoader.LoadPrefabs().Values.ToList();
 
+        var minMarkers = 2;
+        var maxMarkers = 6;
+
+        var random = new Random(1337);
+        var cachedPrefabs = CaveBuilder.GetRandomPrefabs(prefabCounts, random, minMarkers, maxMarkers);
         var graph = new Graph(cachedPrefabs.Prefabs);
         var voxels = new HashSet<Voxell>();
 
@@ -127,7 +139,7 @@ public static class CaveViewer
             {
                 g.Clear(BackgroundColor);
                 DrawEdges(g, graph.Edges.ToList());
-                DrawPrefabs(g, cachedPrefabs.Prefabs);
+                DrawPrefabs(b, g, cachedPrefabs.Prefabs);
             }
 
             b.Save(@"graph.png", ImageFormat.Png);
@@ -320,7 +332,7 @@ public static class CaveViewer
                     }
                 });
 
-                DrawPrefabs(g, cachedPrefabs.Prefabs);
+                DrawPrefabs(b, g, cachedPrefabs.Prefabs);
                 b.Save(@"cave.png", ImageFormat.Png);
             }
         }
@@ -594,6 +606,12 @@ public static class CaveViewer
         GenerateObjFile("noise.obj", voxels, false);
     }
 
+    public static void GifCommand()
+    {
+        // clustering_02.png
+        GIFEncoder.Encode("output.gif", new string[] { "../previews/clustering_02.png", "../previews/clustering_03.png", "../previews/clustering_04.png", "../previews/clustering_05.png" });
+    }
+
     public static void Main(string[] args)
     {
         switch (args[0])
@@ -637,6 +655,10 @@ public static class CaveViewer
 
             case "cluster":
                 ClusterizeCommand(args);
+                break;
+
+            case "gif":
+                GifCommand();
                 break;
 
             case "cellaut":

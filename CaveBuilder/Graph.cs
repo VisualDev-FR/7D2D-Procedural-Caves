@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+
 
 public class Graph
 {
@@ -8,19 +10,22 @@ public class Graph
 
     public HashSet<GraphNode> Nodes { get; set; }
 
-    public Dictionary<string, int> prefabsConnections;
+    public Dictionary<GraphNode, HashSet<GraphEdge>> relatedEdges;
+
+    public Dictionary<int, HashSet<GraphEdge>> relatedPrefabs;
 
     public Graph(List<CavePrefab> prefabs)
     {
         Edges = new HashSet<GraphEdge>();
         Nodes = new HashSet<GraphNode>();
-        prefabsConnections = new Dictionary<string, int>();
+        relatedEdges = new Dictionary<GraphNode, HashSet<GraphEdge>>();
+        relatedPrefabs = new Dictionary<int, HashSet<GraphEdge>>();
 
         var timer = CaveUtils.StartTimer();
 
         BuildDelauneyGraph(prefabs);
 
-        Log.Out($"[Cave] primary graph : edges: {Edges.Count}, nodes: {Nodes.Count}");
+        Log.Out($"[Cave] primary graph : edges: {Edges.Count}, nodes: {Nodes.Count}, timer: {timer.ElapsedMilliseconds:N0}ms");
 
         Prune();
 
@@ -28,42 +33,259 @@ public class Graph
 
     }
 
-    private void AddEdge(GraphEdge edge)
+    private GraphEdge AddEdge(GraphNode node1, GraphNode node2)
     {
-        edge.id = Edges.Count;
-
-        Edges.Add(edge);
-        Nodes.Add(edge.node1);
-        Nodes.Add(edge.node2);
-    }
-
-    private void AddEdge(DelauneyPoint point1, DelauneyPoint point2)
-    {
-        if (point1.prefab == point2.prefab)
-        {
-            return;
-        }
-
-        var node1 = new GraphNode(point1.marker, point1.prefab);
-        var node2 = new GraphNode(point2.marker, point2.prefab);
-
         var edge = new GraphEdge(Edges.Count, node1, node2);
 
         Edges.Add(edge);
         Nodes.Add(node1);
         Nodes.Add(node2);
+
+        if (!relatedEdges.ContainsKey(edge.node1))
+        {
+            relatedEdges[edge.node1] = new HashSet<GraphEdge>();
+        }
+
+        if (!relatedEdges.ContainsKey(edge.node2))
+        {
+            relatedEdges[edge.node2] = new HashSet<GraphEdge>();
+        }
+
+        relatedEdges[edge.node1].Add(edge);
+        relatedEdges[edge.node2].Add(edge);
+
+        var prefabHash = edge.PrefabHash;
+
+        if (!relatedPrefabs.ContainsKey(prefabHash))
+        {
+            relatedPrefabs[prefabHash] = new HashSet<GraphEdge>();
+        }
+
+        relatedPrefabs[prefabHash].Add(edge);
+
+        return edge;
+    }
+
+    private GraphEdge AddEdge(DelauneyPoint point1, DelauneyPoint point2)
+    {
+        if (point1.Prefab == point2.Prefab)
+        {
+            return null;
+        }
+
+        return AddEdge(point1.node, point2.node);
+    }
+
+    private GraphEdge GetEdge(GraphNode node1, GraphNode node2)
+    {
+        int hashcode = GraphEdge.GetHashCode(node1, node2);
+
+        foreach (var edge in Edges)
+        {
+            if (edge.GetHashCode() == hashcode)
+            {
+                return edge;
+            }
+        }
+
+        throw new KeyNotFoundException();
+    }
+
+    private void RemoveEdge(GraphEdge edge)
+    {
+        relatedEdges[edge.node1].Remove(edge);
+        relatedEdges[edge.node2].Remove(edge);
+
+        if (relatedEdges[edge.node1].Count == 0)
+        {
+            relatedEdges.Remove(edge.node1);
+            Nodes.Remove(edge.node1);
+        }
+
+        if (relatedEdges[edge.node2].Count == 0)
+        {
+            relatedEdges.Remove(edge.node2);
+            Nodes.Remove(edge.node2);
+        }
+
+        var prefabHash = edge.PrefabHash;
+
+        relatedPrefabs[prefabHash].Remove(edge);
+
+        if (relatedPrefabs[prefabHash].Count == 0)
+        {
+            relatedPrefabs.Remove(prefabHash);
+        }
+
+        Edges.Remove(edge);
+    }
+
+    private void ReplaceEdge(GraphEdge replace, GraphEdge by)
+    {
+        replace.pruned = true;
+        by.pruned = false;
+        by.colorName = "Purple";
+    }
+
+    private IEnumerable<GraphNode> GetNodesAlone()
+    {
+        return Nodes.Where(node => IsNodeAlone(node));
+    }
+
+    private bool IsNodeAlone(GraphNode node)
+    {
+        return relatedEdges[node].Count(edge => !edge.pruned) == 0;
     }
 
     private void Prune()
     {
+        // return;
+        var prefabs = Nodes.Select(node => node.prefab).ToHashSet();
+        var notFound = 0;
+
+        foreach (var prefab in prefabs)
+        {
+            if (!TryFindLocalGraph(prefab))
+            {
+                notFound++;
+            }
+        }
+
+        foreach (var edgeGroup in relatedPrefabs.Values)
+        {
+            var edges = edgeGroup.Where(e => !e.pruned).ToList();
+            int edgesCount = edges.Count;
+
+            foreach (var edge in edges)
+            {
+                if (edgesCount == 1)
+                {
+                    break;
+                }
+
+                bool cond1 = relatedEdges[edge.node1].Count(e => !e.pruned) > 1;
+                bool cond2 = relatedEdges[edge.node2].Count(e => !e.pruned) > 1;
+
+                if (cond1 && cond2)
+                {
+                    edge.pruned = true;
+                    edgesCount--;
+                }
+            }
+
+            if (edgesCount == 2)
+            {
+                TryMergeEdges(edges[0], edges[1], "DarkRed");
+            }
+        }
+
+        foreach (var node in GetNodesAlone())
+        {
+            TryReplaceEdge(node);
+        }
+
+        foreach (var node in GetNodesAlone())
+        {
+            if (relatedEdges[node].Count == 0)
+            {
+                Log.Error($"[Cave] Node without related edge at [{node.position}]");
+            }
+
+            var edge = relatedEdges[node].OrderBy(e => e.Weight).First();
+            edge.colorName = "White";
+            edge.pruned = false;
+        }
+
+        Log.Out($"{GetNodesAlone().Count()} pruned Nodes, {notFound} not found");
+
+        foreach (var edge in Edges.ToList())
+        {
+            if (edge.pruned)
+            {
+                // RemoveEdge(edge);
+                edge.colorName = "DarkGray";
+                edge.width = 1;
+                edge.opacity = 50;
+            }
+            else
+            {
+                // edge.colorName = "DarkRed";
+            }
+        }
+    }
+
+    private bool TryMergeEdges(GraphEdge edge1, GraphEdge edge2, string mergedColor = "Yellow")
+    {
+        // TODO: refactor this dirty code
+
+        GraphNode node1 = null;
+        GraphNode node2 = null;
+
+        if (edge1.node1.Equals(edge2.node1) || edge1.node1.Equals(edge2.node2) || edge1.node2.Equals(edge2.node1) || edge1.node2.Equals(edge2.node2))
+        {
+            return false;
+        }
+
+        if (relatedEdges[edge1.node1].Count(e => !e.pruned) == 1)
+        {
+            node1 = edge1.node1;
+        }
+        else if (relatedEdges[edge1.node2].Count(e => !e.pruned) == 1)
+        {
+            node1 = edge1.node2;
+        }
+        else
+        {
+            return false;
+        }
+
+        if (relatedEdges[edge2.node1].Count(e => !e.pruned) == 1)
+        {
+            node2 = edge2.node1;
+        }
+        else if (relatedEdges[edge2.node2].Count(e => !e.pruned) == 1)
+        {
+            node2 = edge2.node2;
+        }
+        else
+        {
+            return false;
+        }
+
+        if (node1.prefab.Equals(node2.prefab))
+        {
+            return false;
+        }
+
+        var edge = new GraphEdge(node1, node2);
+
+        if (Edges.Contains(edge))
+        {
+            edge = GetEdge(node1, node2);
+        }
+        else
+        {
+            edge = AddEdge(node1, node2);
+        }
+
+
+        edge.colorName = mergedColor;
+        edge.pruned = false;
+
+        edge1.pruned = true;
+        edge2.pruned = true;
+
+        return true;
+    }
+
+    private bool TryFindLocalGraph(CavePrefab prefab)
+    {
+        var otherEdges = Edges.Where(e => e.IsRelatedToPrefab(prefab));
         var groupedEdges = new Dictionary<int, List<GraphEdge>>();
 
-        foreach (var edge in Edges)
+        foreach (var edge in otherEdges)
         {
-            int hash1 = edge.Prefab1.GetHashCode();
-            int hash2 = edge.Prefab2.GetHashCode();
-
-            int hashcode = hash1 ^ hash2;
+            var hashcode = edge.PrefabHash;
 
             if (!groupedEdges.ContainsKey(hashcode))
             {
@@ -73,16 +295,99 @@ public class Graph
             groupedEdges[hashcode].Add(edge);
         }
 
-        Edges.Clear();
+        var combinations = GenerateCombinations(prefab.nodes, groupedEdges.Values.ToList(), new GraphEdge[groupedEdges.Count], 0).ToList();
+        var bestComb = new List<GraphEdge>();
+        var minWeight = float.MaxValue;
 
-        foreach (var edgeGroup in groupedEdges.Values)
+        foreach (var comb in combinations)
         {
-            var shortestEdge = edgeGroup
-                .OrderBy(edge => edge.Weight)
-                .First();
+            var nodes = comb.Select(e => e.GetNode(prefab)).ToHashSet();
 
-            AddEdge(shortestEdge);
+            var weight = comb.Sum(e => e.Weight) * (1 + prefab.nodes.Count - nodes.Count);
+
+            if (weight < minWeight)
+            {
+                bestComb = comb;
+                minWeight = weight;
+            }
         }
+
+        if (bestComb.Count == 0)
+        {
+            // Log.Warning("No valid comb found");
+            return false;
+        }
+
+        foreach (var edge in bestComb)
+        {
+            // edge.colorName = "White";
+            edge.pruned = false;
+        }
+
+        return true;
+    }
+
+    private IEnumerable<List<GraphEdge>> GenerateCombinations(List<GraphNode> nodes, List<List<GraphEdge>> edges, GraphEdge[] currentCombination, int depth)
+    {
+        // Log.Out($"depth: {depth}, nodes: {nodes.Count}, edges: {edges.Count}");
+
+        if (depth == edges.Count)
+        {
+            yield return currentCombination.ToList();
+            yield break;
+        }
+
+        var edgesSelection = edges[depth];
+
+        foreach (var edge in edgesSelection)
+        {
+            currentCombination[depth] = edge;
+
+            foreach (var comb in GenerateCombinations(nodes, edges, currentCombination.ToArray(), depth + 1))
+            {
+                yield return comb;
+            }
+        }
+    }
+
+    private bool IsEdgeEligible(GraphEdge edge, GraphNode node)
+    {
+        return
+            !edge.pruned
+            && edge.IsRelatedToPrefab(node.prefab)
+            && relatedEdges[edge.GetNode(node.prefab)].Count(re => !re.pruned) > 1;
+    }
+
+    private bool TryReplaceEdge(GraphNode node)
+    {
+        var eligibleEdges = Edges.Where(e => IsEdgeEligible(e, node)).ToList();
+
+        if (eligibleEdges.Count == 0)
+            return false;
+
+        GraphEdge bestEdge = null;
+        var minWeight = float.MaxValue;
+
+        foreach (var edge in eligibleEdges)
+        {
+            var node2 = edge.Prefab1 != node.prefab ? edge.node1 : edge.node2;
+            var weight = CaveUtils.SqrEuclidianDist(node.position, node2.position) - edge.Weight;
+
+            if (weight < minWeight)
+            {
+                minWeight = weight;
+                bestEdge = edge;
+            }
+        }
+
+        bestEdge.pruned = true;
+
+        var _node = bestEdge.Prefab1 != node.prefab ? bestEdge.node1 : bestEdge.node2;
+        var newEdge = AddEdge(node, _node);
+
+        newEdge.pruned = false;
+
+        return true;
     }
 
     private void BuildDelauneyGraph(List<CavePrefab> prefabs)
@@ -126,4 +431,5 @@ public class Graph
             }
         }
     }
+
 }

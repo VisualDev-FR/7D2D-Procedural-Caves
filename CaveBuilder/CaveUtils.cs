@@ -103,6 +103,11 @@ public static class CaveUtils
         return a > b ? a : b;
     }
 
+    public static float FastMax(float a, float b)
+    {
+        return a > b ? a : b;
+    }
+
     public static int FastMax(int a, int b, int c)
     {
         if (a > b && a > c)

@@ -40,6 +40,11 @@ public class GraphNode
         CaveUtils.Assert(direction != Direction.None, $"None direction: {prefab.Name}, marker start: [{marker.start}], prefab size:[{prefab.Size}]");
     }
 
+    public GraphNode(Vector3i position)
+    {
+        this.position = position;
+    }
+
     public static Vector3i MarkerCenter(Prefab.Marker marker)
     {
         return new Vector3i(
@@ -151,8 +156,27 @@ public class GraphNode
 
     public override bool Equals(object obj)
     {
-        GraphNode other = (GraphNode)obj;
-        return position.Equals(other.position);
+        if (obj is GraphNode other)
+        {
+            return other.GetHashCode() == GetHashCode();
+        }
+
+        return false;
+    }
+
+    public static bool operator ==(GraphNode node1, GraphNode node2)
+    {
+        if (node1 is null || node2 is null)
+        {
+            return false;
+        }
+
+        return node1.GetHashCode() == node2.GetHashCode();
+    }
+
+    public static bool operator !=(GraphNode node1, GraphNode node2)
+    {
+        return !(node1 == node2);
     }
 
 }

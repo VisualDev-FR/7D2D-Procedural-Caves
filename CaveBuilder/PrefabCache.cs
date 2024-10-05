@@ -71,6 +71,10 @@ public class PrefabCache
     public bool IsNearSamePrefab(CavePrefab prefab, int minDist)
     {
         // TODO: hanlde surface prefabs which have null pdi
+        if(prefab.prefabDataInstance == null)
+        {
+            return false;
+        }
 
         if (!prefabPlacements.TryGetValue(prefab.Name, out var positions))
         {
