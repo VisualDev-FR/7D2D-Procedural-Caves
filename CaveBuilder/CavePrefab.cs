@@ -70,7 +70,7 @@ public class CavePrefab
         UpdateMarkers(pdi);
     }
 
-    public CavePrefab(int index, Vector3i position, Random rand)
+    public CavePrefab(int index, Vector3i position, Random rand, int markerCount)
     {
         id = index;
         nodes = new List<GraphNode>();
@@ -82,10 +82,10 @@ public class CavePrefab
             rand.Next(CaveBuilder.MIN_PREFAB_SIZE, CaveBuilder.MAX_PREFAB_SIZE)
         );
 
-        UpdateMarkers(rand);
+        UpdateMarkers(rand, markerCount);
     }
 
-    public Prefab.Marker RandomMarker(Random rand, int rotation, int xMax, int yMax, int zMax)
+    public Prefab.Marker RandomMarker(Random rand, int rotation, int xMax, int yMax, int zMax, bool aligned = true)
     {
         var markerType = Prefab.Marker.MarkerTypes.None;
         var tags = FastTags<TagGroup.Poi>.none;
@@ -96,9 +96,9 @@ public class CavePrefab
         int sizeY = CaveUtils.FastMin(5, yMax); // rand.Next(CaveUtils.FastMin(2, yMax), CaveUtils.FastMin(maxMarkerSize, yMax));
         int sizeZ = CaveUtils.FastMin(5, zMax); // rand.Next(CaveUtils.FastMin(2, zMax), CaveUtils.FastMin(maxMarkerSize, zMax));
 
-        int px = Size.x / 2;
+        int px = aligned ? Size.x / 2 : rand.Next(1, xMax);
+        int pz = aligned ? Size.z / 2 : rand.Next(1, zMax);
         int py = Size.y / 2;
-        int pz = Size.z / 2;
 
         switch (rotation)
         {
@@ -140,6 +140,47 @@ public class CavePrefab
         }
     }
 
+    public void UpdateMarkers(Random rand, int markerCount)
+    {
+        caveMarkers = new List<Prefab.Marker>();
+
+        var positions = new HashSet<Vector3i>();
+        var addedMarkers = 0;
+
+        while (addedMarkers < markerCount)
+        {
+            int xMax = 0;
+            int zMax = 0;
+            int rotation = rand.Next(4);
+
+            switch (rotation)
+            {
+                case 0:
+                case 1:
+                    xMax = Size.x - 2;
+                    zMax = 1;
+                    break;
+
+                case 2:
+                case 3:
+                    xMax = 1;
+                    zMax = Size.z - 2;
+                    break;
+            }
+
+            var marker = RandomMarker(rand, rotation, xMax, Size.y, zMax, false);
+
+            if (!positions.Contains(marker.start))
+            {
+                positions.Add(marker.Start);
+                caveMarkers.Add(marker);
+                addedMarkers++;
+            }
+        }
+
+        UpdateMarkers(caveMarkers);
+    }
+
     public void UpdateMarkers(Random rand)
     {
         caveMarkers = new List<Prefab.Marker>(){
@@ -149,20 +190,15 @@ public class CavePrefab
             RandomMarker(rand, 3, 1, Size.y, Size.z - 2),
         };
 
-        UpdateMarkers(rand, caveMarkers);
+        UpdateMarkers(caveMarkers);
     }
 
-    public void UpdateMarkers(Random rand, List<Prefab.Marker> markers)
+    public void UpdateMarkers(List<Prefab.Marker> markers)
     {
         nodes = new List<GraphNode>();
 
         foreach (var marker in markers)
         {
-            // if (rand.Next(0, 100) < 50)
-            // {
-            //     continue;
-            // }
-
             CaveUtils.Assert(marker != null, "null marker");
             CaveUtils.Assert(marker.size != null, "null marker size");
 
@@ -197,7 +233,10 @@ public class CavePrefab
 
         position.y = rand.Next(CaveBuilder.bedRockMargin, (int)(WorldBuilder.Instance.GetHeight(position.x, position.y) - Size.y));
 
-        UpdateMarkers(rand);
+        foreach (var node in nodes)
+        {
+            node.position = position + node.marker.Start;
+        }
     }
 
     public bool OverLaps2D(CavePrefab other, int margin)
