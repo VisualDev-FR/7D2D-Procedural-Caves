@@ -306,14 +306,7 @@ public class Graph
         {
             var nodes = comb.Select(e => e.GetNode(prefab)).ToHashSet();
 
-            // Log.Out($"{nodes.Count()} < {prefab.nodes.Count}");
-
-            if (nodes.Count() < prefab.nodes.Count)
-            {
-                continue;
-            }
-
-            var weight = comb.Sum(e => e.Weight);
+            var weight = comb.Sum(e => e.Weight) * (1 + prefab.nodes.Count - nodes.Count);
 
             if (weight < minWeight)
             {
