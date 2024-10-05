@@ -20,7 +20,7 @@ public static class CaveViewer
 
     public static readonly Color EntranceColor = Color.Yellow;
 
-    public static readonly Color RoomColor = Color.Purple;
+    public static readonly Color RoomColor = Color.DarkGray;
 
     public static readonly Color NoiseColor = Color.FromArgb(84, 84, 82);
 
@@ -38,6 +38,20 @@ public static class CaveViewer
     public static PointF ParsePointF(Vector3i point)
     {
         return new PointF(point.x, point.z);
+    }
+
+    public static void DrawGrid(Bitmap b, Graphics graph, int worldSize, int gridSize)
+    {
+        for (int x = gridSize; x < worldSize; x += gridSize)
+        {
+            var color = Color.FromArgb(50, Color.FromName("DarkGray"));
+
+            using (var pen = new Pen(color, 1))
+            {
+                graph.DrawLine(pen, new PointF(x, 0), new PointF(x, worldSize));
+                graph.DrawLine(pen, new PointF(0, x), new PointF(worldSize, x));
+            }
+        }
     }
 
     public static void DrawPrefabs(Bitmap b, Graphics graph, List<CavePrefab> prefabs)
@@ -109,36 +123,47 @@ public static class CaveViewer
 
     public static void GraphCommand(string[] args)
     {
-        CaveBuilder.worldSize = 1024 * 6;
+        CaveBuilder.worldSize = 1024 * 2;
 
         int prefabCounts = args.Length > 1 ? int.Parse(args[1]) : CaveBuilder.PREFAB_COUNT;
 
         // var prefabs = PrefabLoader.LoadPrefabs().Values.ToList();
 
+        var gridSize = 150;
         var minMarkers = 2;
         var maxMarkers = 6;
 
         var random = new Random(1337);
-        var cachedPrefabs = CaveBuilder.GetRandomPrefabs(prefabCounts, random, minMarkers, maxMarkers);
-        var graph = new Graph(cachedPrefabs.Prefabs);
-        var voxels = new HashSet<Voxell>();
 
-        foreach (var prefab in cachedPrefabs.Prefabs)
-        {
-            voxels.Add(new Voxell(prefab.position, prefab.Size, WaveFrontMaterial.DarkGreen) { force = true });
+        var cachedPrefabs = new PrefabCache();
 
-            foreach (var node in prefab.nodes)
-            {
-                voxels.Add(new Voxell(node.prefab.position + node.marker.start, node.marker.size, WaveFrontMaterial.Orange) { force = true });
-            }
-        }
+
+        cachedPrefabs.SetupBoundaryPrefabs(random, CaveBuilder.worldSize, gridSize);
+
+
+        Log.Out(cachedPrefabs.Count);
+
+        // var cachedPrefabs = CaveBuilder.GetRandomPrefabs(prefabCounts, random, minMarkers, maxMarkers);
+        // var graph = new Graph(cachedPrefabs.Prefabs);
+        // var voxels = new HashSet<Voxell>();
+
+        // foreach (var prefab in cachedPrefabs.Prefabs)
+        // {
+        //     voxels.Add(new Voxell(prefab.position, prefab.Size, WaveFrontMaterial.DarkGreen) { force = true });
+
+        //     foreach (var node in prefab.nodes)
+        //     {
+        //         voxels.Add(new Voxell(node.prefab.position + node.marker.start, node.marker.size, WaveFrontMaterial.Orange) { force = true });
+        //     }
+        // }
 
         using (var b = new Bitmap(CaveBuilder.worldSize, CaveBuilder.worldSize))
         {
             using (Graphics g = Graphics.FromImage(b))
             {
                 g.Clear(BackgroundColor);
-                DrawEdges(g, graph.Edges.ToList());
+                DrawGrid(b, g, CaveBuilder.worldSize, gridSize);
+                // DrawEdges(g, graph.Edges.ToList());
                 DrawPrefabs(b, g, cachedPrefabs.Prefabs);
             }
 

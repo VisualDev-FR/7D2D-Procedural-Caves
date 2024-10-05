@@ -206,6 +206,17 @@ public class CavePrefab
         }
     }
 
+    public void RemoveMarker(Direction direction)
+    {
+        for (int i = nodes.Count - 1; i >= 0; i--)
+        {
+            if (nodes[i].direction.Equals(direction))
+            {
+                nodes.RemoveAt(i);
+            }
+        }
+    }
+
     public HashSet<Vector3i> GetMarkerPoints()
     {
         var result = new HashSet<Vector3i>();
