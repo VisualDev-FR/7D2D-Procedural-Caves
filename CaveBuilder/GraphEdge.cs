@@ -84,6 +84,11 @@ public class GraphEdge : IComparable<GraphEdge>
 
     public override int GetHashCode()
     {
+        return GetHashCode(node1, node2);
+    }
+
+    public static int GetHashCode(GraphNode node1, GraphNode node2)
+    {
         int hash1 = node1.GetHashCode();
         int hash2 = node2.GetHashCode();
 
