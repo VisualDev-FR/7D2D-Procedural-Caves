@@ -172,14 +172,6 @@ public class Graph
                     edgesCount--;
                 }
             }
-        }
-
-        foreach (var edgeGroup in relatedPrefabs.Values)
-        {
-            var edges = edgeGroup.Where(e => !e.pruned).ToList();
-            int edgesCount = edges.Count;
-
-            if (edgesCount == 1) continue;
 
             if (edgesCount == 2)
             {
@@ -187,19 +179,24 @@ public class Graph
             }
         }
 
-        Log.Out($"{GetNodesAlone().Count()} pruned Nodes, {notFound} not found");
+        foreach (var node in GetNodesAlone())
+        {
+            TryReplaceEdge(node);
+        }
 
         foreach (var node in GetNodesAlone())
         {
             if (relatedEdges[node].Count == 0)
             {
-                Log.Error($"Alone node without related edge at [{node.position}]");
+                Log.Error($"[Cave] Node without related edge at [{node.position}]");
             }
 
             var edge = relatedEdges[node].OrderBy(e => e.Weight).First();
             edge.colorName = "White";
             edge.pruned = false;
         }
+
+        Log.Out($"{GetNodesAlone().Count()} pruned Nodes, {notFound} not found");
 
         foreach (var edge in Edges.ToList())
         {
@@ -353,23 +350,44 @@ public class Graph
         }
     }
 
-    private bool TryReplaceEdge(GraphEdge edge)
+    private bool IsEdgeEligible(GraphEdge edge, GraphNode node)
     {
-        var sisterEdges = relatedPrefabs[edge.PrefabHash].Where(e => !e.pruned);
-        var sisterEdge = sisterEdges.First();
+        return
+            !edge.pruned
+            && edge.IsRelatedToPrefab(node.prefab)
+            && relatedEdges[edge.GetNode(node.prefab)].Count(re => !re.pruned) > 1;
+    }
 
-        // CaveUtils.Assert(sisterEdges.Count() == 1, $"{sisterEdges.Count()} edges, expected: 1");
+    private bool TryReplaceEdge(GraphNode node)
+    {
+        var eligibleEdges = Edges.Where(e => IsEdgeEligible(e, node)).ToList();
 
-        bool cond1 = relatedEdges[sisterEdge.node1].Count(e => !e.pruned) > 1 || sisterEdge.node1 == edge.node1 || sisterEdge.node1 == edge.node2;
-        bool cond2 = relatedEdges[sisterEdge.node2].Count(e => !e.pruned) > 1 || sisterEdge.node2 == edge.node1 || sisterEdge.node2 == edge.node2;
+        if (eligibleEdges.Count == 0)
+            return false;
 
-        if (cond1 && cond2)
+        GraphEdge bestEdge = null;
+        var minWeight = float.MaxValue;
+
+        foreach (var edge in eligibleEdges)
         {
-            ReplaceEdge(sisterEdge, edge);
-            return true;
+            var node2 = edge.Prefab1 != node.prefab ? edge.node1 : edge.node2;
+            var weight = CaveUtils.SqrEuclidianDist(node.position, node2.position) - edge.Weight;
+
+            if (weight < minWeight)
+            {
+                minWeight = weight;
+                bestEdge = edge;
+            }
         }
 
-        return false;
+        bestEdge.pruned = true;
+
+        var _node = bestEdge.Prefab1 != node.prefab ? bestEdge.node1 : bestEdge.node2;
+        var newEdge = AddEdge(node, _node);
+
+        newEdge.pruned = false;
+
+        return true;
     }
 
     private void BuildDelauneyGraph(List<CavePrefab> prefabs)
