@@ -41,11 +41,11 @@ public class DelaunayTriangulator
         var tri2 = new DelauneyTriangle(point0, point2, point3);
 
         var border = new HashSet<DelauneyTriangle>() { tri1, tri2 };
-        var triangulation = new HashSet<DelauneyTriangle>(border);
+        var triangles = new HashSet<DelauneyTriangle>(border);
 
         foreach (var point in points)
         {
-            var badTriangles = FindBadTriangles(point, triangulation);
+            var badTriangles = FindBadTriangles(point, triangles);
             var polygon = FindHoleBoundaries(badTriangles);
 
             foreach (var triangle in badTriangles)
@@ -55,18 +55,26 @@ public class DelaunayTriangulator
                     vertex.AdjacentTriangles.Remove(triangle);
                 }
             }
-            triangulation.RemoveWhere(o => badTriangles.Contains(o));
+            triangles.RemoveWhere(t => badTriangles.Contains(t));
 
             foreach (var edge in polygon.Where(possibleEdge => possibleEdge.Point1 != point && possibleEdge.Point2 != point))
             {
-                var triangle = new DelauneyTriangle(point, edge.Point1, edge.Point2);
-                triangulation.Add(triangle);
+                try
+                {
+                    var triangle = new DelauneyTriangle(point, edge.Point1, edge.Point2);
+                    triangles.Add(triangle);
+                }
+                catch (DivideByZeroException)
+                {
+                    Log.Warning("[Cave] Delauney: DivideByZeroException");
+                    continue;
+                }
             }
         }
 
-        triangulation.RemoveWhere(triangle => triangle.Vertices.Any(vertice => vertice.node is null));
+        triangles.RemoveWhere(triangle => triangle.Vertices.Any(vertice => vertice.node is null));
 
-        return triangulation;
+        return triangles;
     }
 
     private List<DelauneyEdge> FindHoleBoundaries(ISet<DelauneyTriangle> badTriangles)
@@ -85,7 +93,7 @@ public class DelaunayTriangulator
 
     private ISet<DelauneyTriangle> FindBadTriangles(DelauneyPoint point, HashSet<DelauneyTriangle> triangles)
     {
-        var badTriangles = triangles.Where(o => o.IsPointInsideCircumcircle(point));
+        var badTriangles = triangles.Where(t => t.IsPointInsideCircumcircle(point));
         return new HashSet<DelauneyTriangle>(badTriangles);
     }
 }
@@ -145,8 +153,6 @@ public class DelauneyTriangle
 
         if (div == 0)
         {
-            Log.Out($"[Cave] {p0.Prefab.Name}, {p1.Prefab.Name}, {p2.Prefab.Name}");
-            Log.Out($"[Cave] {p0.position}, {p1.position}, {p2.position}");
             throw new DivideByZeroException();
         }
 
@@ -170,8 +176,7 @@ public class DelauneyTriangle
 
     public bool IsPointInsideCircumcircle(DelauneyPoint point)
     {
-        var d_squared = (point.X - Circumcenter.X) * (point.X - Circumcenter.X) +
-            (point.Z - Circumcenter.Z) * (point.Z - Circumcenter.Z);
+        var d_squared = (point.X - Circumcenter.X) * (point.X - Circumcenter.X) + (point.Z - Circumcenter.Z) * (point.Z - Circumcenter.Z);
         return d_squared < RadiusSquared;
     }
 }
