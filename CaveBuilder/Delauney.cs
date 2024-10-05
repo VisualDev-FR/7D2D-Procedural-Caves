@@ -40,8 +40,7 @@ public class DelaunayTriangulator
         var tri1 = new DelauneyTriangle(point0, point1, point2);
         var tri2 = new DelauneyTriangle(point0, point2, point3);
 
-        var border = new HashSet<DelauneyTriangle>() { tri1, tri2 };
-        var triangles = new HashSet<DelauneyTriangle>(border);
+        var triangles = new HashSet<DelauneyTriangle>() { tri1, tri2 };
 
         foreach (var point in points)
         {
@@ -57,17 +56,17 @@ public class DelaunayTriangulator
             }
             triangles.RemoveWhere(t => badTriangles.Contains(t));
 
-            foreach (var edge in polygon.Where(possibleEdge => possibleEdge.Point1 != point && possibleEdge.Point2 != point))
+            foreach (var edge in polygon)
             {
-                try
+                var triangle = new DelauneyTriangle(point, edge.Point1, edge.Point2);
+
+                if (triangle.isValid)
                 {
-                    var triangle = new DelauneyTriangle(point, edge.Point1, edge.Point2);
                     triangles.Add(triangle);
                 }
-                catch (DivideByZeroException)
+                else
                 {
-                    Log.Warning("[Cave] Delauney: DivideByZeroException");
-                    continue;
+                    Log.Warning("[Cave] Delauney: invalid Triangle");
                 }
             }
         }
@@ -77,35 +76,34 @@ public class DelaunayTriangulator
         return triangles;
     }
 
-    private List<DelauneyEdge> FindHoleBoundaries(ISet<DelauneyTriangle> badTriangles)
+    private IEnumerable<DelauneyEdge> FindHoleBoundaries(HashSet<DelauneyTriangle> badTriangles)
     {
-        var edges = new List<DelauneyEdge>();
-        foreach (var triangle in badTriangles)
-        {
-            edges.Add(new DelauneyEdge(triangle.Vertices[0], triangle.Vertices[1]));
-            edges.Add(new DelauneyEdge(triangle.Vertices[1], triangle.Vertices[2]));
-            edges.Add(new DelauneyEdge(triangle.Vertices[2], triangle.Vertices[0]));
-        }
-        var grouped = edges.GroupBy(o => o);
-        var boundaryEdges = edges.GroupBy(o => o).Where(o => o.Count() == 1).Select(o => o.First());
-        return boundaryEdges.ToList();
+        return badTriangles
+            .SelectMany(t => t.Edges)
+            .GroupBy(e => e)
+            .Where(e => e.Count() == 1)
+            .Select(e => e.First());
     }
 
-    private ISet<DelauneyTriangle> FindBadTriangles(DelauneyPoint point, HashSet<DelauneyTriangle> triangles)
+    private HashSet<DelauneyTriangle> FindBadTriangles(DelauneyPoint point, HashSet<DelauneyTriangle> triangles)
     {
-        var badTriangles = triangles.Where(t => t.IsPointInsideCircumcircle(point));
-        return new HashSet<DelauneyTriangle>(badTriangles);
+        return triangles
+            .Where(t => t.IsPointInsideCircumcircle(point))
+            .ToHashSet();
     }
 }
-
 
 public class DelauneyTriangle
 {
     public DelauneyPoint[] Vertices { get; } = new DelauneyPoint[3];
 
+    public DelauneyEdge[] Edges { get; } = new DelauneyEdge[3];
+
     public DelauneyPoint Circumcenter { get; private set; }
 
     public double RadiusSquared;
+
+    public bool isValid = true;
 
     public DelauneyTriangle(DelauneyPoint point1, DelauneyPoint point2, DelauneyPoint point3)
     {
@@ -133,6 +131,13 @@ public class DelauneyTriangle
         Vertices[1].AdjacentTriangles.Add(this);
         Vertices[2].AdjacentTriangles.Add(this);
 
+        Edges = new DelauneyEdge[]
+        {
+            new DelauneyEdge(Vertices[0], Vertices[1]),
+            new DelauneyEdge(Vertices[0], Vertices[2]),
+            new DelauneyEdge(Vertices[1], Vertices[2]),
+        };
+
         UpdateCircumcircle();
     }
 
@@ -153,7 +158,8 @@ public class DelauneyTriangle
 
         if (div == 0)
         {
-            throw new DivideByZeroException();
+            isValid = false;
+            return;
         }
 
         var center = new DelauneyPoint(aux1 / div, 0, aux2 / div);
@@ -163,20 +169,17 @@ public class DelauneyTriangle
 
     private bool IsCounterClockwise(DelauneyPoint point1, DelauneyPoint point2, DelauneyPoint point3)
     {
-        var result = (point2.X - point1.X) * (point3.Z - point1.Z) -
-            (point3.X - point1.X) * (point2.Z - point1.Z);
+        var result = (point2.X - point1.X) * (point3.Z - point1.Z) - (point3.X - point1.X) * (point2.Z - point1.Z);
         return result > 0;
-    }
-
-    public bool SharesEdgeWith(DelauneyTriangle triangle)
-    {
-        var sharedVertices = Vertices.Where(o => triangle.Vertices.Contains(o)).Count();
-        return sharedVertices == 2;
     }
 
     public bool IsPointInsideCircumcircle(DelauneyPoint point)
     {
-        var d_squared = (point.X - Circumcenter.X) * (point.X - Circumcenter.X) + (point.Z - Circumcenter.Z) * (point.Z - Circumcenter.Z);
+        var dx = point.X - Circumcenter.X;
+        var dz = point.Z - Circumcenter.Z;
+
+        var d_squared = dx * dx + dz * dz;
+
         return d_squared < RadiusSquared;
     }
 }
