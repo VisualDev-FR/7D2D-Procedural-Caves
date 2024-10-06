@@ -1,41 +1,21 @@
-MOD LICENSE AGREEMENT
+Copyright (c) 2024 VisualDev-FR
 
-This Mod License Agreement ("Agreement") is a legal agreement between you (the "Licensee") and VisualDev (the "Licensor") regarding the use of the mod ProceduralCaves (the "Mod") for the game 7 Days to Die.
+https://github.com/VisualDev-FR/7D2D-Procedural-Caves
 
-1. Grant of License
-The Licensor grants you a non-transferable, non-exclusive license to use the Mod for personal, non-commercial purposes. This license is granted only to specific individuals selected by the Licensor.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-2. Restrictions
-The Licensee agrees to the following restrictions:
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
-No Redistribution: The Licensee shall not distribute, share, upload, or otherwise make the Mod available to any third party, in any form, without the express written permission of the Licensor.
-
-No Modification: The Licensee shall not modify, alter, or create derivative works based on the Mod.
-
-No Commercial Use: The Mod is provided for personal, non-commercial use only. The Licensee shall not sell, rent, or use the Mod for any commercial purpose.
-
-3. Non-Disclosure Agreement (NDA)
-The Licensee agrees to the following terms regarding confidentiality:
-
-Confidential Information: Any information related to the Mod, including but not limited to its content, features, functionality, assets (textures, models, scripts, etc.), and any other materials provided by the Licensor, shall be considered confidential ("Confidential Information").
-
-No Disclosure: The Licensee agrees not to disclose, share, or distribute any Confidential Information to any third party without the express written consent of the Licensor. This includes, but is not limited to, sharing screenshots, videos, code, or other materials related to the Mod on forums, social media, or any public or private platforms.
-
-Purpose: The Licensee agrees to use the Confidential Information solely for the purpose of using the Mod in accordance with this Agreement.
-
-Duration: This non-disclosure obligation shall remain in effect indefinitely, or until the Licensor publicly releases the Mod or explicitly lifts the NDA in writing.
-
-4. Ownership
-All rights, title, and interest in and to the Mod, including all content and assets, remain the exclusive property of the Licensor. This Agreement does not transfer ownership of the Mod.
-
-5. Termination
-The Licensor reserves the right to terminate this Agreement and revoke the Licensee’s access to the Mod at any time, with or without cause. Upon termination, the Licensee must cease all use of the Mod, delete any copies in their possession, and continue to comply with the Non-Disclosure Agreement.
-
-6. No Warranty
-The Mod is provided "as is," without warranty of any kind, express or implied. The Licensor makes no guarantees regarding the functionality, performance, or compatibility of the Mod with the game.
-
-7. Governing Law
-This Agreement shall be governed by and construed in accordance with the laws of [Your Country/State].
-
-VisualDev
-2024
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE
+OR OTHER DEALINGS IN THE SOFTWARE.

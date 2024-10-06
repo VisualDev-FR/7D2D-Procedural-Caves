@@ -83,17 +83,14 @@
     <!-- Harmony -->
     <Compile Include="Harmony\ModApi.cs" />
 
-    <!-- WorldGen -->
-    <Compile Include="Scripts\BlockSelectionUtils.cs" />
-    <Compile Include="Scripts\CaveEditorConsoleCmd.cs" />
-    <Compile Include="Scripts\StalactiteGenerator.cs" />
-
-    <!-- Cave Builder -->
-    <Compile Include="CaveBuilder\BoundingBox.cs" />
-    <Compile Include="CaveBuilder\CaveConfig.cs" />
-    <Compile Include="CaveBuilder\CaveRoom.cs" />
-    <Compile Include="CaveBuilder\CaveUtils.cs" />
-    <Compile Include="CaveBuilder\FastNoiseLite.cs" />
+    <Compile Include="Scripts\ConsoleCmd\CaveEditorConsoleCmd.cs" />
+    <Compile Include="Scripts\Models\BoundingBox.cs" />
+    <Compile Include="Scripts\CaveGeneration\StalactiteGenerator.cs" />
+    <Compile Include="Scripts\CaveGeneration\CaveRoom.cs" />
+    <Compile Include="Scripts\Noise\FastNoiseLite.cs" />
+    <Compile Include="Scripts\Utils\BlockSelectionUtils.cs" />
+    <Compile Include="Scripts\CaveConfig.cs" />
+    <Compile Include="Scripts\CaveUtils.cs" />
 
   </ItemGroup>
   <ItemGroup />

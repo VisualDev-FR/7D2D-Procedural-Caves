@@ -43,7 +43,7 @@ public static class CaveBuilder
 
     public static int terrainMargin = 2;
 
-    public static bool TryPlacePrefab(ref CavePrefab prefab, PrefabCache others)
+    public static bool TryPlacePrefab(ref CavePrefab prefab, CavePrefabManager others)
     {
         int maxTries = 10;
         int minDist = prefab.prefabDataInstance == null ? int.MaxValue : prefab.prefabDataInstance.prefab.DuplicateRepeatDistance;
@@ -61,11 +61,11 @@ public static class CaveBuilder
         return false;
     }
 
-    public static PrefabCache GetRandomPrefabs(int count, List<PrefabData> prefabs)
+    public static CavePrefabManager GetRandomPrefabs(int count, List<PrefabData> prefabs)
     {
         Log.Out("Start POIs placement...");
 
-        var prefabCache = new PrefabCache();
+        var prefabCache = new CavePrefabManager();
 
         for (int i = 0; i < count; i++)
         {
@@ -83,7 +83,7 @@ public static class CaveBuilder
         return prefabCache;
     }
 
-    public static void GetRandomPrefabs(int count, Random random, PrefabCache prefabCache, int minMarkers = 4, int maxMarkers = 4)
+    public static void GetRandomPrefabs(int count, Random random, CavePrefabManager prefabCache, int minMarkers = 4, int maxMarkers = 4)
     {
         Log.Out("Start POIs placement...");
 

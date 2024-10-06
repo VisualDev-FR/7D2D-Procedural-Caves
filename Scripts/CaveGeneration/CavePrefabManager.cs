@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
 
-public class PrefabCache
+public class CavePrefabManager
 {
     private static readonly HashSet<CavePrefab> emptyPrefabsHashset = new HashSet<CavePrefab>();
 
@@ -19,7 +17,7 @@ public class PrefabCache
 
     public int Count => Prefabs.Count;
 
-    public PrefabCache()
+    public CavePrefabManager()
     {
         Prefabs = new List<CavePrefab>();
         groupedCavePrefabs = new Dictionary<int, List<CavePrefab>>();
@@ -158,6 +156,7 @@ public class PrefabCache
 
                 var prefab = new CavePrefab(Prefabs.Count)
                 {
+                    isBoundaryPrefab = true,
                     isRoom = true,
                     position = new Vector3i(tileX * tileSize, 0, tileZ * tileSize),
                     Size = new Vector3i(

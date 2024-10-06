@@ -151,6 +151,26 @@ public class Graph
             }
         }
 
+        // boundary edges pruning
+        foreach (var node in Nodes.Where(n => n.prefab.isBoundaryPrefab))
+        {
+            var doubleEdges = relatedEdges[node]
+                .Where(e => !e.pruned && e.Prefab1.isBoundaryPrefab && e.Prefab2.isBoundaryPrefab)
+                .OrderBy(e => e.Weight)
+                .ToArray();
+
+            if (doubleEdges.Length < 2)
+                continue;
+
+            foreach (var edge in doubleEdges)
+            {
+                edge.pruned = true;
+            }
+
+            doubleEdges[0].pruned = false;
+        }
+
+        // duplicate prefab links pruning
         foreach (var edgeGroup in relatedPrefabs.Values)
         {
             var edges = edgeGroup.Where(e => !e.pruned).ToList();
@@ -179,11 +199,13 @@ public class Graph
             }
         }
 
+        // try fix alone edges
         foreach (var node in GetNodesAlone())
         {
             TryReplaceEdge(node);
         }
 
+        // fix alone edges
         foreach (var node in GetNodesAlone())
         {
             if (relatedEdges[node].Count == 0)
@@ -202,7 +224,7 @@ public class Graph
         {
             if (edge.pruned)
             {
-                // RemoveEdge(edge);
+                RemoveEdge(edge);
                 edge.colorName = "DarkGray";
                 edge.width = 1;
                 edge.opacity = 50;
