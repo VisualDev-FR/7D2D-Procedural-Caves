@@ -287,7 +287,7 @@ public class CaveMap : IEnumerable<CaveBlock>
         return caveblocks.ContainsKey(hashcode);
     }
 
-    public IEnumerator SetWaterCoroutine(HashSet<CaveBlock> localMinimas, CavePrefabManager cachedPrefabs)
+    public IEnumerator SetWaterCoroutine(WorldBuilder worldBuilder, HashSet<CaveBlock> localMinimas, CavePrefabManager cachedPrefabs)
     {
         int index = 0;
 
@@ -298,7 +298,7 @@ public class CaveMap : IEnumerable<CaveBlock>
         {
             index++;
 
-            if (WorldBuilder.Instance.IsCanceled)
+            if (worldBuilder.IsCanceled)
                 yield break;
 
             if (waterStart.isWater)
@@ -308,7 +308,7 @@ public class CaveMap : IEnumerable<CaveBlock>
 
             string message = $"Water processing: {100.0f * index / localMinimas.Count:F0}% ({index} / {localMinimas.Count})";
 
-            yield return WorldBuilder.Instance.SetMessage(message);
+            yield return worldBuilder.SetMessage(message);
 
             foreach (var hashcode in hashcodes)
             {

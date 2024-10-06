@@ -7,7 +7,7 @@ using WorldGenerationEngineFinal;
 [HarmonyPatch(typeof(WorldBuilder), "GenerateData")]
 public static class WorldBuilder_GenerateData
 {
-    private static readonly WorldBuilder worldBuilder = WorldBuilder.Instance;
+    private static WorldBuilder worldBuilder;
 
     private static float[] HeightMap;
 
@@ -19,8 +19,9 @@ public static class WorldBuilder_GenerateData
 
     public static readonly float terrainOffset = 50;
 
-    public static bool Prefix(ref IEnumerator __result)
+    public static bool Prefix(ref WorldBuilder __instance, ref IEnumerator __result)
     {
+        worldBuilder = __instance;
         Log.Out("Patch rand world generator!");
         __result = GenerateData();
         return false;
@@ -28,7 +29,7 @@ public static class WorldBuilder_GenerateData
 
     public static IEnumerator GenerateData()
     {
-        CavePlanner.Init();
+        CaveCache.Init(worldBuilder);
         PatchWaterHeight();
 
         yield return worldBuilder.Init();
@@ -45,14 +46,14 @@ public static class WorldBuilder_GenerateData
 
         if (worldBuilder.Towns != 0 || worldBuilder.Wilderness != 0)
         {
-            yield return PrefabManager.LoadPrefabs();
-            PrefabManager.ShufflePrefabData(worldBuilder.Seed);
+            yield return worldBuilder.PrefabManager.LoadPrefabs();
+            worldBuilder.PrefabManager.ShufflePrefabData(worldBuilder.Seed);
             yield return null;
-            PathingUtils.SetupPathingGrid();
+            worldBuilder.PathingUtils.SetupPathingGrid();
         }
         else
         {
-            PrefabManager.ClearDisplayed();
+            worldBuilder.PrefabManager.ClearDisplayed();
         }
 
         StoreHeightMaps();
@@ -60,7 +61,7 @@ public static class WorldBuilder_GenerateData
 
         if (worldBuilder.Towns != 0)
         {
-            yield return TownPlanner.Plan(worldBuilder.thisWorldProperties, worldBuilder.Seed);
+            yield return worldBuilder.TownPlanner.Plan(worldBuilder.thisWorldProperties, worldBuilder.Seed);
         }
 
         ResetHeightMaps();
@@ -72,15 +73,15 @@ public static class WorldBuilder_GenerateData
         if (worldBuilder.IsCanceled)
             yield break;
 
-        yield return POISmoother.SmoothStreetTiles();
+        yield return worldBuilder.POISmoother.SmoothStreetTiles();
 
         if (worldBuilder.IsCanceled)
             yield break;
 
         if (worldBuilder.Towns != 0 || worldBuilder.Wilderness != 0)
         {
-            yield return HighwayPlanner.Plan(worldBuilder.thisWorldProperties, worldBuilder.Seed);
-            yield return TownPlanner.SpawnPrefabs();
+            yield return worldBuilder.HighwayPlanner.Plan(worldBuilder.thisWorldProperties, worldBuilder.Seed);
+            yield return worldBuilder.TownPlanner.SpawnPrefabs();
 
             if (worldBuilder.IsCanceled)
                 yield break;
@@ -88,14 +89,14 @@ public static class WorldBuilder_GenerateData
 
         if (worldBuilder.Wilderness != 0)
         {
-            yield return WildernessPlanner.Plan(worldBuilder.thisWorldProperties, worldBuilder.Seed);
+            yield return worldBuilder.WildernessPlanner.Plan(worldBuilder.thisWorldProperties, worldBuilder.Seed);
             yield return worldBuilder.smoothWildernessTerrain();
-            yield return WildernessPathPlanner.Plan(worldBuilder.Seed);
+            yield return worldBuilder.WildernessPathPlanner.Plan(worldBuilder.Seed);
         }
         int num = 12 - worldBuilder.playerSpawns.Count;
         if (num > 0)
         {
-            foreach (StreetTile item in WorldBuilder.CalcPlayerSpawnTiles())
+            foreach (StreetTile item in worldBuilder.CalcPlayerSpawnTiles())
             {
                 if (worldBuilder.CreatePlayerSpawn(item.WorldPositionCenter, _isFallback: true) && --num <= 0)
                 {
@@ -112,10 +113,10 @@ public static class WorldBuilder_GenerateData
         if (worldBuilder.Towns != 0 || worldBuilder.Wilderness != 0)
         {
             yield return worldBuilder.SetMessage("Smooth Road Terrain", _logToConsole: true);
-            yield return WorldBuilder.smoothRoadTerrain(worldBuilder.dest, worldBuilder.HeightMap, worldBuilder.WorldSize);
+            yield return worldBuilder.smoothRoadTerrain(worldBuilder.dest, worldBuilder.HeightMap, worldBuilder.WorldSize);
         }
 
-        yield return CavePlanner.GenerateCaveMap();
+        yield return CaveCache.cavePlanner.GenerateCaveMap();
 
         worldBuilder.paths.Clear();
         worldBuilder.wildernessPaths.Clear();
@@ -135,9 +136,9 @@ public static class WorldBuilder_GenerateData
     private static void PatchWaterHeight()
     {
         CaveUtils.SetField<WorldBuilder>(
-            WorldBuilder.Instance,
+            worldBuilder,
             "WaterHeight",
-            (int)ClampHeight(WorldBuilder.Instance.WaterHeight)
+            (int)ClampHeight(worldBuilder.WaterHeight)
         );
     }
 
@@ -188,7 +189,7 @@ public static class WorldBuilder_saveRawHeightmap
 {
     public static bool Prefix()
     {
-        CavePlanner.SaveCaveMap();
+        CaveCache.cavePlanner.SaveCaveMap();
         return true;
     }
 }

@@ -8,10 +8,14 @@ using WorldGenerationEngineFinal;
 [HarmonyPatch(typeof(WildernessPlanner), "Plan")]
 public class WildernessPlanner_Plan
 {
+    public static WorldBuilder worldBuilder;
+
+    public static WildernessPlanner WildernessPlanner;
+
     public static IEnumerator PlanPostfix(DynamicProperties thisWorldProperties, int worldSeed)
     {
         yield return null;
-        int count = WorldBuilder.Instance.GetCount("wilderness", WorldBuilder.Instance.Wilderness);
+        int count = worldBuilder.GetCount("wilderness", worldBuilder.Wilderness);
         int tries = WildernessPlanner.maxWildernessSpawnTries;
         MicroStopwatch ms = new MicroStopwatch(_bStart: true);
         int wildernessPOIsLeft = count;
@@ -37,9 +41,9 @@ public class WildernessPlanner_Plan
                 wildernessPOIsLeft--;
                 tries = WildernessPlanner.maxWildernessSpawnTries;
             }
-            if (WorldBuilder.Instance.IsMessageElapsed())
+            if (worldBuilder.IsMessageElapsed())
             {
-                yield return WorldBuilder.Instance.SetMessage($"Generating Wilderness POIs: {Mathf.FloorToInt(100f * (1f - (float)wildernessPOIsLeft / (float)totalWildernessPOIs))}%");
+                yield return worldBuilder.SetMessage($"Generating Wilderness POIs: {Mathf.FloorToInt(100f * (1f - (float)wildernessPOIsLeft / (float)totalWildernessPOIs))}%");
             }
             StreetTile streetTile = validWildernessTiles[WildernessPlanner.getLowBiasedRandom(rnd, 0, validWildernessTiles.Count)];
             if (!streetTile.Used && streetTile.SpawnPrefabs())
@@ -54,15 +58,17 @@ public class WildernessPlanner_Plan
         }
 
         // harmony patch is here
-        CaveEntrancesPlanner.SpawnCaveEntrances(rnd);
+        CaveCache.caveEntrancesPlanner.SpawnCaveEntrances(rnd);
 
         GameRandomManager.Instance.FreeGameRandom(rnd);
         WildernessPlanner.WildernessPathInfos.Sort((WorldBuilder.WildernessPathInfo wp1, WorldBuilder.WildernessPathInfo wp2) => wp2.PathRadius.CompareTo(wp1.PathRadius));
-        Log.Out($"WildernessPlanner Plan {WorldBuilder.Instance.WildernessPrefabCount} prefabs spawned, in {(float)ms.ElapsedMilliseconds * 0.001f}, r={Rand.Instance.PeekSample():x}");
+        Log.Out($"WildernessPlanner Plan {worldBuilder.WildernessPrefabCount} prefabs spawned, in {(float)ms.ElapsedMilliseconds * 0.001f}, r={Rand.Instance.PeekSample():x}");
     }
 
-    public static bool Prefix(DynamicProperties thisWorldProperties, int worldSeed, ref IEnumerator __result)
+    public static bool Prefix(WildernessPlanner __instance, DynamicProperties thisWorldProperties, int worldSeed, ref IEnumerator __result)
     {
+        WildernessPlanner = __instance;
+        worldBuilder = __instance.worldBuilder;
         __result = PlanPostfix(thisWorldProperties, worldSeed);
         return false;
     }

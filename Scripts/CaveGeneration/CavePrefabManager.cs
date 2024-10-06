@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using WorldGenerationEngineFinal;
 
 
 public class CavePrefabManager
@@ -16,13 +17,15 @@ public class CavePrefabManager
 
     public readonly List<CavePrefab> Prefabs;
 
-    public readonly int worldSize;
+    public WorldBuilder worldBuilder;
+
+    public int WorldSize => worldBuilder.WorldSize;
 
     public int Count => Prefabs.Count;
 
-    public CavePrefabManager(int worldSize)
+    public CavePrefabManager(WorldBuilder worldBuilder)
     {
-        this.worldSize = worldSize;
+        this.worldBuilder = worldBuilder;
         Prefabs = new List<CavePrefab>();
         groupedCavePrefabs = new Dictionary<int, List<CavePrefab>>();
         nearestPrefabs = new Dictionary<int, HashSet<CavePrefab>>();
@@ -152,7 +155,7 @@ public class CavePrefabManager
 
         while (maxTries-- > 0)
         {
-            prefab.SetRandomPosition(rand, worldSize);
+            prefab.SetRandomPosition(worldBuilder, rand, WorldSize);
 
             if (!prefab.OverLaps2D(Prefabs, overLapMargin) && !IsNearSamePrefab(prefab, minDist))
             {
@@ -201,7 +204,7 @@ public class CavePrefabManager
 
     public void SetupBoundaryPrefabs(Random rand, int tileSize)
     {
-        var tileGridSize = worldSize / tileSize;
+        var tileGridSize = WorldSize / tileSize;
         var uBound = 1;
 
         for (int tileX = 1; tileX < tileGridSize - uBound + 1; tileX++)

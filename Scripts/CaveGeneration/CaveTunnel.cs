@@ -40,11 +40,13 @@ public class CaveTunnel
 
     private Vector3i HalfWorldSize => new Vector3i(CaveConfig.worldSize / 2, 0, CaveConfig.worldSize / 2);
 
-    public CaveTunnel(GraphEdge edge, CavePrefabManager cachedPrefabs)
+    private readonly WorldBuilder worldBuilder;
+
+    public CaveTunnel(WorldBuilder worldBuilder, GraphEdge edge, CavePrefabManager cachedPrefabs)
     {
         id = new MutableInt16(edge.id);
 
-        // CaveNoise.pathingNoise.SetSeed(CaveBuilder.SEED + id.value);
+        this.worldBuilder = worldBuilder;
 
         FindPath(edge, cachedPrefabs);
         FindLocalMinimas();
@@ -112,7 +114,7 @@ public class CaveTunnel
 
                 bool shouldContinue =
                     neighborPos.y < bedRockMargin
-                    || neighborPos.y + terrainMargin > WorldBuilder.Instance.GetHeight(neighborPos.x, neighborPos.z)
+                    || neighborPos.y + terrainMargin > worldBuilder.GetHeight(neighborPos.x, neighborPos.z)
                     || visited.Contains(neighborPos.GetHashCode()); // NOTE: AstarNode and Vector3i must have same hashcode function
 
                 if (shouldContinue)
@@ -153,8 +155,8 @@ public class CaveTunnel
         }
 
         // reaching here mean no path was found
-        var height1 = WorldBuilder.Instance.GetHeight(start.x, start.z);
-        var height2 = WorldBuilder.Instance.GetHeight(target.x, target.z);
+        var height1 = worldBuilder.GetHeight(start.x, start.z);
+        var height2 = worldBuilder.GetHeight(target.x, target.z);
 
         var p1 = start - HalfWorldSize;
         var p2 = target - HalfWorldSize;
@@ -191,7 +193,10 @@ public class CaveTunnel
         for (int i = 0; i < path.Count; i++)
         {
             var tunnelRadius = r1 + (r2 - r1) * ((float)i / path.Count);
-            var sphere = GetSphere(path[i].ToVector3i(), tunnelRadius);
+            var sphere = GetSphere(path[i].ToVector3i(), tunnelRadius)
+                .Where(caveBlock =>
+                       caveBlock.y > CaveConfig.bedRockMargin
+                    && caveBlock.y + CaveConfig.terrainMargin < (int)worldBuilder.GetHeight(caveBlock.x, caveBlock.z));
 
             blocks.UnionWith(sphere);
         }
@@ -346,14 +351,7 @@ public class CaveTunnel
         foreach (var hashcode in spheresMapping[radius])
         {
             var position = center + spheres[hashcode];
-
-            if (
-                   position.y > CaveConfig.bedRockMargin
-                && position.y + CaveConfig.terrainMargin < (int)WorldBuilder.Instance.GetHeight(position.x, position.z)
-            )
-            {
-                yield return new CaveBlock(position);
-            }
+            yield return new CaveBlock(position);
         }
     }
 
