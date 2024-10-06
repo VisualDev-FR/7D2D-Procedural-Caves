@@ -158,6 +158,7 @@ public class PrefabCache
 
                 var prefab = new CavePrefab(Prefabs.Count)
                 {
+                    isBoundaryPrefab = true,
                     isRoom = true,
                     position = new Vector3i(tileX * tileSize, 0, tileZ * tileSize),
                     Size = new Vector3i(

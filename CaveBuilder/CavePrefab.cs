@@ -42,6 +42,8 @@ public class CavePrefab
 
     public bool isRoom = false;
 
+    public bool isBoundaryPrefab = false;
+
     public List<GraphNode> nodes;
 
     public List<Prefab.Marker> caveMarkers;
