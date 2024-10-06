@@ -19,9 +19,12 @@ public static class WorldBuilder_GenerateData
 
     public static readonly float terrainOffset = 50;
 
-    public static bool Prefix(ref WorldBuilder __instance, ref IEnumerator __result)
+    public static bool Prefix(WorldBuilder __instance, ref IEnumerator __result)
     {
         worldBuilder = __instance;
+
+        CaveUtils.Assert(worldBuilder != null, "null world builder");
+
         Log.Out("Patch rand world generator!");
         __result = GenerateData();
         return false;

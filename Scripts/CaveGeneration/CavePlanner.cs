@@ -36,7 +36,9 @@ public class CavePlanner
 
     public CavePlanner(WorldBuilder worldBuilder)
     {
-        var seed = worldBuilder.Seed + WorldSize;
+        this.worldBuilder = worldBuilder;
+
+        var seed = worldBuilder.Seed + worldBuilder.WorldSize;
 
         cavemap = new CaveMap();
 
