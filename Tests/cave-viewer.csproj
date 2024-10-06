@@ -1,0 +1,72 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net4.8</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Bumpkit" Version="1.0.2" />
+    <PackageReference Include="mstest" Version="3.5.0" />
+    <PackageReference Include="System.Drawing.Common" Version="7.0.0" />
+    <Reference Include="$(PATH_7D2D)\7DaysToDie_Data\Managed\Assembly-CSharp.dll" />
+    <Reference Include="$(PATH_7D2D)\7DaysToDie_Data\Managed\UnityEngine.CoreModule.dll" />
+    <Reference Include="$(PATH_7D2D)\7DaysToDie_Data\Managed\netstandard.dll" />
+  </ItemGroup>
+  <ItemGroup>
+
+
+    <!-- CaveGeneration -->
+    <Compile Include="..\Scripts\CaveGeneration\CavePlanner.cs" />
+    <Compile Include="..\Scripts\CaveGeneration\CavePrefabChecker.cs" />
+    <Compile Include="..\Scripts\CaveGeneration\StalactiteGenerator.cs" />
+    <Compile Include="..\Scripts\CaveGeneration\CaveBlock.cs" />
+    <Compile Include="..\Scripts\CaveGeneration\CaveChunk.cs" />
+    <Compile Include="..\Scripts\CaveGeneration\CaveMap.cs" />
+    <Compile Include="..\Scripts\CaveGeneration\CavePrefab.cs" />
+    <Compile Include="..\Scripts\CaveGeneration\CavePrefabManager.cs" />
+    <Compile Include="..\Scripts\CaveGeneration\CaveRegion.cs" />
+    <Compile Include="..\Scripts\CaveGeneration\CaveRoom.cs" />
+    <Compile Include="..\Scripts\CaveGeneration\CaveTunnel.cs" />
+    <Compile Include="..\Scripts\CaveGeneration\HashedPriorityQueue.cs" />
+    <Compile Include="..\Scripts\CaveGeneration\CaveEntrancesPlanner.cs" />
+
+    <!-- CaveNetworking -->
+    <Compile Include="..\Scripts\CaveNetworking\CaveGraph.cs" />
+    <Compile Include="..\Scripts\CaveNetworking\Delauney.cs" />
+    <Compile Include="..\Scripts\CaveNetworking\Graph.cs" />
+    <Compile Include="..\Scripts\CaveNetworking\GraphEdge.cs" />
+    <Compile Include="..\Scripts\CaveNetworking\GraphNode.cs" />
+
+    <!-- CaveRenderer -->
+    <Compile Include="..\Scripts\CaveRenderer\CaveBlocksProvider.cs" />
+    <Compile Include="..\Scripts\CaveRenderer\CaveGenerator.cs" />
+
+    <!-- ConsoleCmd -->
+    <Compile Include="..\Scripts\ConsoleCmd\CaveDebugConsoleCmd.cs" />
+    <Compile Include="..\Scripts\ConsoleCmd\CaveEditorConsoleCmd.cs" />
+
+    <!-- IO -->
+    <Compile Include="..\Scripts\IO\MultiStream.cs" />
+    <Compile Include="..\Scripts\IO\TTSReader.cs" />
+
+    <!-- Models -->
+    <Compile Include="..\Scripts\Models\Direction.cs" />
+    <Compile Include="..\Scripts\Models\MutableInt16.cs" />
+    <Compile Include="..\Scripts\Models\Vector2s.cs" />
+    <Compile Include="..\Scripts\Models\Vector3bf.cs" />
+    <Compile Include="..\Scripts\Models\AstarNode.cs" />
+    <Compile Include="..\Scripts\Models\BoundingBox.cs" />
+
+    <!-- Noise -->
+    <Compile Include="..\Scripts\Noise\CaveNoise.cs" />
+    <Compile Include="..\Scripts\Noise\FastNoiseLite.cs" />
+
+    <!-- Utils -->
+    <Compile Include="..\Scripts\Utils\BlockSelectionUtils.cs" />
+
+    <!-- Root -->
+    <Compile Include="..\Scripts\CaveConfig.cs" />
+    <Compile Include="..\Scripts\CaveUtils.cs" />
+    <Compile Include="..\Scripts\CaveBuilder.cs" />
+
+  </ItemGroup>
+</Project>

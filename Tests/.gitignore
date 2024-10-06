@@ -3,5 +3,6 @@ bin/
 *
 !.gitignore
 !*.cs
+!*.csproj
 !*.bat
 !*.mtl

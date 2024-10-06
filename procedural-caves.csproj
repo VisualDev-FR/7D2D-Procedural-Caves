@@ -98,45 +98,59 @@
     <Compile Include="Harmony\H_WildernessPlanner.cs" />
     <Compile Include="Harmony\H_WorldBuilder.cs" />
 
-    <!-- WorldGen -->
-    <Compile Include="Scripts\BlockSelectionUtils.cs" />
-    <Compile Include="Scripts\CaveBlocksProvider.cs" />
-    <Compile Include="Scripts\CaveDebugConsoleCmd.cs" />
-    <Compile Include="Scripts\CaveEditorConsoleCmd.cs" />
-    <Compile Include="Scripts\CaveEntrancesPlanner.cs" />
-    <Compile Include="Scripts\CaveGenerator.cs" />
-    <Compile Include="Scripts\CavePlanner.cs" />
-    <Compile Include="Scripts\CavePrefabChecker.cs" />
-    <Compile Include="Scripts\StalactiteGenerator.cs" />
-    <Compile Include="Scripts\TTSReader.cs" />
+    <!-- CaveGeneration -->
+    <Compile Include="Scripts\CaveGeneration\CavePlanner.cs" />
+    <Compile Include="Scripts\CaveGeneration\CavePrefabChecker.cs" />
+    <Compile Include="Scripts\CaveGeneration\StalactiteGenerator.cs" />
+    <Compile Include="Scripts\CaveGeneration\CaveBlock.cs" />
+    <Compile Include="Scripts\CaveGeneration\CaveChunk.cs" />
+    <Compile Include="Scripts\CaveGeneration\CaveMap.cs" />
+    <Compile Include="Scripts\CaveGeneration\CavePrefab.cs" />
+    <Compile Include="Scripts\CaveGeneration\CavePrefabManager.cs" />
+    <Compile Include="Scripts\CaveGeneration\CaveRegion.cs" />
+    <Compile Include="Scripts\CaveGeneration\CaveRoom.cs" />
+    <Compile Include="Scripts\CaveGeneration\CaveTunnel.cs" />
+    <Compile Include="Scripts\CaveGeneration\HashedPriorityQueue.cs" />
+    <Compile Include="Scripts\CaveGeneration\CaveEntrancesPlanner.cs" />
 
-    <!-- Cave Builder -->
-    <Compile Include="CaveBuilder\AstarNode.cs" />
-    <Compile Include="CaveBuilder\BoundingBox.cs" />
-    <Compile Include="CaveBuilder\CaveBlock.cs" />
-    <Compile Include="CaveBuilder\CaveBuilder.cs" />
-    <Compile Include="CaveBuilder\CaveChunk.cs" />
-    <Compile Include="CaveBuilder\CaveConfig.cs" />
-    <Compile Include="CaveBuilder\CaveGraph.cs" />
-    <Compile Include="CaveBuilder\CaveMap.cs" />
-    <Compile Include="CaveBuilder\CaveNoise.cs" />
-    <Compile Include="CaveBuilder\CavePrefab.cs" />
-    <Compile Include="CaveBuilder\CavePrefabManager.cs" />
-    <Compile Include="CaveBuilder\CaveRegion.cs" />
-    <Compile Include="CaveBuilder\CaveRoom.cs" />
-    <Compile Include="CaveBuilder\CaveTunnel.cs" />
-    <Compile Include="CaveBuilder\CaveUtils.cs" />
-    <Compile Include="CaveBuilder\Delauney.cs" />
-    <Compile Include="CaveBuilder\Direction.cs" />
-    <Compile Include="CaveBuilder\FastNoiseLite.cs" />
-    <Compile Include="CaveBuilder\Graph.cs" />
-    <Compile Include="CaveBuilder\GraphEdge.cs" />
-    <Compile Include="CaveBuilder\GraphNode.cs" />
-    <Compile Include="CaveBuilder\HashedPriorityQueue.cs" />
-    <Compile Include="CaveBuilder\MultiStream.cs" />
-    <Compile Include="CaveBuilder\MutableInt16.cs" />
-    <Compile Include="CaveBuilder\Vector2s.cs" />
-    <Compile Include="CaveBuilder\Vector3bf.cs" />
+    <!-- CaveNetworking -->
+    <Compile Include="Scripts\CaveNetworking\CaveGraph.cs" />
+    <Compile Include="Scripts\CaveNetworking\Delauney.cs" />
+    <Compile Include="Scripts\CaveNetworking\Graph.cs" />
+    <Compile Include="Scripts\CaveNetworking\GraphEdge.cs" />
+    <Compile Include="Scripts\CaveNetworking\GraphNode.cs" />
+
+    <!-- CaveRenderer -->
+    <Compile Include="Scripts\CaveRenderer\CaveBlocksProvider.cs" />
+    <Compile Include="Scripts\CaveRenderer\CaveGenerator.cs" />
+
+    <!-- ConsoleCmd -->
+    <Compile Include="Scripts\ConsoleCmd\CaveDebugConsoleCmd.cs" />
+    <Compile Include="Scripts\ConsoleCmd\CaveEditorConsoleCmd.cs" />
+
+    <!-- IO -->
+    <Compile Include="Scripts\IO\MultiStream.cs" />
+    <Compile Include="Scripts\IO\TTSReader.cs" />
+
+    <!-- Models -->
+    <Compile Include="Scripts\Models\Direction.cs" />
+    <Compile Include="Scripts\Models\MutableInt16.cs" />
+    <Compile Include="Scripts\Models\Vector2s.cs" />
+    <Compile Include="Scripts\Models\Vector3bf.cs" />
+    <Compile Include="Scripts\Models\AstarNode.cs" />
+    <Compile Include="Scripts\Models\BoundingBox.cs" />
+
+    <!-- Noise -->
+    <Compile Include="Scripts\Noise\CaveNoise.cs" />
+    <Compile Include="Scripts\Noise\FastNoiseLite.cs" />
+
+    <!-- Utils -->
+    <Compile Include="Scripts\Utils\BlockSelectionUtils.cs" />
+
+    <!-- Root -->
+    <Compile Include="Scripts\CaveConfig.cs" />
+    <Compile Include="Scripts\CaveUtils.cs" />
+    <Compile Include="Scripts\CaveBuilder.cs" />
 
   </ItemGroup>
   <ItemGroup />
