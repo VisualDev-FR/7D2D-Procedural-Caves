@@ -277,20 +277,6 @@ public static class CavePlanner
         }
     }
 
-    private static List<List<T>> SplitList<T>(List<T> parent, int count)
-    {
-        List<List<T>> resultat = new List<List<T>>();
-        int subListSize = (int)Math.Ceiling((double)parent.Count / count);
-
-        for (int i = 0; i < parent.Count; i += subListSize)
-        {
-            List<T> subList = parent.GetRange(i, Math.Min(subListSize, parent.Count - i));
-            resultat.Add(subList);
-        }
-
-        return resultat;
-    }
-
     private static IEnumerator SpawnCaveRooms(int count, CavePrefabManager cachedPrefabs)
     {
         for (int i = 0; i < count; i++)
@@ -369,7 +355,7 @@ public static class CavePlanner
         AddSurfacePrefabs(prefabManager);
 
         var threads = new List<Thread>();
-        var subLists = SplitList(caveGraph.Edges.ToList(), 6);
+        var subLists = CaveUtils.SplitList(caveGraph.Edges.ToList(), 6);
         var localMinimas = new HashSet<CaveBlock>();
         var lockObject = new object();
         int index = 0;

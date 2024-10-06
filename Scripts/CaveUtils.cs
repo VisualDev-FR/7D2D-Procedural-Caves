@@ -303,4 +303,18 @@ public static class CaveUtils
     {
         return value.ToString($"x{bits}");
     }
+
+    public static List<List<T>> SplitList<T>(List<T> parent, int count)
+    {
+        List<List<T>> resultat = new List<List<T>>();
+        int subListSize = (int)Math.Ceiling((double)parent.Count / count);
+
+        for (int i = 0; i < parent.Count; i += subListSize)
+        {
+            List<T> subList = parent.GetRange(i, Math.Min(subListSize, parent.Count - i));
+            resultat.Add(subList);
+        }
+
+        return resultat;
+    }
 }
