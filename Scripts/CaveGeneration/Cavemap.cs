@@ -165,9 +165,9 @@ public class CaveMap : IEnumerable<CaveBlock>
         {
             foreach (CaveBlock caveBlock in caveblocks.Values)
             {
-                int region_x = caveBlock.x / CaveBuilder.RegionSize;
-                int region_z = caveBlock.z / CaveBuilder.RegionSize;
-                int regionID = region_x + region_z * CaveBuilder.regionGridSize;
+                int region_x = caveBlock.x / CaveConfig.RegionSize;
+                int region_z = caveBlock.z / CaveConfig.RegionSize;
+                int regionID = region_x + region_z * CaveConfig.regionGridSize;
 
                 var writer = multistream.GetWriter($"region_{regionID}.bin");
                 caveBlock.ToBinaryStream(writer);

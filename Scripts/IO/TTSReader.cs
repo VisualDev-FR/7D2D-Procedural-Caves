@@ -258,7 +258,7 @@ public class TTSReader
 
     private static bool IsUnderTerrain(int posY, int yOffset)
     {
-        return posY < -yOffset - CaveBuilder.terrainMargin;
+        return posY < -yOffset - CaveConfig.terrainMargin;
     }
 
     // NOTE: copied from Prefab.offsetToCoord

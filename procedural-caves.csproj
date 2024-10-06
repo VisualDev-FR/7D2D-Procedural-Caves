@@ -150,7 +150,6 @@
     <!-- Root -->
     <Compile Include="Scripts\CaveConfig.cs" />
     <Compile Include="Scripts\CaveUtils.cs" />
-    <Compile Include="Scripts\CaveBuilder.cs" />
 
   </ItemGroup>
   <ItemGroup />

@@ -111,9 +111,9 @@ public static class CaveViewer
 
     public static void DrawNoise(Bitmap b, CaveNoise noise)
     {
-        for (int x = 0; x < CaveBuilder.worldSize; x++)
+        for (int x = 0; x < CaveConfig.worldSize; x++)
         {
-            for (int z = 0; z < CaveBuilder.worldSize; z++)
+            for (int z = 0; z < CaveConfig.worldSize; z++)
             {
                 if (noise.IsCave(x, z))
                     b.SetPixel(x, z, NoiseColor);
@@ -123,9 +123,9 @@ public static class CaveViewer
 
     public static void GraphCommand(string[] args)
     {
-        CaveBuilder.worldSize = 1024 * 2;
+        CaveConfig.worldSize = 1024 * 2;
 
-        int prefabCounts = args.Length > 1 ? int.Parse(args[1]) : CaveBuilder.PREFAB_COUNT;
+        int prefabCounts = args.Length > 1 ? int.Parse(args[1]) : CaveConfig.TargetPrefabCount;
 
         // var prefabs = PrefabLoader.LoadPrefabs().Values.ToList();
 
@@ -135,15 +135,15 @@ public static class CaveViewer
 
         var random = new Random(1337);
 
-        var cachedPrefabs = new CavePrefabManager();
+        var prefabManager = new CavePrefabManager(CaveConfig.worldSize);
 
-        cachedPrefabs.SetupBoundaryPrefabs(random, CaveBuilder.worldSize, gridSize);
+        prefabManager.SetupBoundaryPrefabs(random, gridSize);
+        prefabManager.GetRandomPrefabs(random, prefabCounts, minMarkers, maxMarkers);
 
-        CaveBuilder.GetRandomPrefabs(prefabCounts, random, cachedPrefabs, minMarkers, maxMarkers);
-        var graph = new Graph(cachedPrefabs.Prefabs);
+        var graph = new Graph(prefabManager.Prefabs);
         var voxels = new HashSet<Voxell>();
 
-        foreach (var prefab in cachedPrefabs.Prefabs)
+        foreach (var prefab in prefabManager.Prefabs)
         {
             voxels.Add(new Voxell(prefab.position, prefab.Size, WaveFrontMaterial.DarkGreen) { force = true });
 
@@ -153,14 +153,14 @@ public static class CaveViewer
             }
         }
 
-        using (var b = new Bitmap(CaveBuilder.worldSize, CaveBuilder.worldSize))
+        using (var b = new Bitmap(CaveConfig.worldSize, CaveConfig.worldSize))
         {
             using (Graphics g = Graphics.FromImage(b))
             {
                 g.Clear(BackgroundColor);
-                DrawGrid(b, g, CaveBuilder.worldSize, gridSize);
+                DrawGrid(b, g, CaveConfig.worldSize, gridSize);
                 DrawEdges(g, graph.Edges.ToList());
-                DrawPrefabs(b, g, cachedPrefabs.Prefabs);
+                DrawPrefabs(b, g, prefabManager.Prefabs);
             }
 
             b.Save(@"graph.png", ImageFormat.Png);
@@ -169,12 +169,12 @@ public static class CaveViewer
 
     public static void PathCommand(string[] args)
     {
-        CaveBuilder.worldSize = 100;
-        CaveBuilder.radiationZoneMargin = 0;
+        CaveConfig.worldSize = 100;
+        CaveConfig.radiationZoneMargin = 0;
         // CaveBuilder.rand = new Random();
 
         if (args.Length > 1)
-            CaveBuilder.worldSize = int.Parse(args[1]);
+            CaveConfig.worldSize = int.Parse(args[1]);
 
         var p1 = new CavePrefab(0)
         {
@@ -184,14 +184,14 @@ public static class CaveViewer
 
         var p2 = new CavePrefab(1)
         {
-            position = new Vector3i(20, 50, CaveBuilder.worldSize - 30),
+            position = new Vector3i(20, 50, CaveConfig.worldSize - 30),
             Size = new Vector3i(20, 10, 20),
         };
 
-        p1.UpdateMarkers(CaveBuilder.rand);
-        p2.UpdateMarkers(CaveBuilder.rand);
+        p1.UpdateMarkers(CaveConfig.rand);
+        p2.UpdateMarkers(CaveConfig.rand);
 
-        var cachedPrefabs = new CavePrefabManager();
+        var cachedPrefabs = new CavePrefabManager(CaveConfig.worldSize);
         cachedPrefabs.AddPrefab(p1);
         cachedPrefabs.AddPrefab(p2);
 
@@ -310,14 +310,18 @@ public static class CaveViewer
 
     public static void CaveCommand(string[] args)
     {
-        CaveBuilder.worldSize = 1024;
+        CaveConfig.worldSize = 1024;
 
         if (args.Length > 1)
-            CaveBuilder.worldSize = int.Parse(args[1]);
+            CaveConfig.worldSize = int.Parse(args[1]);
 
         var timer = CaveUtils.StartTimer();
         var prefabs = PrefabLoader.LoadPrefabs().Values.ToList();
-        var cachedPrefabs = CaveBuilder.GetRandomPrefabs(CaveBuilder.PREFAB_COUNT, prefabs);
+        var cachedPrefabs = new CavePrefabManager(CaveConfig.worldSize);
+        var rand = new Random(CaveConfig.SEED);
+        var prefabCount = CaveConfig.TargetPrefabCount;
+
+        cachedPrefabs.GetRandomPrefabs(rand, prefabCount, prefabs);
 
         Log.Out("Start solving graph...");
 
@@ -330,7 +334,7 @@ public static class CaveViewer
         var cavemap = new CaveMap();
         var localMinimas = new HashSet<CaveBlock>();
 
-        using (var b = new Bitmap(CaveBuilder.worldSize, CaveBuilder.worldSize))
+        using (var b = new Bitmap(CaveConfig.worldSize, CaveConfig.worldSize))
         {
             using (Graphics g = Graphics.FromImage(b))
             {
@@ -363,7 +367,7 @@ public static class CaveViewer
         Log.Out($"{cavemap.Count:N0} cave blocks generated ({cavemap.TunnelsCount} unique tunnels), timer={timer.ElapsedMilliseconds:N0}ms, memory={(GC.GetTotalMemory(true) - memoryBefore) / 1_048_576.0:F1}MB.");
         Log.Out($"{localMinimas.Count} local minimas");
 
-        if (CaveBuilder.worldSize > 1024)
+        if (CaveConfig.worldSize > 1024)
             return;
 
         bool isFloor(CaveBlock block) => block.isFloor && block.isFlat;
@@ -585,7 +589,7 @@ public static class CaveViewer
     public static void NoiseCommand(string[] args)
     {
         var roomNoise = new CaveNoise(
-            seed: CaveBuilder.SEED + 13,
+            seed: CaveConfig.SEED + 13,
             octaves: 2,
             frequency: 0.015f,
             threshold: -0.4f,

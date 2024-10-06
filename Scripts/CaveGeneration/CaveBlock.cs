@@ -136,7 +136,7 @@ public class CaveBlock
 
     public Vector3i ToWorldPos()
     {
-        return ToVector3i() - CaveBuilder.HalfWorldSize;
+        return ToVector3i() - CaveConfig.HalfWorldSize;
     }
 
     public override string ToString()

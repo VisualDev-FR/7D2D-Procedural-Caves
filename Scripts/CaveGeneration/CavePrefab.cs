@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using WorldGenerationEngineFinal;
 using Random = System.Random;
 
@@ -79,9 +78,9 @@ public class CavePrefab
         this.position = position;
 
         Size = new Vector3i(
-            rand.Next(CaveBuilder.MIN_PREFAB_SIZE, CaveBuilder.MAX_PREFAB_SIZE),
-            rand.Next(CaveBuilder.MIN_PREFAB_SIZE, CaveBuilder.MAX_PREFAB_SIZE),
-            rand.Next(CaveBuilder.MIN_PREFAB_SIZE, CaveBuilder.MAX_PREFAB_SIZE)
+            rand.Next(CaveConfig.MIN_PREFAB_SIZE, CaveConfig.MAX_PREFAB_SIZE),
+            rand.Next(CaveConfig.MIN_PREFAB_SIZE, CaveConfig.MAX_PREFAB_SIZE),
+            rand.Next(CaveConfig.MIN_PREFAB_SIZE, CaveConfig.MAX_PREFAB_SIZE)
         );
 
         UpdateMarkers(rand, markerCount);
@@ -236,7 +235,7 @@ public class CavePrefab
 
     public void SetRandomPosition(Random rand, int mapSize)
     {
-        int offset = CaveBuilder.radiationSize + CaveBuilder.radiationZoneMargin;
+        int offset = CaveConfig.radiationSize + CaveConfig.radiationZoneMargin;
 
         position = new Vector3i(
             rand.Next(offset, mapSize - offset - Size.x),
@@ -244,7 +243,7 @@ public class CavePrefab
             rand.Next(offset, mapSize - offset - Size.z)
         );
 
-        position.y = rand.Next(CaveBuilder.bedRockMargin, (int)(WorldBuilder.Instance.GetHeight(position.x, position.y) - Size.y));
+        position.y = rand.Next(CaveConfig.bedRockMargin, (int)(WorldBuilder.Instance.GetHeight(position.x, position.y) - Size.y));
 
         foreach (var node in nodes)
         {

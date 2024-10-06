@@ -21,10 +21,10 @@ public class CaveChunksProvider
 
     public static int GetRegionID(Vector2s chunkPos)
     {
-        var region_x = chunkPos.x / CaveBuilder.chunkRegionGridSize;
-        var region_z = chunkPos.z / CaveBuilder.chunkRegionGridSize;
+        var region_x = chunkPos.x / CaveConfig.chunkRegionGridSize;
+        var region_z = chunkPos.z / CaveConfig.chunkRegionGridSize;
 
-        var regionID = region_x + region_z * CaveBuilder.regionGridSize;
+        var regionID = region_x + region_z * CaveConfig.regionGridSize;
 
         return regionID;
     }
@@ -40,7 +40,7 @@ public class CaveChunksProvider
 
     public static int HashCodeFromWorldPos(int x, int y, int z)
     {
-        int halfWorldSize = CaveBuilder.worldSize / 2;
+        int halfWorldSize = CaveConfig.worldSize / 2;
 
         return CaveBlock.GetHashCode(
             x + halfWorldSize,
@@ -52,8 +52,8 @@ public class CaveChunksProvider
     public static Vector2s GetChunkPos(Chunk chunk)
     {
         return new Vector2s(
-            (short)(chunk.ChunkPos.x + (CaveBuilder.worldSize >> 5)),
-            (short)(chunk.ChunkPos.z + (CaveBuilder.worldSize >> 5))
+            (short)(chunk.ChunkPos.x + (CaveConfig.worldSize >> 5)),
+            (short)(chunk.ChunkPos.z + (CaveConfig.worldSize >> 5))
         );
     }
 
@@ -68,8 +68,8 @@ public class CaveChunksProvider
     public static Vector2s GetChunkPos(short worldX, short worldZ)
     {
         return new Vector2s(
-            (short)((worldX >> 4) + (CaveBuilder.worldSize >> 5)),
-            (short)((worldZ >> 4) + (CaveBuilder.worldSize >> 5))
+            (short)((worldX >> 4) + (CaveConfig.worldSize >> 5)),
+            (short)((worldZ >> 4) + (CaveConfig.worldSize >> 5))
         );
     }
 
@@ -251,7 +251,7 @@ public class CaveChunksProvider
 
         var caveBlocks = new HashSet<CaveBlock>();
         var visitedChunks = new HashSet<Vector2s>();
-        var worldSize = CaveBuilder.worldSize;
+        var worldSize = CaveConfig.worldSize;
         var chunkPos = GetChunkPos(playerPosition);
         var tunnelIDs = FindTunnelsNearPosition(playerPosition);
 
