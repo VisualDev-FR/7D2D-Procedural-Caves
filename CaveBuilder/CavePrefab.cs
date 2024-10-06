@@ -361,7 +361,7 @@ public class CavePrefab
         {
             for (int z = z0chunk; z <= z1Chunk; z++)
             {
-                yield return PrefabCache.GetChunkHash(x, z);
+                yield return CavePrefabManager.GetChunkHash(x, z);
             }
         }
     }

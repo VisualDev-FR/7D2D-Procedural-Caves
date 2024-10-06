@@ -224,7 +224,7 @@ public class Graph
         {
             if (edge.pruned)
             {
-                // RemoveEdge(edge);
+                RemoveEdge(edge);
                 edge.colorName = "DarkGray";
                 edge.width = 1;
                 edge.opacity = 50;

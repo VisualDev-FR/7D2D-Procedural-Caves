@@ -70,9 +70,9 @@ public static class CavePlanner
         return allCavePrefabs[entranceName];
     }
 
-    private static PrefabCache GetUsedCavePrefabs()
+    private static CavePrefabManager GetUsedCavePrefabs()
     {
-        var prefabs = new PrefabCache();
+        var prefabs = new CavePrefabManager();
 
         foreach (var pdi in PrefabManager.UsedPrefabsWorld)
         {
@@ -193,7 +193,7 @@ public static class CavePlanner
         return false;
     }
 
-    private static PrefabDataInstance TrySpawnCavePrefab(PrefabData prefabData, PrefabCache others)
+    private static PrefabDataInstance TrySpawnCavePrefab(PrefabData prefabData, CavePrefabManager others)
     {
         int maxPlacementAttempts = 20;
 
@@ -221,7 +221,7 @@ public static class CavePlanner
         return null;
     }
 
-    public static IEnumerator SpawnUnderGroundPrefabs(int count, PrefabCache cachedPrefabs)
+    public static IEnumerator SpawnUnderGroundPrefabs(int count, CavePrefabManager cachedPrefabs)
     {
         var undergroundPrefabs = GetUndergroundPrefabs();
 
@@ -245,7 +245,7 @@ public static class CavePlanner
         yield return null;
     }
 
-    private static void AddSurfacePrefabs(PrefabCache cachedPrefabs)
+    private static void AddSurfacePrefabs(CavePrefabManager cachedPrefabs)
     {
         var rwgTileClusters = new Dictionary<string, List<BoundingBox>>();
 
@@ -291,7 +291,7 @@ public static class CavePlanner
         return resultat;
     }
 
-    private static IEnumerator SpawnCaveRooms(int count, PrefabCache cachedPrefabs)
+    private static IEnumerator SpawnCaveRooms(int count, CavePrefabManager cachedPrefabs)
     {
         for (int i = 0; i < count; i++)
         {
@@ -342,9 +342,9 @@ public static class CavePlanner
         if (WorldBuilder.IsCanceled)
             yield break;
 
-        PrefabCache cachedPrefabs = GetUsedCavePrefabs();
+        CavePrefabManager prefabManager = GetUsedCavePrefabs();
 
-        foreach (var prefab in cachedPrefabs.Prefabs)
+        foreach (var prefab in prefabManager.Prefabs)
         {
             Log.Out($"[Cave] Cave entrance '{prefab.Name}' added at {prefab.position}");
         }
@@ -356,17 +356,17 @@ public static class CavePlanner
 
         yield return WorldBuilder.SetMessage("Spawning cave prefabs...", _logToConsole: true);
 
-        yield return SpawnUnderGroundPrefabs(CaveBuilder.PREFAB_COUNT, cachedPrefabs);
-        yield return SpawnCaveRooms(1000, cachedPrefabs);
+        yield return SpawnUnderGroundPrefabs(CaveBuilder.PREFAB_COUNT, prefabManager);
+        yield return SpawnCaveRooms(1000, prefabManager);
 
-        caveGraph = new Graph(cachedPrefabs.Prefabs);
+        caveGraph = new Graph(prefabManager.Prefabs);
 
         foreach (var edge in caveGraph.Edges)
         {
             Log.Out($"[Cave] [{edge.node1.position}], [{edge.node2.position}]");
         }
 
-        AddSurfacePrefabs(cachedPrefabs);
+        AddSurfacePrefabs(prefabManager);
 
         var threads = new List<Thread>();
         var subLists = SplitList(caveGraph.Edges.ToList(), 6);
@@ -388,7 +388,7 @@ public static class CavePlanner
                     var start = edge.node1;
                     var target = edge.node2;
 
-                    var tunnel = new CaveTunnel(edge, cachedPrefabs);
+                    var tunnel = new CaveTunnel(edge, prefabManager);
 
                     lock (lockObject)
                     {
@@ -427,7 +427,7 @@ public static class CavePlanner
             }
         }
 
-        yield return cavemap.SetWaterCoroutine(localMinimas, cachedPrefabs);
+        yield return cavemap.SetWaterCoroutine(localMinimas, prefabManager);
 
         if (WorldBuilder.IsCanceled)
             yield break;

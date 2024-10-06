@@ -11,7 +11,7 @@ public class CaveMap : IEnumerable<CaveBlock>
 
     private readonly Vector3i size;
 
-    private readonly PrefabCache cachedPrefabs;
+    private readonly CavePrefabManager cachedPrefabs;
 
     private readonly Dictionary<int, CaveBlock> caveblocks;
 
@@ -21,7 +21,7 @@ public class CaveMap : IEnumerable<CaveBlock>
 
     public int TunnelsCount => tunnels.Count;
 
-    public CaveMap(Vector3i position, Vector3i size, PrefabCache cachedPrefabs)
+    public CaveMap(Vector3i position, Vector3i size, CavePrefabManager cachedPrefabs)
     {
         caveblocks = new Dictionary<int, CaveBlock>();
 
@@ -197,7 +197,7 @@ public class CaveMap : IEnumerable<CaveBlock>
         throw new Exception("Lower point not found");
     }
 
-    private HashSet<int> ExpandWater(CaveBlock waterStart, PrefabCache cachedPrefabs)
+    private HashSet<int> ExpandWater(CaveBlock waterStart, CavePrefabManager cachedPrefabs)
     {
         CaveUtils.Assert(waterStart is CaveBlock, "null water start");
 
@@ -256,7 +256,7 @@ public class CaveMap : IEnumerable<CaveBlock>
         return waterHashes;
     }
 
-    public void SetWater(HashSet<CaveBlock> localMinimas, PrefabCache cachedPrefabs)
+    public void SetWater(HashSet<CaveBlock> localMinimas, CavePrefabManager cachedPrefabs)
     {
         if (!CaveConfig.generateWater)
             return;
@@ -287,7 +287,7 @@ public class CaveMap : IEnumerable<CaveBlock>
         return caveblocks.ContainsKey(hashcode);
     }
 
-    public IEnumerator SetWaterCoroutine(HashSet<CaveBlock> localMinimas, PrefabCache cachedPrefabs)
+    public IEnumerator SetWaterCoroutine(HashSet<CaveBlock> localMinimas, CavePrefabManager cachedPrefabs)
     {
         int index = 0;
 

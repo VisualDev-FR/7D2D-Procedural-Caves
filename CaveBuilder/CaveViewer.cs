@@ -135,7 +135,7 @@ public static class CaveViewer
 
         var random = new Random(1337);
 
-        var cachedPrefabs = new PrefabCache();
+        var cachedPrefabs = new CavePrefabManager();
 
         cachedPrefabs.SetupBoundaryPrefabs(random, CaveBuilder.worldSize, gridSize);
 
@@ -191,7 +191,7 @@ public static class CaveViewer
         p1.UpdateMarkers(CaveBuilder.rand);
         p2.UpdateMarkers(CaveBuilder.rand);
 
-        var cachedPrefabs = new PrefabCache();
+        var cachedPrefabs = new CavePrefabManager();
         cachedPrefabs.AddPrefab(p1);
         cachedPrefabs.AddPrefab(p2);
 
