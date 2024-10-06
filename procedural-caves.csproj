@@ -121,8 +121,8 @@
     <Compile Include="Scripts\CaveNetworking\GraphNode.cs" />
 
     <!-- CaveRenderer -->
-    <Compile Include="Scripts\CaveRenderer\CaveBlocksProvider.cs" />
-    <Compile Include="Scripts\CaveRenderer\CaveGenerator.cs" />
+    <Compile Include="Scripts\CaveProvider\CaveBlocksProvider.cs" />
+    <Compile Include="Scripts\CaveProvider\CaveGenerator.cs" />
 
     <!-- ConsoleCmd -->
     <Compile Include="Scripts\ConsoleCmd\CaveDebugConsoleCmd.cs" />
@@ -150,7 +150,6 @@
     <!-- Root -->
     <Compile Include="Scripts\CaveConfig.cs" />
     <Compile Include="Scripts\CaveUtils.cs" />
-    <Compile Include="Scripts\CaveBuilder.cs" />
 
   </ItemGroup>
   <ItemGroup />

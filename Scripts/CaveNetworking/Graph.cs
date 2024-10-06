@@ -416,7 +416,7 @@ public class Graph
     {
         var points = prefabs.SelectMany(prefab => prefab.DelauneyPoints());
         var triangulator = new DelaunayTriangulator();
-        var worldSize = CaveBuilder.worldSize;
+        var worldSize = CaveConfig.worldSize;
 
         foreach (var triangle in triangulator.BowyerWatson(points, worldSize, worldSize))
         {

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 
+
 public class CavePrefabManager
 {
     private static readonly HashSet<CavePrefab> emptyPrefabsHashset = new HashSet<CavePrefab>();
@@ -15,10 +16,13 @@ public class CavePrefabManager
 
     public readonly List<CavePrefab> Prefabs;
 
+    public readonly int worldSize;
+
     public int Count => Prefabs.Count;
 
-    public CavePrefabManager()
+    public CavePrefabManager(int worldSize)
     {
+        this.worldSize = worldSize;
         Prefabs = new List<CavePrefab>();
         groupedCavePrefabs = new Dictionary<int, List<CavePrefab>>();
         nearestPrefabs = new Dictionary<int, HashSet<CavePrefab>>();
@@ -140,7 +144,62 @@ public class CavePrefabManager
         return false;
     }
 
-    public void SetupBoundaryPrefabs(Random rand, int worldSize, int tileSize)
+    private bool TryPlacePrefab(Random rand, ref CavePrefab prefab)
+    {
+        int minDist = prefab.prefabDataInstance == null ? int.MaxValue : prefab.prefabDataInstance.prefab.DuplicateRepeatDistance;
+        int overLapMargin = CaveConfig.overLapMargin;
+        int maxTries = 10;
+
+        while (maxTries-- > 0)
+        {
+            prefab.SetRandomPosition(rand, worldSize);
+
+            if (!prefab.OverLaps2D(Prefabs, overLapMargin) && !IsNearSamePrefab(prefab, minDist))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public void GetRandomPrefabs(Random rand, int targetCount, List<PrefabData> prefabs)
+    {
+        Log.Out("Start POIs placement...");
+
+        for (int i = 0; i < targetCount; i++)
+        {
+            var pdi = new PrefabDataInstance(Count + 1, Vector3i.zero, (byte)rand.Next(4), prefabs[i % prefabs.Count]);
+            var prefab = new CavePrefab(pdi.id, pdi, Vector3i.zero);
+
+            if (TryPlacePrefab(rand, ref prefab))
+            {
+                AddPrefab(prefab);
+            }
+        }
+
+        Log.Out($"{Count} / {targetCount} prefabs added");
+    }
+
+    public void GetRandomPrefabs(Random rand, int targetCount, int minMarkers = 4, int maxMarkers = 4)
+    {
+        Log.Out("Start POIs placement...");
+
+        for (int i = 0; i < targetCount; i++)
+        {
+            var markerCount = rand.Next(minMarkers, maxMarkers);
+            var prefab = new CavePrefab(Count + 1, Vector3i.zero, rand, markerCount);
+
+            if (TryPlacePrefab(rand, ref prefab))
+            {
+                AddPrefab(prefab);
+            }
+        }
+
+        Log.Out($"{Count} / {targetCount} prefabs added");
+    }
+
+    public void SetupBoundaryPrefabs(Random rand, int tileSize)
     {
         var tileGridSize = worldSize / tileSize;
         var uBound = 1;

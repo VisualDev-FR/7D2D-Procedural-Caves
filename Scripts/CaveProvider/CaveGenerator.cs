@@ -30,10 +30,10 @@ public static class CaveGenerator
 
         if (isEnabled)
         {
-            CaveBuilder.worldSize = GetWorldSize(worldName);
+            CaveConfig.worldSize = GetWorldSize(worldName);
             caveChunksProvider = new CaveChunksProvider(worldName);
 
-            Log.Out($"[Cave] init caveGenerator for world '{worldName}', size: {CaveBuilder.worldSize}");
+            Log.Out($"[Cave] init caveGenerator for world '{worldName}', size: {CaveConfig.worldSize}");
         }
         else
         {

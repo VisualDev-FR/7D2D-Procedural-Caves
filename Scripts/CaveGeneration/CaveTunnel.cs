@@ -38,7 +38,7 @@ public class CaveTunnel
         new Vector3(0.75f, 0.75f, 0.75f)
     };
 
-    private Vector3i HalfWorldSize => new Vector3i(CaveBuilder.worldSize / 2, 0, CaveBuilder.worldSize / 2);
+    private Vector3i HalfWorldSize => new Vector3i(CaveConfig.worldSize / 2, 0, CaveConfig.worldSize / 2);
 
     public CaveTunnel(GraphEdge edge, CavePrefabManager cachedPrefabs)
     {
@@ -86,8 +86,8 @@ public class CaveTunnel
         var queue = new HashedPriorityQueue<AstarNode>();
         var visited = new HashSet<int>();
 
-        int bedRockMargin = CaveBuilder.bedRockMargin + 1;
-        int terrainMargin = CaveBuilder.terrainMargin + 1;
+        int bedRockMargin = CaveConfig.bedRockMargin + 1;
+        int terrainMargin = CaveConfig.terrainMargin + 1;
         int sqrMinPrefabDistance = 100;
         int neighborDistance = 1;
         int index = 0;
@@ -348,8 +348,8 @@ public class CaveTunnel
             var position = center + spheres[hashcode];
 
             if (
-                   position.y > CaveBuilder.bedRockMargin
-                && position.y + CaveBuilder.terrainMargin < (int)WorldBuilder.Instance.GetHeight(position.x, position.z)
+                   position.y > CaveConfig.bedRockMargin
+                && position.y + CaveConfig.terrainMargin < (int)WorldBuilder.Instance.GetHeight(position.x, position.z)
             )
             {
                 yield return new CaveBlock(position);

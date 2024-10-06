@@ -36,8 +36,8 @@ public static class CavePlanner
     {
         var seed = WorldBuilder.Instance.Seed + WorldSize;
 
-        CaveBuilder.worldSize = WorldSize;
-        CaveBuilder.rand = new Random(seed);
+        CaveConfig.worldSize = WorldSize;
+        CaveConfig.rand = new Random(seed);
 
         usedEntrances = new HashSet<string>();
         wildernessEntranceNames = new List<string>();
@@ -56,11 +56,11 @@ public static class CavePlanner
 
         if (unusedEntranceNames.Count > 0)
         {
-            entranceName = unusedEntranceNames[CaveBuilder.rand.Next(unusedEntranceNames.Count)];
+            entranceName = unusedEntranceNames[CaveConfig.rand.Next(unusedEntranceNames.Count)];
         }
         else
         {
-            entranceName = wildernessEntranceNames[CaveBuilder.rand.Next(wildernessEntranceNames.Count)];
+            entranceName = wildernessEntranceNames[CaveConfig.rand.Next(wildernessEntranceNames.Count)];
         }
 
         // Log.Out($"[Cave] random selected entrance: '{entranceName}'");
@@ -72,7 +72,7 @@ public static class CavePlanner
 
     private static CavePrefabManager GetUsedCavePrefabs()
     {
-        var prefabs = new CavePrefabManager();
+        var prefabs = new CavePrefabManager(WorldSize);
 
         foreach (var pdi in PrefabManager.UsedPrefabsWorld)
         {
@@ -157,12 +157,12 @@ public static class CavePlanner
 
     private static Vector3i GetRandomPositionFor(Vector3i size)
     {
-        var offset = CaveBuilder.radiationSize + CaveBuilder.radiationZoneMargin;
+        var offset = CaveConfig.radiationSize + CaveConfig.radiationZoneMargin;
 
         return new Vector3i(
-            _x: CaveBuilder.rand.Next(offset, WorldSize - offset - size.x),
+            _x: CaveConfig.rand.Next(offset, WorldSize - offset - size.x),
             _y: 0,
-            _z: CaveBuilder.rand.Next(offset, WorldSize - offset - size.z)
+            _z: CaveConfig.rand.Next(offset, WorldSize - offset - size.z)
         );
     }
 
@@ -199,21 +199,21 @@ public static class CavePlanner
 
         while (maxPlacementAttempts-- > 0)
         {
-            int rotation = CaveBuilder.rand.Next(4);
+            int rotation = CaveConfig.rand.Next(4);
 
             Vector3i rotatedSize = CaveUtils.GetRotatedSize(prefabData.size, rotation);
             Vector3i position = GetRandomPositionFor(rotatedSize);
 
             var minTerrainHeight = GetMinTerrainHeight(position, rotatedSize);
-            var canBePlacedUnderTerrain = minTerrainHeight > (CaveBuilder.bedRockMargin + prefabData.size.y + CaveBuilder.terrainMargin);
+            var canBePlacedUnderTerrain = minTerrainHeight > (CaveConfig.bedRockMargin + prefabData.size.y + CaveConfig.terrainMargin);
 
             if (!canBePlacedUnderTerrain)
                 continue;
 
-            if (OverLaps2D(position, rotatedSize, others.Prefabs, CaveBuilder.overLapMargin))
+            if (OverLaps2D(position, rotatedSize, others.Prefabs, CaveConfig.overLapMargin))
                 continue;
 
-            position.y = CaveBuilder.rand.Next(CaveBuilder.bedRockMargin, minTerrainHeight - prefabData.size.y - CaveBuilder.terrainMargin);
+            position.y = CaveConfig.rand.Next(CaveConfig.bedRockMargin, minTerrainHeight - prefabData.size.y - CaveConfig.terrainMargin);
 
             return new PrefabDataInstance(PrefabManager.PrefabInstanceId++, position - HalfWorldSize, (byte)rotation, prefabData);
         }
@@ -277,20 +277,6 @@ public static class CavePlanner
         }
     }
 
-    private static List<List<T>> SplitList<T>(List<T> parent, int count)
-    {
-        List<List<T>> resultat = new List<List<T>>();
-        int subListSize = (int)Math.Ceiling((double)parent.Count / count);
-
-        for (int i = 0; i < parent.Count; i += subListSize)
-        {
-            List<T> subList = parent.GetRange(i, Math.Min(subListSize, parent.Count - i));
-            resultat.Add(subList);
-        }
-
-        return resultat;
-    }
-
     private static IEnumerator SpawnCaveRooms(int count, CavePrefabManager cachedPrefabs)
     {
         for (int i = 0; i < count; i++)
@@ -300,15 +286,15 @@ public static class CavePlanner
             for (int j = 0; j < maxTries; j++)
             {
                 Vector3i size = new Vector3i(
-                    CaveBuilder.rand.Next(20, 50),
-                    CaveBuilder.rand.Next(15, 30),
-                    CaveBuilder.rand.Next(30, 100)
+                    CaveConfig.rand.Next(20, 50),
+                    CaveConfig.rand.Next(15, 30),
+                    CaveConfig.rand.Next(30, 100)
                 );
 
                 Vector3i position = GetRandomPositionFor(size);
 
                 var minTerrainHeight = GetMinTerrainHeight(position, size);
-                var canBePlacedUnderTerrain = minTerrainHeight > (CaveBuilder.bedRockMargin + size.y + CaveBuilder.terrainMargin);
+                var canBePlacedUnderTerrain = minTerrainHeight > (CaveConfig.bedRockMargin + size.y + CaveConfig.terrainMargin);
 
                 if (!canBePlacedUnderTerrain)
                     continue;
@@ -316,7 +302,7 @@ public static class CavePlanner
                 if (OverLaps2D(position, size, cachedPrefabs.Prefabs, 30))
                     continue;
 
-                position.y = CaveBuilder.rand.Next(CaveBuilder.bedRockMargin, minTerrainHeight - size.y - CaveBuilder.terrainMargin);
+                position.y = CaveConfig.rand.Next(CaveConfig.bedRockMargin, minTerrainHeight - size.y - CaveConfig.terrainMargin);
 
                 var prefab = new CavePrefab(cachedPrefabs.Count + 1)
                 {
@@ -324,13 +310,13 @@ public static class CavePlanner
                     position = position,
                 };
 
-                prefab.UpdateMarkers(CaveBuilder.rand);
-                var room = new CaveRoom(prefab, CaveBuilder.rand.Next());
+                prefab.UpdateMarkers(CaveConfig.rand);
+                var room = new CaveRoom(prefab, CaveConfig.rand.Next());
 
                 cavemap.AddRoom(room);
                 cachedPrefabs.AddPrefab(prefab);
 
-                Log.Out($"Room added at '{position - CaveBuilder.HalfWorldSize}', size: '{size}'");
+                Log.Out($"Room added at '{position - CaveConfig.HalfWorldSize}', size: '{size}'");
                 break;
             }
         }
@@ -356,7 +342,7 @@ public static class CavePlanner
 
         yield return WorldBuilder.SetMessage("Spawning cave prefabs...", _logToConsole: true);
 
-        yield return SpawnUnderGroundPrefabs(CaveBuilder.PREFAB_COUNT, prefabManager);
+        yield return SpawnUnderGroundPrefabs(CaveConfig.TargetPrefabCount, prefabManager);
         yield return SpawnCaveRooms(1000, prefabManager);
 
         caveGraph = new Graph(prefabManager.Prefabs);
@@ -369,7 +355,7 @@ public static class CavePlanner
         AddSurfacePrefabs(prefabManager);
 
         var threads = new List<Thread>();
-        var subLists = SplitList(caveGraph.Edges.ToList(), 6);
+        var subLists = CaveUtils.SplitList(caveGraph.Edges.ToList(), 6);
         var localMinimas = new HashSet<CaveBlock>();
         var lockObject = new object();
         int index = 0;

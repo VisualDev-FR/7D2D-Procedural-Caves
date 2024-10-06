@@ -19,7 +19,7 @@ public class CaveNoise
     public float scale = 1f;
 
     public static CaveNoise pathingNoise = new CaveNoise(
-        seed: CaveBuilder.SEED,
+        seed: CaveConfig.SEED,
         octaves: 1,
         frequency: 0.15f,
         threshold: -0.2f,
@@ -29,7 +29,7 @@ public class CaveNoise
     );
 
     public static CaveNoise waterNoise = new CaveNoise(
-        seed: CaveBuilder.SEED + 13,
+        seed: CaveConfig.SEED + 13,
         octaves: 1,
         frequency: 0.002f,
         threshold: -0.3f,
@@ -45,7 +45,7 @@ public class CaveNoise
 
         if (invert) this.threshold *= -1;
 
-        noise = new FastNoiseLite(seed != -1 ? seed : CaveBuilder.SEED);
+        noise = new FastNoiseLite(seed != -1 ? seed : CaveConfig.SEED);
         noise.SetFractalType(fractalType);
         noise.SetNoiseType(noiseType);
         noise.SetFractalOctaves(octaves);
