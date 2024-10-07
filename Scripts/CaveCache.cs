@@ -1,3 +1,4 @@
+using System;
 using WorldGenerationEngineFinal;
 
 public static class CaveCache
@@ -6,9 +7,21 @@ public static class CaveCache
 
     public static CavePlanner cavePlanner;
 
+    public static CavePrefabManager cavePrefabManager;
+
     public static void Init(WorldBuilder worldBuilder)
     {
-        caveEntrancesPlanner = new CaveEntrancesPlanner(worldBuilder);
         cavePlanner = new CavePlanner(worldBuilder);
+        cavePrefabManager = new CavePrefabManager(worldBuilder);
+        caveEntrancesPlanner = new CaveEntrancesPlanner(worldBuilder);
+    }
+
+    public static void Clear()
+    {
+        caveEntrancesPlanner = null;
+        cavePlanner = null;
+        cavePrefabManager = null;
+
+        GC.Collect();
     }
 }

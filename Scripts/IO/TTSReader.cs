@@ -311,13 +311,13 @@ public class TTSReader
             {
                 Vector3i currentPosition = queue.First();
 
-                clusterMin.x = CaveUtils.FastMin(clusterMin.x, currentPosition.x);
-                clusterMin.y = CaveUtils.FastMin(clusterMin.y, currentPosition.y);
-                clusterMin.z = CaveUtils.FastMin(clusterMin.z, currentPosition.z);
+                clusterMin.x = Utils.FastMin(clusterMin.x, currentPosition.x);
+                clusterMin.y = Utils.FastMin(clusterMin.y, currentPosition.y);
+                clusterMin.z = Utils.FastMin(clusterMin.z, currentPosition.z);
 
-                clusterMax.x = CaveUtils.FastMax(clusterMax.x, currentPosition.x + 1);
-                clusterMax.y = CaveUtils.FastMax(clusterMax.y, currentPosition.y + 1);
-                clusterMax.z = CaveUtils.FastMax(clusterMax.z, currentPosition.z + 1);
+                clusterMax.x = Utils.FastMax(clusterMax.x, currentPosition.x + 1);
+                clusterMax.y = Utils.FastMax(clusterMax.y, currentPosition.y + 1);
+                clusterMax.z = Utils.FastMax(clusterMax.z, currentPosition.z + 1);
 
                 cluster.Add(currentPosition);
                 queue.Remove(currentPosition);

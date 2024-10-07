@@ -317,4 +317,10 @@ public static class CaveUtils
 
         return resultat;
     }
+
+    public static Vector3i HalfWorldSize(int worldSize)
+    {
+        return new Vector3i(worldSize >> 1, 0, worldSize >> 1);
+    }
+
 }

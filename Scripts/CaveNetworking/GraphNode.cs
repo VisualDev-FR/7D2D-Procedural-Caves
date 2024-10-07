@@ -25,7 +25,7 @@ public class GraphNode
         CaveUtils.Assert(marker != null, $"null marker");
         CaveUtils.Assert(marker.size != null, $"null marker size");
 
-        NodeRadius = CaveUtils.FastMax(1, CaveUtils.FastMin(CaveUtils.FastMax(marker.size.x, marker.size.z), marker.size.y) / 2);
+        NodeRadius = Utils.FastMax(1, Utils.FastMin(Utils.FastMax(marker.size.x, marker.size.z), marker.size.y) / 2);
 
         sqrRadius = NodeRadius * NodeRadius;
 
@@ -104,7 +104,7 @@ public class GraphNode
 
         var markerStart = prefab.position + marker.start;
         var markerEnd = markerStart + marker.size;
-        var radius = CaveUtils.FastMax(5, CaveUtils.FastMax(marker.size.x, marker.size.z, marker.size.y) / 2);
+        var radius = Utils.FastMax(5, CaveUtils.FastMax(marker.size.x, marker.size.z, marker.size.y) / 2);
         var sqrRadius = radius * radius;
 
         CaveUtils.Assert(radius >= 5, $"marker radius should be over 5: {radius}");

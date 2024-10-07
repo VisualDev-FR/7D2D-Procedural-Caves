@@ -93,9 +93,9 @@ public class CavePrefab
         var groupName = "";
 
         // var maxMarkerSize = 10;
-        int sizeX = CaveUtils.FastMin(5, xMax); // rand.Next(CaveUtils.FastMin(2, xMax), CaveUtils.FastMin(maxMarkerSize, xMax));
-        int sizeY = CaveUtils.FastMin(5, yMax); // rand.Next(CaveUtils.FastMin(2, yMax), CaveUtils.FastMin(maxMarkerSize, yMax));
-        int sizeZ = CaveUtils.FastMin(5, zMax); // rand.Next(CaveUtils.FastMin(2, zMax), CaveUtils.FastMin(maxMarkerSize, zMax));
+        int sizeX = Utils.FastMin(5, xMax); // rand.Next(Utils.FastMin(2, xMax), Utils.FastMin(maxMarkerSize, xMax));
+        int sizeY = Utils.FastMin(5, yMax); // rand.Next(Utils.FastMin(2, yMax), Utils.FastMin(maxMarkerSize, yMax));
+        int sizeZ = Utils.FastMin(5, zMax); // rand.Next(Utils.FastMin(2, zMax), Utils.FastMin(maxMarkerSize, zMax));
 
         int px = aligned ? Size.x / 2 : rand.Next(1, xMax);
         int pz = aligned ? Size.z / 2 : rand.Next(1, zMax);

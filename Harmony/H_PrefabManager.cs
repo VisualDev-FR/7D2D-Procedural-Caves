@@ -41,7 +41,7 @@ public static class PrefabManager_LoadPrefabs
 
             // PATCH START //
 
-            CaveCache.cavePlanner.TryCacheCavePrefab(prefabData);
+            CaveCache.cavePrefabManager.TryCacheCavePrefab(prefabData);
 
             if (!prefabData.Tags.Test_AnySet(filter) && !prefabData.Tags.Test_AllSet(wildernessCaveEntrance))
             {

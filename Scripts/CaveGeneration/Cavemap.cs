@@ -167,7 +167,7 @@ public class CaveMap : IEnumerable<CaveBlock>
             {
                 int region_x = caveBlock.x / CaveConfig.RegionSize;
                 int region_z = caveBlock.z / CaveConfig.RegionSize;
-                int regionID = region_x + region_z * CaveConfig.regionGridSize;
+                int regionID = region_x + region_z * CaveConfig.RegionGridSize;
 
                 var writer = multistream.GetWriter($"region_{regionID}.bin");
                 caveBlock.ToBinaryStream(writer);
@@ -287,7 +287,7 @@ public class CaveMap : IEnumerable<CaveBlock>
         return caveblocks.ContainsKey(hashcode);
     }
 
-    public IEnumerator SetWaterCoroutine(WorldBuilder worldBuilder, HashSet<CaveBlock> localMinimas, CavePrefabManager cachedPrefabs)
+    public IEnumerator SetWaterCoroutine(WorldBuilder worldBuilder, HashSet<CaveBlock> localMinimas)
     {
         int index = 0;
 

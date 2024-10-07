@@ -13,7 +13,7 @@ public class CaveEntrancesPlanner
 {
     private GameRandom gameRandom;
 
-    private WorldBuilder worldBuilder;
+    private readonly WorldBuilder worldBuilder;
 
     public CaveEntrancesPlanner(WorldBuilder worldBuilder)
     {
@@ -45,7 +45,7 @@ public class CaveEntrancesPlanner
                 continue;
 
             var tile = wildernessTiles[tileIndex % wildernessTiles.Count];
-            var prefab = CaveCache.cavePlanner.SelectRandomWildernessEntrance();
+            var prefab = CaveCache.cavePrefabManager.SelectRandomWildernessEntrance();
 
             if (TrySpawnWildernessCaveEntrance(tile, prefab))
             {
@@ -422,7 +422,7 @@ public class CaveEntrancesPlanner
         {
             int sizeX = wildernessPrefab.size.x;
             int sizeZ = wildernessPrefab.size.z;
-            int maxSize = CaveUtils.FastMax(sizeX, sizeZ);
+            int maxSize = Utils.FastMax(sizeX, sizeZ);
             int rotation = gameRandom.RandomRange(0, 4);
 
             if (rotation == 1 || rotation == 3)

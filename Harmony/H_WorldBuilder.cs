@@ -17,8 +17,6 @@ public static class WorldBuilder_GenerateData
 
     private static float[] waterDest;
 
-    public static readonly float terrainOffset = 50;
-
     public static bool Prefix(WorldBuilder __instance, ref IEnumerator __result)
     {
         worldBuilder = __instance;
@@ -33,6 +31,7 @@ public static class WorldBuilder_GenerateData
     public static IEnumerator GenerateData()
     {
         CaveCache.Init(worldBuilder);
+
         PatchWaterHeight();
 
         yield return worldBuilder.Init();
@@ -108,7 +107,7 @@ public static class WorldBuilder_GenerateData
             }
         }
 
-        GC.Collect();
+        GCUtils.Collect();
 
         yield return worldBuilder.SetMessage("Draw Roads", _logToConsole: true);
         yield return worldBuilder.DrawRoads(worldBuilder.dest);
@@ -119,21 +118,21 @@ public static class WorldBuilder_GenerateData
             yield return worldBuilder.smoothRoadTerrain(worldBuilder.dest, worldBuilder.HeightMap, worldBuilder.WorldSize);
         }
 
-        yield return CaveCache.cavePlanner.GenerateCaveMap();
+        yield return CaveCache.cavePlanner.GenerateCaveMap(CaveCache.cavePrefabManager);
 
         worldBuilder.paths.Clear();
         worldBuilder.wildernessPaths.Clear();
 
         yield return worldBuilder.FinalizeWater();
 
-        GC.Collect();
+        GCUtils.Collect();
 
         Log.Out("RWG final in {0}:{1:00}, r={2:x}", worldBuilder.totalMS.Elapsed.Minutes, worldBuilder.totalMS.Elapsed.Seconds, Rand.Instance.PeekSample());
     }
 
     private static float ClampHeight(float height)
     {
-        return terrainOffset + (255f - terrainOffset) * height / 255f;
+        return CaveConfig.terrainOffset + (255f - CaveConfig.terrainOffset) * height / 255f;
     }
 
     private static void PatchWaterHeight()
@@ -193,6 +192,7 @@ public static class WorldBuilder_saveRawHeightmap
     public static bool Prefix()
     {
         CaveCache.cavePlanner.SaveCaveMap();
+        CaveCache.Clear();
         return true;
     }
 }

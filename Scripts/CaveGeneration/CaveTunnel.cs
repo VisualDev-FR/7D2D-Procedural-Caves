@@ -67,8 +67,8 @@ public class CaveTunnel
     // private API
     private void FindPath(GraphEdge edge, CavePrefabManager cachedPrefabs)
     {
-        var start = edge.node1.Normal(CaveUtils.FastMax(5, edge.node1.NodeRadius));
-        var target = edge.node2.Normal(CaveUtils.FastMax(5, edge.node2.NodeRadius));
+        var start = edge.node1.Normal(Utils.FastMax(5, edge.node1.NodeRadius));
+        var target = edge.node2.Normal(Utils.FastMax(5, edge.node2.NodeRadius));
 
         if (cachedPrefabs.MinSqrDistanceToPrefab(start) == 0)
         {

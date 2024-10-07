@@ -21,10 +21,10 @@ public class CaveChunksProvider
 
     public static int GetRegionID(Vector2s chunkPos)
     {
-        var region_x = chunkPos.x / CaveConfig.chunkRegionGridSize;
-        var region_z = chunkPos.z / CaveConfig.chunkRegionGridSize;
+        var region_x = chunkPos.x / CaveConfig.ChunkRegionGridSize;
+        var region_z = chunkPos.z / CaveConfig.ChunkRegionGridSize;
 
-        var regionID = region_x + region_z * CaveConfig.regionGridSize;
+        var regionID = region_x + region_z * CaveConfig.RegionGridSize;
 
         return regionID;
     }

@@ -2,8 +2,6 @@ using System;
 
 public static class CaveConfig
 {
-    public static bool generateWater = false;
-
     public static FastTags<TagGroup.Poi> tagCaveMarker = FastTags<TagGroup.Poi>.Parse("cavenode");
 
     public static FastTags<TagGroup.Poi> tagCaveEntrance = FastTags<TagGroup.Poi>.Parse("entrance");
@@ -24,21 +22,17 @@ public static class CaveConfig
 
     public static Vector3i HalfWorldSize => new Vector3i(worldSize / 2, 0, worldSize / 2);
 
-    public static int regionGridSize => worldSize / RegionSize;
+    public static int RegionGridSize => worldSize / RegionSize;
 
-    public static int chunkRegionGridSize => RegionSize / ChunkSize;
+    public static int ChunkRegionGridSize => RegionSize >> 4;
 
     public static int TargetPrefabCount => worldSize / 5;
 
     public static readonly int RegionSize = 512;
 
-    public static readonly int ChunkSize = 16;
-
     public static readonly int MIN_PREFAB_SIZE = 8;
 
     public static readonly int MAX_PREFAB_SIZE = 100;
-
-    public static readonly float POINT_WIDTH = 5;
 
     public static Random rand = new Random(SEED);
 
@@ -52,4 +46,7 @@ public static class CaveConfig
 
     public static int terrainMargin = 2;
 
+    public static bool generateWater = false;
+
+    public static readonly float terrainOffset = 50;
 }
