@@ -45,7 +45,7 @@ public class CaveEntrancesPlanner
                 continue;
 
             var tile = wildernessTiles[tileIndex % wildernessTiles.Count];
-            var prefab = CaveCache.cavePrefabManager.SelectRandomWildernessEntrance();
+            var prefab = CaveCache.cavePrefabManager.SelectRandomWildernessEntrance(gameRandom);
 
             if (TrySpawnWildernessCaveEntrance(tile, prefab))
             {
@@ -272,8 +272,8 @@ public class CaveEntrancesPlanner
             worldBuilder.WildernessPlanner.WildernessPathInfos.Add(
                 new WorldBuilder.WildernessPathInfo(
                     new Vector2i(
-                        (int)rotatedPosition.x + CaveConfig.worldSize / 2,
-                        (int)rotatedPosition.y + CaveConfig.worldSize / 2
+                        (int)rotatedPosition.x + worldBuilder.WorldSize >> 1,
+                        (int)rotatedPosition.y + worldBuilder.WorldSize >> 1
                     ),
                     pdi.id,
                     roadRadius,

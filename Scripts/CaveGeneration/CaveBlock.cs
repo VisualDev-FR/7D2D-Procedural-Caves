@@ -134,9 +134,9 @@ public class CaveBlock
         return CaveUtils.PositionHashCode(x, y, z);
     }
 
-    public Vector3i ToWorldPos()
+    public Vector3i ToWorldPos(Vector3i halfWorldSize)
     {
-        return ToVector3i() - CaveConfig.HalfWorldSize;
+        return ToVector3i() - halfWorldSize;
     }
 
     public override string ToString()

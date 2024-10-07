@@ -73,14 +73,18 @@ public class CavePrefab
 
     public CavePrefab(int index, Vector3i position, Random rand, int markerCount)
     {
-        id = index;
-        nodes = new List<GraphNode>();
         this.position = position;
 
+        id = index;
+        nodes = new List<GraphNode>();
+
+        int minPrefabSize = 8;
+        int maxPrefabSize = 100;
+
         Size = new Vector3i(
-            rand.Next(CaveConfig.MIN_PREFAB_SIZE, CaveConfig.MAX_PREFAB_SIZE),
-            rand.Next(CaveConfig.MIN_PREFAB_SIZE, CaveConfig.MAX_PREFAB_SIZE),
-            rand.Next(CaveConfig.MIN_PREFAB_SIZE, CaveConfig.MAX_PREFAB_SIZE)
+            rand.Next(minPrefabSize, maxPrefabSize),
+            rand.Next(minPrefabSize, maxPrefabSize),
+            rand.Next(minPrefabSize, maxPrefabSize)
         );
 
         UpdateMarkers(rand, markerCount);

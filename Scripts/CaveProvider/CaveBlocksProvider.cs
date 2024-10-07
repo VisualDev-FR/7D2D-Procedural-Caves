@@ -12,24 +12,31 @@ public class CaveChunksProvider
 
     public Dictionary<int, CaveRegion> regions;
 
-    public CaveChunksProvider(string worldName)
+    public int worldSize;
+
+    public CaveChunksProvider(string worldName, int worldSize)
     {
+        this.worldSize = worldSize;
+
         regions = new Dictionary<int, CaveRegion>();
         cavemapDir = $"{GameIO.GetWorldDir(worldName)}/cavemap";
         caveGraph = new CaveGraph($"{GameIO.GetWorldDir(worldName)}/cavegraph.txt");
     }
 
-    public static int GetRegionID(Vector2s chunkPos)
+    public int GetRegionID(Vector2s chunkPos)
     {
-        var region_x = chunkPos.x / CaveConfig.ChunkRegionGridSize;
-        var region_z = chunkPos.z / CaveConfig.ChunkRegionGridSize;
+        int chunkRegionGridSize = CaveConfig.RegionSize >> 4;
+        int regionGridSize = worldSize / CaveConfig.RegionSize;
 
-        var regionID = region_x + region_z * CaveConfig.RegionGridSize;
+        int region_x = chunkPos.x / chunkRegionGridSize;
+        int region_z = chunkPos.z / chunkRegionGridSize;
+
+        int regionID = region_x + region_z * regionGridSize;
 
         return regionID;
     }
 
-    public static int HashCodeFromWorldPos(Vector3 worldPos)
+    public int HashCodeFromWorldPos(Vector3 worldPos)
     {
         return HashCodeFromWorldPos(
             (int)worldPos.x,
@@ -38,9 +45,9 @@ public class CaveChunksProvider
         );
     }
 
-    public static int HashCodeFromWorldPos(int x, int y, int z)
+    public int HashCodeFromWorldPos(int x, int y, int z)
     {
-        int halfWorldSize = CaveConfig.worldSize / 2;
+        int halfWorldSize = worldSize / 2;
 
         return CaveBlock.GetHashCode(
             x + halfWorldSize,
@@ -49,15 +56,15 @@ public class CaveChunksProvider
         );
     }
 
-    public static Vector2s GetChunkPos(Chunk chunk)
+    public Vector2s GetChunkPos(Chunk chunk)
     {
         return new Vector2s(
-            (short)(chunk.ChunkPos.x + (CaveConfig.worldSize >> 5)),
-            (short)(chunk.ChunkPos.z + (CaveConfig.worldSize >> 5))
+            (short)(chunk.ChunkPos.x + (worldSize >> 5)),
+            (short)(chunk.ChunkPos.z + (worldSize >> 5))
         );
     }
 
-    public static Vector2s GetChunkPos(Vector3 worldPos)
+    public Vector2s GetChunkPos(Vector3 worldPos)
     {
         return GetChunkPos(
             (short)worldPos.x,
@@ -65,11 +72,11 @@ public class CaveChunksProvider
         );
     }
 
-    public static Vector2s GetChunkPos(short worldX, short worldZ)
+    public Vector2s GetChunkPos(short worldX, short worldZ)
     {
         return new Vector2s(
-            (short)((worldX >> 4) + (CaveConfig.worldSize >> 5)),
-            (short)((worldZ >> 4) + (CaveConfig.worldSize >> 5))
+            (short)((worldX >> 4) + (worldSize >> 5)),
+            (short)((worldZ >> 4) + (worldSize >> 5))
         );
     }
 
@@ -241,7 +248,7 @@ public class CaveChunksProvider
             return false;
         }
 
-        return CaveUtils.SqrEuclidianDist(block.ToWorldPos(), playerpos) > minSpawnDist * minSpawnDist;
+        return CaveUtils.SqrEuclidianDist(block.ToWorldPos(CaveGenerator.HalfWorldSize), playerpos) > minSpawnDist * minSpawnDist;
     }
 
     public List<CaveBlock> GetSpawnPositionsFromPlayer(Vector3 playerPosition, int minSpawnDist)
@@ -251,7 +258,6 @@ public class CaveChunksProvider
 
         var caveBlocks = new HashSet<CaveBlock>();
         var visitedChunks = new HashSet<Vector2s>();
-        var worldSize = CaveConfig.worldSize;
         var chunkPos = GetChunkPos(playerPosition);
         var tunnelIDs = FindTunnelsNearPosition(playerPosition);
 

@@ -1,5 +1,3 @@
-using System;
-
 public static class CaveConfig
 {
     public static FastTags<TagGroup.Poi> tagCaveMarker = FastTags<TagGroup.Poi>.Parse("cavenode");
@@ -16,25 +14,7 @@ public static class CaveConfig
 
     public static FastTags<TagGroup.Poi> tagRwgStreetTile = FastTags<TagGroup.Poi>.Parse("streettile, rwgonly");
 
-    public static int SEED = 1634735684;
-
-    public static int worldSize = 2048;
-
-    public static Vector3i HalfWorldSize => new Vector3i(worldSize / 2, 0, worldSize / 2);
-
-    public static int RegionGridSize => worldSize / RegionSize;
-
-    public static int ChunkRegionGridSize => RegionSize >> 4;
-
-    public static int TargetPrefabCount => worldSize / 5;
-
     public static readonly int RegionSize = 512;
-
-    public static readonly int MIN_PREFAB_SIZE = 8;
-
-    public static readonly int MAX_PREFAB_SIZE = 100;
-
-    public static Random rand = new Random(SEED);
 
     public static int overLapMargin = 50;
 

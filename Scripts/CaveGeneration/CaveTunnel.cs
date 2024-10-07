@@ -38,8 +38,6 @@ public class CaveTunnel
         new Vector3(0.75f, 0.75f, 0.75f)
     };
 
-    private Vector3i HalfWorldSize => new Vector3i(CaveConfig.worldSize / 2, 0, CaveConfig.worldSize / 2);
-
     private readonly WorldBuilder worldBuilder;
 
     public CaveTunnel(WorldBuilder worldBuilder, GraphEdge edge, CavePrefabManager cachedPrefabs)
@@ -67,6 +65,8 @@ public class CaveTunnel
     // private API
     private void FindPath(GraphEdge edge, CavePrefabManager cachedPrefabs)
     {
+        var HalfWorldSize = CaveUtils.HalfWorldSize(worldBuilder.WorldSize);
+
         var start = edge.node1.Normal(Utils.FastMax(5, edge.node1.NodeRadius));
         var target = edge.node2.Normal(Utils.FastMax(5, edge.node2.NodeRadius));
 

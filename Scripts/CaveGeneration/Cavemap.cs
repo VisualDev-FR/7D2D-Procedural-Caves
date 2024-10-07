@@ -159,15 +159,17 @@ public class CaveMap : IEnumerable<CaveBlock>
         Log.Out($"remaining tunnels: {string.Join(", ", tunnels.Keys)}");
     }
 
-    public void Save(string dirname)
+    public void Save(string dirname, int worldSize)
     {
+        int regionGridSize = worldSize / CaveConfig.RegionSize;
+
         using (var multistream = new MultiStream(dirname, create: true))
         {
             foreach (CaveBlock caveBlock in caveblocks.Values)
             {
                 int region_x = caveBlock.x / CaveConfig.RegionSize;
                 int region_z = caveBlock.z / CaveConfig.RegionSize;
-                int regionID = region_x + region_z * CaveConfig.RegionGridSize;
+                int regionID = region_x + region_z * regionGridSize;
 
                 var writer = multistream.GetWriter($"region_{regionID}.bin");
                 caveBlock.ToBinaryStream(writer);

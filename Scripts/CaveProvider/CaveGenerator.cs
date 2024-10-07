@@ -4,7 +4,7 @@ using System.IO;
 using System.Xml;
 
 
-public static class CaveGenerator
+public class CaveGenerator
 {
     public static CaveChunksProvider caveChunksProvider;
 
@@ -24,16 +24,19 @@ public static class CaveGenerator
 
     private static BlockValue terrGravel = new BlockValue((uint)Block.GetBlockByName("terrGravel").blockID);
 
+    public static Vector3i HalfWorldSize;
+
     public static void Init(string worldName)
     {
         isEnabled = Directory.Exists($"{GameIO.GetWorldDir(worldName)}/cavemap");
 
         if (isEnabled)
         {
-            CaveConfig.worldSize = GetWorldSize(worldName);
-            caveChunksProvider = new CaveChunksProvider(worldName);
+            int worldSize = GetWorldSize(worldName);
+            caveChunksProvider = new CaveChunksProvider(worldName, worldSize);
+            HalfWorldSize = new Vector3i(worldSize >> 1, 0, worldSize >> 1);
 
-            Log.Out($"[Cave] init caveGenerator for world '{worldName}', size: {CaveConfig.worldSize}");
+            Log.Out($"[Cave] init caveGenerator for world '{worldName}', size: {worldSize}");
         }
         else
         {

@@ -1,15 +1,14 @@
 using System;
 using System.IO;
+using System.Linq;
+using System.Threading;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using WorldGenerationEngineFinal;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
 
 using Random = System.Random;
-using System.Threading;
 
 
 public class CavePlanner
@@ -28,12 +27,7 @@ public class CavePlanner
     {
         this.worldBuilder = worldBuilder;
 
-        var seed = worldBuilder.Seed + worldBuilder.WorldSize;
-
         cavemap = new CaveMap();
-
-        CaveConfig.worldSize = WorldSize;
-        CaveConfig.rand = new Random(seed);
 
         worldBuilder.PrefabManager.Clear();
         worldBuilder.PrefabManager.ClearDisplayed();
@@ -47,12 +41,14 @@ public class CavePlanner
 
         yield return worldBuilder.SetMessage("Spawning cave prefabs...", _logToConsole: true);
 
+        Random random = new Random(worldBuilder.Seed + worldBuilder.WorldSize);
+
         cavePrefabManager.GetUsedCavePrefabs();
-        cavePrefabManager.SpawnUnderGroundPrefabs(CaveConfig.TargetPrefabCount);
-        cavePrefabManager.SpawnCaveRooms(1000);
+        cavePrefabManager.SpawnUnderGroundPrefabs(worldBuilder.WorldSize / 5, random);
+        cavePrefabManager.SpawnCaveRooms(1000, random);
         cavePrefabManager.AddSurfacePrefabs();
 
-        var caveGraph = new Graph(CaveCache.cavePrefabManager.Prefabs);
+        var caveGraph = new Graph(CaveCache.cavePrefabManager.Prefabs, worldBuilder.WorldSize);
 
         var threads = new List<Thread>();
         var subLists = CaveUtils.SplitList(caveGraph.Edges.ToList(), 6);
@@ -213,7 +209,7 @@ public class CavePlanner
 
     public void SaveCaveMap()
     {
-        cavemap.Save($"{worldBuilder.WorldPath}/cavemap");
+        cavemap.Save($"{worldBuilder.WorldPath}/cavemap", worldBuilder.WorldSize);
     }
 
 }

@@ -14,7 +14,7 @@ public class Graph
 
     public Dictionary<int, HashSet<GraphEdge>> relatedPrefabs;
 
-    public Graph(List<CavePrefab> prefabs)
+    public Graph(List<CavePrefab> prefabs, int worldSize)
     {
         Edges = new HashSet<GraphEdge>();
         Nodes = new HashSet<GraphNode>();
@@ -23,7 +23,7 @@ public class Graph
 
         var timer = CaveUtils.StartTimer();
 
-        BuildDelauneyGraph(prefabs);
+        BuildDelauneyGraph(prefabs, worldSize);
 
         Log.Out($"[Cave] primary graph : edges: {Edges.Count}, nodes: {Nodes.Count}, timer: {timer.ElapsedMilliseconds:N0}ms");
 
@@ -412,11 +412,10 @@ public class Graph
         return true;
     }
 
-    private void BuildDelauneyGraph(List<CavePrefab> prefabs)
+    private void BuildDelauneyGraph(List<CavePrefab> prefabs, int worldSize)
     {
         var points = prefabs.SelectMany(prefab => prefab.DelauneyPoints());
         var triangulator = new DelaunayTriangulator();
-        var worldSize = CaveConfig.worldSize;
 
         foreach (var triangle in triangulator.BowyerWatson(points, worldSize, worldSize))
         {
