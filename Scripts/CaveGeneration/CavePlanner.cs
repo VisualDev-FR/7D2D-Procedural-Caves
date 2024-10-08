@@ -9,6 +9,7 @@ using UnityEngine;
 using UnityEngine.Experimental.Rendering;
 
 using Random = System.Random;
+using HarmonyLib;
 
 
 public class CavePlanner
@@ -34,6 +35,33 @@ public class CavePlanner
         worldBuilder.PrefabManager.Cleanup();
     }
 
+    private Thread StartRoomsThread(CavePrefabManager cavePrefabManager)
+    {
+        var lockObject = new object();
+
+        var thread = new Thread(() =>
+        {
+            foreach (var caveRoom in cavePrefabManager.CaveRooms)
+            {
+                var blocks = caveRoom.GetBlocks().ToHashSet();
+
+                lock (lockObject)
+                {
+                    cavemap.AddBlocks(blocks);
+                }
+            }
+        })
+        {
+            Priority = System.Threading.ThreadPriority.AboveNormal
+        };
+
+        Log.Out($"[Cave] Start cave rooms thread");
+
+        thread.Start();
+
+        return thread;
+    }
+
     public IEnumerator GenerateCaveMap(CavePrefabManager cavePrefabManager)
     {
         if (worldBuilder.IsCanceled)
@@ -50,7 +78,7 @@ public class CavePlanner
 
         var caveGraph = new Graph(CaveCache.cavePrefabManager.Prefabs, worldBuilder.WorldSize);
 
-        var threads = new List<Thread>();
+        var threads = new List<Thread>() { StartRoomsThread(cavePrefabManager) };
         var subLists = CaveUtils.SplitList(caveGraph.Edges.ToList(), 6);
         var localMinimas = new HashSet<CaveBlock>();
         var lockObject = new object();

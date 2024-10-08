@@ -30,6 +30,12 @@ public class CavePrefabManager
 
     private readonly Dictionary<string, PrefabData> allCavePrefabs = new Dictionary<string, PrefabData>();
 
+    private readonly Dictionary<int, CaveRoom> caveRooms = new Dictionary<int, CaveRoom>();
+
+    public IEnumerable<CaveRoom> CaveRooms => Prefabs
+        .Where(prefab => prefab.isRoom)
+        .Select(prefab => caveRooms[prefab.id]);
+
     public CavePrefabManager(WorldBuilder worldBuilder)
     {
         this.worldBuilder = worldBuilder;
@@ -463,7 +469,8 @@ public class CavePrefabManager
                 };
 
                 prefab.UpdateMarkers(rand);
-                var room = new CaveRoom(prefab, rand.Next());
+
+                caveRooms[prefab.id] = new CaveRoom(prefab, rand.Next());
 
                 AddPrefab(prefab);
 

@@ -68,14 +68,11 @@ public class CaveMap : IEnumerable<CaveBlock>
         return MarchingCubes.DensityTerrain;
     }
 
-    public void AddRoom(CaveRoom room)
+    public void AddBlocks(IEnumerable<Vector3i> positions)
     {
-        foreach (var pos in room.GetBlocks())
+        foreach (var pos in positions)
         {
-            caveblocks[pos.GetHashCode()] = new CaveBlock(pos)
-            {
-                isRoom = true,
-            };
+            caveblocks[pos.GetHashCode()] = new CaveBlock(pos);
         }
     }
 
