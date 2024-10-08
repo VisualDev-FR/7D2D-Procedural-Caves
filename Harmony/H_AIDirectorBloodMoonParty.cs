@@ -40,7 +40,7 @@ public class AIDirectorBloodMoonParty_SpawnZombie
             Log.Error($"[Cave] no spawn position found for BloodMoonParty.");
         }
         var randomIndex = Instance.controller.Random.Next(spawnPositions.Count);
-        var spawnPos = spawnPositions[randomIndex].ToWorldPos();
+        var spawnPos = spawnPositions[randomIndex].ToWorldPos(CaveGenerator.HalfWorldSize);
 
         int et = EntityGroups.GetRandomFromGroup(Instance.partySpawner.spawnGroupName, ref Instance.lastClassId);
 

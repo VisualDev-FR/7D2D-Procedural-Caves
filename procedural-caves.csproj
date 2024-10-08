@@ -148,6 +148,7 @@
     <Compile Include="Scripts\Utils\BlockSelectionUtils.cs" />
 
     <!-- Root -->
+    <Compile Include="Scripts\CaveCache.cs" />
     <Compile Include="Scripts\CaveConfig.cs" />
     <Compile Include="Scripts\CaveUtils.cs" />
 

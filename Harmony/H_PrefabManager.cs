@@ -7,10 +7,10 @@ using WorldGenerationEngineFinal;
 [HarmonyPatch(typeof(PrefabManager), "LoadPrefabs")]
 public static class PrefabManager_LoadPrefabs
 {
-    public static IEnumerator LoadPrefabs()
+    public static IEnumerator LoadPrefabs(PrefabManager PrefabManager)
     {
         PrefabManager.ClearDisplayed();
-        if (PrefabManager.AllPrefabDatas.Count != 0)
+        if (PrefabManager.prefabManagerData.AllPrefabDatas.Count != 0)
         {
             yield break;
         }
@@ -41,11 +41,11 @@ public static class PrefabManager_LoadPrefabs
 
             // PATCH START //
 
-            CavePlanner.TryCacheCavePrefab(prefabData);
+            CaveCache.cavePrefabManager.TryCacheCavePrefab(prefabData);
 
             if (!prefabData.Tags.Test_AnySet(filter) && !prefabData.Tags.Test_AllSet(wildernessCaveEntrance))
             {
-                PrefabManager.AllPrefabDatas[location.Name.ToLower()] = prefabData;
+                PrefabManager.prefabManagerData.AllPrefabDatas[location.Name.ToLower()] = prefabData;
             }
 
             // PATCH END //
@@ -57,12 +57,12 @@ public static class PrefabManager_LoadPrefabs
             }
         }
 
-        Log.Out($"LoadPrefabs {PrefabManager.AllPrefabDatas.Count} of {prefabs.Count} in {ms.ElapsedMilliseconds * 0.001f}");
+        Log.Out($"LoadPrefabs {PrefabManager.prefabManagerData.AllPrefabDatas.Count} of {prefabs.Count} in {ms.ElapsedMilliseconds * 0.001f}");
     }
 
-    public static bool Prefix(ref IEnumerator __result)
+    public static bool Prefix(PrefabManager __instance, ref IEnumerator __result)
     {
-        __result = LoadPrefabs();
+        __result = LoadPrefabs(__instance);
 
         return false;
     }

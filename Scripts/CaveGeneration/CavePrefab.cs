@@ -73,14 +73,18 @@ public class CavePrefab
 
     public CavePrefab(int index, Vector3i position, Random rand, int markerCount)
     {
-        id = index;
-        nodes = new List<GraphNode>();
         this.position = position;
 
+        id = index;
+        nodes = new List<GraphNode>();
+
+        int minPrefabSize = 8;
+        int maxPrefabSize = 100;
+
         Size = new Vector3i(
-            rand.Next(CaveConfig.MIN_PREFAB_SIZE, CaveConfig.MAX_PREFAB_SIZE),
-            rand.Next(CaveConfig.MIN_PREFAB_SIZE, CaveConfig.MAX_PREFAB_SIZE),
-            rand.Next(CaveConfig.MIN_PREFAB_SIZE, CaveConfig.MAX_PREFAB_SIZE)
+            rand.Next(minPrefabSize, maxPrefabSize),
+            rand.Next(minPrefabSize, maxPrefabSize),
+            rand.Next(minPrefabSize, maxPrefabSize)
         );
 
         UpdateMarkers(rand, markerCount);
@@ -93,9 +97,9 @@ public class CavePrefab
         var groupName = "";
 
         // var maxMarkerSize = 10;
-        int sizeX = CaveUtils.FastMin(5, xMax); // rand.Next(CaveUtils.FastMin(2, xMax), CaveUtils.FastMin(maxMarkerSize, xMax));
-        int sizeY = CaveUtils.FastMin(5, yMax); // rand.Next(CaveUtils.FastMin(2, yMax), CaveUtils.FastMin(maxMarkerSize, yMax));
-        int sizeZ = CaveUtils.FastMin(5, zMax); // rand.Next(CaveUtils.FastMin(2, zMax), CaveUtils.FastMin(maxMarkerSize, zMax));
+        int sizeX = Utils.FastMin(5, xMax); // rand.Next(Utils.FastMin(2, xMax), Utils.FastMin(maxMarkerSize, xMax));
+        int sizeY = Utils.FastMin(5, yMax); // rand.Next(Utils.FastMin(2, yMax), Utils.FastMin(maxMarkerSize, yMax));
+        int sizeZ = Utils.FastMin(5, zMax); // rand.Next(Utils.FastMin(2, zMax), Utils.FastMin(maxMarkerSize, zMax));
 
         int px = aligned ? Size.x / 2 : rand.Next(1, xMax);
         int pz = aligned ? Size.z / 2 : rand.Next(1, zMax);
@@ -233,7 +237,7 @@ public class CavePrefab
         return result;
     }
 
-    public void SetRandomPosition(Random rand, int mapSize)
+    public void SetRandomPosition(WorldBuilder worldBuilder, Random rand, int mapSize)
     {
         int offset = CaveConfig.radiationSize + CaveConfig.radiationZoneMargin;
 
@@ -243,7 +247,7 @@ public class CavePrefab
             rand.Next(offset, mapSize - offset - Size.z)
         );
 
-        position.y = rand.Next(CaveConfig.bedRockMargin, (int)(WorldBuilder.Instance.GetHeight(position.x, position.y) - Size.y));
+        position.y = rand.Next(CaveConfig.bedRockMargin, (int)(worldBuilder.GetHeight(position.x, position.y) - Size.y));
 
         foreach (var node in nodes)
         {

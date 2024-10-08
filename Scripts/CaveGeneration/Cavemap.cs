@@ -1,16 +1,11 @@
 using System;
+using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Security.Policy;
 using WorldGenerationEngineFinal;
 
 public class CaveMap : IEnumerable<CaveBlock>
 {
-    private readonly Vector3i position;
-
-    private readonly Vector3i size;
-
     private readonly CavePrefabManager cachedPrefabs;
 
     private readonly Dictionary<int, CaveBlock> caveblocks;
@@ -20,15 +15,6 @@ public class CaveMap : IEnumerable<CaveBlock>
     public int Count => caveblocks.Count;
 
     public int TunnelsCount => tunnels.Count;
-
-    public CaveMap(Vector3i position, Vector3i size, CavePrefabManager cachedPrefabs)
-    {
-        caveblocks = new Dictionary<int, CaveBlock>();
-
-        this.position = position;
-        this.size = size;
-        this.cachedPrefabs = cachedPrefabs;
-    }
 
     public CaveMap()
     {
@@ -82,14 +68,11 @@ public class CaveMap : IEnumerable<CaveBlock>
         return MarchingCubes.DensityTerrain;
     }
 
-    public void AddRoom(CaveRoom room)
+    public void AddBlocks(IEnumerable<Vector3i> positions)
     {
-        foreach (var pos in room.GetBlocks())
+        foreach (var pos in positions)
         {
-            caveblocks[pos.GetHashCode()] = new CaveBlock(pos)
-            {
-                isRoom = true,
-            };
+            caveblocks[pos.GetHashCode()] = new CaveBlock(pos);
         }
     }
 
@@ -159,15 +142,17 @@ public class CaveMap : IEnumerable<CaveBlock>
         Log.Out($"remaining tunnels: {string.Join(", ", tunnels.Keys)}");
     }
 
-    public void Save(string dirname)
+    public void Save(string dirname, int worldSize)
     {
+        int regionGridSize = worldSize / CaveConfig.RegionSize;
+
         using (var multistream = new MultiStream(dirname, create: true))
         {
             foreach (CaveBlock caveBlock in caveblocks.Values)
             {
                 int region_x = caveBlock.x / CaveConfig.RegionSize;
                 int region_z = caveBlock.z / CaveConfig.RegionSize;
-                int regionID = region_x + region_z * CaveConfig.regionGridSize;
+                int regionID = region_x + region_z * regionGridSize;
 
                 var writer = multistream.GetWriter($"region_{regionID}.bin");
                 caveBlock.ToBinaryStream(writer);
@@ -287,7 +272,7 @@ public class CaveMap : IEnumerable<CaveBlock>
         return caveblocks.ContainsKey(hashcode);
     }
 
-    public IEnumerator SetWaterCoroutine(HashSet<CaveBlock> localMinimas, CavePrefabManager cachedPrefabs)
+    public IEnumerator SetWaterCoroutine(WorldBuilder worldBuilder, HashSet<CaveBlock> localMinimas)
     {
         int index = 0;
 
@@ -298,7 +283,7 @@ public class CaveMap : IEnumerable<CaveBlock>
         {
             index++;
 
-            if (WorldBuilder.Instance.IsCanceled)
+            if (worldBuilder.IsCanceled)
                 yield break;
 
             if (waterStart.isWater)
@@ -308,7 +293,7 @@ public class CaveMap : IEnumerable<CaveBlock>
 
             string message = $"Water processing: {100.0f * index / localMinimas.Count:F0}% ({index} / {localMinimas.Count})";
 
-            yield return WorldBuilder.Instance.SetMessage(message);
+            yield return worldBuilder.SetMessage(message);
 
             foreach (var hashcode in hashcodes)
             {

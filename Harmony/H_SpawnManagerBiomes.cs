@@ -189,7 +189,7 @@ public class SpawnManagerBiomes_Update
 
         CaveBlock caveblock = spawnPositions[random.Next(spawnPositions.Count)];
 
-        Vector3 spawnPosition = caveblock.ToWorldPos();
+        Vector3 spawnPosition = caveblock.ToWorldPos(CaveGenerator.HalfWorldSize);
 
         return spawnPosition;
     }
