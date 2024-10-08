@@ -20,7 +20,6 @@ public class CaveChunksProvider
 
         regions = new Dictionary<int, CaveRegion>();
         cavemapDir = $"{GameIO.GetWorldDir(worldName)}/cavemap";
-        caveGraph = new CaveGraph($"{GameIO.GetWorldDir(worldName)}/cavegraph.txt");
     }
 
     public int GetRegionID(Vector2s chunkPos)
@@ -184,6 +183,9 @@ public class CaveChunksProvider
 
     public HashSet<int> GetTunnelsAroundPrefab(PrefabInstance prefabInstance)
     {
+        // TODO: re-setup cave graph saving at world generation before enabling this code
+        return null;
+
         if (caveGraph.graph.TryGetValue(prefabInstance.id, out var tunnelIDs))
         {
             return tunnelIDs.ToHashSet();

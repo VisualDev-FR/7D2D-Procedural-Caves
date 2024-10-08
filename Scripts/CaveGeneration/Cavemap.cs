@@ -1,16 +1,11 @@
 using System;
+using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Security.Policy;
 using WorldGenerationEngineFinal;
 
 public class CaveMap : IEnumerable<CaveBlock>
 {
-    private readonly Vector3i position;
-
-    private readonly Vector3i size;
-
     private readonly CavePrefabManager cachedPrefabs;
 
     private readonly Dictionary<int, CaveBlock> caveblocks;
@@ -20,15 +15,6 @@ public class CaveMap : IEnumerable<CaveBlock>
     public int Count => caveblocks.Count;
 
     public int TunnelsCount => tunnels.Count;
-
-    public CaveMap(Vector3i position, Vector3i size, CavePrefabManager cachedPrefabs)
-    {
-        caveblocks = new Dictionary<int, CaveBlock>();
-
-        this.position = position;
-        this.size = size;
-        this.cachedPrefabs = cachedPrefabs;
-    }
 
     public CaveMap()
     {

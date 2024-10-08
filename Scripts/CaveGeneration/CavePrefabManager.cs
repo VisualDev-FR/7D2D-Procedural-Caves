@@ -1,6 +1,6 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
+using System.Collections.Generic;
 using WorldGenerationEngineFinal;
 
 
@@ -268,11 +268,11 @@ public class CavePrefabManager
 
 
 
+
     public List<PrefabData> GetUndergroundPrefabs()
     {
-        return Prefabs
+        return allCavePrefabs.Values
             .Where(p => p.Tags.Test_AnySet(CaveConfig.tagCaveUnderground))
-            .Select(p => p.prefabDataInstance.prefab)
             .ToList();
     }
 
@@ -406,6 +406,8 @@ public class CavePrefabManager
     {
         var undergroundPrefabs = GetUndergroundPrefabs();
         var HalfWorldSize = CaveUtils.HalfWorldSize(worldBuilder.WorldSize);
+
+        CaveUtils.Assert(undergroundPrefabs.Count > 0, "No underground prefab was found in prefab manager.allPrefabDatas");
 
         for (int i = 0; i < count; i++)
         {
