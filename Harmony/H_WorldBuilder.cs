@@ -118,7 +118,7 @@ public static class WorldBuilder_GenerateData
             yield return worldBuilder.smoothRoadTerrain(worldBuilder.dest, worldBuilder.HeightMap, worldBuilder.WorldSize);
         }
 
-        yield return CaveCache.cavePlanner.GenerateCaveMap(CaveCache.cavePrefabManager);
+        yield return CaveCache.cavePlanner.GenerateCaveMap(CaveCache.cavePrefabManager, CaveCache.heightMap);
 
         worldBuilder.paths.Clear();
         worldBuilder.wildernessPaths.Clear();

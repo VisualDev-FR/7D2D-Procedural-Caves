@@ -485,7 +485,7 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
 
         foreach (var path in Directory.GetFiles(dirName))
         {
-            var filename = Path.GetFileName(path).Split(".")[0];
+            var filename = Path.GetFileName(path).Split('.')[0];
             var extension = Path.GetFileName(path).Replace(filename, "");
             var newPath = $"{dirName}/{newName}{extension}";
 

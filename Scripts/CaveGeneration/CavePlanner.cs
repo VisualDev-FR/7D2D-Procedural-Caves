@@ -9,7 +9,6 @@ using UnityEngine;
 using UnityEngine.Experimental.Rendering;
 
 using Random = System.Random;
-using HarmonyLib;
 
 
 public class CavePlanner
@@ -62,7 +61,7 @@ public class CavePlanner
         return thread;
     }
 
-    public IEnumerator GenerateCaveMap(CavePrefabManager cavePrefabManager)
+    public IEnumerator GenerateCaveMap(CavePrefabManager cavePrefabManager, RawHeightMap heightMap)
     {
         if (worldBuilder.IsCanceled)
             yield break;
@@ -76,7 +75,7 @@ public class CavePlanner
         cavePrefabManager.SpawnCaveRooms(1000, random);
         cavePrefabManager.AddSurfacePrefabs();
 
-        var caveGraph = new Graph(CaveCache.cavePrefabManager.Prefabs, worldBuilder.WorldSize);
+        var caveGraph = new Graph(cavePrefabManager.Prefabs, worldBuilder.WorldSize);
 
         var threads = new List<Thread>() { StartRoomsThread(cavePrefabManager) };
         var subLists = CaveUtils.SplitList(caveGraph.Edges.ToList(), 6);
@@ -98,7 +97,7 @@ public class CavePlanner
                     var start = edge.node1;
                     var target = edge.node2;
 
-                    var tunnel = new CaveTunnel(worldBuilder, edge, cavePrefabManager);
+                    var tunnel = new CaveTunnel(edge, cavePrefabManager, heightMap, WorldSize);
 
                     lock (lockObject)
                     {

@@ -9,11 +9,14 @@ public static class CaveCache
 
     public static CavePrefabManager cavePrefabManager;
 
+    public static RawHeightMap heightMap;
+
     public static void Init(WorldBuilder worldBuilder)
     {
         cavePlanner = new CavePlanner(worldBuilder);
         cavePrefabManager = new CavePrefabManager(worldBuilder);
-        caveEntrancesPlanner = new CaveEntrancesPlanner(worldBuilder);
+        caveEntrancesPlanner = new CaveEntrancesPlanner(cavePrefabManager);
+        heightMap = new RawHeightMap(worldBuilder);
     }
 
     public static void Clear()

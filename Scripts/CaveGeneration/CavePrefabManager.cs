@@ -20,7 +20,7 @@ public class CavePrefabManager
 
     public PrefabManager PrefabManager => worldBuilder.PrefabManager;
 
-    public int WorldSize => worldBuilder.WorldSize;
+    public int worldSize;
 
     public int Count => Prefabs.Count;
 
@@ -36,9 +36,16 @@ public class CavePrefabManager
         .Where(prefab => prefab.isRoom)
         .Select(prefab => caveRooms[prefab.id]);
 
+    public CavePrefabManager(int worldSize)
+    {
+        this.worldSize = worldSize;
+    }
+
     public CavePrefabManager(WorldBuilder worldBuilder)
     {
         this.worldBuilder = worldBuilder;
+
+        worldSize = worldBuilder.WorldSize;
         Prefabs = new List<CavePrefab>();
         groupedCavePrefabs = new Dictionary<int, List<CavePrefab>>();
         nearestPrefabs = new Dictionary<int, HashSet<CavePrefab>>();
@@ -168,7 +175,7 @@ public class CavePrefabManager
 
         while (maxTries-- > 0)
         {
-            prefab.SetRandomPosition(worldBuilder, rand, WorldSize);
+            prefab.SetRandomPosition(worldBuilder, rand, worldSize);
 
             if (!prefab.OverLaps2D(Prefabs, overLapMargin) && !IsNearSamePrefab(prefab, minDist))
             {
@@ -217,7 +224,7 @@ public class CavePrefabManager
 
     public void SetupBoundaryPrefabs(Random rand, int tileSize)
     {
-        var tileGridSize = WorldSize / tileSize;
+        var tileGridSize = worldSize / tileSize;
         var uBound = 1;
 
         for (int tileX = 1; tileX < tileGridSize - uBound + 1; tileX++)
@@ -345,9 +352,9 @@ public class CavePrefabManager
         var offset = CaveConfig.radiationSize + CaveConfig.radiationZoneMargin;
 
         return new Vector3i(
-            _x: rand.Next(offset, WorldSize - offset - size.x),
+            _x: rand.Next(offset, worldSize - offset - size.x),
             _y: 0,
-            _z: rand.Next(offset, WorldSize - offset - size.z)
+            _z: rand.Next(offset, worldSize - offset - size.z)
         );
     }
 

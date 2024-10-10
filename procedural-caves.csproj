@@ -133,12 +133,13 @@
     <Compile Include="Scripts\IO\TTSReader.cs" />
 
     <!-- Models -->
-    <Compile Include="Scripts\Models\Direction.cs" />
-    <Compile Include="Scripts\Models\MutableInt16.cs" />
-    <Compile Include="Scripts\Models\Vector2s.cs" />
-    <Compile Include="Scripts\Models\Vector3bf.cs" />
     <Compile Include="Scripts\Models\AstarNode.cs" />
     <Compile Include="Scripts\Models\BoundingBox.cs" />
+    <Compile Include="Scripts\Models\Direction.cs" />
+    <Compile Include="Scripts\Models\MutableInt16.cs" />
+    <Compile Include="Scripts\Models\RawHeightMap.cs" />
+    <Compile Include="Scripts\Models\Vector2s.cs" />
+    <Compile Include="Scripts\Models\Vector3bf.cs" />
 
     <!-- Noise -->
     <Compile Include="Scripts\Noise\CaveNoise.cs" />
