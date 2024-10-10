@@ -136,7 +136,7 @@ public class CavePlanner
             }
         }
 
-        yield return cavemap.SetWaterCoroutine(worldBuilder, localMinimas);
+        yield return cavemap.SetWaterCoroutine(cavePrefabManager, worldBuilder, localMinimas);
 
         if (worldBuilder.IsCanceled)
             yield break;

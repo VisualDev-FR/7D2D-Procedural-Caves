@@ -6,8 +6,6 @@ using WorldGenerationEngineFinal;
 
 public class CaveMap : IEnumerable<CaveBlock>
 {
-    private readonly CavePrefabManager cachedPrefabs;
-
     private readonly Dictionary<int, CaveBlock> caveblocks;
 
     public readonly Dictionary<int, CaveTunnel> tunnels;
@@ -272,7 +270,7 @@ public class CaveMap : IEnumerable<CaveBlock>
         return caveblocks.ContainsKey(hashcode);
     }
 
-    public IEnumerator SetWaterCoroutine(WorldBuilder worldBuilder, HashSet<CaveBlock> localMinimas)
+    public IEnumerator SetWaterCoroutine(CavePrefabManager cachedPrefabs, WorldBuilder worldBuilder, HashSet<CaveBlock> localMinimas)
     {
         int index = 0;
 

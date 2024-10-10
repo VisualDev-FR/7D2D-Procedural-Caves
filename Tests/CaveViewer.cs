@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Linq;
 using System.Collections;
+using System.Numerics;
 
 public static class CaveViewer
 {
@@ -166,6 +167,38 @@ public static class CaveViewer
         }
     }
 
+    public static void BezierCommand(string[] args)
+    {
+        Vector2 p0 = new Vector2(0, 0);
+        Vector2 p1 = new Vector2(50, 100);
+        Vector2 p2 = new Vector2(100, 0);
+
+        int numPoints = 100;
+
+        List<Vector2> points = new List<Vector2>();
+
+        for (int i = 0; i <= numPoints; i++)
+        {
+            float t = i / (float)numPoints;
+            float x = (1 - t) * (1 - t) * p0.X + 2 * (1 - t) * t * p1.X + t * t * p2.X;
+            float y = (1 - t) * (1 - t) * p0.Y + 2 * (1 - t) * t * p1.Y + t * t * p2.Y;
+
+            points.Add(new Vector2(x, y));
+        }
+
+        using (var b = new Bitmap(150, 150))
+        {
+            using (Graphics g = Graphics.FromImage(b))
+            {
+                g.Clear(BackgroundColor);
+                DrawPoints(b, points.Select(p => new Vector3i(p.X, 0, p.Y)), TunnelsColor);
+            }
+
+            b.Save("bezier.png", ImageFormat.Png);
+        }
+
+    }
+
     public static void PathCommand(string[] args)
     {
         int worldSize = 100;
@@ -204,13 +237,13 @@ public static class CaveViewer
         Log.Out($"size     {node2.marker.size}");
         Log.Out($"result   {node2.position}\n");
 
-        var cavemap = new CaveMap();
+        CaveTunnel.InitSpheres(5);
 
         var timer = CaveUtils.StartTimer();
+        var cavemap = new CaveMap();
         var tunnel = new CaveTunnel(edge, cachedPrefabs, heightMap, worldSize);
 
         cavemap.AddTunnel(tunnel);
-        cavemap.SetWater(tunnel.localMinimas, cachedPrefabs);
 
         Log.Out($"{p1.position} -> {p2.position} | Astar dist: {tunnel.path.Count}, eucl dist: {CaveUtils.EuclidianDist(p1.position, p2.position)}, timer: {timer.ElapsedMilliseconds}ms");
         Log.Out($"{tunnel.localMinimas.Count} water blocks found");
@@ -629,12 +662,6 @@ public static class CaveViewer
         GenerateObjFile("noise.obj", voxels, false);
     }
 
-    public static void GifCommand()
-    {
-        // clustering_02.png
-        // GIFEncoder.Encode("output.gif", new string[] { "../previews/clustering_02.png", "../previews/clustering_03.png", "../previews/clustering_04.png", "../previews/clustering_05.png" });
-    }
-
     public static void Main(string[] args)
     {
         switch (args[0])
@@ -680,10 +707,6 @@ public static class CaveViewer
                 ClusterizeCommand(args);
                 break;
 
-            case "gif":
-                GifCommand();
-                break;
-
             case "cellaut":
             case "cell":
                 CellularAutomaCommand(args);
@@ -697,6 +720,10 @@ public static class CaveViewer
             case "bounds":
             case "bb":
                 BoundingCommands(args);
+                break;
+
+            case "bezier":
+                BezierCommand(args);
                 break;
 
             default:

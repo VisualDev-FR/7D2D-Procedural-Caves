@@ -297,7 +297,7 @@ public class CaveTunnel
 
     public static readonly Dictionary<int, Vector3i> spheres = InitSpheres();
 
-    public static Dictionary<int, Vector3i> InitSpheres()
+    public static Dictionary<int, Vector3i> InitSpheres(int maxRadius = 30)
     {
         var spheres = new Dictionary<int, Vector3i>() { { 0, Vector3i.zero } };
         var queue = new HashSet<Vector3i>() { Vector3i.zero };
