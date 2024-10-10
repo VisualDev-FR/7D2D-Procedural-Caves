@@ -7,7 +7,6 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Linq;
 using System.Collections;
-using System.Numerics;
 
 public static class CaveViewer
 {
@@ -169,34 +168,21 @@ public static class CaveViewer
 
     public static void BezierCommand(string[] args)
     {
-        Vector2 p0 = new Vector2(0, 0);
-        Vector2 p1 = new Vector2(50, 100);
-        Vector2 p2 = new Vector2(100, 0);
+        var timer = CaveUtils.StartTimer();
 
-        int numPoints = 100;
+        var P0 = new Vector3i(0, 0, 0);
+        var P1 = new Vector3i(100, 200, 100);
+        var P2 = new Vector3i(200, 300, 100);
+        var P3 = new Vector3i(400, 0, 0);
 
-        List<Vector2> points = new List<Vector2>();
+        var voxells = new BezierCurve3D()
+            .GetPoints(256, P0, P1, P2, P3)
+            .Select(pos => new Voxell(pos))
+            .ToHashSet();
 
-        for (int i = 0; i <= numPoints; i++)
-        {
-            float t = i / (float)numPoints;
-            float x = (1 - t) * (1 - t) * p0.X + 2 * (1 - t) * t * p1.X + t * t * p2.X;
-            float y = (1 - t) * (1 - t) * p0.Y + 2 * (1 - t) * t * p1.Y + t * t * p2.Y;
+        Log.Out($"blocks: {voxells.Count}, timer: {timer.ElapsedMilliseconds}ms");
 
-            points.Add(new Vector2(x, y));
-        }
-
-        using (var b = new Bitmap(150, 150))
-        {
-            using (Graphics g = Graphics.FromImage(b))
-            {
-                g.Clear(BackgroundColor);
-                DrawPoints(b, points.Select(p => new Vector3i(p.X, 0, p.Y)), TunnelsColor);
-            }
-
-            b.Save("bezier.png", ImageFormat.Png);
-        }
-
+        GenerateObjFile("bezier.obj", voxells, true);
     }
 
     public static void PathCommand(string[] args)
