@@ -4,7 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using WorldGenerationEngineFinal;
+
+using Random = System.Random;
 
 
 public class CaveTunnel
@@ -50,9 +51,11 @@ public class CaveTunnel
         this.worldSize = worldSize;
 
         FindPath(edge, cachedPrefabs);
-        FindLocalMinimas();
+
+        blocks.UnionWith(path);
+        // FindLocalMinimas();
         ThickenTunnel(edge.node1, edge.node2);
-        PostProcessTunnel();
+        // PostProcessTunnel();
     }
 
     public void SetID(int id)
@@ -73,28 +76,12 @@ public class CaveTunnel
         var start = edge.node1.Normal(Utils.FastMax(5, edge.node1.NodeRadius));
         var target = edge.node2.Normal(Utils.FastMax(5, edge.node2.NodeRadius));
 
-        if (cachedPrefabs.MinSqrDistanceToPrefab(start) == 0)
-        {
-            Log.Warning($"[Cave] '{edge.Prefab1.Name}' ({start - HalfWorldSize}) intersect with another prefab");
-            return;
-        }
-
-        if (cachedPrefabs.MinSqrDistanceToPrefab(target) == 0)
-        {
-            Log.Warning($"[Cave] '{edge.Prefab2.Name}' ({target - HalfWorldSize}) intersect with another prefab");
-            return;
-        }
-
         var startNode = new AstarNode(start);
         var goalNode = new AstarNode(target);
 
         var queue = new HashedPriorityQueue<AstarNode>();
         var visited = new HashSet<int>();
 
-        int bedRockMargin = CaveConfig.bedRockMargin + 1;
-        int terrainMargin = CaveConfig.terrainMargin + 1;
-        int sqrMinPrefabDistance = 100;
-        int neighborDistance = 1;
         int index = 0;
 
         queue.Enqueue(startNode, float.MaxValue);
@@ -103,7 +90,7 @@ public class CaveTunnel
         {
             AstarNode currentNode = queue.Dequeue();
 
-            if (currentNode.hashcode == goalNode.hashcode)
+            if (currentNode.Equals(goalNode))
             {
                 ReconstructPath(currentNode);
                 return;
@@ -115,39 +102,18 @@ public class CaveTunnel
             {
                 Vector3i neighborPos = currentNode.position + offset;
 
-                bool shouldContinue =
-                    neighborPos.y < bedRockMargin
-                    || neighborPos.y + terrainMargin > heightMap.GetHeight(neighborPos.x, neighborPos.z)
-                    || visited.Contains(neighborPos.GetHashCode()); // NOTE: AstarNode and Vector3i must have same hashcode function
-
-                if (shouldContinue)
+                if (visited.Contains(neighborPos.GetHashCode()))
                     continue;
 
-                float minDist = cachedPrefabs.MinSqrDistanceToPrefab(neighborPos);
-
-                if (minDist == 0)
-                {
-                    continue;
-                }
-
-                bool isCave = CaveNoise.pathingNoise.IsCave(neighborPos);
-                int factor = 0;
-
-                if (!isCave) factor += 1;
-                if (minDist < sqrMinPrefabDistance) factor += 1;
-
-                float tentativeGCost = currentNode.GCost + (neighborDistance << factor);
+                float tentativeGCost = currentNode.GCost + 1;
 
                 AstarNode neighbor = new AstarNode(neighborPos);
 
-                // TODO: try to remove condition 'tentativeGCost < neighbor.GCost'
-                // -> it seems to be useless (to be confirmed)
-                // -> try with condition 'tentativeGCost < currentNode.GCost' instead
                 if (tentativeGCost < neighbor.GCost || !queue.Contains(neighbor))
                 {
                     neighbor.Parent = currentNode;
                     neighbor.GCost = tentativeGCost;
-                    neighbor.HCost = CaveUtils.SqrEuclidianDistInt32(neighbor.position, goalNode.position) << factor;
+                    neighbor.HCost = CaveUtils.SqrEuclidianDistInt32(neighbor.position, goalNode.position) + 1;
 
                     if (!queue.Contains(neighbor))
                     {
@@ -187,21 +153,45 @@ public class CaveTunnel
 
     private void ThickenTunnel(GraphNode start, GraphNode target)
     {
-        blocks.UnionWith(start.GetSphere());
-        blocks.UnionWith(target.GetSphere());
+        var positions = path.Select(block => block.ToVector3i()).ToHashSet();
+        var current = new Vector3i();
+        var neighbor = new Vector3i();
+        var random = new Random(1337);
 
-        int r1 = start.NodeRadius;
-        int r2 = target.NodeRadius;
-
-        for (int i = 0; i < path.Count; i++)
+        for (int i = 0; i < 3; i++)
         {
-            var tunnelRadius = r1 + (r2 - r1) * ((float)i / path.Count);
-            var sphere = GetSphere(path[i].ToVector3i(), tunnelRadius)
-                .Where(caveBlock =>
-                       caveBlock.y > CaveConfig.bedRockMargin
-                    && caveBlock.y + CaveConfig.terrainMargin < (int)heightMap.GetHeight(caveBlock.x, caveBlock.z));
+            foreach (var pos in positions.ToList())
+            {
+                var visited = new HashSet<Vector3i>();
 
-            blocks.UnionWith(sphere);
+                foreach (var offset in CaveUtils.offsets)
+                {
+                    var neighborsCount = 0;
+
+                    current.x = pos.x + offset.x;
+                    current.y = pos.y + offset.y;
+                    current.z = pos.z + offset.z;
+
+                    if (positions.Contains(current)) continue;
+
+                    foreach (var offset2 in CaveUtils.offsets)
+                    {
+                        neighbor.x = current.x + offset2.x;
+                        neighbor.y = current.y + offset2.y;
+                        neighbor.z = current.z + offset2.z;
+
+                        if (positions.Contains(neighbor)) neighborsCount++;
+                    }
+
+                    if (neighborsCount > 1 && random.Next(100) < 10)
+                        positions.Add(current);
+                }
+            }
+        }
+
+        foreach (var pos in positions)
+        {
+            blocks.Add(new CaveBlock(pos));
         }
     }
 
@@ -295,7 +285,7 @@ public class CaveTunnel
 
     public static readonly Dictionary<int, HashSet<int>> spheresMapping = new Dictionary<int, HashSet<int>>();
 
-    public static readonly Dictionary<int, Vector3i> spheres = InitSpheres();
+    public static readonly Dictionary<int, Vector3i> spheres; // = InitSpheres();
 
     public static Dictionary<int, Vector3i> InitSpheres(int maxRadius = 30)
     {

@@ -201,7 +201,7 @@ public static class CaveViewer
 
     public static void PathCommand(string[] args)
     {
-        int worldSize = 100;
+        int worldSize = 200;
         var rand = new Random(1337);
         var heightMap = new RawHeightMap(worldSize, 128);
 
@@ -229,21 +229,10 @@ public static class CaveViewer
 
         var node1 = p1.nodes[1];
         var node2 = p2.nodes[0];
-
         var edge = new GraphEdge(node1, node2);
 
-        Log.Out($"prefab   {node2.prefab.position}");
-        Log.Out($"start    {node2.marker.start}");
-        Log.Out($"size     {node2.marker.size}");
-        Log.Out($"result   {node2.position}\n");
-
-        CaveTunnel.InitSpheres(5);
-
         var timer = CaveUtils.StartTimer();
-        var cavemap = new CaveMap();
         var tunnel = new CaveTunnel(edge, cachedPrefabs, heightMap, worldSize);
-
-        cavemap.AddTunnel(tunnel);
 
         Log.Out($"{p1.position} -> {p2.position} | Astar dist: {tunnel.path.Count}, eucl dist: {CaveUtils.EuclidianDist(p1.position, p2.position)}, timer: {timer.ElapsedMilliseconds}ms");
         Log.Out($"{tunnel.localMinimas.Count} water blocks found");
@@ -255,29 +244,13 @@ public static class CaveViewer
 
         foreach (var block in tunnel.blocks)
         {
-            if (cavemap.GetBlock(block.GetHashCode()).isWater)
+            if (block.isWater)
             {
                 voxels.Add(new Voxell(block.x, block.y, block.z, WaveFrontMaterial.LightBlue));
             }
             else
             {
                 voxels.Add(new Voxell(block.x, block.y, block.z, WaveFrontMaterial.DarkRed));
-            }
-        }
-
-        foreach (var node in p1.nodes)
-        {
-            foreach (var point in node.GetMarkerPoints())
-            {
-                voxels.Add(new Voxell(point, WaveFrontMaterial.Orange) { force = true });
-            }
-        }
-
-        foreach (var node in p2.nodes)
-        {
-            foreach (var point in node.GetMarkerPoints())
-            {
-                voxels.Add(new Voxell(point, WaveFrontMaterial.Orange) { force = true });
             }
         }
 
