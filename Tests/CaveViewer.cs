@@ -134,9 +134,10 @@ public static class CaveViewer
         int maxMarkers = 6;
 
         var prefabManager = new CavePrefabManager(worldSize);
+        var heightMap = new RawHeightMap(worldSize, 128);
 
         prefabManager.SetupBoundaryPrefabs(random, gridSize);
-        prefabManager.GetRandomPrefabs(random, prefabCounts, minMarkers, maxMarkers);
+        prefabManager.GetRandomPrefabs(random, heightMap, prefabCounts, minMarkers, maxMarkers);
 
         var graph = new Graph(prefabManager.Prefabs, worldSize);
         var voxels = new HashSet<Voxell>();
@@ -318,7 +319,7 @@ public static class CaveViewer
         var rand = new Random(seed);
         var heightMap = new RawHeightMap(worldSize, 64);
 
-        cachedPrefabs.GetRandomPrefabs(rand, prefabCount, prefabs);
+        cachedPrefabs.GetRandomPrefabs(rand, heightMap, prefabCount, prefabs);
 
         Log.Out("Start solving graph...");
 
@@ -631,7 +632,7 @@ public static class CaveViewer
     public static void GifCommand()
     {
         // clustering_02.png
-        GIFEncoder.Encode("output.gif", new string[] { "../previews/clustering_02.png", "../previews/clustering_03.png", "../previews/clustering_04.png", "../previews/clustering_05.png" });
+        // GIFEncoder.Encode("output.gif", new string[] { "../previews/clustering_02.png", "../previews/clustering_03.png", "../previews/clustering_04.png", "../previews/clustering_05.png" });
     }
 
     public static void Main(string[] args)

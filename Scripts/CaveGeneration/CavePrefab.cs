@@ -237,7 +237,7 @@ public class CavePrefab
         return result;
     }
 
-    public void SetRandomPosition(WorldBuilder worldBuilder, Random rand, int mapSize)
+    public void SetRandomPosition(RawHeightMap heightMap, Random rand, int mapSize)
     {
         int offset = CaveConfig.radiationSize + CaveConfig.radiationZoneMargin;
 
@@ -247,7 +247,7 @@ public class CavePrefab
             rand.Next(offset, mapSize - offset - Size.z)
         );
 
-        position.y = rand.Next(CaveConfig.bedRockMargin, (int)(worldBuilder.GetHeight(position.x, position.y) - Size.y));
+        position.y = rand.Next(CaveConfig.bedRockMargin, (int)(heightMap.GetHeight(position.x, position.y) - Size.y));
 
         foreach (var node in nodes)
         {

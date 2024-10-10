@@ -39,6 +39,11 @@ public class CavePrefabManager
     public CavePrefabManager(int worldSize)
     {
         this.worldSize = worldSize;
+
+        Prefabs = new List<CavePrefab>();
+        groupedCavePrefabs = new Dictionary<int, List<CavePrefab>>();
+        nearestPrefabs = new Dictionary<int, HashSet<CavePrefab>>();
+        prefabPlacements = new Dictionary<string, List<Vector3i>>();
     }
 
     public CavePrefabManager(WorldBuilder worldBuilder)
@@ -167,7 +172,7 @@ public class CavePrefabManager
         return false;
     }
 
-    private bool TryPlacePrefab(Random rand, ref CavePrefab prefab)
+    private bool TryPlacePrefab(Random rand, ref CavePrefab prefab, RawHeightMap heightMap)
     {
         int minDist = prefab.prefabDataInstance == null ? int.MaxValue : prefab.prefabDataInstance.prefab.DuplicateRepeatDistance;
         int overLapMargin = CaveConfig.overLapMargin;
@@ -175,7 +180,7 @@ public class CavePrefabManager
 
         while (maxTries-- > 0)
         {
-            prefab.SetRandomPosition(worldBuilder, rand, worldSize);
+            prefab.SetRandomPosition(heightMap, rand, worldSize);
 
             if (!prefab.OverLaps2D(Prefabs, overLapMargin) && !IsNearSamePrefab(prefab, minDist))
             {
@@ -186,7 +191,7 @@ public class CavePrefabManager
         return false;
     }
 
-    public void GetRandomPrefabs(Random rand, int targetCount, List<PrefabData> prefabs)
+    public void GetRandomPrefabs(Random rand, RawHeightMap heightMap, int targetCount, List<PrefabData> prefabs)
     {
         Log.Out("Start POIs placement...");
 
@@ -195,7 +200,7 @@ public class CavePrefabManager
             var pdi = new PrefabDataInstance(Count + 1, Vector3i.zero, (byte)rand.Next(4), prefabs[i % prefabs.Count]);
             var prefab = new CavePrefab(pdi.id, pdi, Vector3i.zero);
 
-            if (TryPlacePrefab(rand, ref prefab))
+            if (TryPlacePrefab(rand, ref prefab, heightMap))
             {
                 AddPrefab(prefab);
             }
@@ -204,7 +209,7 @@ public class CavePrefabManager
         Log.Out($"{Count} / {targetCount} prefabs added");
     }
 
-    public void GetRandomPrefabs(Random rand, int targetCount, int minMarkers = 4, int maxMarkers = 4)
+    public void GetRandomPrefabs(Random rand, RawHeightMap heightMap, int targetCount, int minMarkers = 4, int maxMarkers = 4)
     {
         Log.Out("Start POIs placement...");
 
@@ -213,7 +218,7 @@ public class CavePrefabManager
             var markerCount = rand.Next(minMarkers, maxMarkers);
             var prefab = new CavePrefab(Count + 1, Vector3i.zero, rand, markerCount);
 
-            if (TryPlacePrefab(rand, ref prefab))
+            if (TryPlacePrefab(rand, ref prefab, heightMap))
             {
                 AddPrefab(prefab);
             }
@@ -279,9 +284,6 @@ public class CavePrefabManager
         }
     }
 
-
-
-
     public List<PrefabData> GetUndergroundPrefabs()
     {
         return allCavePrefabs.Values
@@ -322,7 +324,7 @@ public class CavePrefabManager
         return prefabs.ToList();
     }
 
-    private int GetMinTerrainHeight(Vector3i position, Vector3i size)
+    private int GetMinTerrainHeight(Vector3i position, Vector3i size, RawHeightMap heightMap)
     {
         int minHeight = 1337;
 
@@ -330,11 +332,11 @@ public class CavePrefabManager
         {
             for (int z = position.z; z < position.z + size.z; z++)
             {
-                minHeight = Utils.FastMin(minHeight, (int)worldBuilder.GetHeight(x, z));
+                minHeight = Utils.FastMin(minHeight, (int)heightMap.GetHeight(x, z));
             }
         }
 
-        var prefabsAbove = GetPrefabsAbove(position - CaveUtils.HalfWorldSize(worldBuilder.WorldSize), size);
+        var prefabsAbove = GetPrefabsAbove(position - CaveUtils.HalfWorldSize(heightMap.worldSize), size);
 
         if (prefabsAbove.Count > 0)
         {
@@ -385,7 +387,7 @@ public class CavePrefabManager
         return false;
     }
 
-    private PrefabDataInstance TrySpawnCavePrefab(PrefabData prefabData, Random rand)
+    private PrefabDataInstance TrySpawnCavePrefab(PrefabData prefabData, Random rand, RawHeightMap heightMap)
     {
         int maxPlacementAttempts = 20;
 
@@ -396,7 +398,7 @@ public class CavePrefabManager
             Vector3i rotatedSize = CaveUtils.GetRotatedSize(prefabData.size, rotation);
             Vector3i position = GetRandomPositionFor(rotatedSize, rand);
 
-            var minTerrainHeight = GetMinTerrainHeight(position, rotatedSize);
+            var minTerrainHeight = GetMinTerrainHeight(position, rotatedSize, heightMap);
             var canBePlacedUnderTerrain = minTerrainHeight > (CaveConfig.bedRockMargin + prefabData.size.y + CaveConfig.terrainMargin);
 
             if (!canBePlacedUnderTerrain || OverLaps2D(position, rotatedSize, CaveConfig.overLapMargin))
@@ -415,7 +417,7 @@ public class CavePrefabManager
         return null;
     }
 
-    public void SpawnUnderGroundPrefabs(int count, Random rand)
+    public void SpawnUnderGroundPrefabs(int count, Random rand, RawHeightMap heightMap)
     {
         var undergroundPrefabs = GetUndergroundPrefabs();
         var HalfWorldSize = CaveUtils.HalfWorldSize(worldBuilder.WorldSize);
@@ -425,7 +427,7 @@ public class CavePrefabManager
         for (int i = 0; i < count; i++)
         {
             var prefabData = undergroundPrefabs[i % undergroundPrefabs.Count];
-            var pdi = TrySpawnCavePrefab(prefabData, rand);
+            var pdi = TrySpawnCavePrefab(prefabData, rand, heightMap);
 
             if (pdi == null)
                 continue;
@@ -441,7 +443,7 @@ public class CavePrefabManager
         Log.Out($"[Cave] {Count} cave prefabs added.");
     }
 
-    public void SpawnCaveRooms(int count, Random rand)
+    public void SpawnCaveRooms(int count, Random rand, RawHeightMap heightMap)
     {
         for (int i = 0; i < count; i++)
         {
@@ -457,7 +459,7 @@ public class CavePrefabManager
 
                 Vector3i position = GetRandomPositionFor(size, rand);
 
-                var minTerrainHeight = GetMinTerrainHeight(position, size);
+                var minTerrainHeight = GetMinTerrainHeight(position, size, heightMap);
                 var canBePlacedUnderTerrain = minTerrainHeight > (CaveConfig.bedRockMargin + size.y + CaveConfig.terrainMargin);
 
                 if (!canBePlacedUnderTerrain)

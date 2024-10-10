@@ -71,8 +71,8 @@ public class CavePlanner
         Random random = new Random(worldBuilder.Seed + worldBuilder.WorldSize);
 
         cavePrefabManager.GetUsedCavePrefabs();
-        cavePrefabManager.SpawnUnderGroundPrefabs(worldBuilder.WorldSize / 5, random);
-        cavePrefabManager.SpawnCaveRooms(1000, random);
+        cavePrefabManager.SpawnUnderGroundPrefabs(worldBuilder.WorldSize / 5, random, heightMap);
+        cavePrefabManager.SpawnCaveRooms(1000, random, heightMap);
         cavePrefabManager.AddSurfacePrefabs();
 
         var caveGraph = new Graph(cavePrefabManager.Prefabs, worldBuilder.WorldSize);

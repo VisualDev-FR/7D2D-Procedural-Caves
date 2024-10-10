@@ -7,7 +7,7 @@ public class RawHeightMap
 {
     private readonly float[] heightMap;
 
-    private readonly int worldSize;
+    public readonly int worldSize;
 
     public RawHeightMap(WorldBuilder worldBuilder)
     {

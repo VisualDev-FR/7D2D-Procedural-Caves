@@ -2,7 +2,7 @@
 
 cd %~dp0
 
-dotnet build --no-incremental > .log
+dotnet build --no-incremental
 
-.\bin\Debug\net4.8\cave-builder.exe %*
+.\bin\Debug\net4.8\cave-viewer.exe %*
 
