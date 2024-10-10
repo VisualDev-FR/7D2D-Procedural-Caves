@@ -1,28 +1,32 @@
 using System;
 using System.IO;
-using System.Drawing;
-using System.Drawing.Imaging;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Linq;
 using System.Collections;
+using UnityEngine;
+
+using Random = System.Random;
+
 
 public static class CaveViewer
 {
-    public static readonly Color BackgroundColor = Color.Black;
+    public static readonly Color BackgroundColor = Color.black;
 
-    public static readonly Color TunnelsColor = Color.DarkRed;
+    public static readonly Color gridColor = new Color32(255, 255, 255, 64);
 
-    public static readonly Color NodeColor = Color.Yellow;
+    public static readonly Color TunnelsColor = new Color(255, 0, 0, 64);
 
-    public static readonly Color UnderGroundColor = Color.Green;
+    public static readonly Color NodeColor = Color.yellow;
 
-    public static readonly Color EntranceColor = Color.Yellow;
+    public static readonly Color UnderGroundColor = Color.green;
 
-    public static readonly Color RoomColor = Color.DarkGray;
+    public static readonly Color EntranceColor = Color.yellow;
 
-    public static readonly Color NoiseColor = Color.FromArgb(84, 84, 82);
+    public static readonly Color RoomColor = Color.gray;
+
+    public static readonly Color NoiseColor = new Color(84, 84, 82);
 
     public static void RunCoroutine(IEnumerator coroutine)
     {
@@ -35,26 +39,7 @@ public static class CaveViewer
         }
     }
 
-    public static PointF ParsePointF(Vector3i point)
-    {
-        return new PointF(point.x, point.z);
-    }
-
-    public static void DrawGrid(Bitmap b, Graphics graph, int worldSize, int gridSize)
-    {
-        for (int x = gridSize; x < worldSize; x += gridSize)
-        {
-            var color = Color.FromArgb(50, Color.FromName("DarkGray"));
-
-            using (var pen = new Pen(color, 1))
-            {
-                graph.DrawLine(pen, new PointF(x, 0), new PointF(x, worldSize));
-                graph.DrawLine(pen, new PointF(0, x), new PointF(worldSize, x));
-            }
-        }
-    }
-
-    public static void DrawPrefabs(Bitmap b, Graphics graph, List<CavePrefab> prefabs)
+    public static void DrawPrefabs(PNGEncoder encoder, List<CavePrefab> prefabs)
     {
         foreach (var prefab in prefabs)
         {
@@ -72,52 +57,29 @@ public static class CaveViewer
                 color = EntranceColor;
             }
 
-            using (var pen = new Pen(color, 1))
-            {
-                graph.DrawRectangle(pen, prefab.position.x, prefab.position.z, prefab.Size.x, prefab.Size.z);
-            }
+            encoder.DrawRectangle(prefab.position, prefab.Size, UnderGroundColor);
 
             foreach (var node in prefab.nodes)
             {
-                b.SetPixel(node.position.x, node.position.z, NodeColor);
+                encoder.SetPixel(node.position.x, node.position.z, NodeColor);
             }
         }
     }
 
-    public static void DrawPoints(Bitmap bitmap, IEnumerable<Vector3i> points, Color color)
+    public static void DrawPoints(PNGEncoder encoder, IEnumerable<Vector3i> points, Color color)
     {
         foreach (var point in points)
         {
-            bitmap.SetPixel(point.x, point.z, color);
+            encoder.SetPixel(point.x, point.z, color);
         }
     }
 
-    public static void DrawEdges(Graphics graph, List<GraphEdge> edges)
+    public static void DrawEdges(PNGEncoder encoder, List<GraphEdge> edges)
     {
         foreach (var edge in edges)
         {
-            // var color = edge.isVirtual ? RoomColor : TunnelsColor;
-            var color = Color.FromName(edge.colorName);
-
-            using (var pen = new Pen(Color.FromArgb(edge.opacity, color), edge.width))
-            {
-                graph.DrawCurve(pen, new PointF[2]{
-                    ParsePointF(edge.node1.position),
-                    ParsePointF(edge.node2.position),
-                });
-            }
-        }
-    }
-
-    public static void DrawNoise(Bitmap b, CaveNoise noise, int worldSize)
-    {
-        for (int x = 0; x < worldSize; x++)
-        {
-            for (int z = 0; z < worldSize; z++)
-            {
-                if (noise.IsCave(x, z))
-                    b.SetPixel(x, z, NoiseColor);
-            }
+            var color = TunnelsColor;
+            encoder.DrawLine(edge.node1.position, edge.node2.position, color);
         }
     }
 
@@ -151,18 +113,13 @@ public static class CaveViewer
             }
         }
 
-        using (var b = new Bitmap(worldSize, worldSize))
-        {
-            using (Graphics g = Graphics.FromImage(b))
-            {
-                g.Clear(BackgroundColor);
-                DrawGrid(b, g, worldSize, gridSize);
-                DrawEdges(g, graph.Edges.ToList());
-                DrawPrefabs(b, g, prefabManager.Prefabs);
-            }
+        var png = new PNGEncoder(worldSize);
 
-            b.Save(@"graph.png", ImageFormat.Png);
-        }
+        png.DrawGrid(gridSize, gridColor);
+        DrawEdges(png, graph.Edges.ToList());
+        DrawPrefabs(png, prefabManager.Prefabs);
+
+        png.Encode("graph.png");
     }
 
     public static void PathCommand(string[] args)
@@ -331,33 +288,27 @@ public static class CaveViewer
         var cavemap = new CaveMap();
         var localMinimas = new HashSet<CaveBlock>();
 
-        using (var b = new Bitmap(worldSize, worldSize))
+        var png = new PNGEncoder(worldSize);
+
+        Parallel.ForEach(graph.Edges, edge =>
         {
-            using (Graphics g = Graphics.FromImage(b))
+            Log.Out($"Cave tunneling: {100.0f * index++ / graph.Edges.Count:F0}% ({index} / {graph.Edges.Count}) {cavemap.Count:N0}");
+
+            var tunnel = new CaveTunnel(edge, cachedPrefabs, heightMap, worldSize);
+
+            lock (lockObject)
             {
-                g.Clear(BackgroundColor);
+                cavemap.AddTunnel(tunnel);
 
-                Parallel.ForEach(graph.Edges, edge =>
+                foreach (CaveBlock caveBlock in tunnel.blocks)
                 {
-                    Log.Out($"Cave tunneling: {100.0f * index++ / graph.Edges.Count:F0}% ({index} / {graph.Edges.Count}) {cavemap.Count:N0}");
-
-                    var tunnel = new CaveTunnel(edge, cachedPrefabs, heightMap, worldSize);
-
-                    lock (lockObject)
-                    {
-                        cavemap.AddTunnel(tunnel);
-
-                        foreach (CaveBlock caveBlock in tunnel.blocks)
-                        {
-                            b.SetPixel(caveBlock.x, caveBlock.z, TunnelsColor);
-                        }
-                    }
-                });
-
-                DrawPrefabs(b, g, cachedPrefabs.Prefabs);
-                b.Save(@"cave.png", ImageFormat.Png);
+                    png.SetPixel(caveBlock.x, caveBlock.z, TunnelsColor);
+                }
             }
-        }
+        });
+
+        DrawPrefabs(png, cachedPrefabs.Prefabs);
+        png.Encode("cave.png");
 
         // cavemap.SetWater(localMinimas, cachedPrefabs);
 
@@ -404,6 +355,38 @@ public static class CaveViewer
         // }
 
         // GenerateObjFile("cave.obj", voxels, false);
+    }
+
+    public static void BezierCommand(string[] args)
+    {
+        Vector2 p0 = new Vector2(0, 0);
+        Vector2 p1 = new Vector2(50, 100);
+        Vector2 p2 = new Vector2(100, 0);
+
+        int numPoints = 100;
+
+        List<Vector2> points = new List<Vector2>();
+
+        for (int i = 0; i <= numPoints; i++)
+        {
+            float t = i / (float)numPoints;
+
+            float x = (1 - t) * (1 - t) * p0.x +
+                      2 * (1 - t) * t * p1.x +
+                      t * t * p2.x;
+
+            float y = (1 - t) * (1 - t) * p0.y +
+                      2 * (1 - t) * t * p1.y +
+                      t * t * p2.y;
+
+            points.Add(new Vector2(x, y));
+        }
+
+        var png = new PNGEncoder(150);
+
+        DrawPoints(png, points.Select(p => new Vector3i(p.x, 0, p.y)), TunnelsColor);
+
+        png.Encode("bezier.png");
     }
 
     public static void CellularAutomaCommand(string[] args)
@@ -631,7 +614,7 @@ public static class CaveViewer
     public static void GifCommand()
     {
         // clustering_02.png
-        GIFEncoder.Encode("output.gif", new string[] { "../previews/clustering_02.png", "../previews/clustering_03.png", "../previews/clustering_04.png", "../previews/clustering_05.png" });
+        // GIFEncoder.Encode("output.gif", new string[] { "../previews/clustering_02.png", "../previews/clustering_03.png", "../previews/clustering_04.png", "../previews/clustering_05.png" });
     }
 
     public static void Main(string[] args)
@@ -690,6 +673,10 @@ public static class CaveViewer
 
             case "bit":
                 BitCommand();
+                break;
+
+            case "bezier":
+                BezierCommand(args);
                 break;
 
             case "boundingbox":

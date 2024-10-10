@@ -1,20 +1,103 @@
-<Project Sdk="Microsoft.NET.Sdk">
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+
   <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{4069FB6B-DC75-4192-8208-1BF2C0EF7227}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net4.8</TargetFramework>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>cave-viewer</RootNamespace>
+    <AssemblyName>cave-viewer</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
   </PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include="Bumpkit" Version="1.0.2" />
-    <PackageReference Include="mstest" Version="3.5.0" />
-    <PackageReference Include="System.Drawing.Common" Version="7.0.0" />
-    <Reference Include="$(PATH_7D2D)\7DaysToDie_Data\Managed\Assembly-CSharp.dll" />
-    <Reference Include="$(PATH_7D2D)\7DaysToDie_Data\Managed\UnityEngine.CoreModule.dll" />
-    <Reference Include="$(PATH_7D2D)\7DaysToDie_Data\Managed\netstandard.dll" />
-    <Reference Include="$(PATH_7D2D)\7DaysToDie_Data\Managed\LogLibrary.dll" />
-    <Reference Include="$(PATH_7D2D)\7DaysToDie_Data\Managed\UnityEngine.ImageConversionModule.dll" />
-  </ItemGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>portable</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\debug</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+
   <ItemGroup>
 
+    <Reference Include="Assembly-CSharp">
+      <HintPath>$(PATH_7D2D)\7DaysToDie_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+
+    <Reference Include="LogLibrary">
+      <HintPath>$(PATH_7D2D)\7DaysToDie_Data\Managed\LogLibrary.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+
+    <Reference Include="System.Xml">
+      <HintPath>$(PATH_7D2D)\7DaysToDie_Data\Managed\System.Xml.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+
+    <Reference Include="System">
+      <HintPath>$(PATH_7D2D)\7DaysToDie_Data\Managed\System.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+
+    <Reference Include="System.Xml.Linq">
+      <HintPath>$(PATH_7D2D)\7DaysToDie_Data\Managed\System.Xml.Linq.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+
+    <Reference Include="UnityEngine">
+      <HintPath>$(PATH_7D2D)\7DaysToDie_Data\Managed\UnityEngine.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+
+    <Reference Include="UnityEngine.ImageConversionModule">
+      <HintPath>$(PATH_7D2D)\7DaysToDie_Data\Managed\UnityEngine.ImageConversionModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>$(PATH_7D2D)\7DaysToDie_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>$(PATH_7D2D)\7DaysToDie_Data\Managed\mscorlib.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+
+    <Reference Include="InControl">
+      <HintPath>$(PATH_7D2D)\7DaysToDie_Data\Managed\InControl.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+
+  </ItemGroup>
+
+  <ItemGroup>
+
+    <Compile Include="./CaveViewer.cs" />
+    <!-- <Compile Include="./GIFEncoder.cs" /> -->
+    <Compile Include="./PNGEncoder.cs" />
+    <Compile Include="./PrefabLoader.cs" />
+    <Compile Include="./Voxell.cs" />
+    <Compile Include="./VoxellFace.cs" />
+    <Compile Include="./WaveFrontMaterial.cs" />
 
     <!-- CaveGeneration -->
     <Compile Include="..\Scripts\CaveGeneration\CavePlanner.cs" />
@@ -71,4 +154,13 @@
     <Compile Include="..\Scripts\CaveUtils.cs" />
 
   </ItemGroup>
+
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+
+  <PropertyGroup>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>false</Deterministic>
+  </PropertyGroup>
+
+  <Import Project="$(SolutionDir)\Tools\Directory.Build.targets" Condition="Exists('$(SolutionDir)\Tools\Directory.Build.targets')" />
 </Project>

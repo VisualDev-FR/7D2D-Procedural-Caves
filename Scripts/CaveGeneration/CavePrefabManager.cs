@@ -39,6 +39,11 @@ public class CavePrefabManager
     public CavePrefabManager(int worldSize)
     {
         this.worldSize = worldSize;
+
+        Prefabs = new List<CavePrefab>();
+        groupedCavePrefabs = new Dictionary<int, List<CavePrefab>>();
+        nearestPrefabs = new Dictionary<int, HashSet<CavePrefab>>();
+        prefabPlacements = new Dictionary<string, List<Vector3i>>();
     }
 
     public CavePrefabManager(WorldBuilder worldBuilder)
