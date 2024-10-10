@@ -202,7 +202,8 @@ public static class CaveViewer
     public static void PathCommand(string[] args)
     {
         int worldSize = 100;
-        var rand = new Random(1337);
+        int seed = 13347;
+        var rand = new Random(seed);
         var heightMap = new RawHeightMap(worldSize, 128);
 
         if (args.Length > 1)
@@ -216,7 +217,7 @@ public static class CaveViewer
 
         var p2 = new CavePrefab(1)
         {
-            position = new Vector3i(20, 50, worldSize - 30),
+            position = new Vector3i(20, 100, worldSize - 30),
             Size = new Vector3i(20, 10, 20),
         };
 
@@ -241,7 +242,7 @@ public static class CaveViewer
 
         var timer = CaveUtils.StartTimer();
         var cavemap = new CaveMap();
-        var tunnel = new CaveTunnel(edge, cachedPrefabs, heightMap, worldSize);
+        var tunnel = new CaveTunnel(edge, cachedPrefabs, heightMap, worldSize, seed);
 
         cavemap.AddTunnel(tunnel);
 
@@ -350,7 +351,7 @@ public static class CaveViewer
         var prefabs = PrefabLoader.LoadPrefabs().Values.ToList();
         var cachedPrefabs = new CavePrefabManager(worldSize);
         var rand = new Random(seed);
-        var heightMap = new RawHeightMap(worldSize, 64);
+        var heightMap = new RawHeightMap(worldSize, 128);
 
         cachedPrefabs.GetRandomPrefabs(rand, heightMap, prefabCount, prefabs);
 
@@ -375,7 +376,7 @@ public static class CaveViewer
                 {
                     Log.Out($"Cave tunneling: {100.0f * index++ / graph.Edges.Count:F0}% ({index} / {graph.Edges.Count}) {cavemap.Count:N0}");
 
-                    var tunnel = new CaveTunnel(edge, cachedPrefabs, heightMap, worldSize);
+                    var tunnel = new CaveTunnel(edge, cachedPrefabs, heightMap, worldSize, seed);
 
                     lock (lockObject)
                     {

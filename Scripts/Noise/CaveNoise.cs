@@ -62,6 +62,11 @@ public class CaveNoise
         noise.SetSeed(seed);
     }
 
+    public void IncrementSeed(int increment = 1)
+    {
+        noise.IncrementSeed(increment);
+    }
+
     public bool IsTerrain(int x, int y, int z)
     {
         return noise.GetNoise(x, y, z) < threshold;

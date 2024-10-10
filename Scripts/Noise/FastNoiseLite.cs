@@ -136,6 +136,10 @@ public class FastNoiseLite
     /// </remarks>
     public void SetSeed(int seed) { mSeed = seed; }
 
+    public int GetSeed() => mSeed;
+
+    public void IncrementSeed(int increment = 1) { mSeed += increment; }
+
     /// <summary>
     /// Sets frequency for all noise types
     /// </summary>

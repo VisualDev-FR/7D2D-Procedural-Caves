@@ -32,6 +32,11 @@ public class RawHeightMap
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public float GetHeight(int x, int z)
     {
+        if (x < 0 || z < 0 || x >= worldSize || z >= worldSize)
+        {
+            return 0;
+        }
+
         return heightMap[x + z * worldSize];
     }
 }

@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using WorldGenerationEngineFinal;
 
 
 public class CaveTunnel
@@ -42,8 +41,10 @@ public class CaveTunnel
         new Vector3(0.75f, 0.75f, 0.75f)
     };
 
-    public CaveTunnel(GraphEdge edge, CavePrefabManager cachedPrefabs, RawHeightMap heightMap, int worldSize)
+    public CaveTunnel(GraphEdge edge, CavePrefabManager cachedPrefabs, RawHeightMap heightMap, int worldSize, int seed)
     {
+        CaveNoise.pathingNoise.SetSeed(seed);
+
         id = new MutableInt16(edge.id);
 
         this.heightMap = heightMap;
@@ -73,6 +74,9 @@ public class CaveTunnel
         var start = edge.node1.Normal(Utils.FastMax(5, edge.node1.NodeRadius));
         var target = edge.node2.Normal(Utils.FastMax(5, edge.node2.NodeRadius));
 
+        var yMin = Utils.FastMin(start.y, target.y);
+        var yMax = Utils.FastMax(start.y, target.y);
+
         if (cachedPrefabs.MinSqrDistanceToPrefab(start) == 0)
         {
             Log.Warning($"[Cave] '{edge.Prefab1.Name}' ({start - HalfWorldSize}) intersect with another prefab");
@@ -85,8 +89,8 @@ public class CaveTunnel
             return;
         }
 
-        var startNode = new AstarNode(start);
-        var goalNode = new AstarNode(target);
+        var startNode = new AstarNode(start, edge.node1.position);
+        var goalNode = new AstarNode(target, edge.node2.position);
 
         var queue = new HashedPriorityQueue<AstarNode>();
         var visited = new HashSet<int>();
@@ -130,22 +134,25 @@ public class CaveTunnel
                     continue;
                 }
 
+                AstarNode neighbor = new AstarNode(neighborPos, currentNode);
+
+                Vector3i dir = currentNode.direction + neighbor.direction;
                 bool isCave = CaveNoise.pathingNoise.IsCave(neighborPos);
                 int factor = 0;
 
                 if (!isCave) factor += 1;
                 if (minDist < sqrMinPrefabDistance) factor += 1;
+                if (dir.x == 0) factor += 1;
+                if (dir.z == 0) factor += 1;
+                if (neighborPos.y > yMax || neighborPos.y < yMin) factor += 1;
 
                 float tentativeGCost = currentNode.GCost + (neighborDistance << factor);
-
-                AstarNode neighbor = new AstarNode(neighborPos);
 
                 // TODO: try to remove condition 'tentativeGCost < neighbor.GCost'
                 // -> it seems to be useless (to be confirmed)
                 // -> try with condition 'tentativeGCost < currentNode.GCost' instead
                 if (tentativeGCost < neighbor.GCost || !queue.Contains(neighbor))
                 {
-                    neighbor.Parent = currentNode;
                     neighbor.GCost = tentativeGCost;
                     neighbor.HCost = CaveUtils.SqrEuclidianDistInt32(neighbor.position, goalNode.position) << factor;
 

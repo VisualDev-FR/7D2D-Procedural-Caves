@@ -97,7 +97,7 @@ public class CavePlanner
                     var start = edge.node1;
                     var target = edge.node2;
 
-                    var tunnel = new CaveTunnel(edge, cavePrefabManager, heightMap, WorldSize);
+                    var tunnel = new CaveTunnel(edge, cavePrefabManager, heightMap, WorldSize, worldBuilder.Seed);
 
                     lock (lockObject)
                     {
