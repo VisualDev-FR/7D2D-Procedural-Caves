@@ -202,7 +202,7 @@ public class CaveTunnel
 
         for (int i = 0; i < path.Count; i++)
         {
-            var tunnelRadius = r1 + (r2 - r1) * ((float)i / path.Count);
+            var tunnelRadius = GetRadius(i, r1, r2);
             var sphere = GetSphere(path[i].ToVector3i(), tunnelRadius)
                 .Where(caveBlock =>
                        caveBlock.y > CaveConfig.bedRockMargin
@@ -210,6 +210,11 @@ public class CaveTunnel
 
             blocks.UnionWith(sphere);
         }
+    }
+
+    private float GetRadius(int index, int r1, int r2)
+    {
+        return r1 + (r2 - r1) * ((float)index / path.Count);
     }
 
     private HashSet<CaveBlock> SmoothTunnel()

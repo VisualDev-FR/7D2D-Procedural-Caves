@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Linq;
 using System.Collections;
+using XMLData;
 
 public static class CaveViewer
 {
@@ -171,9 +172,9 @@ public static class CaveViewer
         var timer = CaveUtils.StartTimer();
 
         var P0 = new Vector3i(0, 0, 0);
-        var P1 = new Vector3i(100, 200, 100);
-        var P2 = new Vector3i(200, 300, 100);
-        var P3 = new Vector3i(400, 0, 0);
+        var P1 = new Vector3i(20, 40, 20);
+        var P2 = new Vector3i(40, 60, 20);
+        var P3 = new Vector3i(60, 0, 0);
 
         var voxells = new BezierCurve3D()
             .GetPoints(256, P0, P1, P2, P3)
@@ -649,6 +650,39 @@ public static class CaveViewer
         GenerateObjFile("noise.obj", voxels, false);
     }
 
+    public static void Noise1dCommand(string[] args)
+    {
+        var timer = CaveUtils.StartTimer();
+
+        var rand = new Random();
+        var curve = new Noise1D(rand, 20, 50, 100);
+
+        timer.Stop();
+
+        using (var b = new Bitmap(100, 100))
+        {
+            using (Graphics g = Graphics.FromImage(b))
+            {
+                g.Clear(BackgroundColor);
+
+                for (int i = 0; i < curve.points.Count - 1; i++)
+                {
+                    var p1 = curve.points[i];
+                    var p2 = curve.points[i + 1];
+
+                    using (var pen = new Pen(TunnelsColor, 1))
+                    {
+                        g.DrawLine(pen, new PointF(p1.X, 100 - p1.Y), new PointF(p2.X, 100 - p2.Y));
+                    }
+                }
+            }
+
+            b.Save(@"noise1d.png", ImageFormat.Png);
+        }
+
+        Log.Out($"timer: {timer.ElapsedMilliseconds}ms");
+    }
+
     public static void Main(string[] args)
     {
         switch (args[0])
@@ -707,6 +741,11 @@ public static class CaveViewer
             case "bounds":
             case "bb":
                 BoundingCommands(args);
+                break;
+
+            case "noise1d":
+            case "interpolate":
+                Noise1dCommand(args);
                 break;
 
             case "bezier":
