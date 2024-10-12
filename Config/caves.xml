@@ -1,20 +1,65 @@
 <configs>
     <append xpath="/caves">
 
-    <property name="MaxPrefabPlacementAttempts" value="50" help="myPropertyHelp" />
-    <property name="RadiationMargin" value="50" help="myPropertyHelp" />
-    <property name="LightFactor" value="0.5" help="myPropertyHelp" />
-    <property name="SetWater" value="true" help="myPropertyHelp" />
+        <property name="MaxPrefabPlacementAttempts" value="50" help="myPropertyHelp" />
+        <property name="RadiationMargin" value="50" help="myPropertyHelp" />
+        <property name="LightFactor" value="0.5" help="myPropertyHelp" />
+        <property name="SetWater" value="true" help="myPropertyHelp" />
 
-    <property name="PathingNoise" help="myPropertyHelp">
-        <property name="noiseType" value="perlin" help="myPropertyHelp" />
-        <property name="fractalType" value="none" help="myPropertyHelp" />
-        <property name="octaves" value="1" help="myPropertyHelp" />
-        <property name="gain" value="0.5" help="myPropertyHelp" />
-        <property name="lacunarity" value="0.5" help="myPropertyHelp" />
-        <property name="frequency" value="0.05" help="myPropertyHelp" />
-        <property name="threshold" value="0.5" help="myPropertyHelp" />
-    </property>
+        <!--  -->
+        <property name="PathingNoise" help="myPropertyHelp">
+            <property name="noiseType" value="perlin" help="myPropertyHelp" />
+            <property name="fractalType" value="none" help="myPropertyHelp" />
+            <property name="octaves" value="1" help="myPropertyHelp" />
+            <property name="gain" value="0.5" help="myPropertyHelp" />
+            <property name="lacunarity" value="0.5" help="myPropertyHelp" />
+            <property name="frequency" value="0.05" help="myPropertyHelp" />
+            <property name="threshold" value="0.5" help="myPropertyHelp" />
+        </property>
+
+        <!-- used to force terrain around cave tunnels or cave rooms -->
+        <property name="caveTerrainPlaceholders">
+
+            <property block="terrDirt" replacedBy="terrStone" />
+            <property block="terrDestroyedStone" replacedBy="terrStone" />
+            <property block="terrDestroyedWoodDebris" replacedBy="terrStone" />
+            <property block="terrGravel" replacedBy="terrStone" />
+            <property block="terrSand" replacedBy="terrStone" />
+            <property block="terrAsphalt" replacedBy="terrStone" />
+            <property block="terrConcrete" replacedBy="terrStone" />
+            <property block="terrOreIron" replacedBy="terrStone" />
+            <property block="terrOreLead" replacedBy="terrStone" />
+            <property block="terrOreCoal" replacedBy="terrStone" />
+            <property block="terrOrePotassiumNitrate" replacedBy="terrStone" />
+            <property block="terrOreOilDeposit" replacedBy="terrStone" />
+
+            <property block="terrDirt" replacedBy="terrSandStone" biome="desert" />
+            <property block="terrDestroyedStone" replacedBy="terrSandStone" biome="desert" />
+            <property block="terrDestroyedWoodDebris" replacedBy="terrSandStone" biome="desert" />
+            <property block="terrGravel" replacedBy="terrSandStone" biome="desert" />
+            <property block="terrSand" replacedBy="terrSandStone" biome="desert" />
+            <property block="terrAsphalt" replacedBy="terrSandStone" biome="desert" />
+            <property block="terrConcrete" replacedBy="terrSandStone" biome="desert" />
+            <property block="terrOreIron" replacedBy="terrSandStone" biome="desert" />
+            <property block="terrOreLead" replacedBy="terrSandStone" biome="desert" />
+            <property block="terrOreCoal" replacedBy="terrSandStone" biome="desert" />
+            <property block="terrOrePotassiumNitrate" replacedBy="terrSandStone" biome="desert" />
+            <property block="terrOreOilDeposit" replacedBy="terrSandStone" biome="desert" />
+
+            <property block="terrDirt" replacedBy="terrSnow" biome="snow" />
+            <property block="terrDestroyedStone" replacedBy="terrSnow" biome="snow" />
+            <property block="terrDestroyedWoodDebris" replacedBy="terrSnow" biome="snow" />
+            <property block="terrGravel" replacedBy="terrSnow" biome="snow" />
+            <property block="terrSand" replacedBy="terrSnow" biome="snow" />
+            <property block="terrAsphalt" replacedBy="terrSnow" biome="snow" />
+            <property block="terrConcrete" replacedBy="terrSnow" biome="snow" />
+            <property block="terrOreIron" replacedBy="terrSnow" biome="snow" />
+            <property block="terrOreLead" replacedBy="terrSnow" biome="snow" />
+            <property block="terrOreCoal" replacedBy="terrSnow" biome="snow" />
+            <property block="terrOrePotassiumNitrate" replacedBy="terrSnow" biome="snow" />
+            <property block="terrOreOilDeposit" replacedBy="terrSnow" biome="snow" />
+
+        </property>
 
     </append>
 </configs>

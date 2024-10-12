@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Xml;
 
 
@@ -185,6 +186,61 @@ public class CaveGenerator
         return caveAir;
     }
 
+    private static BlockValue GetBoundingStoneBlockValue(int biomeID, BlockValue currentBlockValue)
+    {
+        /* biomes.xml
+
+            <biomemap id="01" name="snow"/>
+            <biomemap id="03" name="pine_forest"/>
+            <biomemap id="05" name="desert"/>
+            <biomemap id="06" name="water"/>
+            <biomemap id="07" name="radiated"/>
+            <biomemap id="08" name="wasteland"/>
+            <biomemap id="09" name="burnt_forest"/>
+            <biomemap id="13" name="caveFloor"/>
+            <biomemap id="14" name="caveCeiling"/>
+            <biomemap id="18" name="onlyWater"/>
+            <biomemap id="19" name="underwater"/>
+        */
+
+        var replacementBlockValue = BlockValue.Air;
+
+        switch (biomeID)
+        {
+            case 1:
+                replacementBlockValue = Block.GetBlockByName("terrSnow").ToBlockValue();
+                break;
+
+            case 5:
+                replacementBlockValue = Block.GetBlockByName("terrSandStone").ToBlockValue();
+                break;
+
+            default:
+                replacementBlockValue = Block.GetBlockByName("terrStone").ToBlockValue();
+                break;
+        }
+
+        switch (currentBlockValue.Block.blockName)
+        {
+            case "terrDirt":
+            case "terrDestroyedStone":
+            case "terrDestroyedWoodDebris":
+            case "terrGravel":
+            case "terrSand":
+            case "terrAsphalt":
+            case "terrConcrete":
+            case "terrOreIron":
+            case "terrOreLead":
+            case "terrOreCoal":
+            case "terrOrePotassiumNitrate":
+            case "terrOreOilDeposit":
+                return replacementBlockValue;
+
+            default:
+                return BlockValue.Air;
+        }
+    }
+
     public static void GenerateCave(Chunk chunk)
     {
         if (chunk == null)
@@ -200,36 +256,56 @@ public class CaveGenerator
         if (caveBlocks == null)
             return;
 
+        var caveBlocksV3i = caveBlocks.Select(block => block.blockChunkPos.ToVector3i()).ToHashSet();
+        var visited = new HashSet<Vector3i>();
+        var neighbor = new Vector3i();
+
         foreach (CaveBlock caveBlock in caveBlocks)
         {
             Vector3bf blockChunkPos = caveBlock.blockChunkPos;
 
-            try
-            {
-                chunk.SetBlockRaw(blockChunkPos.x, blockChunkPos.y, blockChunkPos.z, caveAir);
-                chunk.SetDensity(blockChunkPos.x, blockChunkPos.y, blockChunkPos.z, caveBlock.density);
+            chunk.SetBlockRaw(blockChunkPos.x, blockChunkPos.y, blockChunkPos.z, caveAir);
+            chunk.SetDensity(blockChunkPos.x, blockChunkPos.y, blockChunkPos.z, caveBlock.density);
 
-                if (caveBlock.isFloor && caveBlock.isFlat)
-                {
-                    chunk.SetBlockRaw(blockChunkPos.x, blockChunkPos.y - 1, blockChunkPos.z, terrGravel);
-                    chunk.SetDensity(blockChunkPos.x, blockChunkPos.y - 1, blockChunkPos.z, MarchingCubes.DensityTerrain);
-                }
-            }
-            catch (Exception e)
+            if (caveBlock.isFloor && caveBlock.isFlat)
             {
-                Log.Error($"[Cave] {e.GetType()} (Chunk={caveBlock.chunkPos}, block={caveBlock.blockChunkPos})");
+                chunk.SetBlockRaw(blockChunkPos.x, blockChunkPos.y - 1, blockChunkPos.z, terrGravel);
+                chunk.SetDensity(blockChunkPos.x, blockChunkPos.y - 1, blockChunkPos.z, MarchingCubes.DensityTerrain);
             }
 
-            if (!caveBlock.isWater)
-                continue;
-
-            try
+            if (caveBlock.isWater)
             {
                 chunk.SetWaterRaw(blockChunkPos.x, blockChunkPos.y, blockChunkPos.z, WaterValue.Full);
             }
-            catch (Exception e)
+
+            int biomeID = chunk.GetBiomeId(0, 0);
+
+            foreach (var offset in CaveUtils.offsets)
             {
-                Log.Error($"[Cave] {e.GetType()} (Chunk={caveBlock.chunkPos}, block={caveBlock.blockChunkPos})");
+                neighbor.x = blockChunkPos.x + offset.x;
+                neighbor.y = blockChunkPos.y + offset.y;
+                neighbor.z = blockChunkPos.z + offset.z;
+
+                if (
+                       visited.Contains(neighbor)
+                    || caveBlocksV3i.Contains(neighbor)
+                    || neighbor.x < 0
+                    || neighbor.z < 0
+                    || neighbor.x > 15
+                    || neighbor.z > 15
+                    )
+                    continue;
+
+                var currentBlock = chunk.GetBlock(neighbor);
+                var blockValue = GetBoundingStoneBlockValue(biomeID, currentBlock);
+
+                if (blockValue.isair)
+                    continue;
+
+                chunk.SetBlockRaw(neighbor.x, neighbor.y, neighbor.z, blockValue);
+                chunk.SetDensity(neighbor.x, neighbor.y, neighbor.z, MarchingCubes.DensityTerrain);
+
+                visited.Add(neighbor);
             }
         }
 
