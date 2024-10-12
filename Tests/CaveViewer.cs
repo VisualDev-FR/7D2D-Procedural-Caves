@@ -672,7 +672,7 @@ public static class CaveViewer
 
                     using (var pen = new Pen(TunnelsColor, 1))
                     {
-                        g.DrawLine(pen, new PointF(p1.X, 100 - p1.Y), new PointF(p2.X, 100 - p2.Y));
+                        g.DrawLine(pen, new PointF(p1.x, 100 - p1.y), new PointF(p2.x, 100 - p2.y));
                     }
                 }
             }
