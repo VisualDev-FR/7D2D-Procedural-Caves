@@ -118,7 +118,7 @@ public static class WorldBuilder_GenerateData
             yield return worldBuilder.smoothRoadTerrain(worldBuilder.dest, worldBuilder.HeightMap, worldBuilder.WorldSize);
         }
 
-        yield return CaveCache.cavePlanner.GenerateCaveMap(CaveCache.cavePrefabManager, CaveCache.heightMap);
+        yield return CaveCache.Instance.cavePlanner.GenerateCaveMap(CaveCache.Instance.cavePrefabManager, CaveCache.Instance.heightMap);
 
         worldBuilder.paths.Clear();
         worldBuilder.wildernessPaths.Clear();
@@ -191,7 +191,7 @@ public static class WorldBuilder_saveRawHeightmap
 {
     public static bool Prefix()
     {
-        CaveCache.cavePlanner.SaveCaveMap();
+        CaveCache.Instance.cavePlanner.SaveCaveMap();
         CaveCache.Clear();
         return true;
     }

@@ -1,17 +1,19 @@
 using System;
 using WorldGenerationEngineFinal;
 
-public static class CaveCache
+public class CaveCache
 {
-    public static CaveEntrancesPlanner caveEntrancesPlanner;
+    public CaveEntrancesPlanner caveEntrancesPlanner;
 
-    public static CavePlanner cavePlanner;
+    public CavePlanner cavePlanner;
 
-    public static CavePrefabManager cavePrefabManager;
+    public CavePrefabManager cavePrefabManager;
 
-    public static RawHeightMap heightMap;
+    public RawHeightMap heightMap;
 
-    public static void Init(WorldBuilder worldBuilder)
+    public static CaveCache Instance;
+
+    public CaveCache(WorldBuilder worldBuilder)
     {
         cavePlanner = new CavePlanner(worldBuilder);
         cavePrefabManager = new CavePrefabManager(worldBuilder);
@@ -19,11 +21,14 @@ public static class CaveCache
         heightMap = new RawHeightMap(worldBuilder);
     }
 
+    public static void Init(WorldBuilder worldBuilder)
+    {
+        Instance = new CaveCache(worldBuilder);
+    }
+
     public static void Clear()
     {
-        caveEntrancesPlanner = null;
-        cavePlanner = null;
-        cavePrefabManager = null;
+        Instance = null;
 
         GC.Collect();
     }

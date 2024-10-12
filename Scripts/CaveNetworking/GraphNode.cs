@@ -37,7 +37,7 @@ public class GraphNode
         );
         direction = GetDirection();
 
-        CaveUtils.Assert(direction != Direction.None, $"None direction: {prefab.Name}, marker start: [{marker.start}], prefab size:[{prefab.Size}]");
+        CaveUtils.Assert(direction != Direction.None, $"None direction: {prefab.PrefabName}, marker start: [{marker.start}], prefab size:[{prefab.Size}]");
     }
 
     public GraphNode(Vector3i position)
@@ -108,7 +108,7 @@ public class GraphNode
         var sqrRadius = radius * radius;
 
         CaveUtils.Assert(radius >= 5, $"marker radius should be over 5: {radius}");
-        CaveUtils.Assert(!prefab.Intersect3D(center), $"Marker {marker.start} intersect with prefab {prefab.Name}");
+        CaveUtils.Assert(!prefab.Intersect3D(center), $"Marker {marker.start} intersect with prefab {prefab.PrefabName}");
 
         while (queue.Count > 0 && index-- > 0)
         {

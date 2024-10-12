@@ -58,7 +58,7 @@ public class WildernessPlanner_Plan
         }
 
         // harmony patch is here
-        CaveCache.caveEntrancesPlanner.SpawnCaveEntrances(rnd);
+        CaveCache.Instance.caveEntrancesPlanner.SpawnCaveEntrances(rnd);
 
         GameRandomManager.Instance.FreeGameRandom(rnd);
         WildernessPlanner.WildernessPathInfos.Sort((WorldBuilder.WildernessPathInfo wp1, WorldBuilder.WildernessPathInfo wp2) => wp2.PathRadius.CompareTo(wp1.PathRadius));

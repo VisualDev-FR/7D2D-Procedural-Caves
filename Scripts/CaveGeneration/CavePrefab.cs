@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using WorldGenerationEngineFinal;
@@ -33,7 +34,7 @@ public class CavePrefab
 
     public int BoundingRadiusSqr { get; internal set; }
 
-    public string Name => prefabDataInstance?.prefab.Name;
+    public string PrefabName => prefabDataInstance?.prefab.Name;
 
     public FastTags<TagGroup.Poi> Tags => prefabDataInstance == null ? FastTags<TagGroup.Poi>.none : prefabDataInstance.prefab.Tags;
 
@@ -405,6 +406,12 @@ public class CavePrefab
 
     public IEnumerable<DelauneyPoint> DelauneyPoints()
     {
+        if (nodes == null)
+        {
+            Log.Error($"[Cave] null cavePrefab nodes, isroom: {isRoom}, isBoundaryPrefab: {isBoundaryPrefab}, null pdi: {prefabDataInstance is null}, prefab name: {PrefabName}");
+            yield break;
+        }
+
         foreach (var node in nodes)
         {
             yield return new DelauneyPoint(node);

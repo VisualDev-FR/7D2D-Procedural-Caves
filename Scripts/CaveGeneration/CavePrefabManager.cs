@@ -66,14 +66,14 @@ public class CavePrefabManager
     {
         Prefabs.Add(prefab);
 
-        if (prefab?.Name != null)
+        if (prefab?.PrefabName != null)
         {
-            if (!prefabPlacements.ContainsKey(prefab.Name))
+            if (!prefabPlacements.ContainsKey(prefab.PrefabName))
             {
-                prefabPlacements[prefab.Name] = new List<Vector3i>();
+                prefabPlacements[prefab.PrefabName] = new List<Vector3i>();
             }
 
-            prefabPlacements[prefab.Name].Add(prefab.GetCenter());
+            prefabPlacements[prefab.PrefabName].Add(prefab.GetCenter());
         }
 
         foreach (var chunkHash in prefab.GetOverlappingChunkHashes())
@@ -108,7 +108,7 @@ public class CavePrefabManager
             return false;
         }
 
-        if (!prefabPlacements.TryGetValue(prefab.Name, out var positions))
+        if (!prefabPlacements.TryGetValue(prefab.PrefabName, out var positions))
         {
             return false;
         }
@@ -437,7 +437,7 @@ public class CavePrefabManager
             AddPrefab(cavePrefab);
             PrefabManager.AddUsedPrefabWorld(-1, pdi);
 
-            Log.Out($"[Cave] cave prefab '{cavePrefab.Name}' added at {cavePrefab.position}");
+            Log.Out($"[Cave] cave prefab '{cavePrefab.PrefabName}' added at {cavePrefab.position}");
         }
 
         Log.Out($"[Cave] {Count} cave prefabs added.");

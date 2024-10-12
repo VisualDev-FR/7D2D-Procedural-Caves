@@ -79,13 +79,13 @@ public class CaveTunnel
 
         if (cachedPrefabs.MinSqrDistanceToPrefab(start) == 0)
         {
-            Log.Warning($"[Cave] '{edge.Prefab1.Name}' ({start - HalfWorldSize}) intersect with another prefab");
+            Log.Warning($"[Cave] '{edge.Prefab1.PrefabName}' ({start - HalfWorldSize}) intersect with another prefab");
             return;
         }
 
         if (cachedPrefabs.MinSqrDistanceToPrefab(target) == 0)
         {
-            Log.Warning($"[Cave] '{edge.Prefab2.Name}' ({target - HalfWorldSize}) intersect with another prefab");
+            Log.Warning($"[Cave] '{edge.Prefab2.PrefabName}' ({target - HalfWorldSize}) intersect with another prefab");
             return;
         }
 
@@ -171,7 +171,7 @@ public class CaveTunnel
         var p1 = start - HalfWorldSize;
         var p2 = target - HalfWorldSize;
 
-        Log.Warning($"No Path found from '{edge.Prefab1.Name}' ({p1} / {height1}) to '{edge.Prefab2.Name}' ({p2} / ({height2})) after {index} iterations ");
+        Log.Warning($"No Path found from '{edge.Prefab1.PrefabName}' ({p1} / {height1}) to '{edge.Prefab2.PrefabName}' ({p2} / ({height2})) after {index} iterations ");
     }
 
     private void FindLocalMinimas()
@@ -212,11 +212,6 @@ public class CaveTunnel
 
             blocks.UnionWith(sphere);
         }
-    }
-
-    private float GetRadius(int index, int r1, int r2)
-    {
-        return r1 + (r2 - r1) * ((float)index / path.Count);
     }
 
     private HashSet<CaveBlock> SmoothTunnel()
@@ -305,14 +300,17 @@ public class CaveTunnel
     // static API
     public static readonly int minRadius = 2;
 
-    public static readonly int maxRadius = 30;
+    public static readonly int maxRadius = 10;
 
     public static readonly Dictionary<int, HashSet<int>> spheresMapping = new Dictionary<int, HashSet<int>>();
 
     public static readonly Dictionary<int, Vector3i> spheres = InitSpheres();
 
-    public static Dictionary<int, Vector3i> InitSpheres(int maxRadius = 30)
+    public static Dictionary<int, Vector3i> InitSpheres(int maxRadius = -1)
     {
+        if (maxRadius < 0)
+            maxRadius = CaveTunnel.maxRadius;
+
         var spheres = new Dictionary<int, Vector3i>() { { 0, Vector3i.zero } };
         var queue = new HashSet<Vector3i>() { Vector3i.zero };
         var visited = new HashSet<Vector3i>();
