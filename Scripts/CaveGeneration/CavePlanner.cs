@@ -27,7 +27,7 @@ public class CavePlanner
     {
         this.worldBuilder = worldBuilder;
 
-        cavemap = new CaveMap();
+        cavemap = new CaveMap(worldBuilder.WorldSize);
 
         worldBuilder.PrefabManager.Clear();
         worldBuilder.PrefabManager.ClearDisplayed();
@@ -37,6 +37,10 @@ public class CavePlanner
     private Thread StartRoomsThread(CavePrefabManager cavePrefabManager)
     {
         var lockObject = new object();
+        var roomBlock = new CaveBlock()
+        {
+            isRoom = true,
+        };
 
         var thread = new Thread(() =>
         {
@@ -46,7 +50,7 @@ public class CavePlanner
 
                 lock (lockObject)
                 {
-                    cavemap.AddBlocks(blocks);
+                    cavemap.AddBlocks(blocks, roomBlock.rawData);
                 }
             }
         })
@@ -147,7 +151,7 @@ public class CavePlanner
 
         yield return worldBuilder.SetMessage("Creating cave preview...", _logToConsole: true);
 
-        Log.Out($"{cavemap.Count:N0} cave blocks generated");
+        Log.Out($"{cavemap.BlocksCount:N0} cave blocks generated");
 
         yield return null;
     }
@@ -208,7 +212,7 @@ public class CavePlanner
             }
         }
 
-        foreach (CaveBlock caveblock in caveMap)
+        foreach (CaveBlock caveblock in caveMap.GetBlocks())
         {
             var position = caveblock;
             int index = position.x + position.z * WorldSize;

@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 
 public class CaveBlock
@@ -19,6 +20,16 @@ public class CaveBlock
     public int y => blockChunkPos.y;
 
     public int z => (chunkPos.z << 4) + blockChunkPos.z;
+
+    public int HashZX() => HashZX(x, z);
+
+    public static int HashZX(int x, int z) => (x << 14) + z; // x * 16384 + z
+
+    public static void ZXFromHash(int hash, out int x, out int z)
+    {
+        x = hash >> 14;     // hash / 16384
+        z = hash & 16383;   // hash % 16384
+    }
 
     public bool isWater
     {
@@ -67,6 +78,8 @@ public class CaveBlock
         get => (rawData & 0b1000_0000) != 0;
         set => rawData = (byte)(value ? (rawData | 0b1000_0000) : (rawData & 0b0111_1111));
     }
+
+    public CaveBlock() { }
 
     public CaveBlock(Vector3i position, sbyte density = defaultDensity)
     {

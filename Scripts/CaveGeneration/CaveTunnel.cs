@@ -53,7 +53,6 @@ public class CaveTunnel
         FindPath(edge, cachedPrefabs);
         FindLocalMinimas();
         ThickenTunnel(edge.node1, edge.node2, seed);
-        PostProcessTunnel();
     }
 
     public void SetID(int id)
