@@ -30,8 +30,6 @@ public static class WorldBuilder_GenerateData
 
     public static IEnumerator GenerateData()
     {
-        CaveCache.Init(worldBuilder);
-
         PatchWaterHeight();
 
         yield return worldBuilder.Init();
@@ -42,6 +40,8 @@ public static class WorldBuilder_GenerateData
             yield break;
 
         worldBuilder.initStreetTiles();
+
+        CaveCache.Init(worldBuilder);
 
         if (worldBuilder.IsCanceled)
             yield break;

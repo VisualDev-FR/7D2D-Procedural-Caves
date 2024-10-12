@@ -52,7 +52,7 @@ public class CaveTunnel
 
         FindPath(edge, cachedPrefabs);
         FindLocalMinimas();
-        ThickenTunnel(edge.node1, edge.node2);
+        ThickenTunnel(edge.node1, edge.node2, seed);
         PostProcessTunnel();
     }
 
@@ -192,7 +192,7 @@ public class CaveTunnel
         }
     }
 
-    private void ThickenTunnel(GraphNode start, GraphNode target)
+    private void ThickenTunnel(GraphNode start, GraphNode target, int seed)
     {
         blocks.UnionWith(start.GetSphere());
         blocks.UnionWith(target.GetSphere());
@@ -200,9 +200,11 @@ public class CaveTunnel
         int r1 = start.NodeRadius;
         int r2 = target.NodeRadius;
 
+        var noise = new Noise1D(new System.Random(seed), r1, r2, path.Count);
+
         for (int i = 0; i < path.Count; i++)
         {
-            var tunnelRadius = GetRadius(i, r1, r2);
+            var tunnelRadius = noise.Interpolate(i);
             var sphere = GetSphere(path[i].ToVector3i(), tunnelRadius)
                 .Where(caveBlock =>
                        caveBlock.y > CaveConfig.bedRockMargin

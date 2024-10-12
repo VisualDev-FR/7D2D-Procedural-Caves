@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Numerics;
+using UnityEngine;
+
+using Random = System.Random;
 
 
 public class Noise1D
@@ -14,7 +16,7 @@ public class Noise1D
         float x1 = distance;
         float y1 = r2;
 
-        int maxRadius = Utils.FastMax(r1, r2);
+        int maxRadius = CaveUtils.FastMax(r1, r2, 6);
         int minRadius = 2;
 
         points = new List<Vector2>() {
@@ -30,19 +32,19 @@ public class Noise1D
             points.Add(new Vector2(x, y));
         }
 
-        points.Sort((a, b) => a.X.CompareTo(b.X));
+        points.Sort((a, b) => a.x.CompareTo(b.x));
     }
 
     public int Interpolate(int index)
     {
         for (int i = 0; i < points.Count - 1; i++)
         {
-            if (index >= points[i].X && index <= points[i + 1].X)
+            if (index >= points[i].x && index <= points[i + 1].x)
             {
-                double x0 = points[i].X;
-                double y0 = points[i].Y;
-                double x1 = points[i + 1].X;
-                double y1 = points[i + 1].Y;
+                double x0 = points[i].x;
+                double y0 = points[i].y;
+                double x1 = points[i + 1].x;
+                double y1 = points[i + 1].y;
 
                 return (int)(y0 + (y1 - y0) * (index - x0) / (x1 - x0));
             }

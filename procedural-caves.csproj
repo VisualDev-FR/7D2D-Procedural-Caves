@@ -144,6 +144,7 @@
     <!-- Noise -->
     <Compile Include="Scripts\Noise\CaveNoise.cs" />
     <Compile Include="Scripts\Noise\FastNoiseLite.cs" />
+    <Compile Include="Scripts\Noise\Noise1D.cs" />
 
     <!-- Utils -->
     <Compile Include="Scripts\Utils\BlockSelectionUtils.cs" />

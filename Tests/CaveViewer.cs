@@ -189,7 +189,7 @@ public static class CaveViewer
     public static void PathCommand(string[] args)
     {
         int worldSize = 100;
-        int seed = 13347;
+        int seed = 133487;
         var rand = new Random(seed);
         var heightMap = new RawHeightMap(worldSize, 128);
 
