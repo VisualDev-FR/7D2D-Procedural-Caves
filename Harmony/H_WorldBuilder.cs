@@ -9,14 +9,6 @@ public static class WorldBuilder_GenerateData
 {
     private static WorldBuilder worldBuilder;
 
-    private static float[] HeightMap;
-
-    private static float[] terrainDest;
-
-    private static float[] terrainWaterDest;
-
-    private static float[] waterDest;
-
     public static bool Prefix(WorldBuilder __instance, ref IEnumerator __result)
     {
         worldBuilder = __instance;
@@ -58,7 +50,7 @@ public static class WorldBuilder_GenerateData
             worldBuilder.PrefabManager.ClearDisplayed();
         }
 
-        StoreHeightMaps();
+        StoreHeightMaps(out float[] HeightMap, out float[] terrainDest, out float[] terrainWaterDest, out float[] waterDest);
         PatchHeightMaps();
 
         if (worldBuilder.Towns != 0)
@@ -66,7 +58,7 @@ public static class WorldBuilder_GenerateData
             yield return worldBuilder.TownPlanner.Plan(worldBuilder.thisWorldProperties, worldBuilder.Seed);
         }
 
-        ResetHeightMaps();
+        ResetHeightMaps(HeightMap, terrainDest, terrainWaterDest, waterDest);
 
         yield return worldBuilder.GenerateTerrainLast();
 
@@ -144,7 +136,15 @@ public static class WorldBuilder_GenerateData
         );
     }
 
-    private static void StoreHeightMaps()
+    private static void PatchHeightMaps()
+    {
+        for (int i = 0; i < worldBuilder.HeightMap.Length; i++)
+        {
+            worldBuilder.HeightMap[i] = ClampHeight(worldBuilder.HeightMap[i]);
+        }
+    }
+
+    private static void StoreHeightMaps(out float[] HeightMap, out float[] terrainDest, out float[] terrainWaterDest, out float[] waterDest)
     {
         var arraySizes = worldBuilder.HeightMap.Length;
 
@@ -163,15 +163,7 @@ public static class WorldBuilder_GenerateData
         Array.Copy(worldBuilder.terrainWaterDest, terrainWaterDest, arraySizes);
     }
 
-    private static void PatchHeightMaps()
-    {
-        for (int i = 0; i < worldBuilder.HeightMap.Length; i++)
-        {
-            worldBuilder.HeightMap[i] = ClampHeight(worldBuilder.HeightMap[i]);
-        }
-    }
-
-    private static void ResetHeightMaps()
+    private static void ResetHeightMaps(float[] HeightMap, float[] terrainDest, float[] terrainWaterDest, float[] waterDest)
     {
         var arraySizes = worldBuilder.HeightMap.Length;
 
