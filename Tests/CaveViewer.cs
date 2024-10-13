@@ -381,7 +381,7 @@ public static class CaveViewer
 
         // cavemap.SetWater(localMinimas, cachedPrefabs);
 
-        Log.Out($"{cavemap.BlocksCount:N0} cave blocks generated ({cavemap.TunnelsCount} unique tunnels), timer={timer.ElapsedMilliseconds:N0}ms, memory={(GC.GetTotalMemory(true) - memoryBefore) / 1_048_576.0:F1}MB.");
+        Log.Out($"{cavemap.BlocksCount:N0} cave blocks generated ({cavemap.TunnelsCount} unique tunnels), timer={timer.ElapsedMilliseconds:N0}ms, memory={(GC.GetTotalMemory(true) - memoryBefore) / 1_048_576.0:N1}MB.");
         Log.Out($"{localMinimas.Count} local minimas");
 
         if (worldSize > 1024)

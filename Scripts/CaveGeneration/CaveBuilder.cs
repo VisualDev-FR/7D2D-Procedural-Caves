@@ -37,10 +37,6 @@ public class CaveBuilder
         cavePrefabManager = new CavePrefabManager(worldBuilder);
         caveEntrancesPlanner = new CaveEntrancesPlanner(cavePrefabManager);
         heightMap = new RawHeightMap(worldBuilder);
-
-        worldBuilder.PrefabManager.Clear();
-        worldBuilder.PrefabManager.ClearDisplayed();
-        worldBuilder.PrefabManager.Cleanup();
     }
 
     private Thread StartRoomsThread(CavePrefabManager cavePrefabManager)
@@ -73,6 +69,8 @@ public class CaveBuilder
     {
         if (worldBuilder.IsCanceled)
             yield break;
+
+        long memoryBefore = GC.GetTotalMemory(true);
 
         yield return worldBuilder.SetMessage("Spawning cave prefabs...", _logToConsole: true);
 
@@ -150,19 +148,17 @@ public class CaveBuilder
         if (worldBuilder.IsCanceled)
             yield break;
 
-        yield return worldBuilder.SetMessage("Saving cavemap...");
+        // yield return GenerateCavePreview(cavemap);
 
-        yield return GenerateCavePreview(cavemap);
-
-        yield return worldBuilder.SetMessage("Creating cave preview...", _logToConsole: true);
-
-        Log.Out($"{cavemap.BlocksCount:N0} cave blocks generated");
+        Log.Out($"{cavemap.BlocksCount:N0} cave blocks generated, memory used: {(GC.GetTotalMemory(true) - memoryBefore) / 1_048_576:N1}MB");
 
         yield return null;
     }
 
-    public IEnumerator GenerateCavePreview(CaveMap caveMap)
+    private IEnumerator GenerateCavePreview(CaveMap caveMap)
     {
+        yield return worldBuilder.SetMessage("Creating cave preview...", _logToConsole: true);
+
         Color32 regularPrefabColor = new Color32(255, 255, 255, 32);
         Color32 cavePrefabsColor = new Color32(0, 255, 0, 128);
         Color32 caveEntrancesColor = new Color32(255, 255, 0, 255);
