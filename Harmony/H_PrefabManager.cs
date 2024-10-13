@@ -1,13 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
-using HarmonyLib;
 using WorldGenerationEngineFinal;
 
 
-[HarmonyPatch(typeof(PrefabManager), "LoadPrefabs")]
-public static class PrefabManager_LoadPrefabs
+public static class H_PrefabManager
 {
-    public static IEnumerator LoadPrefabs(PrefabManager PrefabManager)
+    public static IEnumerator LoadPrefabs(PrefabManager PrefabManager, CavePrefabManager cavePrefabManager)
     {
         PrefabManager.ClearDisplayed();
         if (PrefabManager.prefabManagerData.AllPrefabDatas.Count != 0)
@@ -41,7 +39,7 @@ public static class PrefabManager_LoadPrefabs
 
             // PATCH START //
 
-            CaveCache.Instance.cavePrefabManager.TryCacheCavePrefab(prefabData);
+            cavePrefabManager.TryCacheCavePrefab(prefabData);
 
             if (!prefabData.Tags.Test_AnySet(filter) && !prefabData.Tags.Test_AllSet(wildernessCaveEntrance))
             {
@@ -60,11 +58,5 @@ public static class PrefabManager_LoadPrefabs
         Log.Out($"LoadPrefabs {PrefabManager.prefabManagerData.AllPrefabDatas.Count} of {prefabs.Count} in {ms.ElapsedMilliseconds * 0.001f}");
     }
 
-    public static bool Prefix(PrefabManager __instance, ref IEnumerator __result)
-    {
-        __result = LoadPrefabs(__instance);
-
-        return false;
-    }
 }
 

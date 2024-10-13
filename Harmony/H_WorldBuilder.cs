@@ -40,7 +40,7 @@ public static class WorldBuilder_GenerateData
 
         if (worldBuilder.Towns != 0 || worldBuilder.Wilderness != 0)
         {
-            yield return worldBuilder.PrefabManager.LoadPrefabs();
+            yield return H_PrefabManager.LoadPrefabs(worldBuilder.PrefabManager, CaveCache.Instance.cavePrefabManager);
             worldBuilder.PrefabManager.ShufflePrefabData(worldBuilder.Seed);
             yield return null;
             worldBuilder.PathingUtils.SetupPathingGrid();
