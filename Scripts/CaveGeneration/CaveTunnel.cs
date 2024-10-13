@@ -1,6 +1,7 @@
 // # pragma warning disable CS0436
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -8,13 +9,11 @@ using UnityEngine;
 
 public class CaveTunnel
 {
-    public MutableInt16 id;
-
     public readonly List<CaveBlock> path = new List<CaveBlock>();
 
-    public readonly HashSet<CaveBlock> localMinimas = new HashSet<CaveBlock>();
-
     public readonly HashSet<CaveBlock> blocks = new HashSet<CaveBlock>();
+
+    public IEnumerable<CaveBlock> LocalMinimas => FindLocalMinimas();
 
     private readonly RawHeightMap heightMap;
 
@@ -45,24 +44,11 @@ public class CaveTunnel
     {
         CaveNoise.pathingNoise.SetSeed(seed);
 
-        id = new MutableInt16(edge.id);
-
         this.heightMap = heightMap;
         this.worldSize = worldSize;
 
         FindPath(edge, cachedPrefabs);
-        FindLocalMinimas();
         ThickenTunnel(edge.node1, edge.node2, seed);
-    }
-
-    public void SetID(int id)
-    {
-        this.id.value = (short)id;
-    }
-
-    public void SetID(MutableInt16 id)
-    {
-        this.id.value = id.value;
     }
 
     // private API
@@ -173,19 +159,19 @@ public class CaveTunnel
         Log.Warning($"No Path found from '{edge.Prefab1.PrefabName}' ({p1} / {height1}) to '{edge.Prefab2.PrefabName}' ({p2} / ({height2})) after {index} iterations ");
     }
 
-    private void FindLocalMinimas()
+    private IEnumerable<CaveBlock> FindLocalMinimas()
     {
         for (int i = 1; i < path.Count - 1; i++)
         {
             if (IsLocalMinima(path, i))
             {
-                localMinimas.Add(path[i]);
+                yield return path[i];
             }
             else if (IsStartOfFlatMinimum(path, i))
             {
                 if (IsFlatMinimum(path, ref i))
                 {
-                    localMinimas.Add(path[i]);
+                    yield return path[i];
                 }
             }
         }
@@ -193,6 +179,8 @@ public class CaveTunnel
 
     private void ThickenTunnel(GraphNode start, GraphNode target, int seed)
     {
+        // TODO: handle duplicates with that instead of hashset: https://stackoverflow.com/questions/1672412/filtering-duplicates-out-of-an-ienumerable
+
         blocks.UnionWith(start.GetSphere());
         blocks.UnionWith(target.GetSphere());
 
@@ -213,46 +201,6 @@ public class CaveTunnel
         }
     }
 
-    private HashSet<CaveBlock> SmoothTunnel()
-    {
-        var dictionary = blocks.ToDictionary(
-            block => block.GetHashCode(),
-            block => block
-        );
-
-        foreach (var block in blocks.ToList())
-        {
-            int neighborsCount = 0;
-            int totalDensity = 0;
-
-            foreach (var offset in CaveUtils.offsetsNoDiagonal)
-            {
-                var hash = CaveBlock.GetHashCode(
-                    block.x + offset.x,
-                    block.y + offset.y,
-                    block.z + offset.z
-                );
-
-                if (dictionary.ContainsKey(hash))
-                {
-                    totalDensity += dictionary[hash].density;
-                    neighborsCount++;
-                }
-            }
-
-            if (neighborsCount < 2)
-            {
-                blocks.Remove(block);
-            }
-            else
-            {
-                block.density = (sbyte)((float)totalDensity / neighborsCount);
-            }
-        }
-
-        return blocks;
-    }
-
     private void ReconstructPath(AstarNode currentNode)
     {
         while (currentNode != null)
@@ -263,37 +211,6 @@ public class CaveTunnel
         }
 
         path.Reverse();
-    }
-
-    private void PostProcessTunnel()
-    {
-        var positions = blocks.Select(block => block.ToVector3i()).ToHashSet();
-
-        foreach (CaveBlock block in blocks)
-        {
-            block.tunnelID = id;
-
-            var position = block.ToVector3i();
-            var lower = position + Vector3i.down;
-            var upper = position + Vector3i.up;
-
-            if (!positions.Contains(lower) && positions.Contains(upper))
-                block.isFloor = true;
-
-            if (!positions.Contains(upper) && positions.Contains(lower))
-                block.isCeiling = true;
-
-            block.isFlat = true;
-
-            foreach (var offset in CaveUtils.offsetsHorizontal8)
-            {
-                if (!positions.Contains(position + offset))
-                {
-                    block.isFlat = false;
-                    break;
-                }
-            }
-        }
     }
 
     // static API
@@ -364,8 +281,11 @@ public class CaveTunnel
 
         foreach (var hashcode in spheresMapping[radius])
         {
-            var position = center + spheres[hashcode];
-            yield return new CaveBlock(position);
+            yield return new CaveBlock(
+                center.x + spheres[hashcode].x,
+                center.y + spheres[hashcode].y,
+                center.z + spheres[hashcode].z
+            );
         }
     }
 

@@ -2,7 +2,6 @@ using System;
 using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Concurrent;
 using WorldGenerationEngineFinal;
 
 
@@ -27,9 +26,9 @@ public class CaveBlockLayer
         bitfield = (start << 16) | (end << 8) | blockRawData;
     }
 
-    public CaveBlockLayer(int hashcode)
+    public CaveBlockLayer(int bitfield)
     {
-        bitfield = hashcode;
+        this.bitfield = bitfield;
     }
 
     public static int GetHashCode(int start, int end, byte blockRawData)
@@ -141,7 +140,6 @@ public class CaveMap
                 }
                 blockRLE = caveblocks[hashZX];
             }
-            CaveUtils.Assert(caveblocks.ContainsKey(hashZX), "Someting weird occured...");
 
             byte previousData = blocks[0].rawData;
             int previousY = blocks[0].y;
@@ -164,7 +162,6 @@ public class CaveMap
                 previousData = blocks[i].rawData;
             }
 
-            CaveUtils.Assert(caveblocks.ContainsKey(hashZX), "Someting surnatural occured... https://www.youtube.com/watch?v=v4-GcS1UQyg");
             lock (_lock)
             {
                 blockRLE.Add(CaveBlockLayer.GetHashCode(startY, previousY, previousData));

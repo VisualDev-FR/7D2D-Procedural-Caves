@@ -102,7 +102,7 @@ public class CavePlanner
 
                     lock (lockObject)
                     {
-                        localMinimas.UnionWith(tunnel.localMinimas);
+                        localMinimas.UnionWith(tunnel.LocalMinimas);
                     }
                 }
             })

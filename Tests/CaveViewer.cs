@@ -233,7 +233,6 @@ public static class CaveViewer
         cavemap.AddTunnel(tunnel);
 
         Log.Out($"{p1.position} -> {p2.position} | Astar dist: {tunnel.path.Count}, eucl dist: {CaveUtils.EuclidianDist(p1.position, p2.position)}, timer: {timer.ElapsedMilliseconds}ms");
-        Log.Out($"{tunnel.localMinimas.Count} water blocks found");
 
         var voxels = new HashSet<Voxell>(){
             new Voxell(p1.position, p1.Size, WaveFrontMaterial.DarkGreen) { force = true },
@@ -645,7 +644,7 @@ public static class CaveViewer
             {
                 g.Clear(BackgroundColor);
 
-                for (int i = 0; i < curve.points.Count - 1; i++)
+                for (int i = 0; i < curve.Count - 1; i++)
                 {
                     var p1 = curve.points[i];
                     var p2 = curve.points[i + 1];
@@ -662,7 +661,6 @@ public static class CaveViewer
 
         Log.Out($"timer: {timer.ElapsedMilliseconds}ms");
     }
-
 
     public static void Main(string[] args)
     {
@@ -740,10 +738,8 @@ public static class CaveViewer
         }
     }
 
-
     public static void Test_CaveBlock_HashZX()
     {
-
         int x = 64045;
         int z = 4687;
 

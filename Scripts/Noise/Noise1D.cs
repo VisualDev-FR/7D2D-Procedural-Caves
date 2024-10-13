@@ -7,7 +7,9 @@ using Random = System.Random;
 
 public class Noise1D
 {
-    public readonly List<Vector2> points;
+    public readonly Vector2[] points;
+
+    public int Count => points.Length;
 
     public Noise1D(Random rand, int r1, int r2, int distance)
     {
@@ -19,7 +21,7 @@ public class Noise1D
         int maxRadius = CaveUtils.FastMax(r1, r2, 6);
         int minRadius = 2;
 
-        points = new List<Vector2>() {
+        var points = new List<Vector2> {
             new Vector2(x0, y0),
             new Vector2(x1, y1),
         };
@@ -33,11 +35,13 @@ public class Noise1D
         }
 
         points.Sort((a, b) => a.x.CompareTo(b.x));
+
+        this.points = points.ToArray();
     }
 
     public int Interpolate(int index)
     {
-        for (int i = 0; i < points.Count - 1; i++)
+        for (int i = 0; i < points.Length - 1; i++)
         {
             if (index >= points[i].x && index <= points[i + 1].x)
             {
