@@ -125,6 +125,8 @@ public static class WorldBuilder_GenerateData
         GCUtils.Collect();
 
         Log.Out("RWG final in {0}:{1:00}, r={2:x}", worldBuilder.totalMS.Elapsed.Minutes, worldBuilder.totalMS.Elapsed.Seconds, Rand.Instance.PeekSample());
+
+        yield break;
     }
 
     private static float ClampHeight(float height)
@@ -185,9 +187,9 @@ public static class WorldBuilder_GenerateData
         caveBuilder.SaveCaveMap();
     }
 
-    public static void Clear()
+    public static void Cleanup()
     {
-        worldBuilder = null;
+        caveBuilder?.Cleanup();
         caveBuilder = null;
     }
 }
@@ -199,7 +201,7 @@ public static class WorldBuilder_saveRawHeightmap
     public static bool Prefix()
     {
         WorldBuilder_GenerateData.SaveCaveMap();
-        WorldBuilder_GenerateData.Clear();
+        WorldBuilder_GenerateData.Cleanup();
 
         return true;
     }

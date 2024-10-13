@@ -57,6 +57,14 @@ public class CavePrefabManager
         prefabPlacements = new Dictionary<string, List<Vector3i>>();
     }
 
+    public void Cleanup()
+    {
+        wildernessEntranceNames.Clear();
+        usedEntrances.Clear();
+        allCavePrefabs.Clear();
+        caveRooms.Clear();
+    }
+
     public static int GetChunkHash(int x, int z)
     {
         return CaveUtils.GetChunkHash(x, z);
@@ -191,7 +199,7 @@ public class CavePrefabManager
         return false;
     }
 
-    public void GetRandomPrefabs(Random rand, RawHeightMap heightMap, int targetCount, List<PrefabData> prefabs)
+    public void AddRandomPrefabs(Random rand, RawHeightMap heightMap, int targetCount, List<PrefabData> prefabs)
     {
         Log.Out("Start POIs placement...");
 
@@ -209,7 +217,7 @@ public class CavePrefabManager
         Log.Out($"{Count} / {targetCount} prefabs added");
     }
 
-    public void GetRandomPrefabs(Random rand, RawHeightMap heightMap, int targetCount, int minMarkers = 4, int maxMarkers = 4)
+    public void AddRandomPrefabs(Random rand, RawHeightMap heightMap, int targetCount, int minMarkers = 4, int maxMarkers = 4)
     {
         Log.Out("Start POIs placement...");
 
@@ -514,7 +522,7 @@ public class CavePrefabManager
         allCavePrefabs[prefabName] = prefabData;
     }
 
-    public CavePrefabManager GetUsedCavePrefabs()
+    public CavePrefabManager AddUsedCavePrefabs()
     {
         var prefabs = new CavePrefabManager(worldBuilder);
         var halfWorldSize = new Vector3i(

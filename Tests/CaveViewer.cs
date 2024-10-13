@@ -137,7 +137,7 @@ public static class CaveViewer
         var heightMap = new RawHeightMap(worldSize, 128);
 
         prefabManager.SetupBoundaryPrefabs(random, gridSize);
-        prefabManager.GetRandomPrefabs(random, heightMap, prefabCounts, minMarkers, maxMarkers);
+        prefabManager.AddRandomPrefabs(random, heightMap, prefabCounts, minMarkers, maxMarkers);
 
         var graph = new Graph(prefabManager.Prefabs, worldSize);
         var voxels = new HashSet<Voxell>();
@@ -338,7 +338,7 @@ public static class CaveViewer
         var rand = new Random(seed);
         var heightMap = new RawHeightMap(worldSize, 128);
 
-        cachedPrefabs.GetRandomPrefabs(rand, heightMap, prefabCount, prefabs);
+        cachedPrefabs.AddRandomPrefabs(rand, heightMap, prefabCount, prefabs);
 
         Log.Out("Start solving graph...");
 

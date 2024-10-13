@@ -13,9 +13,9 @@ using Random = System.Random;
 
 public class CaveBuilder
 {
-    private readonly CaveMap cavemap;
+    private CaveMap cavemap;
 
-    private readonly WorldBuilder worldBuilder;
+    private WorldBuilder worldBuilder;
 
     public CavePrefabManager cavePrefabManager;
 
@@ -37,6 +37,17 @@ public class CaveBuilder
         cavePrefabManager = new CavePrefabManager(worldBuilder);
         caveEntrancesPlanner = new CaveEntrancesPlanner(cavePrefabManager);
         heightMap = new RawHeightMap(worldBuilder);
+    }
+
+    public void Cleanup()
+    {
+        cavemap.Cleanup();
+        cavePrefabManager.Cleanup();
+
+        cavemap = null;
+        cavePrefabManager = null;
+        caveEntrancesPlanner = null;
+        heightMap = null;
     }
 
     private Thread StartRoomsThread(CavePrefabManager cavePrefabManager)
@@ -76,7 +87,7 @@ public class CaveBuilder
 
         Random random = new Random(worldBuilder.Seed + worldBuilder.WorldSize);
 
-        cavePrefabManager.GetUsedCavePrefabs();
+        cavePrefabManager.AddUsedCavePrefabs();
         cavePrefabManager.SpawnUnderGroundPrefabs(worldBuilder.WorldSize / 5, random, heightMap);
         cavePrefabManager.SpawnCaveRooms(1000, random, heightMap);
         cavePrefabManager.AddSurfacePrefabs();
@@ -152,7 +163,7 @@ public class CaveBuilder
 
         Log.Out($"{cavemap.BlocksCount:N0} cave blocks generated, memory used: {(GC.GetTotalMemory(true) - memoryBefore) / 1_048_576:N1}MB");
 
-        yield return null;
+        yield break;
     }
 
     private IEnumerator GenerateCavePreview(CaveMap caveMap)

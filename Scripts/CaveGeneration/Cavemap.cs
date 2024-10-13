@@ -68,6 +68,16 @@ public class CaveMap
         caveblocks = new Dictionary<int, List<int>>();
     }
 
+    public void Cleanup()
+    {
+        foreach (var list in caveblocks.Values)
+        {
+            list.Clear();
+        }
+
+        caveblocks.Clear();
+    }
+
     public void AddBlocks(IEnumerable<Vector3i> positions, byte rawData)
     {
         var blockGroup = positions.GroupBy(pos => CaveBlock.HashZX(pos.x, pos.z));
