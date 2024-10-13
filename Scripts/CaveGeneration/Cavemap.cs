@@ -2,59 +2,120 @@ using System;
 using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using WorldGenerationEngineFinal;
 
 
-public struct CaveBlockLayer
+public class CaveBlockLayer
 {
-    private readonly byte start;
+    private readonly int bitfield;
 
-    private readonly byte end;
+    public byte Start => (byte)((bitfield >> 16) & 0xFF);
 
-    private readonly byte rawData;
+    public byte End => (byte)((bitfield >> 8) & 0xFF);
 
-    public int Count => end - start;
+    public byte BlockRawData => (byte)(bitfield & 0xFF);
 
-    public CaveBlockLayer(int x, int z, int start, int end, byte rawData)
+    public static int Count(int hash)
     {
-        this.rawData = rawData;
-        this.start = (byte)start;
-        this.end = (byte)end;
+        var layer = new CaveBlockLayer(hash);
+        return layer.End - layer.Start;
+    }
+
+    public CaveBlockLayer(int start, int end, byte blockRawData)
+    {
+        bitfield = (start << 16) | (end << 8) | blockRawData;
+    }
+
+    public CaveBlockLayer(int hashcode)
+    {
+        bitfield = hashcode;
+    }
+
+    public static int GetHashCode(int start, int end, byte blockRawData)
+    {
+        return (start << 16) | (end << 8) | blockRawData;
     }
 
     public bool IsInside(int y)
     {
-        return y >= start && y < end;
+        return y >= Start && y < End;
     }
 
     public IEnumerable<CaveBlock> GetBlocks(int x, int z)
     {
-        for (int y = start; y <= end; y++)
+        for (int y = Start; y <= End; y++)
         {
-            yield return new CaveBlock(x, y, z) { rawData = rawData };
+            yield return new CaveBlock(x, y, z) { rawData = BlockRawData };
         }
     }
 }
 
 public class CaveMap
 {
-    private readonly Dictionary<int, List<CaveBlockLayer>> caveblocks;
+    private readonly Dictionary<int, List<int>> caveblocks;
 
-    public int BlocksCount => caveblocks.Values.Sum(layer => layer.Count);
+    public int BlocksCount => caveblocks.Values.Sum(layers => layers.Sum(layerHash => CaveBlockLayer.Count(layerHash)));
 
     public readonly int worldSize;
 
     public int TunnelsCount { get; private set; }
 
+    private readonly object _lock = new object();
+
     public CaveMap(int worldSize)
     {
         this.worldSize = worldSize;
-        caveblocks = new Dictionary<int, List<CaveBlockLayer>>();
+        caveblocks = new Dictionary<int, List<int>>();
     }
 
-    public void AddBlocks(IEnumerable<Vector3i> positions, int rawData)
+    public void AddBlocks(IEnumerable<Vector3i> positions, byte rawData)
     {
-        throw new NotImplementedException();
+        var blockGroup = positions.GroupBy(pos => CaveBlock.HashZX(pos.x, pos.z));
+
+        foreach (var group in blockGroup)
+        {
+            int hashZX = group.Key;
+
+            CaveBlock.ZXFromHash(hashZX, out var x, out var z);
+
+            var blocks = group.OrderBy(b => b.y).ToArray();
+
+            // TODO: better handling of tunnels intersection (implement CaveBlockLayer merging)
+            List<int> blockRLE = null;
+
+            lock (_lock)
+            {
+                if (!caveblocks.ContainsKey(hashZX))
+                {
+                    caveblocks[hashZX] = new List<int>();
+                }
+                blockRLE = caveblocks[hashZX];
+            }
+
+            int previousY = blocks[0].y;
+            int startY = blocks[0].y;
+
+            for (int i = 1; i < blocks.Length; i++)
+            {
+                int current = blocks[i].y;
+
+                if (current != previousY + 1)
+                {
+                    lock (_lock)
+                    {
+                        blockRLE.Add(CaveBlockLayer.GetHashCode(startY, previousY, rawData));
+                    }
+                    startY = current;
+                }
+
+                previousY = current;
+            }
+            lock (_lock)
+            {
+                blockRLE.Add(CaveBlockLayer.GetHashCode(startY, previousY, rawData));
+            }
+        }
     }
 
     public void AddBlocks(IEnumerable<CaveBlock> _blocks)
@@ -69,10 +130,18 @@ public class CaveMap
 
             var blocks = group.OrderBy(b => b.y).ToArray();
 
-            if (!caveblocks.ContainsKey(hashZX))
+            // TODO: better handling of tunnels intersection (implement CaveBlockLayer merging)
+            List<int> blockRLE = null;
+
+            lock (_lock)
             {
-                caveblocks[hashZX] = new List<CaveBlockLayer>();
+                if (!caveblocks.ContainsKey(hashZX))
+                {
+                    caveblocks[hashZX] = new List<int>();
+                }
+                blockRLE = caveblocks[hashZX];
             }
+            CaveUtils.Assert(caveblocks.ContainsKey(hashZX), "Someting weird occured...");
 
             byte previousData = blocks[0].rawData;
             int previousY = blocks[0].y;
@@ -84,7 +153,10 @@ public class CaveMap
 
                 if (current != previousY + 1 || previousData != blocks[i].rawData)
                 {
-                    caveblocks[hashZX].Add(new CaveBlockLayer(x, z, startY, previousY, previousData));
+                    lock (_lock)
+                    {
+                        blockRLE.Add(CaveBlockLayer.GetHashCode(startY, previousY, previousData));
+                    }
                     startY = current;
                 }
 
@@ -92,7 +164,11 @@ public class CaveMap
                 previousData = blocks[i].rawData;
             }
 
-            caveblocks[hashZX].Add(new CaveBlockLayer(x, z, startY, previousY, previousData));
+            CaveUtils.Assert(caveblocks.ContainsKey(hashZX), "Someting surnatural occured... https://www.youtube.com/watch?v=v4-GcS1UQyg");
+            lock (_lock)
+            {
+                blockRLE.Add(CaveBlockLayer.GetHashCode(startY, previousY, previousData));
+            }
         }
     }
 
@@ -104,22 +180,20 @@ public class CaveMap
 
     public void Save(string dirname, int worldSize)
     {
-        throw new NotImplementedException();
+        int regionGridSize = worldSize / CaveConfig.RegionSize;
 
-        // int regionGridSize = worldSize / CaveConfig.RegionSize;
+        using (var multistream = new MultiStream(dirname, create: true))
+        {
+            foreach (CaveBlock caveBlock in GetBlocks())
+            {
+                int region_x = caveBlock.x / CaveConfig.RegionSize;
+                int region_z = caveBlock.z / CaveConfig.RegionSize;
+                int regionID = region_x + region_z * regionGridSize;
 
-        // using (var multistream = new MultiStream(dirname, create: true))
-        // {
-        //     foreach (CaveBlock caveBlock in caveblocks.Values)
-        //     {
-        //         int region_x = caveBlock.x / CaveConfig.RegionSize;
-        //         int region_z = caveBlock.z / CaveConfig.RegionSize;
-        //         int regionID = region_x + region_z * regionGridSize;
-
-        //         var writer = multistream.GetWriter($"region_{regionID}.bin");
-        //         caveBlock.ToBinaryStream(writer);
-        //     }
-        // }
+                var writer = multistream.GetWriter($"region_{regionID}.bin");
+                caveBlock.ToBinaryStream(writer);
+            }
+        }
     }
 
     public CaveBlock GetVerticalLowerPoint(CaveBlock start)
@@ -214,12 +288,12 @@ public class CaveMap
 
     public IEnumerator SetWaterCoroutine(CavePrefabManager cachedPrefabs, WorldBuilder worldBuilder, HashSet<CaveBlock> localMinimas)
     {
+        if (!CaveConfig.generateWater)
+            yield break;
+
         throw new NotImplementedException();
 
         // int index = 0;
-
-        // if (!CaveConfig.generateWater)
-        //     yield break;
 
         // foreach (var waterStart in localMinimas)
         // {
@@ -249,11 +323,12 @@ public class CaveMap
         foreach (var entry in caveblocks)
         {
             int hash = entry.Key;
+
             CaveBlock.ZXFromHash(hash, out var x, out var z);
 
             foreach (var layer in entry.Value)
             {
-                foreach (var block in layer.GetBlocks(x, z))
+                foreach (var block in new CaveBlockLayer(layer).GetBlocks(x, z))
                 {
                     yield return block;
                 }

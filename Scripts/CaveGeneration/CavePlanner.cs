@@ -46,12 +46,7 @@ public class CavePlanner
         {
             foreach (var caveRoom in cavePrefabManager.CaveRooms)
             {
-                var blocks = caveRoom.GetBlocks().ToHashSet();
-
-                lock (lockObject)
-                {
-                    cavemap.AddBlocks(blocks, roomBlock.rawData);
-                }
+                cavemap.AddBlocks(caveRoom.GetBlocks(), roomBlock.rawData);
             }
         })
         {
@@ -103,10 +98,11 @@ public class CavePlanner
 
                     var tunnel = new CaveTunnel(edge, cavePrefabManager, heightMap, WorldSize, worldBuilder.Seed);
 
+                    cavemap.AddTunnel(tunnel);
+
                     lock (lockObject)
                     {
                         localMinimas.UnionWith(tunnel.localMinimas);
-                        cavemap.AddTunnel(tunnel);
                     }
                 }
             })
