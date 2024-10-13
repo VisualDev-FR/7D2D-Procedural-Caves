@@ -22,9 +22,9 @@ public class CaveEntrancesPlanner
         this.cavePrefabManager = cavePrefabManager;
     }
 
-    public void SpawnCaveEntrances(GameRandom gameRandom)
+    public void SpawnCaveEntrances()
     {
-        this.gameRandom = gameRandom;
+        gameRandom = GameRandomManager.Instance.CreateGameRandom(WorldBuilder.Seed);
 
         var spawnedEntrances = new List<PrefabData>();
         var wildernessTiles = GetShuffledWildernessTiles();
@@ -60,6 +60,8 @@ public class CaveEntrancesPlanner
                 Log.Out($"[Cave] Fail to spawn prefab '{prefab.Name}' on tile '{tile.GridPosition}'");
             }
         }
+
+        WorldBuilder.WildernessPlanner.WildernessPathInfos.Sort((WorldBuilder.WildernessPathInfo wp1, WorldBuilder.WildernessPathInfo wp2) => wp2.PathRadius.CompareTo(wp1.PathRadius));
 
         return;
     }

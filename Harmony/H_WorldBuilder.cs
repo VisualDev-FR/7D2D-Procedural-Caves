@@ -9,6 +9,10 @@ public static class WorldBuilder_GenerateData
 {
     private static WorldBuilder worldBuilder;
 
+    private static CaveCache caveCache;
+
+    public static CaveEntrancesPlanner CaveEntrancesPlanner => caveCache.caveEntrancesPlanner;
+
     public static bool Prefix(WorldBuilder __instance, ref IEnumerator __result)
     {
         worldBuilder = __instance;
@@ -33,14 +37,14 @@ public static class WorldBuilder_GenerateData
 
         worldBuilder.initStreetTiles();
 
-        CaveCache.Init(worldBuilder);
+        caveCache = new CaveCache(worldBuilder);
 
         if (worldBuilder.IsCanceled)
             yield break;
 
         if (worldBuilder.Towns != 0 || worldBuilder.Wilderness != 0)
         {
-            yield return H_PrefabManager.LoadPrefabs(worldBuilder.PrefabManager, CaveCache.Instance.cavePrefabManager);
+            yield return H_PrefabManager.LoadPrefabs(worldBuilder.PrefabManager, caveCache.cavePrefabManager);
             worldBuilder.PrefabManager.ShufflePrefabData(worldBuilder.Seed);
             yield return null;
             worldBuilder.PathingUtils.SetupPathingGrid();
@@ -84,6 +88,9 @@ public static class WorldBuilder_GenerateData
         if (worldBuilder.Wilderness != 0)
         {
             yield return worldBuilder.WildernessPlanner.Plan(worldBuilder.thisWorldProperties, worldBuilder.Seed);
+
+            caveCache.caveEntrancesPlanner.SpawnCaveEntrances();
+
             yield return worldBuilder.smoothWildernessTerrain();
             yield return worldBuilder.WildernessPathPlanner.Plan(worldBuilder.Seed);
         }
@@ -110,7 +117,7 @@ public static class WorldBuilder_GenerateData
             yield return worldBuilder.smoothRoadTerrain(worldBuilder.dest, worldBuilder.HeightMap, worldBuilder.WorldSize);
         }
 
-        yield return CaveCache.Instance.cavePlanner.GenerateCaveMap(CaveCache.Instance.cavePrefabManager, CaveCache.Instance.heightMap);
+        yield return caveCache.cavePlanner.GenerateCaveMap(caveCache.cavePrefabManager, caveCache.heightMap);
 
         worldBuilder.paths.Clear();
         worldBuilder.wildernessPaths.Clear();
@@ -175,6 +182,16 @@ public static class WorldBuilder_GenerateData
         Array.Copy(waterDest, worldBuilder.waterDest, arraySizes);
     }
 
+    public static void SaveCaveMap()
+    {
+        caveCache.cavePlanner.SaveCaveMap();
+    }
+
+    public static void Clear()
+    {
+        worldBuilder = null;
+        caveCache = null;
+    }
 }
 
 
@@ -183,8 +200,9 @@ public static class WorldBuilder_saveRawHeightmap
 {
     public static bool Prefix()
     {
-        CaveCache.Instance.cavePlanner.SaveCaveMap();
-        CaveCache.Clear();
+        WorldBuilder_GenerateData.SaveCaveMap();
+        WorldBuilder_GenerateData.Clear();
+
         return true;
     }
 }
