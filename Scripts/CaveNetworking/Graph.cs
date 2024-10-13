@@ -171,7 +171,7 @@ public class Graph
         }
 
         // duplicate prefab links pruning
-        foreach (var edgeGroup in relatedPrefabs.Values)
+        foreach (var edgeGroup in relatedPrefabs.Values.ToList())
         {
             var edges = edgeGroup.Where(e => !e.pruned).ToList();
             int edgesCount = edges.Count;

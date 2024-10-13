@@ -522,9 +522,8 @@ public class CavePrefabManager
         allCavePrefabs[prefabName] = prefabData;
     }
 
-    public CavePrefabManager AddUsedCavePrefabs()
+    public void AddUsedCavePrefabs()
     {
-        var prefabs = new CavePrefabManager(worldBuilder);
         var halfWorldSize = new Vector3i(
             worldBuilder.WorldSize >> 1,
             0,
@@ -535,11 +534,10 @@ public class CavePrefabManager
         {
             if (pdi.prefab.Tags.Test_AnySet(CaveConfig.tagCave))
             {
-                prefabs.AddPrefab(new CavePrefab(pdi.id, pdi, halfWorldSize));
+                AddPrefab(new CavePrefab(pdi.id, pdi, halfWorldSize));
+                Log.Out($"[Cave] used cave prefab: {pdi.prefab.Name} at [{pdi.boundingBoxPosition}]");
             }
         }
-
-        return prefabs;
     }
 
     public void AddSurfacePrefabs()
