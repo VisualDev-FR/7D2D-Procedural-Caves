@@ -11,11 +11,17 @@ using UnityEngine.Experimental.Rendering;
 using Random = System.Random;
 
 
-public class CavePlanner
+public class CaveBuilder
 {
     private readonly CaveMap cavemap;
 
     private readonly WorldBuilder worldBuilder;
+
+    public CavePrefabManager cavePrefabManager;
+
+    public CaveEntrancesPlanner caveEntrancesPlanner;
+
+    private RawHeightMap heightMap;
 
     private PrefabManager PrefabManager => worldBuilder.PrefabManager;
 
@@ -23,11 +29,14 @@ public class CavePlanner
 
     public readonly string caveTempDir = $"{GameIO.GetUserGameDataDir()}/temp";
 
-    public CavePlanner(WorldBuilder worldBuilder)
+    public CaveBuilder(WorldBuilder worldBuilder)
     {
         this.worldBuilder = worldBuilder;
 
         cavemap = new CaveMap(worldBuilder.WorldSize);
+        cavePrefabManager = new CavePrefabManager(worldBuilder);
+        caveEntrancesPlanner = new CaveEntrancesPlanner(cavePrefabManager);
+        heightMap = new RawHeightMap(worldBuilder);
 
         worldBuilder.PrefabManager.Clear();
         worldBuilder.PrefabManager.ClearDisplayed();
@@ -60,7 +69,7 @@ public class CavePlanner
         return thread;
     }
 
-    public IEnumerator GenerateCaveMap(CavePrefabManager cavePrefabManager, RawHeightMap heightMap)
+    public IEnumerator GenerateCaveMap()
     {
         if (worldBuilder.IsCanceled)
             yield break;

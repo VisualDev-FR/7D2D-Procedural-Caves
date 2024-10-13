@@ -9,9 +9,7 @@ public static class WorldBuilder_GenerateData
 {
     private static WorldBuilder worldBuilder;
 
-    private static CaveCache caveCache;
-
-    public static CaveEntrancesPlanner CaveEntrancesPlanner => caveCache.caveEntrancesPlanner;
+    private static CaveBuilder caveBuilder;
 
     public static bool Prefix(WorldBuilder __instance, ref IEnumerator __result)
     {
@@ -37,14 +35,14 @@ public static class WorldBuilder_GenerateData
 
         worldBuilder.initStreetTiles();
 
-        caveCache = new CaveCache(worldBuilder);
+        caveBuilder = new CaveBuilder(worldBuilder);
 
         if (worldBuilder.IsCanceled)
             yield break;
 
         if (worldBuilder.Towns != 0 || worldBuilder.Wilderness != 0)
         {
-            yield return H_PrefabManager.LoadPrefabs(worldBuilder.PrefabManager, caveCache.cavePrefabManager);
+            yield return H_PrefabManager.LoadPrefabs(worldBuilder.PrefabManager, caveBuilder.cavePrefabManager);
             worldBuilder.PrefabManager.ShufflePrefabData(worldBuilder.Seed);
             yield return null;
             worldBuilder.PathingUtils.SetupPathingGrid();
@@ -89,7 +87,7 @@ public static class WorldBuilder_GenerateData
         {
             yield return worldBuilder.WildernessPlanner.Plan(worldBuilder.thisWorldProperties, worldBuilder.Seed);
 
-            caveCache.caveEntrancesPlanner.SpawnCaveEntrances();
+            caveBuilder.caveEntrancesPlanner.SpawnCaveEntrances();
 
             yield return worldBuilder.smoothWildernessTerrain();
             yield return worldBuilder.WildernessPathPlanner.Plan(worldBuilder.Seed);
@@ -117,7 +115,7 @@ public static class WorldBuilder_GenerateData
             yield return worldBuilder.smoothRoadTerrain(worldBuilder.dest, worldBuilder.HeightMap, worldBuilder.WorldSize);
         }
 
-        yield return caveCache.cavePlanner.GenerateCaveMap(caveCache.cavePrefabManager, caveCache.heightMap);
+        yield return caveBuilder.GenerateCaveMap();
 
         worldBuilder.paths.Clear();
         worldBuilder.wildernessPaths.Clear();
@@ -184,13 +182,13 @@ public static class WorldBuilder_GenerateData
 
     public static void SaveCaveMap()
     {
-        caveCache.cavePlanner.SaveCaveMap();
+        caveBuilder.SaveCaveMap();
     }
 
     public static void Clear()
     {
         worldBuilder = null;
-        caveCache = null;
+        caveBuilder = null;
     }
 }
 

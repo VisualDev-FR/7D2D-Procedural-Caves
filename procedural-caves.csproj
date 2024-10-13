@@ -98,7 +98,7 @@
     <Compile Include="Harmony\H_WorldBuilder.cs" />
 
     <!-- CaveGeneration -->
-    <Compile Include="Scripts\CaveGeneration\CavePlanner.cs" />
+    <Compile Include="Scripts\CaveGeneration\CaveBuilder.cs" />
     <Compile Include="Scripts\CaveGeneration\CavePrefabChecker.cs" />
     <Compile Include="Scripts\CaveGeneration\StalactiteGenerator.cs" />
     <Compile Include="Scripts\CaveGeneration\CaveBlock.cs" />
@@ -149,7 +149,6 @@
     <Compile Include="Scripts\Utils\BlockSelectionUtils.cs" />
 
     <!-- Root -->
-    <Compile Include="Scripts\CaveCache.cs" />
     <Compile Include="Scripts\CaveConfig.cs" />
     <Compile Include="Scripts\CaveUtils.cs" />
 
