@@ -29,23 +29,16 @@ public static class H_PrefabManager
 
             PrefabData prefabData = PrefabData.LoadPrefabData(location);
 
-            if (prefabData.size.x != prefabData.size.z)
-            {
-                Log.Out($"[Cave] not square prefab: '{prefabData.Name}'");
-            }
-
             if (prefabData == null || prefabData.Tags.IsEmpty)
                 Log.Warning("Could not load prefab data for " + location.Name);
 
             // PATCH START //
-
             cavePrefabManager.TryCacheCavePrefab(prefabData);
 
             if (!prefabData.Tags.Test_AnySet(filter) && !prefabData.Tags.Test_AllSet(wildernessCaveEntrance))
             {
                 PrefabManager.prefabManagerData.AllPrefabDatas[location.Name.ToLower()] = prefabData;
             }
-
             // PATCH END //
 
             if (ms.ElapsedMilliseconds > 500)
