@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using UnityEngine;
 
+using Random = System.Random;
 
 public class CaveChunksProvider
 {
@@ -11,6 +11,10 @@ public class CaveChunksProvider
     public CaveGraph caveGraph;
 
     public Dictionary<int, CaveRegion> regions;
+
+    public static Random rand = new Random();
+
+    public static uint CaveAirRawData => CaveGenerator.caveAir.rawData;
 
     public int worldSize;
 
@@ -33,15 +37,6 @@ public class CaveChunksProvider
         int regionID = region_x + region_z * regionGridSize;
 
         return regionID;
-    }
-
-    public int HashCodeFromWorldPos(Vector3 worldPos)
-    {
-        return HashCodeFromWorldPos(
-            (int)worldPos.x,
-            (int)worldPos.y,
-            (int)worldPos.z
-        );
     }
 
     public int HashCodeFromWorldPos(int x, int y, int z)
@@ -106,22 +101,6 @@ public class CaveChunksProvider
         return CreateCaveRegion(regionID);
     }
 
-    public CaveChunk GetCaveChunk(Vector3 worldPos)
-    {
-        return GetCaveChunk(
-            (short)worldPos.x,
-            (short)worldPos.z
-        );
-    }
-
-    public CaveChunk GetCaveChunk(Chunk chunk)
-    {
-        var chunkPos = GetChunkPos(chunk);
-        var caveRegion = GetRegion(chunkPos);
-
-        return caveRegion?.GetCaveChunk(chunkPos);
-    }
-
     public CaveChunk GetCaveChunk(short worldX, short worldZ)
     {
         var chunkPos = GetChunkPos(worldX, worldZ);
@@ -148,17 +127,6 @@ public class CaveChunksProvider
         return GetCaveBlocks(chunkPos);
     }
 
-    public CaveBlock GetCaveBlock(Vector3 worldPos)
-    {
-        var caveChunk = GetCaveChunk(worldPos);
-        var hashcode = HashCodeFromWorldPos(worldPos);
-
-        if (caveChunk is null)
-            return null;
-
-        return caveChunk.GetBlock(hashcode);
-    }
-
     public bool IsCave(int worldX, int worldY, int worldZ)
     {
         var caveChunk = GetCaveChunk((short)worldX, (short)worldZ);
@@ -170,130 +138,65 @@ public class CaveChunksProvider
         return caveChunk.Exists(hashcode);
     }
 
-    public bool IsCave(Vector3 worldPos)
+    public Vector3i GetSpawnPositionNearPlayer(Vector3 playerPosition, int minSpawnDist)
     {
-        var caveChunk = GetCaveChunk((short)worldPos.x, (short)worldPos.x);
-        var hashcode = HashCodeFromWorldPos(worldPos);
+        var world = GameManager.Instance.World;
+        var queue = new HashedPriorityQueue<AstarNode>();
+        var visited = new HashSet<int>();
+        var startNode = new AstarNode(new Vector3i(playerPosition));
+        var sqrMinSpawnDist = minSpawnDist * minSpawnDist;
+        var rolls = 0;
 
-        if (caveChunk == null)
-            return false;
+        queue.Enqueue(startNode, float.MaxValue);
 
-        return caveChunk.Exists(hashcode);
-    }
-
-    public HashSet<int> GetTunnelsAroundPrefab(PrefabInstance prefabInstance)
-    {
-        // TODO: re-setup cave graph saving at world generation before enabling this code
-        return null;
-
-        if (caveGraph.graph.TryGetValue(prefabInstance.id, out var tunnelIDs))
+        while (queue.Count > 0 && rolls++ < 500)
         {
-            return tunnelIDs.ToHashSet();
-        }
+            AstarNode currentNode = queue.Dequeue();
 
-        return null;
-    }
-
-    public HashSet<int> FindTunnelsNearPosition(Vector3 playerPosition)
-    {
-        if (GetCaveBlock(playerPosition) is CaveBlock block)
-        {
-            return new HashSet<int>() { block.tunnelID.value };
-        }
-
-        if (GameManager.Instance.World.GetPOIAtPosition(playerPosition) is PrefabInstance prefabInstance)
-        {
-            return GetTunnelsAroundPrefab(prefabInstance);
-        }
-
-        var queue = new HashSet<Vector3>() { playerPosition };
-        var visited = new HashSet<Vector3>() { };
-        var maxRolls = 1000;
-
-        while (queue.Count > 0 && maxRolls-- > 0)
-        {
-            var currentPos = queue.First();
-
-            if (GetCaveBlock(currentPos) is CaveBlock caveBlock)
+            if (currentNode.SqrEuclidianDist(startNode) > sqrMinSpawnDist && world.CanMobsSpawnAtPos(currentNode.position))
             {
-                return new HashSet<int>() { caveBlock.tunnelID.value };
+                Log.Out($"[Cave] spawn position found at '{currentNode.position}', rolls: {rolls}");
+                return currentNode.position;
             }
 
-            visited.Add(currentPos);
-            queue.Remove(currentPos);
+            int x = currentNode.position.x;
+            int y = currentNode.position.y;
+            int z = currentNode.position.z;
 
-            foreach (var offset in CaveUtils.offsets)
+            visited.Add(currentNode.hashcode);
+
+            foreach (var offset in CaveUtils.offsetsNoVertical)
             {
-                var position = currentPos + offset;
+                Vector3i neighborPos = currentNode.position + offset;
+                uint rawData = world.GetBlock(x + offset.x, y + offset.y, z + offset.z).rawData;
 
-                if (visited.Contains(position))
+                bool canExtend =
+                       !visited.Contains(neighborPos.GetHashCode())
+                    && rawData == 0 || rawData > 255
+                    && world.GetBlock(x + offset.x, y + offset.y - 1, z + offset.z).rawData < 256;
+
+                if (!canExtend)
                     continue;
 
-                var blockType = GameManager.Instance.World.GetBlock((int)position.x, (int)position.y, (int)position.z).type;
+                var neighbor = new AstarNode(neighborPos, currentNode);
+                var tentativeGCost = currentNode.GCost + 1;
 
-                if (blockType > 0 && blockType < 255 && position.y < GameManager.Instance.World.GetHeight((int)position.x, (int)position.z))
+                if (tentativeGCost < neighbor.GCost || !queue.Contains(neighbor))
                 {
-                    continue;
-                }
+                    neighbor.GCost = tentativeGCost;
+                    neighbor.HCost = -CaveUtils.SqrEuclidianDist(neighbor.position, startNode.position);
 
-                queue.Add(position);
-            }
-        }
-
-        return null;
-    }
-
-    public bool CanSpawnEnemyAt(CaveBlock block, Vector3 playerpos, int minSpawnDist, HashSet<int> tunnelIDs)
-    {
-        if (!block.isFloor || !block.isFlat || block.isWater || (tunnelIDs != null && !tunnelIDs.Contains(block.tunnelID.value)))
-        {
-            return false;
-        }
-
-        return CaveUtils.SqrEuclidianDist(block.ToWorldPos(CaveGenerator.HalfWorldSize), playerpos) > minSpawnDist * minSpawnDist;
-    }
-
-    public List<CaveBlock> GetSpawnPositionsFromPlayer(Vector3 playerPosition, int minSpawnDist)
-    {
-        // TODO: debug game crashes on 8k maps
-        return new List<CaveBlock>();
-
-        var caveBlocks = new HashSet<CaveBlock>();
-        var visitedChunks = new HashSet<Vector2s>();
-        var chunkPos = GetChunkPos(playerPosition);
-        var tunnelIDs = FindTunnelsNearPosition(playerPosition);
-
-        var queue = new Queue<Vector2s>();
-        queue.Enqueue(chunkPos);
-        visitedChunks.Add(chunkPos);
-
-        while (queue.Count > 0 && caveBlocks.Count == 0)
-        {
-            var currentChunkPos = queue.Dequeue();
-
-            var blocks = GetCaveBlocks(currentChunkPos);
-
-            if (blocks != null)
-            {
-                var spawnableBlocks = blocks.Where(block => CanSpawnEnemyAt(block, playerPosition, minSpawnDist, tunnelIDs));
-                caveBlocks.UnionWith(spawnableBlocks);
-            }
-
-            foreach (var offset in CaveUtils.offsets)
-            {
-                var neighborChunkPos = new Vector2s(
-                    (short)(currentChunkPos.x + offset.x),
-                    (short)(currentChunkPos.z + offset.z)
-                );
-
-                if (!visitedChunks.Contains(neighborChunkPos))
-                {
-                    queue.Enqueue(neighborChunkPos);
-                    visitedChunks.Add(neighborChunkPos);
+                    if (!queue.Contains(neighbor))
+                    {
+                        queue.Enqueue(neighbor, neighbor.FCost);
+                    }
                 }
             }
         }
 
-        return caveBlocks.ToList();
+        // Log.Warning($"[Cave] no spawn position found near '{new Vector3i(playerPosition)}', rolls: {rolls}");
+
+        // reaching here means that no spawn block was found
+        return Vector3i.zero;
     }
 }

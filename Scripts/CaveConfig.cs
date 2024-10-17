@@ -29,4 +29,8 @@ public static class CaveConfig
     public static bool generateWater = false;
 
     public static readonly float terrainOffset = 50;
+
+    public static readonly bool enableCaveBloodMoon = true;
+
+    public static readonly int minSpawnDist = 15;
 }

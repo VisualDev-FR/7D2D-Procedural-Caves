@@ -3,13 +3,15 @@ using System.Collections.Generic;
 
 public class AstarNode
 {
-    public readonly Vector3i position;
-
     public AstarNode Parent { get; private set; }
 
-    public Vector3i direction;
+    public readonly Vector3i position;
+
+    public readonly Vector3i direction;
 
     public readonly int hashcode;
+
+    public readonly int totalDist = 0;
 
     public float GCost { get; set; }
 
@@ -31,6 +33,7 @@ public class AstarNode
 
     public AstarNode(Vector3i pos, AstarNode parent)
     {
+        totalDist = parent.totalDist + 1;
         Parent = parent;
         position = pos;
         hashcode = position.GetHashCode();
@@ -41,10 +44,10 @@ public class AstarNode
         );
     }
 
-    public AstarNode(int x, int y, int z)
+    public AstarNode(Vector3i pos)
     {
-        position = new Vector3i(x, y, z);
-        hashcode = position.GetHashCode();
+        position = pos;
+        hashcode = pos.GetHashCode();
     }
 
     public override int GetHashCode()
@@ -72,5 +75,10 @@ public class AstarNode
         path.Reverse();
 
         return path;
+    }
+
+    public float SqrEuclidianDist(AstarNode other)
+    {
+        return CaveUtils.SqrEuclidianDist(position, other.position);
     }
 }

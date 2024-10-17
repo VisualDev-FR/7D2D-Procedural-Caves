@@ -6,6 +6,11 @@
         <property name="LightFactor" value="0.5" help="myPropertyHelp" />
         <property name="SetWater" value="true" help="myPropertyHelp" />
 
+        <!-- Zombie spawn -->
+        <property name="EnableCaveBloodMoon" value="true" help="Allow to enable or disable zombies spawing in cave during bloodmoon" />
+        <property name="MinSpawnDist" value="20" help="" />
+        <property name="BloodMoonMinSpawnDist" value="40" help="" />
+
         <!--  -->
         <property name="PathingNoise" help="myPropertyHelp">
             <property name="noiseType" value="perlin" help="myPropertyHelp" />

@@ -12,8 +12,6 @@ public class AIDirectorBloodMoonParty_SpawnZombie
 
     private static AIDirectorBloodMoonParty Instance;
 
-    private static readonly int minEnemySpawnDist = 40;
-
     public static bool Prefix(ref AIDirectorBloodMoonParty __instance, World _world, EntityPlayer _target, Vector3 _focusPos, Vector3 _radiusV, ref bool __result)
     {
         if (!CaveGenerator.isEnabled)
@@ -33,14 +31,12 @@ public class AIDirectorBloodMoonParty_SpawnZombie
 
     private static bool SpawnBloodMoonCaveZombie()
     {
-        var spawnPositions = CaveGenerator.caveChunksProvider.GetSpawnPositionsFromPlayer(target.position, minEnemySpawnDist);
+        var spawnPos = CaveGenerator.caveChunksProvider.GetSpawnPositionNearPlayer(target.position, CaveConfig.minSpawnDist);
 
-        if (spawnPositions.Count == 0)
+        if (spawnPos == Vector3i.zero)
         {
             Log.Error($"[Cave] no spawn position found for BloodMoonParty.");
         }
-        var randomIndex = Instance.controller.Random.Next(spawnPositions.Count);
-        var spawnPos = spawnPositions[randomIndex].ToWorldPos(CaveGenerator.HalfWorldSize);
 
         int et = EntityGroups.GetRandomFromGroup(Instance.partySpawner.spawnGroupName, ref Instance.lastClassId);
 
