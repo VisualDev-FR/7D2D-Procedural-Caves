@@ -34,9 +34,7 @@ public class AIDirectorBloodMoonParty_SpawnZombie
         var spawnPos = CaveGenerator.caveChunksProvider.GetSpawnPositionNearPlayer(target.position, CaveConfig.minSpawnDist);
 
         if (spawnPos == Vector3i.zero)
-        {
-            Log.Error($"[Cave] no spawn position found for BloodMoonParty.");
-        }
+            return false;
 
         int et = EntityGroups.GetRandomFromGroup(Instance.partySpawner.spawnGroupName, ref Instance.lastClassId);
 

@@ -140,6 +140,7 @@ public class CaveChunksProvider
 
     public Vector3i GetSpawnPositionNearPlayer(Vector3 playerPosition, int minSpawnDist)
     {
+        var timer = CaveUtils.StartTimer();
         var world = GameManager.Instance.World;
         var queue = new HashedPriorityQueue<AstarNode>();
         var visited = new HashSet<int>();
@@ -149,13 +150,13 @@ public class CaveChunksProvider
 
         queue.Enqueue(startNode, float.MaxValue);
 
-        while (queue.Count > 0 && rolls++ < 500)
+        while (queue.Count > 0 && rolls++ < 100)
         {
             AstarNode currentNode = queue.Dequeue();
 
             if (currentNode.SqrEuclidianDist(startNode) > sqrMinSpawnDist && world.CanMobsSpawnAtPos(currentNode.position))
             {
-                Log.Out($"[Cave] spawn position found at '{currentNode.position}', rolls: {rolls}");
+                Log.Out($"[Cave] spawn position found at '{currentNode.position}', rolls: {rolls}, timer: {timer.ElapsedMilliseconds}ms");
                 return currentNode.position;
             }
 
@@ -172,30 +173,19 @@ public class CaveChunksProvider
 
                 bool canExtend =
                        !visited.Contains(neighborPos.GetHashCode())
-                    && rawData == 0 || rawData > 255
+                    && (rawData == 0 || rawData > 255)
                     && world.GetBlock(x + offset.x, y + offset.y - 1, z + offset.z).rawData < 256;
 
                 if (!canExtend)
                     continue;
 
                 var neighbor = new AstarNode(neighborPos, currentNode);
-                var tentativeGCost = currentNode.GCost + 1;
 
-                if (tentativeGCost < neighbor.GCost || !queue.Contains(neighbor))
-                {
-                    neighbor.GCost = tentativeGCost;
-                    neighbor.HCost = -CaveUtils.SqrEuclidianDist(neighbor.position, startNode.position);
-
-                    if (!queue.Contains(neighbor))
-                    {
-                        queue.Enqueue(neighbor, neighbor.FCost);
-                    }
-                }
+                queue.Enqueue(neighbor, -neighbor.totalDist + rand.Next(-1, 2));
             }
         }
 
-        // Log.Warning($"[Cave] no spawn position found near '{new Vector3i(playerPosition)}', rolls: {rolls}");
-
+        Log.Warning($"[Cave] no spawn position found near '{new Vector3i(playerPosition)}', rolls: {rolls}, timer: {timer.ElapsedMilliseconds}ms");
         // reaching here means that no spawn block was found
         return Vector3i.zero;
     }
