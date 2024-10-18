@@ -1,3 +1,5 @@
+using UnityEngine;
+
 public static class CaveConfig
 {
     public static FastTags<TagGroup.Poi> tagCaveMarker = FastTags<TagGroup.Poi>.Parse("cavenode");
@@ -33,4 +35,13 @@ public static class CaveConfig
     public static readonly bool enableCaveBloodMoon = true;
 
     public static readonly int minSpawnDist = 15;
+
+    public class CaveLightConfig
+    {
+        public static Vector2 ambientInsideEquatorScale = new Vector2(0, 0);
+
+        public static Vector2 ambientInsideGroundScale = new Vector2(0, 0);
+
+        public static Vector2 ambientInsideSkyScale = new Vector2(0, 0);
+    }
 }

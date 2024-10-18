@@ -11,6 +11,13 @@
         <property name="MinSpawnDist" value="20" help="" />
         <property name="BloodMoonMinSpawnDist" value="40" help="" />
 
+        <!-- Lighting -->
+        <property name="ambientInsideSpeed" value=".3" />
+        <property name="ambientInsideThreshold" value=".2" />
+        <property name="ambientInsideEquatorScale" value=".55, 1.5" />
+        <property name="ambientInsideGroundScale" value=".2, .2" />
+        <property name="ambientInsideSkyScale" value=".8, .4" />
+
         <!--  -->
         <property name="PathingNoise" help="myPropertyHelp">
             <property name="noiseType" value="perlin" help="myPropertyHelp" />
