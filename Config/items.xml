@@ -34,6 +34,7 @@
             <property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab" />
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
             <property name="Material" value="MresourceScrapLeadSmall" />
+            <property name="Stacknumber" value="1" />
             <property name="EconomicValue" value="2850" />
             <property name="Group" value="Resources" />
         </item>
@@ -104,6 +105,7 @@
             <property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab" />
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
             <property name="Material" value="MresourceScrapLeadSmall" />
+            <property name="Stacknumber" value="1" />
             <property name="EconomicValue" value="1275" />
             <property name="Group" value="Resources" />
         </item>
@@ -144,6 +146,7 @@
             <property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab" />
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
             <property name="Material" value="MresourceScrapLeadSmall" />
+            <property name="Stacknumber" value="1" />
             <property name="EconomicValue" value="1275" />
             <property name="Group" value="Resources" />
         </item>
