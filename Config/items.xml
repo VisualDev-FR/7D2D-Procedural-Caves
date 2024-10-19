@@ -139,6 +139,15 @@
         </item>
 
         <!-- pirate treasure -->
+        <item name="pirateCollection">
+            <property name="CustomIcon" value="pirateCollection" />
+            <property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab" />
+            <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
+            <property name="Material" value="MresourceScrapLeadSmall" />
+            <property name="EconomicValue" value="1275" />
+            <property name="Group" value="Resources" />
+        </item>
+
         <item name="pirateTreasure_01">
             <property name="CustomIcon" value="pirateTreasure_01" />
             <property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab" />
