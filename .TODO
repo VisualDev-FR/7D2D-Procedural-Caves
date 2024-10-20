@@ -25,6 +25,7 @@ Priority:
     ☐ allow cave markers inside poi bounds, combining octree cluster parsing + marker directions
     ☐ allow tunneling inside rwg tiles
     ☐ store terrain offset in worldinfos.xml
+    ☐ Loading screen with cave pictures
 
 Optimization:
     ✔ store all sphere offsets to avoid computing sqrDistance in critical sections @done(24-09-10 22:16)
@@ -113,8 +114,9 @@ Cave zombies:
     ☐ https://www.cgtrader.com/3d-models/character/fantasy-character/low-poly-epic-skeleton-bloody-creature
     ☐ https://www.cgtrader.com/3d-models/character/man/human-corpse
 
-Items:
+Items / blocks:
     ☐ https://opengameart.org/content/rocks-0
+    ☐ https://www.turbosquid.com/3d-models/3d-stalagmites-rocks-set-1594163
 
 Cancelled:
     ✘ increase terrain height @cancelled(24-07-10 00:26)

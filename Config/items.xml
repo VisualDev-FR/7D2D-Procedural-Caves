@@ -1,5 +1,21 @@
 <configs>
 
+    <!-- meleeToolFlashlight02 -->
+    <append xpath="/items/item[@name='meleeToolFlashlight02']">
+        <property name="ShowQuality" value="true" />
+        <property name="RepairTools" value="battery_T1" />
+        <property name="DegradationBreaksAfter" value="false" />
+
+        <effect_group name="flashLightBatteryConsuming">
+            <passive_effect name="DegradationMax" operation="base_set" value="100,600" tier="1,6" />
+
+            <triggered_effect trigger="onSelfItemActivate" action="AddBuff" buff="buffDecayItemOverTime" />
+            <triggered_effect trigger="onSelfItemDeactivate" action="RemoveBuff" buff="buffDecayItemOverTime" />
+            <triggered_effect trigger="onSelfEquipStop" action="RemoveBuff" buff="buffDecayItemOverTime" />
+        </effect_group>
+    </append>
+
+    <!-- new items -->
     <append xpath="/items">
 
         <item name="battery_T1">
@@ -9,6 +25,7 @@
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
             <property name="Material" value="MresourceScrapLeadSmall" />
             <property name="Stacknumber" value="10" />
+            <property name="RepairAmount" value="9999" />
             <property name="Weight" value="1" />
             <property name="EconomicValue" value="1" />
             <property name="EconomicBundleSize" value="12" />

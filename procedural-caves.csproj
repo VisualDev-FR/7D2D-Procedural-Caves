@@ -98,6 +98,9 @@
     <Compile Include="Harmony\H_WorldEnvironement.cs" />
     <Compile Include="Harmony\ModApi.cs" />
 
+    <!-- GameEvents Actions -->
+    <Compile Include="Scripts/Actions/ActionDeactivateHeldItem.cs" />
+
     <!-- CaveGeneration -->
     <Compile Include="Scripts\CaveGeneration\CaveBuilder.cs" />
     <Compile Include="Scripts\CaveGeneration\CavePrefabChecker.cs" />
