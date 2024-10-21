@@ -8,12 +8,10 @@
 
             <effect_group name="decayItem">
                 <triggered_effect trigger="onSelfBuffUpdate" action="CallGameEvent" event="action_decay_item" />
-
+                <triggered_effect trigger="onSelfBuffUpdate" action="CallGameEvent" event="action_flashlight_sparkle" />
                 <triggered_effect trigger="onSelfBuffUpdate" action="CallGameEvent" event="action_deactivate_held_item">
                     <requirement name="HoldingItemBroken" />
-                    <requirement name="IsItemActive" />
                 </triggered_effect>
-
             </effect_group>
         </buff>
 
