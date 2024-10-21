@@ -100,6 +100,7 @@
 
     <!-- GameEvents Actions -->
     <Compile Include="Scripts/Actions/ActionDeactivateHeldItem.cs" />
+    <Compile Include="Scripts/Actions/ActionFlashLightSparkle.cs" />
 
     <!-- CaveGeneration -->
     <Compile Include="Scripts\CaveGeneration\CaveBuilder.cs" />
