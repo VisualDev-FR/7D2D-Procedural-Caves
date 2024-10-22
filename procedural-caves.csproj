@@ -131,6 +131,7 @@
     <!-- ConsoleCmd -->
     <Compile Include="Scripts\ConsoleCmd\CaveDebugConsoleCmd.cs" />
     <Compile Include="Scripts\ConsoleCmd\CaveEditorConsoleCmd.cs" />
+    <Compile Include="Scripts\ConsoleCmd\DebugItemConsoleCmd.cs" />
 
     <!-- IO -->
     <Compile Include="Scripts\IO\MultiStream.cs" />
