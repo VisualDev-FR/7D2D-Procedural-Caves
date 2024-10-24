@@ -1,12 +1,12 @@
 using UnityEngine;
 
-public class MinEventActionDecayHeadLight : MinEventActionDecayLight
+public class MinEventActionDecayHeadLight : MinEventActionDecayLightAbstract
 {
     private const string headLightPropFPV = "HeadLight";
 
     private const string headLightPropTPV = "HeadLightCam";
 
-    private const string modArmorHelmetLight = "modArmorHelmetLight";
+    private const string modArmorHelmetLightProp = "modArmorHelmetLight";
 
     public override bool CanExecute(MinEventTypes _eventType, MinEventParams _params)
     {
@@ -73,7 +73,7 @@ public class MinEventActionDecayHeadLight : MinEventActionDecayLight
 
         foreach (var mod in equipment.Modifications)
         {
-            if (mod.ItemClass.Name == modArmorHelmetLight)
+            if (mod.ItemClass.Name == modArmorHelmetLightProp)
             {
                 headlightMod = mod;
                 return true;

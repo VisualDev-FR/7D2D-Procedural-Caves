@@ -1,7 +1,7 @@
 
 using UnityEngine;
 
-public class MinEventActionDecayFlashLight : MinEventActionDecayLight
+public class MinEventActionDecayFlashLight : MinEventActionDecayLightAbstract
 {
     public override ItemValue GetLightItemValue(MinEventParams _params)
     {
@@ -11,5 +11,11 @@ public class MinEventActionDecayFlashLight : MinEventActionDecayLight
     public override Transform GetLightTransform(MinEventParams _params)
     {
         return _params.Self.inventory.GetHoldingItemTransform();
+    }
+
+    public override void AfterExecute(EntityAlive player)
+    {
+        // update the itemStack UI
+        player.inventory.notifyListeners();
     }
 }

@@ -5,7 +5,7 @@ using UnityEngine;
 using Random = System.Random;
 
 
-public abstract class MinEventActionDecayLight : MinEventActionTargetedBase
+public abstract class MinEventActionDecayLightAbstract : MinEventActionTargetedBase
 {
     // values in seconds, which say when the sparkle effect must be played
     // follows a cubic curve, to have more frequent sparkles when the light has a low battery
@@ -17,13 +17,15 @@ public abstract class MinEventActionDecayLight : MinEventActionTargetedBase
 
     public abstract Transform GetLightTransform(MinEventParams _params);
 
+    public virtual void AfterExecute(EntityAlive player) { }
+
     public override void Execute(MinEventParams _params)
     {
         var player = _params.Self;
         var lightItemValue = GetLightItemValue(_params);
         var lightTransform = GetLightTransform(_params);
 
-        if (player is null || lightItemValue is null)
+        if (player is null || lightItemValue is null || lightItemValue.Activated == 0)
             return;
 
         float remainingUseTimes = lightItemValue.MaxUseTimes - lightItemValue.UseTimes;
@@ -35,15 +37,18 @@ public abstract class MinEventActionDecayLight : MinEventActionTargetedBase
 
         if (remainingUseTimes <= 0)
         {
-            DeactivateFlashLight(player, lightItemValue, lightTransform);
+            DeactivateFlashLight(player, lightItemValue);
             return;
         }
 
-        Log.Out($"Decaying {lightItemValue.ItemClass.Name}, usetimes: {lightItemValue.UseTimes}");
         lightItemValue.UseTimes++;
+
+        AfterExecute(player);
+
+        Log.Out($"Decaying {lightItemValue.ItemClass.Name}, usetimes: {lightItemValue.UseTimes}");
     }
 
-    private void DeactivateFlashLight(EntityAlive player, ItemValue itemValue, Transform transform)
+    private void DeactivateFlashLight(EntityAlive player, ItemValue itemValue)
     {
         player.MinEventContext.ItemValue = itemValue;
         itemValue.FireEvent(MinEventTypes.onSelfItemDeactivate, player.MinEventContext);
@@ -52,7 +57,7 @@ public abstract class MinEventActionDecayLight : MinEventActionTargetedBase
 
     private IEnumerator LightSparkleCoroutine(Transform transform, bool keepActivated)
     {
-        float scale = 0.25f;
+        float scale = 0.10f;
 
         for (int i = 0; i < random.Next(2, 6); i++)
         {

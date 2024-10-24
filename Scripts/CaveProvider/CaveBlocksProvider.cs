@@ -156,7 +156,7 @@ public class CaveChunksProvider
 
             if (currentNode.SqrEuclidianDist(startNode) > sqrMinSpawnDist && world.CanMobsSpawnAtPos(currentNode.position))
             {
-                Log.Out($"[Cave] spawn position found at '{currentNode.position}', rolls: {rolls}, timer: {timer.ElapsedMilliseconds}ms");
+                // Log.Out($"[Cave] spawn position found at '{currentNode.position}', rolls: {rolls}, timer: {timer.ElapsedMilliseconds}ms");
                 return currentNode.position;
             }
 
@@ -185,7 +185,7 @@ public class CaveChunksProvider
             }
         }
 
-        Log.Warning($"[Cave] no spawn position found near '{new Vector3i(playerPosition)}', rolls: {rolls}, timer: {timer.ElapsedMilliseconds}ms");
+        // Log.Warning($"[Cave] no spawn position found near '{new Vector3i(playerPosition)}', rolls: {rolls}, timer: {timer.ElapsedMilliseconds}ms");
         // reaching here means that no spawn block was found
         return Vector3i.zero;
     }

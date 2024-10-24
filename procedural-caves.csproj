@@ -102,7 +102,7 @@
     <Compile Include="Scripts/Actions/MinEventActionDecayHeadLight.cs" />
     <Compile Include="Scripts/Actions/MinEventActionDecayFlashLight.cs" />
     <Compile Include="Scripts/Actions/MinEventActionDecayGunLight.cs" />
-    <Compile Include="Scripts/Actions/MinEventActionDecayLight.cs" />
+    <Compile Include="Scripts/Actions/MinEventActionDecayLightAbstract.cs" />
 
     <!-- CaveGeneration -->
     <Compile Include="Scripts\CaveGeneration\CaveBuilder.cs" />

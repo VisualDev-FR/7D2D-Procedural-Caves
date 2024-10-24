@@ -1,9 +1,14 @@
 using UnityEngine;
 
-public class MinEventActionDecayGunLight : MinEventActionTargetedBase
+public class MinEventActionDecayGunLight : MinEventActionDecayLightAbstract
 {
-    public override void Execute(MinEventParams _params)
+    public override ItemValue GetLightItemValue(MinEventParams _params)
     {
-        base.Execute(_params);
+        return null;
+    }
+
+    public override Transform GetLightTransform(MinEventParams _params)
+    {
+        return null;
     }
 }
