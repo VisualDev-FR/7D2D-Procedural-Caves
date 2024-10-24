@@ -18,13 +18,14 @@
     <!-- new items -->
     <append xpath="/items">
 
+        <!-- aa batteries -->
         <item name="aa_battery">
             <property name="CustomIcon" value="aa_battery" />
             <property name="HoldType" value="45" />
             <property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab" />
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
             <property name="Material" value="MresourceScrapLeadSmall" />
-            <property name="Stacknumber" value="10" />
+            <property name="Stacknumber" value="20" />
             <property name="RepairAmount" value="9999" />
             <property name="Weight" value="1" />
             <property name="EconomicValue" value="1" />
@@ -33,8 +34,135 @@
             <property name="Group" value="Resources" />
         </item>
 
+        <item name="aa_battery_pack">
+            <property name="CustomIcon" value="aa_battery_pack" />
+            <property name="HoldType" value="45" />
+            <property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab" />
+            <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
+            <property name="Material" value="MresourceScrapLeadMedium" />
+            <property name="Stacknumber" value="5" />
+            <property name="Weight" value="0" />
+            <property name="EconomicValue" value="1" />u
+            <property name="EconomicBundleSize" value="12" />
+            <property name="CraftingIngredientTime" value="9" />
+            <property name="Group" value="Resources" />
+            <property name="SoundPickup" value="ammobox_grab" />
+            <property name="SoundPlace" value="ammobox_place" />
+
+            <property class="Action0">
+                <property name="Class" value="OpenBundle" />
+                <property name="Delay" value="0" />
+                <property name="Sound_start" value="close_garbage" />
+                <property name="Create_item" value="aa_battery" />
+                <property name="Create_item_count" value="4" />
+            </property>
+        </item>
+
+        <!-- nuggets -->
+        <item name="nugget_01">
+            <property name="CustomIcon" value="nugget_01" />
+            <property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab" />
+            <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
+            <property name="Material" value="MresourceScrapLeadSmall" />
+            <property name="Stacknumber" value="10" />
+            <property name="EconomicValue" value="175" />
+            <property name="Group" value="Resources" />
+        </item>
+
+        <item name="nugget_02">
+            <property name="CustomIcon" value="nugget_02" />
+            <property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab" />
+            <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
+            <property name="Material" value="MresourceScrapLeadSmall" />
+            <property name="Stacknumber" value="10" />
+            <property name="EconomicValue" value="175" />
+            <property name="Group" value="Resources" />
+        </item>
+
+        <item name="nugget_03">
+            <property name="CustomIcon" value="nugget_03" />
+            <property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab" />
+            <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
+            <property name="Material" value="MresourceScrapLeadSmall" />
+            <property name="Stacknumber" value="10" />
+            <property name="EconomicValue" value="175" />
+            <property name="Group" value="Resources" />
+        </item>
+
+        <item name="nugget_04">
+            <property name="CustomIcon" value="nugget_04" />
+            <property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab" />
+            <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
+            <property name="Material" value="MresourceScrapLeadSmall" />
+            <property name="Stacknumber" value="10" />
+            <property name="EconomicValue" value="175" />
+            <property name="Group" value="Resources" />
+        </item>
+
+        <item name="nugget_05">
+            <property name="CustomIcon" value="nugget_05" />
+            <property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab" />
+            <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
+            <property name="Material" value="MresourceScrapLeadSmall" />
+            <property name="Stacknumber" value="10" />
+            <property name="EconomicValue" value="175" />
+            <property name="Group" value="Resources" />
+        </item>
+
+        <!-- raw crystals -->
+        <item name="raw_crystal_01">
+            <property name="CustomIcon" value="raw_crystal_01" />
+            <property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab" />
+            <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
+            <property name="Material" value="MresourceScrapLeadSmall" />
+            <property name="Stacknumber" value="10" />
+            <property name="EconomicValue" value="175" />
+            <property name="Group" value="Resources" />
+        </item>
+
+        <item name="raw_crystal_02">
+            <property name="CustomIcon" value="raw_crystal_02" />
+            <property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab" />
+            <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
+            <property name="Material" value="MresourceScrapLeadSmall" />
+            <property name="Stacknumber" value="10" />
+            <property name="EconomicValue" value="175" />
+            <property name="Group" value="Resources" />
+        </item>
+
+        <item name="raw_crystal_03">
+            <property name="CustomIcon" value="raw_crystal_03" />
+            <property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab" />
+            <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
+            <property name="Material" value="MresourceScrapLeadSmall" />
+            <property name="Stacknumber" value="10" />
+            <property name="EconomicValue" value="175" />
+            <property name="Group" value="Resources" />
+        </item>
+
+        <item name="raw_crystal_04">
+            <property name="CustomIcon" value="raw_crystal_04" />
+            <property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab" />
+            <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
+            <property name="Material" value="MresourceScrapLeadSmall" />
+            <property name="Stacknumber" value="10" />
+            <property name="EconomicValue" value="175" />
+            <property name="Group" value="Resources" />
+        </item>
+
+        <item name="raw_crystal_05">
+            <property name="CustomIcon" value="raw_crystal_05" />
+            <property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab" />
+            <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
+            <property name="Material" value="MresourceScrapLeadSmall" />
+            <property name="Stacknumber" value="10" />
+            <property name="EconomicValue" value="175" />
+            <property name="Group" value="Resources" />
+        </item>
+
         <!-- Crystals -->
         <item name="crystalCollection">
+            <property name="Tags" value="gems" />
             <property name="CustomIcon" value="crystalCollection" />
             <property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab" />
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
@@ -45,6 +173,7 @@
         </item>
 
         <item name="crystal_01">
+            <property name="Tags" value="gems" />
             <property name="CustomIcon" value="crystal_01" />
             <property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab" />
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
@@ -52,9 +181,13 @@
             <property name="Stacknumber" value="10" />
             <property name="EconomicValue" value="175" />
             <property name="Group" value="Resources" />
+            <property name="DescriptionKey" value="rareOresGroupDesc" />
+            <property name="SoundPickup" value="nuggets_grab" />
+            <property name="SoundPlace" value="nuggets_place" />
         </item>
 
         <item name="crystal_02">
+            <property name="Tags" value="gems" />
             <property name="CustomIcon" value="crystal_02" />
             <property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab" />
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
@@ -62,9 +195,13 @@
             <property name="Stacknumber" value="10" />
             <property name="EconomicValue" value="175" />
             <property name="Group" value="Resources" />
+            <property name="DescriptionKey" value="rareOresGroupDesc" />
+            <property name="SoundPickup" value="nuggets_grab" />
+            <property name="SoundPlace" value="nuggets_place" />
         </item>
 
         <item name="crystal_03">
+            <property name="Tags" value="gems" />
             <property name="CustomIcon" value="crystal_03" />
             <property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab" />
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
@@ -72,9 +209,13 @@
             <property name="Stacknumber" value="10" />
             <property name="EconomicValue" value="175" />
             <property name="Group" value="Resources" />
+            <property name="DescriptionKey" value="rareOresGroupDesc" />
+            <property name="SoundPickup" value="nuggets_grab" />
+            <property name="SoundPlace" value="nuggets_place" />
         </item>
 
         <item name="crystal_04">
+            <property name="Tags" value="gems" />
             <property name="CustomIcon" value="crystal_04" />
             <property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab" />
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
@@ -82,9 +223,13 @@
             <property name="Stacknumber" value="10" />
             <property name="EconomicValue" value="175" />
             <property name="Group" value="Resources" />
+            <property name="DescriptionKey" value="rareOresGroupDesc" />
+            <property name="SoundPickup" value="nuggets_grab" />
+            <property name="SoundPlace" value="nuggets_place" />
         </item>
 
         <item name="crystal_05">
+            <property name="Tags" value="gems" />
             <property name="CustomIcon" value="crystal_05" />
             <property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab" />
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
@@ -92,16 +237,9 @@
             <property name="Stacknumber" value="10" />
             <property name="EconomicValue" value="175" />
             <property name="Group" value="Resources" />
-        </item>
-
-        <item name="crystal_06">
-            <property name="CustomIcon" value="crystal_06" />
-            <property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab" />
-            <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
-            <property name="Material" value="MresourceScrapLeadSmall" />
-            <property name="Stacknumber" value="10" />
-            <property name="EconomicValue" value="175" />
-            <property name="Group" value="Resources" />
+            <property name="DescriptionKey" value="rareOresGroupDesc" />
+            <property name="SoundPickup" value="nuggets_grab" />
+            <property name="SoundPlace" value="nuggets_place" />
         </item>
 
         <!-- Medals -->
@@ -324,6 +462,41 @@
             <property name="Stacknumber" value="10" />
             <property name="EconomicValue" value="175" />
             <property name="Group" value="Resources" />
+        </item>
+
+        <!-- books -->
+        <item name="bookCaversGuide">
+            <property name="Extends" value="schematicMaster" />
+            <property name="CustomIcon" value="the_caver_guide" />
+            <property name="DescriptionKey" value="perkFiremansAlmanacHeatLongDesc" />
+            <property name="Stacknumber" value="20" />
+            <property name="EconomicValue" value="500" />
+            <property name="Unlocks" value="perkFiremansAlmanacHeat" />
+            <property name="Tags" value="firemansProb" />
+            <property name="Group" value="Books,BooksOnly,TCReading" />
+            <property name="SoundPickup" value="book_grab" />
+            <property name="SoundPlace" value="book_place" />
+
+            <property class="Action0">
+                <property name="Class" value="Eat" />
+                <property name="Delay" value="1.0" />
+                <property name="Sound_start" value="read_skillbook" />
+            </property>
+
+            <effect_group tiered="false">
+                <requirement name="ProgressionLevel" progression_name="perkFiremansAlmanacHeat" operation="Equals" value="0" />
+                <triggered_effect trigger="onSelfPrimaryActionEnd" action="SetProgressionLevel" progression_name="perkFiremansAlmanacHeat" level="-1" /> <!-- level="-1" sets a perk to max level -->
+                <triggered_effect trigger="onSelfPrimaryActionEnd" action="SetProgressionLevel" progression_name="perkFiremansAlmanacComplete" level="-1">
+                    <requirement name="PerksUnlocked" skill_name="skillFiremansAlmanac" operation="GTE" value="7" />
+                </triggered_effect>
+                <triggered_effect trigger="onSelfPrimaryActionEnd" action="PlaySound" sound="read_skillbook_final" play_in_head="true">
+                    <requirement name="PerksUnlocked" skill_name="skillFiremansAlmanac" operation="GTE" value="7" />
+                </triggered_effect>
+            </effect_group>
+
+            <effect_group tiered="false">
+                <triggered_effect trigger="onSelfPrimaryActionEnd" action="GiveExp" exp="50" />
+            </effect_group>
         </item>
 
     </append>

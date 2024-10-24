@@ -5,6 +5,8 @@
             <ingredient name="medal_01" count="1" />
             <ingredient name="medal_02" count="1" />
             <ingredient name="medal_03" count="1" />
+            <ingredient name="medal_04" count="1" />
+            <ingredient name="medal_05" count="1" />
         </recipe>
 
         <recipe name="crystalCollection" count="1" is_trackable="true" craft_time="180" craft_exp_gain="500" always_unlocked="true">
@@ -13,7 +15,6 @@
             <ingredient name="crystal_03" count="1" />
             <ingredient name="crystal_04" count="1" />
             <ingredient name="crystal_05" count="1" />
-            <ingredient name="crystal_06" count="1" />
         </recipe>
 
         <recipe name="pirateCollection" count="1" is_trackable="true" craft_time="180" craft_exp_gain="500" always_unlocked="true">
