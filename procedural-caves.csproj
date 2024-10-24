@@ -98,9 +98,11 @@
     <Compile Include="Harmony\H_WorldEnvironement.cs" />
     <Compile Include="Harmony\ModApi.cs" />
 
-    <!-- GameEvents Actions -->
-    <Compile Include="Scripts/Actions/ActionDeactivateHeldItem.cs" />
-    <Compile Include="Scripts/Actions/ActionFlashLightSparkle.cs" />
+    <!-- MinEventActions -->
+    <Compile Include="Scripts/Actions/MinEventActionDecayHeadLight.cs" />
+    <Compile Include="Scripts/Actions/MinEventActionDecayFlashLight.cs" />
+    <Compile Include="Scripts/Actions/MinEventActionDecayGunLight.cs" />
+    <Compile Include="Scripts/Actions/MinEventActionDecayLight.cs" />
 
     <!-- CaveGeneration -->
     <Compile Include="Scripts\CaveGeneration\CaveBuilder.cs" />

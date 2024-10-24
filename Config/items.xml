@@ -9,9 +9,9 @@
         <effect_group name="flashLightBatteryConsuming">
             <passive_effect name="DegradationMax" operation="base_set" value="300,600,900,1200,1500,1800" tier="1,2,3,4,5,6" />
 
-            <triggered_effect trigger="onSelfItemActivate" action="AddBuff" buff="buffDecayItemOverTime" />
-            <triggered_effect trigger="onSelfItemDeactivate" action="RemoveBuff" buff="buffDecayItemOverTime" />
-            <triggered_effect trigger="onSelfEquipStop" action="RemoveBuff" buff="buffDecayItemOverTime" />
+            <triggered_effect trigger="onSelfItemActivate" action="AddBuff" buff="buffPoweredFlashLight" />
+            <triggered_effect trigger="onSelfItemDeactivate" action="RemoveBuff" buff="buffPoweredFlashLight" />
+            <triggered_effect trigger="onSelfEquipStop" action="RemoveBuff" buff="buffPoweredFlashLight" />
         </effect_group>
     </append>
 

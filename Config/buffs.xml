@@ -1,17 +1,30 @@
+<!-- notes:
+MinEventActionSetPartActive
+MinEventActionSetTransformActive
+
+<triggered_effect trigger="onSelfItemActivate" action="SetPartActive" part="HeadLight" active="@!.IsFPV" />
+<triggered_effect trigger="onSelfItemActivate" action="SetPartActive" part="HeadLightCam" active="@.IsFPV" />
+-->
+
 <configs>
 
     <append xpath="/buffs">
 
-        <buff name="buffDecayItemOverTime">
+        <buff name="buffPoweredFlashLight">
 
             <update_rate value="1" />
 
-            <effect_group name="decayItem">
-                <triggered_effect trigger="onSelfBuffUpdate" action="CallGameEvent" event="action_decay_item" />
-                <triggered_effect trigger="onSelfBuffUpdate" action="CallGameEvent" event="action_flashlight_sparkle" />
-                <triggered_effect trigger="onSelfBuffUpdate" action="CallGameEvent" event="action_deactivate_held_item">
-                    <requirement name="HoldingItemBroken" />
-                </triggered_effect>
+            <effect_group name="poweredFlashLight">
+                <triggered_effect trigger="onSelfBuffUpdate" action="MinEventActionDecayFlashLight, ProceduralCaves" event="action_decay_flashlight" />
+            </effect_group>
+        </buff>
+
+        <buff name="buffPoweredHeadLight">
+
+            <update_rate value="1" />
+
+            <effect_group name="poweredHeadLight">
+                <triggered_effect trigger="onSelfBuffUpdate" action="MinEventActionDecayHeadLight, ProceduralCaves" event="action_decay_flashlight" />
             </effect_group>
         </buff>
 

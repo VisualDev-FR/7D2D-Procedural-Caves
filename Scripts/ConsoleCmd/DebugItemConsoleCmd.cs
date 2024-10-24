@@ -6,6 +6,18 @@ public class DebugItemConsoleCmd : ConsoleCmdAbstract
     {
         var player = GameManager.Instance.World.GetPrimaryPlayer();
         var itemValue = player.inventory.holdingItemItemValue;
+        var itemData = player.inventory.holdingItemData;
+        var itemClass = player.inventory.holdingItem;
+
+        foreach (var partName in player.parts.Keys)
+        {
+            Log.Out($"[DebugItem] part: {partName}");
+        }
+
+        foreach (var mod in itemValue.Modifications)
+        {
+            Log.Out($"[DebugItem] mod: {mod.ItemClass.Name}");
+        }
 
         if (itemValue == null)
         {
@@ -14,6 +26,7 @@ public class DebugItemConsoleCmd : ConsoleCmdAbstract
         }
 
         Log.Out($"[DebugItem] name: {itemValue.ItemClass.Name}");
+        Log.Out($"[DebugItem] Quality: {itemValue.Quality}");
         Log.Out($"[DebugItem] useTimes: {itemValue.UseTimes}");
         Log.Out($"[DebugItem] maxUseTimes: {itemValue.MaxUseTimes}");
     }

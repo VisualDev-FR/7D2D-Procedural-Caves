@@ -1,0 +1,31 @@
+<configs>
+
+    <!-- meleeToolFlashlight02 -->
+    <append xpath="/item_modifiers/item_modifier[@name='modArmorHelmetLight']">
+        <property name="ShowQuality" value="true" />
+        <property name="RepairTools" value="battery_T1" />
+        <property name="DegradationBreaksAfter" value="false" />
+
+        <effect_group name="flashLightBatteryConsuming">
+            <passive_effect name="DegradationMax" operation="base_set" value="10,60" tier="1,6" />
+
+            <triggered_effect trigger="onSelfItemActivate" action="AddBuff" buff="buffPoweredHeadLight" />
+            <triggered_effect trigger="onSelfItemDeactivate" action="RemoveBuff" buff="buffPoweredHeadLight" />
+            <triggered_effect trigger="onSelfEquipStop" action="RemoveBuff" buff="buffPoweredHeadLight" />
+        </effect_group>
+    </append>
+
+    <append xpath="/item_modifiers/item_modifier[@name='modGunFlashlight']">
+        <property name="ShowQuality" value="true" />
+        <property name="RepairTools" value="battery_T1" />
+        <property name="DegradationBreaksAfter" value="false" />
+
+        <effect_group name="flashLightBatteryConsuming">
+            <passive_effect name="DegradationMax" operation="base_set" value="10,60" tier="1,6" />
+
+            <triggered_effect trigger="onSelfItemActivate" action="AddBuff" buff="buffPoweredGunLight" />
+            <triggered_effect trigger="onSelfItemDeactivate" action="RemoveBuff" buff="buffPoweredGunLight" />
+            <triggered_effect trigger="onSelfEquipStop" action="RemoveBuff" buff="buffPoweredGunLight" />
+        </effect_group>
+    </append>
+</configs>
