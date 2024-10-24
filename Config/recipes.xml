@@ -123,8 +123,6 @@
             <ingredient name="pirateTreasure_03" count="1" />
             <ingredient name="pirateTreasure_04" count="1" />
             <ingredient name="pirateTreasure_05" count="1" />
-            <ingredient name="pirateTreasure_06" count="1" />
-            <ingredient name="pirateTreasure_07" count="1" />
         </recipe>
 
     </append>
