@@ -89,8 +89,10 @@
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
             <property name="Material" value="MresourceScrapLeadSmall" />
             <property name="Stacknumber" value="10" />
-            <property name="EconomicValue" value="175" />
+            <property name="EconomicValue" value="250" />
             <property name="Group" value="Resources" />
+            <property name="SoundPickup" value="stone_grab" />
+            <property name="SoundPlace" value="stone_place" />
         </item>
 
         <item name="nugget_02">
@@ -99,8 +101,10 @@
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
             <property name="Material" value="MresourceScrapLeadSmall" />
             <property name="Stacknumber" value="10" />
-            <property name="EconomicValue" value="175" />
+            <property name="EconomicValue" value="250" />
             <property name="Group" value="Resources" />
+            <property name="SoundPickup" value="stone_grab" />
+            <property name="SoundPlace" value="stone_place" />
         </item>
 
         <item name="nugget_03">
@@ -109,8 +113,10 @@
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
             <property name="Material" value="MresourceScrapLeadSmall" />
             <property name="Stacknumber" value="10" />
-            <property name="EconomicValue" value="175" />
+            <property name="EconomicValue" value="250" />
             <property name="Group" value="Resources" />
+            <property name="SoundPickup" value="stone_grab" />
+            <property name="SoundPlace" value="stone_place" />
         </item>
 
         <item name="nugget_04">
@@ -119,8 +125,10 @@
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
             <property name="Material" value="MresourceScrapLeadSmall" />
             <property name="Stacknumber" value="10" />
-            <property name="EconomicValue" value="175" />
+            <property name="EconomicValue" value="250" />
             <property name="Group" value="Resources" />
+            <property name="SoundPickup" value="stone_grab" />
+            <property name="SoundPlace" value="stone_place" />
         </item>
 
         <item name="nugget_05">
@@ -129,8 +137,10 @@
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
             <property name="Material" value="MresourceScrapLeadSmall" />
             <property name="Stacknumber" value="10" />
-            <property name="EconomicValue" value="175" />
+            <property name="EconomicValue" value="250" />
             <property name="Group" value="Resources" />
+            <property name="SoundPickup" value="stone_grab" />
+            <property name="SoundPlace" value="stone_place" />
         </item>
 
         <!-- raw crystals -->
@@ -140,8 +150,10 @@
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
             <property name="Material" value="MresourceScrapLeadSmall" />
             <property name="Stacknumber" value="10" />
-            <property name="EconomicValue" value="175" />
+            <property name="EconomicValue" value="1250" />
             <property name="Group" value="Resources" />
+            <property name="SoundPickup" value="nuggets_grab" />
+            <property name="SoundPlace" value="nuggets_place" />
         </item>
 
         <item name="raw_crystal_02">
@@ -150,8 +162,10 @@
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
             <property name="Material" value="MresourceScrapLeadSmall" />
             <property name="Stacknumber" value="10" />
-            <property name="EconomicValue" value="175" />
+            <property name="EconomicValue" value="1250" />
             <property name="Group" value="Resources" />
+            <property name="SoundPickup" value="nuggets_grab" />
+            <property name="SoundPlace" value="nuggets_place" />
         </item>
 
         <item name="raw_crystal_03">
@@ -160,8 +174,10 @@
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
             <property name="Material" value="MresourceScrapLeadSmall" />
             <property name="Stacknumber" value="10" />
-            <property name="EconomicValue" value="175" />
+            <property name="EconomicValue" value="1250" />
             <property name="Group" value="Resources" />
+            <property name="SoundPickup" value="nuggets_grab" />
+            <property name="SoundPlace" value="nuggets_place" />
         </item>
 
         <item name="raw_crystal_04">
@@ -170,8 +186,10 @@
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
             <property name="Material" value="MresourceScrapLeadSmall" />
             <property name="Stacknumber" value="10" />
-            <property name="EconomicValue" value="175" />
+            <property name="EconomicValue" value="1250" />
             <property name="Group" value="Resources" />
+            <property name="SoundPickup" value="nuggets_grab" />
+            <property name="SoundPlace" value="nuggets_place" />
         </item>
 
         <item name="raw_crystal_05">
@@ -180,8 +198,10 @@
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
             <property name="Material" value="MresourceScrapLeadSmall" />
             <property name="Stacknumber" value="10" />
-            <property name="EconomicValue" value="175" />
+            <property name="EconomicValue" value="1250" />
             <property name="Group" value="Resources" />
+            <property name="SoundPickup" value="nuggets_grab" />
+            <property name="SoundPlace" value="nuggets_place" />
         </item>
 
         <!-- Crystals -->
@@ -192,7 +212,7 @@
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
             <property name="Material" value="MresourceScrapLeadSmall" />
             <property name="Stacknumber" value="1" />
-            <property name="EconomicValue" value="2850" />
+            <property name="EconomicValue" value="16000" />
             <property name="Group" value="Resources" />
         </item>
 
@@ -203,7 +223,7 @@
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
             <property name="Material" value="MresourceScrapLeadSmall" />
             <property name="Stacknumber" value="5" />
-            <property name="EconomicValue" value="5000" />
+            <property name="EconomicValue" value="16000" />
             <property name="Group" value="Resources" />
             <property name="DescriptionKey" value="rareOresGroupDesc" />
             <property name="SoundPickup" value="nuggets_grab" />
@@ -217,7 +237,7 @@
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
             <property name="Material" value="MresourceScrapLeadSmall" />
             <property name="Stacknumber" value="5" />
-            <property name="EconomicValue" value="1000" />
+            <property name="EconomicValue" value="16000" />
             <property name="Group" value="Resources" />
             <property name="DescriptionKey" value="rareOresGroupDesc" />
             <property name="SoundPickup" value="nuggets_grab" />
@@ -231,7 +251,7 @@
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
             <property name="Material" value="MresourceScrapLeadSmall" />
             <property name="Stacknumber" value="5" />
-            <property name="EconomicValue" value="1000" />
+            <property name="EconomicValue" value="16000" />
             <property name="Group" value="Resources" />
             <property name="DescriptionKey" value="rareOresGroupDesc" />
             <property name="SoundPickup" value="nuggets_grab" />
@@ -245,7 +265,7 @@
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
             <property name="Material" value="MresourceScrapLeadSmall" />
             <property name="Stacknumber" value="5" />
-            <property name="EconomicValue" value="1000" />
+            <property name="EconomicValue" value="16000" />
             <property name="Group" value="Resources" />
             <property name="DescriptionKey" value="rareOresGroupDesc" />
             <property name="SoundPickup" value="nuggets_grab" />
@@ -258,8 +278,8 @@
             <property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab" />
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
             <property name="Material" value="MresourceScrapLeadSmall" />
-            <property name="Stacknumber" value="10" />
-            <property name="EconomicValue" value="175" />
+            <property name="Stacknumber" value="5" />
+            <property name="EconomicValue" value="16000" />
             <property name="Group" value="Resources" />
             <property name="DescriptionKey" value="rareOresGroupDesc" />
             <property name="SoundPickup" value="nuggets_grab" />
