@@ -4,7 +4,7 @@
     <append xpath="/item_modifiers/item_modifier[@name='modArmorHelmetLight']">
 
         <property name="ShowQuality" value="true" />
-        <property name="RepairTools" value="battery_T1" />
+        <property name="RepairTools" value="aa_battery" />
         <property name="DegradationBreaksAfter" value="false" />
 
         <effect_group>
@@ -24,7 +24,7 @@
     <append xpath="/item_modifiers/item_modifier[@name='modGunFlashlight']">
 
         <property name="ShowQuality" value="true" />
-        <property name="RepairTools" value="battery_T1" />
+        <property name="RepairTools" value="aa_battery" />
         <property name="DegradationBreaksAfter" value="false" />
 
         <effect_group name="flashLightBatteryConsuming">

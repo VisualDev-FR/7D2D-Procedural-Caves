@@ -3,7 +3,7 @@
     <!-- meleeToolFlashlight02 -->
     <append xpath="/items/item[@name='meleeToolFlashlight02']">
         <property name="ShowQuality" value="true" />
-        <property name="RepairTools" value="battery_T1" />
+        <property name="RepairTools" value="aa_battery" />
         <property name="DegradationBreaksAfter" value="false" />
 
         <effect_group name="flashLightBatteryConsuming">
@@ -18,8 +18,8 @@
     <!-- new items -->
     <append xpath="/items">
 
-        <item name="battery_T1">
-            <property name="CustomIcon" value="battery_T1" />
+        <item name="aa_battery">
+            <property name="CustomIcon" value="aa_battery" />
             <property name="HoldType" value="45" />
             <property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab" />
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
@@ -31,18 +31,6 @@
             <property name="EconomicBundleSize" value="12" />
             <property name="CraftingIngredientTime" value="9" />
             <property name="Group" value="Resources" />
-        </item>
-
-        <item name="battery_T3">
-            <property name="CustomIcon" value="battery_T3" />
-            <property name="HoldType" value="45" />
-            <property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab" />
-            <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
-            <property name="Material" value="MresourceScrapLeadSmall" />
-            <property name="Stacknumber" value="10" />
-            <property name="EconomicValue" value="1" />
-            <property name="CraftingIngredientTime" value="9" />
-            <property name="Group" value="Resources,Chemicals" />
         </item>
 
         <!-- Crystals -->
