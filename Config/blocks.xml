@@ -73,5 +73,196 @@
             <drop event="Harvest" tag="oreWoodHarvest" name="fossil_04" prob=".005" count="1" />
         </block>
 
+        <!-- loot container (see placeholders.xml where name starts with 'caveCtn') -->
+        <block name="caveCntWoodenChestClosed">
+            <property name="Extends" value="cntWoodenChestClosed" />
+            <property name="LootList" value="caveWoodenChest" />
+        </block>
+
+        <block name="caveCntWoodenChestMilitaryClosed">
+            <property name="Extends" value="cntWoodenChestMilitaryClosed" />
+            <property name="LootList" value="caveMilitaryChest" />
+        </block>
+
+        <block name="caveCntOldWestChestClosed">
+            <property name="Extends" value="cntOldWestChestClosed" />
+            <property name="LootList" value="caveOldWestChest" />
+        </block>
+
+        <block name="caveCntWoodenChestRottenClosed">
+            <property name="Extends" value="cntWoodenChestRottenClosed" />
+            <property name="LootList" value="caveRottenChest" />
+        </block>
+
+        <block name="caveCntBackpack01">
+            <property name="Extends" value="cntBackpack01" />
+            <property name="LootList" value="caveCntBackPack" />
+        </block>
+
+        <block name="CaveCntBackpack03">
+            <property name="Extends" value="caveCntBackpack01" />
+        </block>
+
+        <block name="CaveCntDuffle01">
+            <property name="Extends" value="caveCntBackpack01" />
+        </block>
+
+        <block name="CaveCntPurse01">
+            <property name="Extends" value="caveCntBackpack01" />
+        </block>
+
+        <block name="CaveCntSportsBag01">
+            <property name="Extends" value="caveCntBackpack01" />
+            <property name="CreativeMode" value="None" />
+            <property name="CustomIcon" value="cntSportsBag01White" />
+            <property name="CustomIconTint" value="CCCCCC" />
+            <property name="TintColor" value="CCCCCC" />
+            <property name="Model" value="@:Entities/LootContainers/sports_bag01Prefab.prefab" />
+            <property name="SortOrder2" value="1800" />
+        </block>
+
+        <block name="CaveCntSportsBag01Red">
+            <property name="Extends" value="CaveCntSportsBag01" />
+            <property name="CustomIconTint" value="A72D34" />
+            <property name="TintColor" value="A72D34" />
+            <property name="SortOrder2" value="1802" />
+        </block>
+
+        <block name="CaveCntSportsBag01Orange">
+            <property name="Extends" value="CaveCntSportsBag01" />
+            <property name="CustomIconTint" value="A6712D" />
+            <property name="TintColor" value="A6712D" />
+            <property name="SortOrder2" value="1803" />
+        </block>
+
+        <block name="CaveCntSportsBag01Yellow">
+            <property name="Extends" value="CaveCntSportsBag01" />
+            <property name="CustomIconTint" value="A6972D" />
+            <property name="TintColor" value="A6972D" />
+            <property name="SortOrder2" value="1804" />
+        </block>
+
+        <block name="CaveCntSportsBag01Green">
+            <property name="Extends" value="CaveCntSportsBag01" />
+            <property name="CustomIconTint" value="265426" />
+            <property name="TintColor" value="265426" />
+            <property name="SortOrder2" value="1805" />
+        </block>
+
+        <block name="CaveCntSportsBag01Blue">
+            <property name="Extends" value="CaveCntSportsBag01" />
+            <property name="CustomIconTint" value="276182" />
+            <property name="TintColor" value="276182" />
+            <property name="SortOrder2" value="1806" />
+        </block>
+
+        <block name="CaveCntSportsBag01Purple">
+            <property name="Extends" value="CaveCntSportsBag01" />
+            <property name="CustomIconTint" value="574C82" />
+            <property name="TintColor" value="574C82" />
+            <property name="SortOrder2" value="1807" />
+        </block>
+
+        <block name="CaveCntSportsBag01Pink">
+            <property name="Extends" value="CaveCntSportsBag01" />
+            <property name="CustomIconTint" value="8F6296" />
+            <property name="TintColor" value="8F6296" />
+            <property name="SortOrder2" value="1810" />
+        </block>
+
+        <block name="CaveCntSportsBag02">
+            <property name="Extends" value="caveCntBackpack01" />
+            <property name="CreativeMode" value="None" />
+            <property name="CustomIcon" value="cntSportsBag02White" />
+            <property name="CustomIconTint" value="999999" />
+            <property name="TintColor" value="999999" />
+            <property name="Model" value="@:Entities/LootContainers/sports_bag02Prefab.prefab" />
+            <property name="SortOrder2" value="1900" />
+        </block>
+
+        <block name="CaveCntSportsBag02Brown">
+            <property name="Extends" value="CaveCntSportsBag02" />
+            <property name="CustomIconTint" value="52453A" />
+            <property name="TintColor" value="52453A" />
+            <property name="SortOrder2" value="1901" />
+        </block>
+
+        <block name="CaveCntSportsBag02Red">
+            <property name="Extends" value="CaveCntSportsBag02" />
+            <property name="CustomIconTint" value="793B3E" />
+            <property name="TintColor" value="793B3E" />
+            <property name="SortOrder2" value="1902" />
+        </block>
+
+        <block name="CaveCntSportsBag02Orange">
+            <property name="Extends" value="CaveCntSportsBag02" />
+            <property name="CustomIconTint" value="785D3A" />
+            <property name="TintColor" value="785D3A" />
+            <property name="SortOrder2" value="1903" />
+        </block>
+
+        <block name="CaveCntSportsBag02Yellow">
+            <property name="Extends" value="CaveCntSportsBag02" />
+            <property name="CustomIconTint" value="78783A" />
+            <property name="TintColor" value="78783A" />
+            <property name="SortOrder2" value="1904" />
+        </block>
+
+        <block name="CaveCntSportsBag02Green">
+            <property name="Extends" value="CaveCntSportsBag02" />
+            <property name="CustomIconTint" value="41783A" />
+            <property name="TintColor" value="41783A" />
+            <property name="SortOrder2" value="1905" />
+        </block>
+
+        <block name="CaveCntSportsBag02Blue">
+            <property name="Extends" value="CaveCntSportsBag02" />
+            <property name="CustomIconTint" value="276182" />
+            <property name="TintColor" value="276182" />
+            <property name="SortOrder2" value="1906" />
+        </block>
+
+        <block name="CaveCntSportsBag02Purple">
+            <property name="Extends" value="CaveCntSportsBag02" />
+            <property name="CustomIconTint" value="574C82" />
+            <property name="TintColor" value="574C82" />
+            <property name="SortOrder2" value="1907" />
+        </block>
+
+        <block name="CaveCntSportsBag02Pink">
+            <property name="Extends" value="CaveCntSportsBag02" />
+            <property name="CustomIconTint" value="8F6296" />
+            <property name="TintColor" value="8F6296" />
+            <property name="SortOrder2" value="1910" />
+        </block>
+
+        <block name="CaveCntMilitaryGoodsA">
+            <property name="Extends" value="cntMilitaryGoodsA" />
+            <property name="LootList" value="caveMilitaryGoods" />
+        </block>
+
+        <block name="CaveCntMilitaryGoodsB">
+            <property name="Extends" value="CaveCntMilitaryGoodsA" />
+            <property name="CreativeMode" value="Dev" />
+            <property name="Model" value="Entities/Commercial/militaryGoodsBPrefab" />
+            <property name="ModelOffset" value="0,0,0" />
+            <property name="SortOrder2" value="0061" />
+        </block>
+
+        <block name="CaveCntMilitaryGoodsC">
+            <property name="Extends" value="CaveCntMilitaryGoodsA" />
+            <property name="CreativeMode" value="Dev" />
+            <property name="Model" value="Entities/Commercial/militaryGoodsCPrefab" />
+            <property name="SortOrder2" value="0062" />
+        </block>
+
+        <block name="CaveCntMilitaryGoodsD">
+            <property name="Extends" value="CaveCntMilitaryGoodsA" />
+            <property name="CreativeMode" value="Dev" />
+            <property name="Model" value="Entities/Commercial/militaryGoodsDPrefab" />
+            <property name="SortOrder2" value="0063" />
+        </block>
+
+
     </append>
 </configs>
