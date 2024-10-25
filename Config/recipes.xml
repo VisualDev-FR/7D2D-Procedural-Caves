@@ -101,7 +101,7 @@
         </recipe>
 
         <!-- collections -->
-        <recipe name="medalsCollection" count="1" craft_time="180" craft_exp_gain="1000" always_unlocked="true">
+        <recipe name="medals_collection" count="1" craft_time="180" craft_exp_gain="1000" always_unlocked="true">
             <ingredient name="medal_01" count="1" />
             <ingredient name="medal_02" count="1" />
             <ingredient name="medal_03" count="1" />
@@ -109,7 +109,7 @@
             <ingredient name="medal_05" count="1" />
         </recipe>
 
-        <recipe name="crystalCollection" count="1" craft_time="180" craft_exp_gain="1000" always_unlocked="true">
+        <recipe name="crystals_collection" count="1" craft_time="180" craft_exp_gain="1000" always_unlocked="true">
             <ingredient name="crystal_01" count="1" />
             <ingredient name="crystal_02" count="1" />
             <ingredient name="crystal_03" count="1" />
@@ -117,12 +117,36 @@
             <ingredient name="crystal_05" count="1" />
         </recipe>
 
-        <recipe name="pirateCollection" count="1" craft_time="180" craft_exp_gain="1000" always_unlocked="true">
+        <recipe name="pirate_collection" count="1" craft_time="180" craft_exp_gain="1000" always_unlocked="true">
             <ingredient name="pirateTreasure_01" count="1" />
             <ingredient name="pirateTreasure_02" count="1" />
             <ingredient name="pirateTreasure_03" count="1" />
             <ingredient name="pirateTreasure_04" count="1" />
             <ingredient name="pirateTreasure_05" count="1" />
+        </recipe>
+
+        <recipe name="army_medals_collection" count="1" craft_time="180" craft_exp_gain="1000" always_unlocked="true">
+            <ingredient name="army_medals_01" count="5" />
+            <ingredient name="army_medals_02" count="5" />
+            <ingredient name="army_medals_03" count="5" />
+            <ingredient name="army_medals_04" count="5" />
+            <ingredient name="army_medals_05" count="5" />
+        </recipe>
+
+        <recipe name="jewels_collection" count="1" craft_time="180" craft_exp_gain="1000" always_unlocked="true">
+            <ingredient name="jewel_01" count="5" />
+            <ingredient name="jewel_02" count="5" />
+            <ingredient name="jewel_03" count="5" />
+            <ingredient name="jewel_04" count="5" />
+            <ingredient name="jewel_05" count="5" />
+        </recipe>
+
+        <recipe name="fossils_collection" count="1" craft_time="180" craft_exp_gain="1000" always_unlocked="true">
+            <ingredient name="fossil_01" count="5" />
+            <ingredient name="fossil_02" count="5" />
+            <ingredient name="fossil_03" count="5" />
+            <ingredient name="fossil_04" count="5" />
+            <ingredient name="fossil_05" count="5" />
         </recipe>
 
     </append>

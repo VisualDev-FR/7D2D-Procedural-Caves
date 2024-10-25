@@ -62,3 +62,23 @@ xuiCavePreviewDesc,Switch between vanilla preview and cave preview,Affiche l'ape
 xuiCavePreview,Preview type,Type d'aperçu
 xuiTerrainOffsetDesc,increase vanilla terrain height,Augmente la profondeur de base du terrain
 xuiTerrainOffset,Terrain offset,Décalage du terrain
+crystals_collection,Rare Gems collection,Collection de pierre précieuses
+crystal_01,Rubis,Rubis
+crystal_02,Amethyst,Améthyste
+crystal_03,Amber,Ambre
+crystal_04,Emerald,Emeraude
+crystal_05,Spahir,Saphir
+raw_crystal_01,Raw Rubis,Rubis brut
+raw_crystal_02,Raw Amethyst,Améthyste brut
+raw_crystal_03,Raw Amber,Ambre brut
+raw_crystal_04,Raw Emerald,Emeraude brut
+raw_crystal_05,Raw Spahir,Saphir brut
+nugget_01,Rubis nugget,Minerais de Rubis
+nugget_02,Amethyst nugget,Minerais d'Améthyste
+nugget_03,Amber nugget,Minerais d'Ambre
+nugget_04,Emerald nugget,Minerais d'Emeraude
+nugget_05,Spahir nugget,Minerais de Saphir
+the_caver_guide,The Caver's Guide,Le guide du spéléologue
+aa_battery,1.5V AA Battery,Pile AA 1.5V
+aa_battery_pack_2,1.5V AA Battery box,Boite de 2 piles AA 1.5V
+aa_battery_pack_4,1.5V AA Battery box,Boite de 4 piles AA 1.5V
