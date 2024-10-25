@@ -1,91 +1,77 @@
 ﻿<configs>
-	<append xpath="/blocks">
+    <append xpath="/blocks">
 
-		<block name="caveAir">
-			<property name="Tags" value="air"/>
-			<property name="CreativeMode" value="None"/>
-			<property name="Extends" value="air"/>
-			<property name="StabilityFull" value="true"/>
-			<property name="Shape" value="Invisible"/>
-			<property name="StabilitySupport" value="true"/>
-			<property name="stability_glue" value="10000"/>
-			<property name="MaxDamage" value="50000"/>
-			<property name="Collide" value="false"/>
-			<property name="CanDestroy" value="false" />
-			<property name="Material" value="McaveAir"/>
-			<drop event="Destroy" count="0"/>
-		</block>
+        <block name="caveAir">
+            <property name="Tags" value="air" />
+            <property name="CreativeMode" value="None" />
+            <property name="Extends" value="air" />
+            <property name="StabilityFull" value="true" />
+            <property name="Shape" value="Invisible" />
+            <property name="StabilitySupport" value="true" />
+            <property name="stability_glue" value="10000" />
+            <property name="MaxDamage" value="50000" />
+            <property name="Collide" value="false" />
+            <property name="CanDestroy" value="false" />
+            <property name="Material" value="McaveAir" />
+            <drop event="Destroy" count="0" />
+        </block>
 
-		<block name="cntCaveFloor">
-			<property name="Extends" value="cntWastelandRandomLootHelper"/>
-			<property name="CreativeMode" value="Dev"/>
-		</block>
+        <!-- decoration -->
+        <block name="cntCaveFloor">
+            <property name="Extends" value="cntWastelandRandomLootHelper" />
+            <property name="CreativeMode" value="Dev" />
+        </block>
 
-		<block name="cntCaveFloorFlat">
-			<property name="Extends" value="cntWastelandRandomLootHelper"/>
-			<property name="CreativeMode" value="Dev"/>
-		</block>
+        <block name="cntCaveFloorFlat">
+            <property name="Extends" value="cntWastelandRandomLootHelper" />
+            <property name="CreativeMode" value="Dev" />
+        </block>
 
-		<block name="cntCaveCeiling">
-			<property name="Extends" value="cntWastelandRandomLootHelper"/>
-			<property name="CreativeMode" value="Dev"/>
-		</block>
+        <block name="cntCaveCeiling">
+            <property name="Extends" value="cntWastelandRandomLootHelper" />
+            <property name="CreativeMode" value="Dev" />
+        </block>
 
-		<block name="cntDeepCaveFloor">
-			<property name="Extends" value="cntWastelandRandomLootHelper"/>
-			<property name="CreativeMode" value="Dev"/>
-		</block>
+        <!-- terrain loot -->
+        <block name="terrStoneCave">
+            <property name="Extends" value="terrStone" />
 
-		<!-- A20 Stalactites / stalagmites -->
+            <drop event="Harvest" tag="oreWoodHarvest" name="nugget_01" prob=".005" count="1" />
+            <drop event="Harvest" tag="oreWoodHarvest" name="nugget_04" prob=".005" count="1" />
+            <drop event="Harvest" tag="oreWoodHarvest" name="nugget_05" prob=".005" count="1" />
 
-		<!-- <block name="stalactite01">
-			<property name="Material" value="MoreStone"/>
-			<property name="Shape" value="Ext3dModel"/>
-			<property name="Texture" value="293"/>
-			<property name="Mesh" value="models"/>
-			<property name="ImposterDontBlock" value="true"/>
-			<property name="Collide" value="movement,melee"/>
-			<property name="Model" value="OutdoorDecor/stalactite01" param1="main_mesh"/>
-			<drop event="Harvest" name="resourcePotassiumNitratePowder" count="21" tag="oreWoodHarvest"/>
-			<drop event="Destroy" count="0"/>
-			<drop event="Fall" name="resourcePotassiumNitratePowder" count="21" prob="0.4" stick_chance="0"/>
-			<property name="FilterTags" value="MC_outdoor,SC_terrain"/>
-		</block>
+            <drop event="Harvest" tag="oreWoodHarvest" name="fossil_01" prob=".005" count="1" />
+            <drop event="Harvest" tag="oreWoodHarvest" name="fossil_02" prob=".005" count="1" />
+            <drop event="Harvest" tag="oreWoodHarvest" name="fossil_03" prob=".005" count="1" />
+        </block>
 
-		<block name="stalactite02">
-			<property name="Extends" value="stalactite01"/>
-			<property name="Model" value="OutdoorDecor/stalactite02" param1="main_mesh"/>
-		</block>
+        <block name="terrSnowCave">
+            <property name="Extends" value="terrSnow" />
 
-		<block name="stalactite03">
-			<property name="Extends" value="stalactite01"/>
-			<property name="Model" value="OutdoorDecor/stalactite03" param1="main_mesh"/>
-		</block>
+            <drop event="Harvest" tag="oreWoodHarvest" name="nugget_01" prob=".005" count="1" />
+            <drop event="Harvest" tag="oreWoodHarvest" name="nugget_02" prob=".010" count="1" />
+            <drop event="Harvest" tag="oreWoodHarvest" name="nugget_04" prob=".005" count="1" />
+            <drop event="Harvest" tag="oreWoodHarvest" name="nugget_05" prob=".005" count="1" />
 
-		<block name="stalactite04">
-			<property name="Extends" value="stalactite01"/>
-			<property name="Model" value="OutdoorDecor/stalactite04" param1="main_mesh"/>
-		</block>
+            <drop event="Harvest" tag="oreWoodHarvest" name="fossil_01" prob=".005" count="1" />
+            <drop event="Harvest" tag="oreWoodHarvest" name="fossil_02" prob=".005" count="1" />
+            <drop event="Harvest" tag="oreWoodHarvest" name="fossil_03" prob=".005" count="1" />
+            <drop event="Harvest" tag="oreWoodHarvest" name="fossil_05" prob=".005" count="1" />
+        </block>
 
-		<block name="stalagmite01">
-			<property name="Extends" value="stalactite01"/>
-			<property name="Texture" value="1"/>
-			<property name="Model" value="OutdoorDecor/stalagmite01" param1="main_mesh"/>
-		</block>
+        <block name="terrSandStoneCave">
+            <property name="Extends" value="terrSandStone" />
 
-		<block name="stalagmite02">
-			<property name="Extends" value="stalagmite01"/>
-			<property name="Model" value="OutdoorDecor/stalagmite02" param1="main_mesh"/>
-		</block>
+            <drop event="Harvest" tag="oreWoodHarvest" name="nugget_01" prob=".005" count="1" />
+            <drop event="Harvest" tag="oreWoodHarvest" name="nugget_03" prob=".010" count="1" />
+            <drop event="Harvest" tag="oreWoodHarvest" name="nugget_04" prob=".005" count="1" />
+            <drop event="Harvest" tag="oreWoodHarvest" name="nugget_05" prob=".005" count="1" />
 
-		<block name="stalagmite03">
-			<property name="Extends" value="stalagmite01"/>
-			<property name="Model" value="OutdoorDecor/stalagmite03" param1="main_mesh"/>
-		</block>
+            <drop event="Harvest" tag="oreWoodHarvest" name="fossil_01" prob=".005" count="1" />
+            <drop event="Harvest" tag="oreWoodHarvest" name="fossil_02" prob=".005" count="1" />
+            <drop event="Harvest" tag="oreWoodHarvest" name="fossil_03" prob=".005" count="1" />
+            <drop event="Harvest" tag="oreWoodHarvest" name="fossil_04" prob=".005" count="1" />
+        </block>
 
-		<block name="stalagmite04">
-			<property name="Extends" value="stalagmite01"/>
-			<property name="Model" value="OutdoorDecor/stalagmite04" param1="main_mesh"/>
-		</block> -->
-	</append>
+    </append>
 </configs>

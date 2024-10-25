@@ -208,25 +208,28 @@ public class CaveGenerator
         switch (biomeID)
         {
             case 1:
-                replacementBlockValue = Block.GetBlockByName("terrSnow").ToBlockValue();
+                replacementBlockValue = Block.GetBlockByName("terrSnowCave").ToBlockValue();
                 break;
 
             case 5:
-                replacementBlockValue = Block.GetBlockByName("terrSandStone").ToBlockValue();
+                replacementBlockValue = Block.GetBlockByName("terrSandStoneCave").ToBlockValue();
                 break;
 
             default:
-                replacementBlockValue = Block.GetBlockByName("terrStone").ToBlockValue();
+                replacementBlockValue = Block.GetBlockByName("terrStoneCave").ToBlockValue();
                 break;
         }
 
         switch (currentBlockValue.Block.blockName)
         {
+            case "terrStone":
             case "terrDirt":
             case "terrDestroyedStone":
             case "terrDestroyedWoodDebris":
             case "terrGravel":
             case "terrSand":
+            case "terrSandStone":
+            case "terrSnow":
             case "terrAsphalt":
             case "terrConcrete":
             case "terrOreIron":
