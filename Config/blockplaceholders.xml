@@ -1,4 +1,4 @@
-﻿<configs>
+<configs>
   <append xpath="/blockplaceholders">
 
     <!-- ALL BIOMES -->
@@ -255,45 +255,6 @@
       <block name="cntBarrelPlasticQuadB" prob=".0001"/>
       <block name="cntBarrelWhiteQuadA" prob=".0001"/>
       <block name="cntBarrelWhiteQuadB" prob=".0001"/>
-
-      <block name="cntCampingTentDomeRainCoverWhite" prob=".00001"/>
-      <block name="cntCampingTentDomeWhite" prob=".00001"/>
-      <block name="cntCampingTentDomeDamagedWhite" prob=".00001"/>
-      <block name="cntCampingTentAngularRainCoverWhite" prob=".00001"/>
-      <block name="cntCampingTentAngularWhite" prob=".00001"/>
-      <block name="cntCampingTentAngularDamagedWhite" prob=".00001"/>
-      <block name="cntCampingTentDomeRainCoverRed" prob=".00001"/>
-      <block name="cntCampingTentDomeRed" prob=".00001"/>
-      <block name="cntCampingTentDomeDamagedRed" prob=".00001"/>
-      <block name="cntCampingTentAngularRainCoverRed" prob=".00001"/>
-      <block name="cntCampingTentAngularRed" prob=".00001"/>
-      <block name="cntCampingTentAngularDamagedRed" prob=".00001"/>
-      <block name="cntCampingTentDomeRainCoverOrange" prob=".00001"/>
-      <block name="cntCampingTentDomeOrange" prob=".00001"/>
-      <block name="cntCampingTentDomeDamagedOrange" prob=".00001"/>
-      <block name="cntCampingTentAngularRainCoverOrange" prob=".00001"/>
-      <block name="cntCampingTentAngularOrange" prob=".00001"/>
-      <block name="cntCampingTentAngularDamagedOrange" prob=".00001"/>
-      <block name="cntCampingTentDomeRainCoverBlue" prob=".00001"/>
-      <block name="cntCampingTentDomeBlue" prob=".00001"/>
-      <block name="cntCampingTentDomeDamagedBlue" prob=".00001"/>
-      <block name="cntCampingTentAngularRainCoverBlue" prob=".00001"/>
-      <block name="cntCampingTentAngularBlue" prob=".00001"/>
-      <block name="cntCampingTentAngularDamagedBlue" prob=".00001"/>
-      <block name="cntCampingTentDomeRainCoverBlack" prob=".00001"/>
-      <block name="cntCampingTentDomeBlack" prob=".00001"/>
-      <block name="cntCampingTentDomeDamagedBlack" prob=".00001"/>
-      <block name="cntCampingTentAngularRainCoverBlack" prob=".00001"/>
-      <block name="cntCampingTentAngularBlack" prob=".00001"/>
-      <block name="cntCampingTentAngularDamagedBlack" prob=".00001"/>
-      <block name="cntCampingTentDomeRainCoverArmyGreen" prob=".00001"/>
-      <block name="cntCampingTentDomeArmyGreen" prob=".00001"/>
-      <block name="cntCampingTentDomeDamagedArmyGreen" prob=".00001"/>
-      <block name="cntCampingTentAngularRainCoverArmyGreen" prob=".00001"/>
-      <block name="cntCampingTentAngularArmyGreen" prob=".00001"/>
-      <block name="cntCampingTentAngularDamagedArmyGreen" prob=".00001"/>
-      <block name="cntCampingTentDomeRandomHelper" prob=".00001"/>
-      <block name="cntCampingTentAngularRandomHelper" prob=".00001"/>
 
     </placeholder>
 
