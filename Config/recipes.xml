@@ -1,62 +1,6 @@
 <configs>
 
-    <remove xpath="/recipes/recipe[@name='meleeToolFlashlight02']" />
-    <remove xpath="/recipes/recipe[@name='modArmorHelmetLight']" />
-    <remove xpath="/recipes/recipe[@name='modGunFlashlight']" />
-
     <append xpath="/recipes">
-
-        <!-- tiered lights -->
-        <recipe name="meleeToolFlashlight02" count="1" craft_area="workbench" tags="workbenchCrafting" always_unlocked="true">
-            <ingredient name="resourceForgedIron" count="1" />
-            <ingredient name="resourceElectricParts" count="10" />
-            <ingredient name="resourceDuctTape" count="4" />
-            <ingredient name="resourceScrapPolymers" count="4" />
-
-            <ingredient name="resourceLegendaryParts" count="0" />
-            <effect_group>
-                <passive_effect name="CraftingIngredientCount" level="2,6" operation="perc_add" value="1,5" tags="resourceForgedIron,resourceElectricParts,resourceDuctTape,resourceScrapPolymers" />
-                <passive_effect name="CraftingIngredientCount" level="6" operation="base_add" value="1" tags="resourceLegendaryParts" />
-            </effect_group>
-        </recipe>
-
-        <recipe name="modArmorHelmetLight" count="1" craft_area="workbench" tags="workbenchCrafting" always_unlocked="true">
-            <ingredient name="resourceForgedSteel" count="5" />
-            <ingredient name="resourceScrapPolymers" count="2" />
-            <ingredient name="resourceDuctTape" count="2" />
-            <ingredient name="resourceSewingKit" count="1" />
-            <ingredient name="meleeToolFlashlight02" count="1" />
-
-            <ingredient name="resourceLegendaryParts" count="0" />
-            <effect_group>
-                <passive_effect name="CraftingIngredientCount" level="2,6" operation="perc_add" value="1,5" tags="resourceSewingKit,resourceDuctTape,resourceForgedSteel,resourceScrapPolymers" />
-                <passive_effect name="CraftingIngredientCount" level="6" operation="base_add" value="1" tags="resourceLegendaryParts" />
-            </effect_group>
-        </recipe>
-
-        <recipe name="modGunFlashlight" count="1" craft_area="workbench" tags="workbenchCrafting" always_unlocked="true">
-            <ingredient name="resourceScrapPolymers" count="10" />
-            <ingredient name="resourceGlue" count="2" />
-            <ingredient name="resourceElectricParts" count="5" />
-            <ingredient name="meleeToolFlashlight02" count="1" />
-
-            <ingredient name="resourceLegendaryParts" count="0" />
-            <effect_group>
-                <passive_effect name="CraftingIngredientCount" level="2,6" operation="perc_add" value="1,5" tags="resourceScrapPolymers,resourceGlue,resourceElectricParts" />
-                <passive_effect name="CraftingIngredientCount" level="6" operation="base_add" value="1" tags="resourceLegendaryParts" />
-            </effect_group>
-        </recipe>
-
-        <!-- aa_battery -->
-        <recipe name="aa_battery" count="5" craft_area="chemistryStation" tags="chemStationCrafting" craft_time="20" craft_exp_gain="500" always_unlocked="true">
-            <ingredient name="resourceScrapLead" count="10" />
-            <ingredient name="resourceAcid" count="1" />
-            <ingredient name="resourceScrapPolymers" count="10" />
-            <ingredient name="resourceLegendaryParts" count="0" />
-            <effect_group>
-                <passive_effect name="CraftingIngredientCount" level="6" operation="base_add" value="1" tags="resourceLegendaryParts" />
-            </effect_group>
-        </recipe>
 
         <!-- raw crystals -->
         <recipe name="raw_crystal_01" count="1" craft_area="workbench" tags="workbenchCrafting" craft_time="60" craft_exp_gain="500" always_unlocked="true">

@@ -6,57 +6,58 @@
 <configs>
     <append xpath="/lootcontainers">
 
+        <lootgroup name="caveGroupWoodenChest" count="2">
+            <item count="1" group="groupJunk" loot_prob_template="high" />
+            <item count="1" group="dyes" loot_prob_template="low" />
+            <item count="1" name="meleeToolPaintTool" loot_prob_template="veryLow" />
+            <item count="1" name="aa_battery" loot_prob_template="high" />
+        </lootgroup>
+
         <!-- woodenChest -->
         <lootcontainer name="caveWoodenChest" size="6,2" sound_open="UseActions/open_chest" sound_close="UseActions/close_chest" loot_quality_template="qualBaseTemplate" destroy_on_close="empty">
             <item group="caveGroupWoodenChest" />
         </lootcontainer>
 
-        <lootgroup name="caveGroupWoodenChest" count="2">
-            <item count="1" group="groupJunk" loot_prob_template="high" />
-            <item count="1" group="dyes" loot_prob_template="low" />
-            <item count="1" name="meleeToolPaintTool" loot_prob_template="veryLow" />
-        </lootgroup>
-
         <!-- MilitaryChest -->
-        <lootcontainer name="caveMilitaryChest" size="6,2" sound_open="UseActions/open_chest" sound_close="UseActions/close_chest" loot_quality_template="qualBaseTemplate" destroy_on_close="empty">
-            <item group="caveGroupMilitaryFootlocker" />
-        </lootcontainer>
-
         <lootgroup name="caveGroupMilitaryFootlocker" count="all">
             <item group="groupMilitaryFootlocker01" count="2" />
             <item group="groupMilitaryFootlocker02" loot_prob_template="med" force_prob="true" />
         </lootgroup>
 
-        <!-- oldWestChest -->
-        <lootcontainer name="caveOldWestChest" size="6,2" sound_open="UseActions/open_chest" sound_close="UseActions/close_chest" loot_quality_template="qualBaseTemplate" destroy_on_close="empty">
-            <item group="caveGroupOldWestChest" />
+        <lootcontainer name="caveMilitaryChest" size="6,2" sound_open="UseActions/open_chest" sound_close="UseActions/close_chest" loot_quality_template="qualBaseTemplate" destroy_on_close="empty">
+            <item group="caveGroupMilitaryFootlocker" />
         </lootcontainer>
 
+        <!-- oldWestChest -->
         <lootgroup name="caveGroupOldWestChest" count="all">
             <item group="groupOldWestChest01" count="1" />
             <item group="groupOldWestChest02" loot_prob_template="veryLow" force_prob="true" />
         </lootgroup>
 
-        <!-- rottenChest -->
-        <lootcontainer name="caveRottenChest" size="6,2" sound_open="UseActions/open_chest" sound_close="UseActions/close_chest" loot_quality_template="qualBaseTemplate" destroy_on_close="empty">
-            <item group="caveGroupRottenChest" />
+        <lootcontainer name="caveOldWestChest" size="6,2" sound_open="UseActions/open_chest" sound_close="UseActions/close_chest" loot_quality_template="qualBaseTemplate" destroy_on_close="empty">
+            <item group="caveGroupOldWestChest" />
         </lootcontainer>
 
+        <!-- rottenChest -->
         <lootgroup name="caveGroupRottenChest" count="all">
             <item group="groupRottenChest01" count="2" />
             <item group="groupRottenChest02" loot_prob_template="med" force_prob="true" />
             <item group="groupRottenChest03" loot_prob_template="veryLow" force_prob="true" />
         </lootgroup>
 
-        <!-- cntBackPack -->
-        <lootcontainer name="caveCntBackpack" count="1" size="6,2" sound_open="UseActions/open_backpack" sound_close="UseActions/close_backpack" open_time="1.5" loot_quality_template="qualPrimitiveItemsTemplate" destroy_on_close="empty">
-            <item group="caveGroupBackpacks" />
+        <lootcontainer name="caveRottenChest" size="6,2" sound_open="UseActions/open_chest" sound_close="UseActions/close_chest" loot_quality_template="qualBaseTemplate" destroy_on_close="empty">
+            <item group="caveGroupRottenChest" />
         </lootcontainer>
 
+        <!-- cntBackPack -->
         <lootgroup name="caveGroupBackpacks" count="all">
             <item group="groupBackpacks01" count="1" />
             <item group="groupBackpacks02" loot_prob_template="medLow" force_prob="true" />
         </lootgroup>
+
+        <lootcontainer name="caveCntBackpack" count="1" size="6,2" sound_open="UseActions/open_backpack" sound_close="UseActions/close_backpack" open_time="1.5" loot_quality_template="qualPrimitiveItemsTemplate" destroy_on_close="empty">
+            <item group="caveGroupBackpacks" />
+        </lootcontainer>
 
         <!-- militaryGoods -->
         <lootcontainer name="militaryGoods" size="6,2" sound_open="UseActions/open_garbage" sound_close="UseActions/close_garbage" loot_quality_template="qualBaseTemplate" destroy_on_close="empty">

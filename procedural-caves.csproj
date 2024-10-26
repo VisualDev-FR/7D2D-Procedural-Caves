@@ -98,12 +98,6 @@
     <Compile Include="Harmony\H_WorldEnvironement.cs" />
     <Compile Include="Harmony\ModApi.cs" />
 
-    <!-- MinEventActions -->
-    <Compile Include="Scripts/Actions/MinEventActionDecayHeadLight.cs" />
-    <Compile Include="Scripts/Actions/MinEventActionDecayFlashLight.cs" />
-    <Compile Include="Scripts/Actions/MinEventActionDecayGunLight.cs" />
-    <Compile Include="Scripts/Actions/MinEventActionDecayLightAbstract.cs" />
-
     <!-- CaveGeneration -->
     <Compile Include="Scripts\CaveGeneration\CaveBuilder.cs" />
     <Compile Include="Scripts\CaveGeneration\CavePrefabChecker.cs" />
