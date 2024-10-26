@@ -1,0 +1,7 @@
+<configs>
+    <append xpath="/Videos">
+
+        <video name="caveMenuBackground01" path="caveBackground01.mp4" defaultSubtitleDuration="0" />
+
+    </append>
+</configs>

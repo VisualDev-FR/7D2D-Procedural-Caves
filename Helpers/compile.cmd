@@ -27,6 +27,7 @@ xcopy ModInfo.xml %MOD_NAME%\ > nul
 if "%1" == ".\procedural-caves.csproj" (
     xcopy UIAtlases %MOD_NAME%\UIAtlases\ /s > nul
     xcopy Resources %MOD_NAME%\Resources\ /s > nul
+    xcopy StreamingAssets %MOD_NAME%\StreamingAssets\ /s > nul
     xcopy Config %MOD_NAME%\Config\ /s > nul
 )
 

@@ -71,8 +71,14 @@
       <HintPath>$(PATH_7D2D)\7DaysToDie_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
+
     <Reference Include="UnityEngine.CoreModule">
       <HintPath>$(PATH_7D2D)\7DaysToDie_Data\Managed\mscorlib.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+
+    <Reference Include="UnityEngine.VideoModule">
+      <HintPath>$(PATH_7D2D)\7DaysToDie_Data\Managed\UnityEngine.VideoModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
 
@@ -80,6 +86,7 @@
       <HintPath>$(PATH_7D2D)\7DaysToDie_Data\Managed\InControl.dll</HintPath>
       <Private>False</Private>
     </Reference>
+
   </ItemGroup>
   <ItemGroup>
     <!-- Assembly info -->
@@ -96,6 +103,7 @@
     <Compile Include="Harmony\H_SpawnManagerBiomes.cs" />
     <Compile Include="Harmony\H_WorldBuilder.cs" />
     <Compile Include="Harmony\H_WorldEnvironement.cs" />
+    <Compile Include="Harmony\H_XUiC_MainMenu.cs" />
     <Compile Include="Harmony\ModApi.cs" />
 
     <!-- MinEventActions -->

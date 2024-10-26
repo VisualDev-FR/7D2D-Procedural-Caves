@@ -1,5 +1,6 @@
 <configs>
 
+    <!-- rwg options -->
     <remove xpath="/windows/window[@name='worldGeneration']//grid/rect[16]" />
     <remove xpath="/windows/window[@name='worldGeneration']//grid/rect[14]" />
     <remove xpath="/windows/window[@name='worldGeneration']//grid/rect[13]" />
@@ -49,4 +50,22 @@
         </rect>
 
     </insertAfter>
+
+    <!-- main menu background -->
+    <remove xpath="/windows/window[@name='menuBackground']" />
+    <append xpath="/windows">
+
+        <window name="menuBackground" controller="VideoPlayer" pos="0,0" depth="-3" cursor_area="false">
+            <panel name="bgPanel" backgroundspritename="ui_game_panel_header" backgroundcolor="[black]" borderthickness="0"
+                anchor_left="#cam,0,0" anchor_right="#cam,1,0" anchor_bottom="#cam,0,0" anchor_top="#cam,1,0" pivot="center" style="press" gamepad_selectable="false">
+                <sprite name="videoBackground" sprite="menu_empty" type="sliced" color="[black]" anchor_left="#cam,0,-10" anchor_right="#cam,1,10" anchor_bottom="#cam,0,-10" anchor_top="#cam,1,10" />
+                <texture name="videoTexture" pivot="center" anchor_left="#cam,0,0" anchor_right="#cam,1,0" anchor_bottom="#cam,0,0" anchor_top="#cam,1,0" />
+            </panel>
+
+            <sprite name="skipPrompt" depth="25" sprite="ui_game_panel_header" color="[black]" anchor_left="#cam,1,-200" anchor_right="#cam,1,0" anchor_bottom="#cam,0,-0" anchor_top="#cam,0,60">
+                <label name="lblSkip" depth="30" text_key="Skip" justify="left" pivot="left" font_size="32" width="180" height="100" pos="20,-30" parse_actions="true" actions_default_format="( ### )" />
+            </sprite>
+        </window>
+
+    </append>
 </configs>
