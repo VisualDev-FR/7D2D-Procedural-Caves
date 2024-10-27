@@ -273,12 +273,6 @@
       <block name="plantHangingIvy01" prob=".005" />
       <block name="plantHangingIvy02" prob=".005" />
 
-      <block name="corpseHangingRope1White" prob=".0001" />
-      <block name="corpseHangingRope1Brown" prob=".0001" />
-      <block name="corpseHangingRope1Red" prob=".0001" />
-      <block name="corpseHangingRope1Green" prob=".0001" />
-      <block name="corpseHangingRope1Blue" prob=".0001" />
-      <block name="corpseHangingRope1Grey" prob=".0001" />
     </placeholder>
 
     <placeholder name="cntCaveWall">
