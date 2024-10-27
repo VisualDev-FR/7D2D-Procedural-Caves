@@ -22,13 +22,13 @@
             <block name="stalagmite03" prob=".001" />
             <block name="stalagmite04" prob=".001" />
 
-            <block name="rock01" prob=".01" />
-            <block name="rock02" prob=".01" />
-            <block name="rock03" prob=".01" />
-            <block name="rock04" prob=".01" />
-            <block name="rock05" prob=".01" />
-            <block name="rock06" prob=".01" />
-            <block name="rock07" prob=".01" />
+            <block name="rock01" prob=".005" />
+            <block name="rock02" prob=".005" />
+            <block name="rock03" prob=".005" />
+            <block name="rock04" prob=".005" />
+            <block name="rock05" prob=".005" />
+            <block name="rock06" prob=".005" />
+            <block name="rock07" prob=".005" />
 
             <!-- Plants -->
             <block name="treePlainsTree" prob=".001" />
@@ -67,93 +67,105 @@
 
         <placeholder name="cntCaveFloorFlat">
 
-            <block name="caveAir" prob="0.3" />
+            <block name="caveAir" prob=".1" />
 
             <!-- Mineral -->
             <block name="oreIronBoulder" prob=".001" />
             <block name="oreLeadBoulder" prob=".001" />
             <block name="oreCoalBoulder" prob=".001" />
-            <block name="orePotassiumBoulder" prob=".001" />
             <block name="oreShaleBoulder" prob=".001" />
+            <block name="orePotassiumBoulder" prob=".001" />
 
-            <block name="resourceRock01" prob=".001" />
-            <block name="resourceRock02" prob=".001" />
-            <block name="resourceRock03" prob=".001" />
+            <block name="resourceRock01" prob=".002" />
+            <block name="resourceRock02" prob=".002" />
+            <block name="resourceRock03" prob=".002" />
+
+            <!-- Plants -->
+            <block name="treePlainsTree" prob=".001" />
+            <block name="plantShrubDead" prob=".001" />
+            <block name="plantShrub" prob=".001" />
+            <block name="mushroom01" prob=".001" />
+            <block name="mushroom02" prob=".001" />
+            <block name="treeDeadPineLeaf" prob=".001" />
+            <block name="plantedTreeGrassSeed01" prob=".001" />
+            <block name="treeBrownGrassDiagonal" prob=".001" />
+            <block name="treeTallGrassDiagonal" prob=".001" />
+            <block name="treeForestGrassDiagonal" prob=".001" />
+            <block name="treeGreenBrownGrassDiagonal" prob=".001" />
+            <block name="treeDesertShrub" prob=".01" />
 
             <!-- Lootable -->
-            <block name="cntTrashPile01" prob=".0001" />
-            <block name="cntTrashPile02" prob=".0001" />
-            <block name="cntTrashPile03" prob=".0001" />
-            <block name="cntTrashPile04" prob=".0001" />
-            <block name="cntTrashPile05" prob=".0001" />
-            <block name="cntTrashPile06" prob=".0001" />
-            <block name="cntTrashPile07" prob=".0001" />
-            <block name="cntTrashPile08" prob=".0001" />
-            <block name="cntTrashPile09" prob=".0001" />
-            <block name="cntChemPileSmall" prob=".0001" />
             <block name="cntCollapsedCampfire" prob=".001" />
+            <block name="cntTrashPile01" prob=".001" />
+            <block name="cntTrashPile02" prob=".001" />
+            <block name="cntTrashPile03" prob=".001" />
+            <block name="cntTrashPile04" prob=".001" />
+            <block name="cntTrashPile05" prob=".001" />
+            <block name="cntTrashPile06" prob=".001" />
+            <block name="cntTrashPile07" prob=".001" />
+            <block name="cntTrashPile08" prob=".001" />
+            <block name="cntTrashPile09" prob=".001" />
+            <block name="cntFoodPileSmall" prob=".001" />
+            <block name="cntFoodPileMedium" prob=".001" />
+            <block name="cntFoodPileLarge" prob=".001" />
 
-            <block name="CaveCntBackpack01" prob=".0001" />
-            <block name="CaveCntBackpack03" prob=".0001" />
-            <block name="CaveCntDuffle01" prob=".0001" />
-            <block name="CaveCntPurse01" prob=".0001" />
+            <block name="CaveCntDuffle01" prob=".001" />
+            <block name="CaveCntPurse01" prob=".001" />
+            <block name="CaveCntBackpack01" prob=".001" />
+            <block name="CaveCntBackpack03" prob=".001" />
 
-            <block name="CaveCntSportsBag01" prob=".0001" />
-            <block name="CaveCntSportsBag01Red" prob=".0001" />
-            <block name="CaveCntSportsBag01Orange" prob=".0001" />
-            <block name="CaveCntSportsBag01Yellow" prob=".0001" />
-            <block name="CaveCntSportsBag01Green" prob=".0001" />
-            <block name="CaveCntSportsBag01Blue" prob=".0001" />
-            <block name="CaveCntSportsBag01Purple" prob=".0001" />
-            <block name="CaveCntSportsBag01Pink" prob=".0001" />
+            <block name="CaveCntSportsBag01" prob=".0007" />
+            <block name="CaveCntSportsBag01Red" prob=".0007" />
+            <block name="CaveCntSportsBag01Orange" prob=".0007" />
+            <block name="CaveCntSportsBag01Yellow" prob=".0007" />
+            <block name="CaveCntSportsBag01Green" prob=".0007" />
+            <block name="CaveCntSportsBag01Blue" prob=".0007" />
+            <block name="CaveCntSportsBag01Purple" prob=".0007" />
+            <block name="CaveCntSportsBag01Pink" prob=".0007" />
 
-            <block name="CaveCntSportsBag02" prob=".0001" />
-            <block name="CaveCntSportsBag02Brown" prob=".0001" />
-            <block name="CaveCntSportsBag02Red" prob=".0001" />
-            <block name="CaveCntSportsBag02Orange" prob=".0001" />
-            <block name="CaveCntSportsBag02Yellow" prob=".0001" />
-            <block name="CaveCntSportsBag02Green" prob=".0001" />
-            <block name="CaveCntSportsBag02Blue" prob=".0001" />
-            <block name="CaveCntSportsBag02Purple" prob=".0001" />
-            <block name="CaveCntSportsBag02Pink" prob=".0001" />
+            <block name="CaveCntSportsBag02" prob=".0007" />
+            <block name="CaveCntSportsBag02Brown" prob=".0007" />
+            <block name="CaveCntSportsBag02Red" prob=".0007" />
+            <block name="CaveCntSportsBag02Orange" prob=".0007" />
+            <block name="CaveCntSportsBag02Yellow" prob=".0007" />
+            <block name="CaveCntSportsBag02Green" prob=".0007" />
+            <block name="CaveCntSportsBag02Blue" prob=".0007" />
+            <block name="CaveCntSportsBag02Purple" prob=".0007" />
+            <block name="CaveCntSportsBag02Pink" prob=".0007" />
 
-            <block name="cntWeaponsBagSmall" prob=".0001" />
-            <block name="cntWeaponsBagLarge" prob=".0001" />
-            <block name="cntAmmoPileSmall" prob=".0001" />
-            <block name="cntAmmoPileMedium" prob=".0001" />
-            <block name="cntAmmoPileLarge" prob=".0001" />
-            <block name="CaveCntMilitaryGoodsA" prob=".00001" />
-            <block name="CaveCntMilitaryGoodsB" prob=".00001" />
-            <block name="CaveCntMilitaryGoodsC" prob=".00001" />
-            <block name="CaveCntMilitaryGoodsD" prob=".00001" />
+            <block name="cntAmmoPileSmall" prob=".002" />
+            <block name="cntAmmoPileMedium" prob=".001" />
+            <block name="cntWeaponsBagSmall" prob=".001" />
 
-            <block name="caveCntWoodenChestClosed" prob=".00001" />
-            <block name="caveCntWoodenChestMilitaryClosed" prob=".00001" />
-            <block name="caveCntOldWestChestClosed" prob=".00001" />
-            <block name="caveCntWoodenChestRottenClosed" prob=".00001" />
+            <block name="caveCntWoodenChestClosed" prob=".0007" />
+            <block name="caveCntWoodenChestMilitaryClosed" prob=".0007" />
+            <block name="caveCntOldWestChestClosed" prob=".0007" />
+            <block name="caveCntWoodenChestRottenClosed" prob=".0007" />
 
             <!-- Gore -->
+            <block name="goreBlockHumanCorpse" prob=".005" />
+            <block name="goreBlockHumanCorpse1" prob=".005" />
+            <block name="goreBlockHumanCorpse2" prob=".005" />
+            <block name="goreBlockHumanCorpse2Offset" prob=".005" />
+            <block name="goreBlockHumanCorpse3" prob=".005" />
+            <block name="goreBlockHumanBones" prob=".005" />
+            <block name="goreBlockAnimal" prob=".005" />
+
+            <!-- Other -->
+            <block name="graveStone01" prob=".001" />
+            <block name="graveStone02" prob=".001" />
+            <block name="graveStone03" prob=".001" />
+            <block name="graveStone04" prob=".001" />
+            <block name="graveStone05" prob=".001" />
+            <block name="graveStone06" prob=".001" />
+            <block name="graveStone07" prob=".001" />
+            <block name="graveStone08" prob=".001" />
+
             <block name="emberPileLightPOI1" prob=".001" />
             <block name="emberPileLightPOI2" prob=".001" />
             <block name="palletEmpty" prob=".001" />
             <block name="coneConstruction" prob=".001" />
             <block name="candleTableLight" prob=".001" />
-            <block name="goreBlockHumanCorpse" prob=".001" />
-            <block name="goreBlockHumanCorpse1" prob=".001" />
-            <block name="goreBlockHumanCorpse2" prob=".001" />
-            <block name="goreBlockHumanCorpse2Offset" prob=".001" />
-            <block name="goreBlockHumanCorpse3" prob=".001" />
-            <block name="goreBlockHumanBones" prob=".001" />
-            <block name="goreBlockAnimal" prob=".01" />
-
-            <block name="graveStone01" prob=".0001" />
-            <block name="graveStone02" prob=".0001" />
-            <block name="graveStone03" prob=".0001" />
-            <block name="graveStone04" prob=".0001" />
-            <block name="graveStone05" prob=".0001" />
-            <block name="graveStone06" prob=".0001" />
-            <block name="graveStone07" prob=".0001" />
-            <block name="graveStone08" prob=".0001" />
 
             <block name="driftwood" prob=".001" />
             <block name="driftwood2" prob=".001" />
@@ -171,6 +183,7 @@
             <block name="sandBagSingle04" prob=".001" />
             <block name="sandBagSingle05" prob=".001" />
 
+            <!-- Rubble -->
             <block name="rubbishDecor01" prob=".001" />
             <block name="rubbishDecor02" prob=".001" />
             <block name="rubbishDecor03" prob=".001" />
@@ -196,35 +209,26 @@
             <block name="rubblePileWoodBurntLarge" prob=".001" />
 
             <!-- Traps -->
-            <block name="trapSpikesIronDmg1" prob=".00001" />
-            <block name="trapSpikesIronDmg2" prob=".00001" />
-            <block name="trapSpikesWoodDmg1" prob=".00001" />
-            <block name="trapSpikesWoodDmg2" prob=".00001" />
-            <block name="woodSpikesTrapBloodPOI" prob=".00001" />
-            <block name="ironSpikesTrapBloodPOI" prob=".00001" />
+            <block name="trapSpikesIronDmg1" prob=".0001" />
+            <block name="trapSpikesIronDmg2" prob=".0001" />
+            <block name="trapSpikesWoodDmg1" prob=".0001" />
+            <block name="trapSpikesWoodDmg2" prob=".0001" />
+            <block name="woodSpikesTrapBloodPOI" prob=".0001" />
+            <block name="ironSpikesTrapBloodPOI" prob=".0001" />
 
-            <block name="barbedFenceDamaged01" prob=".00001" />
-            <block name="barbedFenceDamaged02" prob=".00001" />
-            <block name="barbedWireSpindle" prob=".00001" />
-            <block name="barbedWireSpindle2" prob=".00001" />
-            <block name="barbedWireSpindle3" prob=".00001" />
-            <block name="barbedWireSpindle4" prob=".00001" />
+            <block name="barbedFenceDamaged01" prob=".0001" />
+            <block name="barbedFenceDamaged02" prob=".0001" />
+            <block name="barbedWireSpindle" prob=".0001" />
+            <block name="barbedWireSpindle2" prob=".0001" />
+            <block name="barbedWireSpindle3" prob=".0001" />
+            <block name="barbedWireSpindle4" prob=".0001" />
 
-            <block name="mineCandyTin" prob=".00001" />
-            <block name="mineCookingPot" prob=".00001" />
-            <block name="mineHubCap" prob=".00001" />
-            <block name="MineAirFilter" prob=".00001" />
+            <block name="mineCandyTin" prob=".0001" />
+            <block name="mineCookingPot" prob=".0001" />
+            <block name="mineHubCap" prob=".0001" />
+            <block name="MineAirFilter" prob=".0001" />
 
-            <block name="bodyBagBlack" prob=".0001" />
-            <block name="bodyBagYellow" prob=".0001" />
-            <block name="bodyBagPile" prob=".0001" />
-            <block name="bodyBagPileMix" prob=".0001" />
-            <block name="bodyBagPair" prob=".0001" />
-            <block name="bodyBagPairYellow" prob=".0001" />
-            <block name="bodyBagPairMixed" prob=".0001" />
-            <block name="bodyBagBlackFlies" prob=".0001" />
-            <block name="bodyBagYellowFlies" prob=".0001" />
-
+            <!-- barrels -->
             <block name="burningBarrel" prob=".001" />
             <block name="cntBarrelOilSingle00" prob=".0001" />
             <block name="cntBarrelRadiatedSingle00" prob=".0001" />

@@ -115,7 +115,7 @@ public class CaveGenerator
 
     public static BlockValue SpawnDecoration(CaveBlock caveBlock, GameRandom random, int worldX, int worldY, int worldZ)
     {
-        random.InternalSetSeed((worldX << 4) + worldZ);
+        random.InternalSetSeed(caveBlock.GetHashCode());
 
         Vector3i worldPos = new Vector3i(worldX, worldY, worldZ);
 
@@ -314,6 +314,7 @@ public class CaveGenerator
 
             if (blockValue.type != CaveBlocks.caveAir.type)
             {
+                blockValue.rotation = (byte)random.Next(4);
                 chunk.SetBlock(GameManager.Instance.World, blockChunkPos.x, blockChunkPos.y, blockChunkPos.z, blockValue);
             }
         }
