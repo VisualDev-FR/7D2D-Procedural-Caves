@@ -5,7 +5,7 @@ using UnityEngine;
 
 
 [HarmonyPatch(typeof(WorldEnvironment), "Update")]
-public static class WorldEnvironment_Update
+public class WorldEnvironment_Update
 {
     private static readonly Vector2 dataAmbientInsideEquatorScale = WorldEnvironment.dataAmbientInsideEquatorScale;
 
@@ -25,7 +25,7 @@ public static class WorldEnvironment_Update
         var playerPosition = localPlayer.position;
         var terrainHeight = GameManager.Instance.World.GetHeightAt(playerPosition.x, playerPosition.z);
 
-        if (terrainHeight > playerPosition.y && !patchApplied)
+        if (terrainHeight > playerPosition.y)
         {
             ApplyCaveLighting(terrainHeight - playerPosition.y);
             patchApplied = true;
@@ -50,10 +50,45 @@ public static class WorldEnvironment_Update
 
     private static void ApplyCaveLighting(float deep)
     {
-        Log.Out("[Cave] patch cave lighting");
+        // Log.Out($"[Cave] patch cave lighting, deep: {deep}");
 
-        WorldEnvironment.dataAmbientInsideEquatorScale = CaveConfig.CaveLightConfig.ambientInsideEquatorScale;
-        WorldEnvironment.dataAmbientInsideGroundScale = CaveConfig.CaveLightConfig.ambientInsideGroundScale;
-        WorldEnvironment.dataAmbientInsideSkyScale = CaveConfig.CaveLightConfig.ambientInsideSkyScale;
+        int deepThreshold = 10;
+
+        if (deep >= deepThreshold)
+        {
+            WorldEnvironment.dataAmbientInsideEquatorScale = CaveConfig.CaveLightConfig.ambientInsideEquatorScale;
+            WorldEnvironment.dataAmbientInsideGroundScale = CaveConfig.CaveLightConfig.ambientInsideGroundScale;
+            WorldEnvironment.dataAmbientInsideSkyScale = CaveConfig.CaveLightConfig.ambientInsideSkyScale;
+            return;
+        }
+
+        float ratio = 1 - (deep / deepThreshold);
+
+        WorldEnvironment.dataAmbientInsideEquatorScale = LerpVector2(
+            CaveConfig.CaveLightConfig.ambientInsideEquatorScale,
+            dataAmbientInsideEquatorScale,
+            ratio
+        );
+
+        WorldEnvironment.dataAmbientInsideEquatorScale = LerpVector2(
+            CaveConfig.CaveLightConfig.ambientInsideGroundScale,
+            dataAmbientInsideGroundScale,
+            ratio
+        );
+
+        WorldEnvironment.dataAmbientInsideEquatorScale = LerpVector2(
+            CaveConfig.CaveLightConfig.ambientInsideSkyScale,
+            dataAmbientInsideSkyScale,
+            ratio
+        );
+
+    }
+
+    private static Vector2 LerpVector2(Vector2 min, Vector2 max, float ratio)
+    {
+        return new Vector2(
+            Utils.FastLerpUnclamped(min.x, max.x, ratio),
+            Utils.FastLerpUnclamped(min.y, max.y, ratio)
+        );
     }
 }

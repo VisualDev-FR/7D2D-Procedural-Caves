@@ -44,10 +44,11 @@ public static class CaveConfig
 
     public class CaveLightConfig
     {
-        public static Vector2 ambientInsideEquatorScale = new Vector2(0, 0);
+        public static float minLight = 0.01f;
+        public static readonly Vector2 ambientInsideEquatorScale = new Vector2(minLight, minLight);
 
-        public static Vector2 ambientInsideGroundScale = new Vector2(0, 0);
+        public static readonly Vector2 ambientInsideGroundScale = new Vector2(minLight, minLight);
 
-        public static Vector2 ambientInsideSkyScale = new Vector2(0, 0);
+        public static readonly Vector2 ambientInsideSkyScale = new Vector2(minLight, minLight);
     }
 }
