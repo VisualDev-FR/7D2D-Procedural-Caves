@@ -150,7 +150,7 @@ public class CaveChunksProvider
 
         queue.Enqueue(startNode, float.MaxValue);
 
-        while (queue.Count > 0 && rolls++ < 100)
+        while (queue.Count > 0 && rolls++ < 200)
         {
             AstarNode currentNode = queue.Dequeue();
 

@@ -31,7 +31,7 @@ public class AIDirectorBloodMoonParty_SpawnZombie
 
     private static bool SpawnBloodMoonCaveZombie()
     {
-        var spawnPos = CaveGenerator.caveChunksProvider.GetSpawnPositionNearPlayer(target.position, CaveConfig.minSpawnDist);
+        var spawnPos = CaveGenerator.caveChunksProvider.GetSpawnPositionNearPlayer(target.position, CaveConfig.minSpawnDistBloodMoon);
 
         if (spawnPos == Vector3i.zero)
             return false;

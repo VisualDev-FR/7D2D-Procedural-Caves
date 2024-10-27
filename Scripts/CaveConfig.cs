@@ -37,7 +37,10 @@ public static class CaveConfig
 
     public static bool enableCaveBloodMoon = true;
 
+    // the minimun euclidian distance from the player to spawn a zombie
     public static int minSpawnDist = 15;
+
+    public static int minSpawnDistBloodMoon = 25;
 
     public class CaveLightConfig
     {
