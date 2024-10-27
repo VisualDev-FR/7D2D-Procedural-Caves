@@ -115,12 +115,7 @@ public class CaveGenerator
 
     public static BlockValue SpawnDecoration(CaveBlock caveBlock, GameRandom random, int worldX, int worldY, int worldZ)
     {
-        if (caveBlock.isRoom)
-        {
-            return CaveBlocks.caveAir;
-        }
-
-        random.InternalSetSeed(worldX * 13 + worldZ);
+        random.InternalSetSeed((worldX << 4) + worldZ);
 
         Vector3i worldPos = new Vector3i(worldX, worldY, worldZ);
 
@@ -134,9 +129,8 @@ public class CaveGenerator
 
         BlockValue placeHolder;
 
-        if (isFloor && isWater)
-            // TODO: pimp water decoration
-            placeHolder = CaveBlocks.cntCaveFloorFlat;
+        if (isFlatFloor && isWater)
+            placeHolder = CaveBlocks.cntCaveFlatWater;
 
         else if (isFlatFloor && !isWater)
             placeHolder = CaveBlocks.cntCaveFloorFlat;

@@ -14,6 +14,8 @@ public class CaveBlocks
 
     public static BlockValue cntCaveCeiling => GetBlockValue("cntCaveCeiling");
 
+    public static BlockValue cntCaveFlatWater => GetBlockValue("cntCaveFlatWater");
+
     // cave blocks
     public static BlockValue caveAir => GetBlockValue("caveAir");
 

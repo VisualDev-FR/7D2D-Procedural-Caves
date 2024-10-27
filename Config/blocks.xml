@@ -32,6 +32,11 @@
             <property name="CreativeMode" value="Dev" />
         </block>
 
+        <block name="cntCaveFlatWater">
+            <property name="Extends" value="cntWastelandRandomLootHelper" />
+            <property name="CreativeMode" value="Dev" />
+        </block>
+
         <!-- terrain loot -->
         <block name="caveTerrStone">
             <property name="Extends" value="terrStone" />
