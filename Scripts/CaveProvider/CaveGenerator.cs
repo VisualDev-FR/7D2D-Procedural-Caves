@@ -11,20 +11,6 @@ public class CaveGenerator
 
     public static bool isEnabled = false;
 
-    public static int caveAirType = caveAir.type;
-
-    public static BlockValue caveAir = new BlockValue((uint)Block.GetBlockByName("caveAir").blockID);
-
-    private static BlockValue concreteBlock = new BlockValue((uint)Block.GetBlockByName("concreteShapes:cube").blockID);
-
-    private static BlockValue cntCaveFloor = new BlockValue((uint)Block.GetBlockByName("cntCaveFloor").blockID);
-
-    private static BlockValue cntCaveFloorFlat = new BlockValue((uint)Block.GetBlockByName("cntCaveFloorFlat").blockID);
-
-    private static BlockValue cntCaveCeiling = new BlockValue((uint)Block.GetBlockByName("cntCaveCeiling").blockID);
-
-    private static BlockValue terrGravel = new BlockValue((uint)Block.GetBlockByName("terrGravel").blockID);
-
     public static Vector3i HalfWorldSize;
 
     public static void Init(string worldName)
@@ -130,7 +116,7 @@ public class CaveGenerator
     {
         if (caveBlock.isRoom)
         {
-            return caveAir;
+            return CaveBlocks.caveAir;
         }
 
         random.InternalSetSeed(worldX * 13 + worldZ);
@@ -149,19 +135,19 @@ public class CaveGenerator
 
         if (isFloor && isWater)
             // TODO: pimp water decoration
-            placeHolder = cntCaveFloorFlat;
+            placeHolder = CaveBlocks.cntCaveFloorFlat;
 
         else if (isFlatFloor && !isWater)
-            placeHolder = cntCaveFloorFlat;
+            placeHolder = CaveBlocks.cntCaveFloorFlat;
 
         else if (isFloor && !isWater)
-            placeHolder = cntCaveFloor;
+            placeHolder = CaveBlocks.cntCaveFloor;
 
         else if (isCeiling)
-            placeHolder = cntCaveCeiling;
+            placeHolder = CaveBlocks.cntCaveCeiling;
 
         else
-            return caveAir;
+            return CaveBlocks.caveAir;
 
         int maxTries = 20;
 
@@ -173,9 +159,9 @@ public class CaveGenerator
             {
                 return blockValue;
             }
-            else if (blockValue.type == caveAir.type)
+            else if (blockValue.type == CaveBlocks.caveAir.type)
             {
-                return BlockPlaceholderMap.Instance.Replace(cntCaveFloor, random, worldX, worldZ);
+                return BlockPlaceholderMap.Instance.Replace(CaveBlocks.cntCaveFloor, random, worldX, worldZ);
             }
             else if (CanPlaceDecoration(blockValue, worldPos))
             {
@@ -183,7 +169,7 @@ public class CaveGenerator
             }
         }
 
-        return caveAir;
+        return CaveBlocks.caveAir;
     }
 
     private static BlockValue GetBoundingStoneBlockValue(int biomeID, BlockValue currentBlockValue)
@@ -203,20 +189,20 @@ public class CaveGenerator
             <biomemap id="19" name="underwater"/>
         */
 
-        var replacementBlockValue = BlockValue.Air;
+        BlockValue biomeBasedBlockValue;
 
         switch (biomeID)
         {
             case 1:
-                replacementBlockValue = Block.GetBlockByName("terrSnowCave").ToBlockValue();
+                biomeBasedBlockValue = CaveBlocks.caveTerrSnow;
                 break;
 
             case 5:
-                replacementBlockValue = Block.GetBlockByName("terrSandStoneCave").ToBlockValue();
+                biomeBasedBlockValue = CaveBlocks.caveTerrSandStone;
                 break;
 
             default:
-                replacementBlockValue = Block.GetBlockByName("terrStoneCave").ToBlockValue();
+                biomeBasedBlockValue = CaveBlocks.caveTerrStone;
                 break;
         }
 
@@ -232,12 +218,22 @@ public class CaveGenerator
             case "terrSnow":
             case "terrAsphalt":
             case "terrConcrete":
+                return biomeBasedBlockValue;
+
             case "terrOreIron":
+                return CaveBlocks.caveTerrOreIron;
+
             case "terrOreLead":
+                return CaveBlocks.caveTerrOreLead;
+
             case "terrOreCoal":
+                return CaveBlocks.caveTerrOreCoal;
+
             case "terrOrePotassiumNitrate":
+                return CaveBlocks.caveTerrOrePotassiumNitrate;
+
             case "terrOreOilDeposit":
-                return replacementBlockValue;
+                return CaveBlocks.caveTerrOreOilDeposit;
 
             default:
                 return BlockValue.Air;
@@ -267,12 +263,12 @@ public class CaveGenerator
         {
             Vector3bf blockChunkPos = caveBlock.blockChunkPos;
 
-            chunk.SetBlockRaw(blockChunkPos.x, blockChunkPos.y, blockChunkPos.z, caveAir);
+            chunk.SetBlockRaw(blockChunkPos.x, blockChunkPos.y, blockChunkPos.z, CaveBlocks.caveAir);
             chunk.SetDensity(blockChunkPos.x, blockChunkPos.y, blockChunkPos.z, caveBlock.density);
 
             if (caveBlock.isFloor && caveBlock.isFlat)
             {
-                chunk.SetBlockRaw(blockChunkPos.x, blockChunkPos.y - 1, blockChunkPos.z, terrGravel);
+                chunk.SetBlockRaw(blockChunkPos.x, blockChunkPos.y - 1, blockChunkPos.z, CaveBlocks.caveTerrGravel);
                 chunk.SetDensity(blockChunkPos.x, blockChunkPos.y - 1, blockChunkPos.z, MarchingCubes.DensityTerrain);
             }
 
@@ -321,7 +317,7 @@ public class CaveGenerator
 
             var blockValue = SpawnDecoration(caveBlock, random, worldX, blockChunkPos.y, worldZ);
 
-            if (blockValue.type != caveAir.type)
+            if (blockValue.type != CaveBlocks.caveAir.type)
             {
                 chunk.SetBlock(GameManager.Instance.World, blockChunkPos.x, blockChunkPos.y, blockChunkPos.z, blockValue);
             }

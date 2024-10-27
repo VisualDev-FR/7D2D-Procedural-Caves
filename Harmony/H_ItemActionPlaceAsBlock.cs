@@ -29,7 +29,7 @@ public class ItemActionPlaceAsBlock_ExecuteAction
 
         // -------------------------------------------------------------
         // NOTE: Patch this condition to allow any item replacing caveAir
-        bool isAir = block.isair || block.type == CaveGenerator.caveAir.type;
+        bool isAir = block.isair || block.type == CaveBlocks.caveAir.type;
         if (!isAir || (!invData.world.IsEditor() && GameUtils.IsColliderWithinBlock(lastBlockPos, block)))
         {
             return;

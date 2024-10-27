@@ -14,7 +14,7 @@ public class CaveChunksProvider
 
     public static Random rand = new Random();
 
-    public static uint CaveAirRawData => CaveGenerator.caveAir.rawData;
+    public static uint CaveAirRawData => CaveBlocks.caveAir.rawData;
 
     public int worldSize;
 
