@@ -5,12 +5,12 @@ using HarmonyLib;
 [HarmonyPatch(new[] { typeof(World), typeof(Chunk), typeof(bool) })]
 public class DynamicPrefabDecorator_DecorateChunk
 {
-    // run cave generation after prefabs spawn, to allow caves digging into rwg streetTiles
-    public static void Postfix(DynamicPrefabDecorator __instance, Chunk _chunk)
+    // run cave generation after prefabs spawn, to allow caves digging into prefabs
+    public static void Postfix(Chunk _chunk)
     {
-        if (CaveGenerator.isEnabled)
+        if (CaveGenerator.isEnabled && !GameUtils.IsPlaytesting())
         {
-            CaveGenerator.GenerateCave(_chunk);
+            CaveGenerator.GenerateCaveChunk(_chunk);
         }
     }
 }

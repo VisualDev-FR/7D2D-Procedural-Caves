@@ -244,7 +244,7 @@ public class CaveGenerator
         }
     }
 
-    public static void GenerateCave(Chunk chunk)
+    public static void GenerateCaveChunk(Chunk chunk)
     {
         if (chunk == null)
         {
