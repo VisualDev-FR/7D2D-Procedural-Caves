@@ -60,7 +60,7 @@
         </lootcontainer>
 
         <!-- militaryGoods -->
-        <lootcontainer name="militaryGoods" size="6,2" sound_open="UseActions/open_garbage" sound_close="UseActions/close_garbage" loot_quality_template="qualBaseTemplate" destroy_on_close="empty">
+        <lootcontainer name="caveMilitaryGoods" size="6,2" sound_open="UseActions/open_garbage" sound_close="UseActions/close_garbage" loot_quality_template="qualBaseTemplate" destroy_on_close="empty">
             <item group="caveGroupMilitaryFootlocker" />
         </lootcontainer>
 

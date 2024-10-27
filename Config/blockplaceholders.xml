@@ -116,17 +116,17 @@
       <block name="CaveCntSportsBag02Purple" prob=".0001" />
       <block name="CaveCntSportsBag02Pink" prob=".0001" />
 
-      <block name="cntWeaponsBagSmall" prob=".00001" />
-      <block name="cntWeaponsBagLarge" prob=".00001" />
-      <block name="cntAmmoPileSmall" prob=".00001" />
-      <block name="cntAmmoPileMedium" prob=".00001" />
-      <block name="cntAmmoPileLarge" prob=".00001" />
+      <block name="cntWeaponsBagSmall" prob=".0001" />
+      <block name="cntWeaponsBagLarge" prob=".0001" />
+      <block name="cntAmmoPileSmall" prob=".0001" />
+      <block name="cntAmmoPileMedium" prob=".0001" />
+      <block name="cntAmmoPileLarge" prob=".0001" />
       <block name="CaveCntMilitaryGoodsA" prob=".00001" />
       <block name="CaveCntMilitaryGoodsB" prob=".00001" />
       <block name="CaveCntMilitaryGoodsC" prob=".00001" />
       <block name="CaveCntMilitaryGoodsD" prob=".00001" />
 
-      <block name="caveCntWoodenChestClosed" prob=".01" />
+      <block name="caveCntWoodenChestClosed" prob=".00001" />
       <block name="caveCntWoodenChestMilitaryClosed" prob=".00001" />
       <block name="caveCntOldWestChestClosed" prob=".00001" />
       <block name="caveCntWoodenChestRottenClosed" prob=".00001" />
