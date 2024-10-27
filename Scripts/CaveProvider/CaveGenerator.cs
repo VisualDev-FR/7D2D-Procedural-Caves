@@ -52,19 +52,20 @@ public class CaveGenerator
         }
     }
 
-    private static bool IsFlatFloor(Vector3i worldPos)
+    private static bool IsFlatFloor(Vector3i worldPos, int radius = 1)
     {
-        int x0 = worldPos.x - 1;
-        int z0 = worldPos.z - 1;
-        int x1 = worldPos.x + 1;
-        int z1 = worldPos.z + 1;
-        int y = worldPos.y - 1;
+        int x0 = worldPos.x - radius;
+        int z0 = worldPos.z - radius;
+        int x1 = worldPos.x + radius;
+        int z1 = worldPos.z + radius;
 
-        for (int x = x0; x < x1; x++)
+        int y = worldPos.y;
+
+        for (int x = x0; x <= x1; x++)
         {
-            for (int z = z0; z < z1; z++)
+            for (int z = z0; z <= z1; z++)
             {
-                if (caveChunksProvider.IsCave(x, y, z))
+                if (!caveChunksProvider.IsCave(x, y, z) || caveChunksProvider.IsCave(x, y - 1, z))
                 {
                     return false;
                 }
@@ -266,7 +267,7 @@ public class CaveGenerator
             chunk.SetBlockRaw(blockChunkPos.x, blockChunkPos.y, blockChunkPos.z, CaveBlocks.caveAir);
             chunk.SetDensity(blockChunkPos.x, blockChunkPos.y, blockChunkPos.z, caveBlock.density);
 
-            if (caveBlock.isFloor && caveBlock.isFlat)
+            if (IsFlatFloor(caveBlock.ToWorldPos(HalfWorldSize)))
             {
                 chunk.SetBlockRaw(blockChunkPos.x, blockChunkPos.y - 1, blockChunkPos.z, CaveBlocks.caveTerrGravel);
                 chunk.SetDensity(blockChunkPos.x, blockChunkPos.y - 1, blockChunkPos.z, MarchingCubes.DensityTerrain);
