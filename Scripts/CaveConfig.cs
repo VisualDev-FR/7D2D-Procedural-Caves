@@ -28,13 +28,16 @@ public static class CaveConfig
 
     public static int terrainMargin = 2;
 
+    // the min deep (from terrain height) to spawn cave zombies
+    public static int zombieSpawnMarginDeep = 5;
+
     public static bool generateWater = false;
 
-    public static readonly float terrainOffset = 50;
+    public static float terrainOffset = 50;
 
-    public static readonly bool enableCaveBloodMoon = true;
+    public static bool enableCaveBloodMoon = true;
 
-    public static readonly int minSpawnDist = 15;
+    public static int minSpawnDist = 15;
 
     public class CaveLightConfig
     {

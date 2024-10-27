@@ -49,7 +49,7 @@ public class SpawnManagerBiomes_Update
         if (playerPosition == Vector3i.zero)
             return false;
 
-        if (playerPosition.y > GameManager.Instance.World.GetTerrainHeight(playerPosition.x, playerPosition.z))
+        if (playerPosition.y + CaveConfig.zombieSpawnMarginDeep > GameManager.Instance.World.GetTerrainHeight(playerPosition.x, playerPosition.z))
             return true;
 
         var spawnPosition = GetZombieSpawnPosition(playerPosition);

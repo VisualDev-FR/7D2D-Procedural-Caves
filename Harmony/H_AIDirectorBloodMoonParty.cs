@@ -17,7 +17,7 @@ public class AIDirectorBloodMoonParty_SpawnZombie
         if (!CaveGenerator.isEnabled)
             return true;
 
-        if (_target.position.y > _world.GetHeight((int)_target.position.x, (int)_target.position.z))
+        if (_target.position.y + CaveConfig.zombieSpawnMarginDeep > _world.GetHeight((int)_target.position.x, (int)_target.position.z))
             return true;
 
         Instance = __instance;
