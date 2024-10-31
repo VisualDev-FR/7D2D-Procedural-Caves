@@ -14,7 +14,7 @@ public class Graph
 
     public Dictionary<int, HashSet<GraphEdge>> relatedPrefabs;
 
-    public Graph(List<CavePrefab> prefabs, int worldSize)
+    public Graph(IEnumerable<CavePrefab> prefabs, int worldSize)
     {
         Edges = new HashSet<GraphEdge>();
         Nodes = new HashSet<GraphNode>();
@@ -23,14 +23,51 @@ public class Graph
 
         var timer = CaveUtils.StartTimer();
 
-        BuildDelauneyGraph(prefabs, worldSize);
+        this.ToFile("C:/tools/DEV/7D2D_Modding/7D2D-Procedural-caves/Tests/graph.txt", prefabs.ToHashSet(), worldSize);
+
+        try
+        {
+            BuildDelauneyGraph(prefabs, worldSize);
+        }
+        finally
+        {
+            this.ToFile("C:/tools/DEV/7D2D_Modding/7D2D-Procedural-caves/Tests/graph.txt", prefabs.ToHashSet(), worldSize);
+        }
 
         Log.Out($"[Cave] primary graph : edges: {Edges.Count}, nodes: {Nodes.Count}, timer: {timer.ElapsedMilliseconds:N0}ms");
 
         Prune();
 
         Log.Out($"[Cave] secondary graph: edges: {Edges.Count}, nodes: {Nodes.Count}, timer: {timer.ElapsedMilliseconds:N0}ms");
+    }
 
+    public void ToFile(string filename, HashSet<CavePrefab> prefabs, int worldSize)
+    {
+        using (var writer = new StreamWriter(filename))
+        {
+            writer.WriteLine(worldSize);
+            writer.WriteLine(prefabs.Count);
+
+            foreach (var prefab in prefabs)
+            {
+                writer.WriteLine(prefab.position.x);
+                writer.WriteLine(prefab.position.z);
+
+                writer.WriteLine(prefab.Size.x);
+                writer.WriteLine(prefab.Size.z);
+            }
+
+            writer.WriteLine(Edges.Count);
+
+            foreach (var edge in Edges)
+            {
+                writer.WriteLine(edge.node1.position.x);
+                writer.WriteLine(edge.node1.position.z);
+
+                writer.WriteLine(edge.node2.position.x);
+                writer.WriteLine(edge.node2.position.z);
+            }
+        }
     }
 
     private GraphEdge AddEdge(GraphNode node1, GraphNode node2)
@@ -412,7 +449,7 @@ public class Graph
         return true;
     }
 
-    private void BuildDelauneyGraph(List<CavePrefab> prefabs, int worldSize)
+    private void BuildDelauneyGraph(IEnumerable<CavePrefab> prefabs, int worldSize)
     {
         var points = prefabs.SelectMany(prefab => prefab.DelauneyPoints());
         var triangulator = new DelaunayTriangulator();

@@ -60,14 +60,7 @@ public class DelaunayTriangulator
             {
                 var triangle = new DelauneyTriangle(point, edge.Point1, edge.Point2);
 
-                if (triangle.isValid)
-                {
-                    triangles.Add(triangle);
-                }
-                else
-                {
-                    Log.Warning("[Cave] Delauney: invalid Triangle");
-                }
+                triangles.Add(triangle);
             }
         }
 
@@ -102,8 +95,6 @@ public class DelauneyTriangle
     public DelauneyPoint Circumcenter { get; private set; }
 
     public double RadiusSquared;
-
-    public bool isValid = true;
 
     public DelauneyTriangle(DelauneyPoint point1, DelauneyPoint point2, DelauneyPoint point3)
     {
@@ -158,8 +149,10 @@ public class DelauneyTriangle
 
         if (div == 0)
         {
-            isValid = false;
-            return;
+            Log.Out($"[Cave] {p0.Prefab.id}, {p1.Prefab.id}, {p2.Prefab.id}");
+            Log.Out($"[Cave] {p0.Prefab.PrefabName}, {p1.Prefab.PrefabName}, {p2.Prefab.PrefabName}");
+            Log.Out($"[Cave] {p0.position}, {p1.position}, {p2.position}");
+            throw new DivideByZeroException();
         }
 
         var center = new DelauneyPoint(aux1 / div, 0, aux2 / div);

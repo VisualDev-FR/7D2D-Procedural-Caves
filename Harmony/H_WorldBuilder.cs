@@ -87,7 +87,7 @@ public static class WorldBuilder_GenerateData
         {
             yield return worldBuilder.WildernessPlanner.Plan(worldBuilder.thisWorldProperties, worldBuilder.Seed);
 
-            caveBuilder.caveEntrancesPlanner.SpawnCaveEntrances();
+            // caveBuilder.caveEntrancesPlanner.SpawnCaveEntrances();
 
             yield return worldBuilder.smoothWildernessTerrain();
             yield return worldBuilder.WildernessPathPlanner.Plan(worldBuilder.Seed);
@@ -104,8 +104,6 @@ public static class WorldBuilder_GenerateData
             }
         }
 
-        GCUtils.Collect();
-
         yield return worldBuilder.SetMessage("Draw Roads", _logToConsole: true);
         yield return worldBuilder.DrawRoads(worldBuilder.dest);
 
@@ -121,8 +119,6 @@ public static class WorldBuilder_GenerateData
         worldBuilder.wildernessPaths.Clear();
 
         yield return worldBuilder.FinalizeWater();
-
-        GCUtils.Collect();
 
         Log.Out("RWG final in {0}:{1:00}, r={2:x}", worldBuilder.totalMS.Elapsed.Minutes, worldBuilder.totalMS.Elapsed.Seconds, Rand.Instance.PeekSample());
 

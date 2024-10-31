@@ -77,6 +77,9 @@ public static class CaveViewer
                 graph.DrawRectangle(pen, prefab.position.x, prefab.position.z, prefab.Size.x, prefab.Size.z);
             }
 
+            if (prefab.nodes is null)
+                continue;
+
             foreach (var node in prefab.nodes)
             {
                 b.SetPixel(node.position.x, node.position.z, NodeColor);
@@ -662,6 +665,110 @@ public static class CaveViewer
         Log.Out($"timer: {timer.ElapsedMilliseconds}ms");
     }
 
+    public static List<string> SplitString(string input, char delimiter)
+    {
+        List<string> result = new List<string>();
+        string currentSegment = "";
+
+        foreach (char c in input)
+        {
+            if (c == delimiter)
+            {
+                // Si on rencontre le délimiteur, on ajoute le segment courant à la liste
+                if (currentSegment.Length > 0)
+                {
+                    result.Add(currentSegment);
+                    currentSegment = ""; // On réinitialise le segment
+                }
+            }
+            else
+            {
+                currentSegment += c; // On construit le segment
+            }
+        }
+
+        // Ajouter le dernier segment s'il existe (sans délimiteur à la fin)
+        if (currentSegment.Length > 0)
+        {
+            result.Add(currentSegment);
+        }
+
+        return result;
+    }
+
+    public static void GraphDebugCommand()
+    {
+        var filename = "C:/tools/DEV/7D2D_Modding/7D2D-Procedural-caves/Tests/graph.txt";
+        var worldSize = 0;
+
+        var Prefabs = new List<CavePrefab>();
+        var Edges = new List<GraphEdge>();
+
+        using (var reader = new StreamReader(filename))
+        {
+            worldSize = int.Parse(reader.ReadLine());
+
+            int prefabCount = int.Parse(reader.ReadLine());
+
+            Log.Out("prefabCount: " + prefabCount.ToString());
+            for (int i = 0; i < prefabCount; i++)
+            {
+                var start = new Vector3i(
+                    int.Parse(reader.ReadLine()),
+                    0,
+                    int.Parse(reader.ReadLine())
+                );
+
+                var size = new Vector3i(
+                    int.Parse(reader.ReadLine()),
+                    0,
+                    int.Parse(reader.ReadLine())
+                );
+                Prefabs.Add(new CavePrefab()
+                {
+                    position = start,
+                    Size = size,
+                });
+            }
+
+            int edgesCount = int.Parse(reader.ReadLine());
+
+            Log.Out("edgesCount: " + edgesCount.ToString());
+
+            for (int i = 0; i < edgesCount; i++)
+            {
+                var start = new Vector3i(
+                    int.Parse(reader.ReadLine()),
+                    0,
+                    int.Parse(reader.ReadLine())
+                );
+
+                var size = new Vector3i(
+                    int.Parse(reader.ReadLine()),
+                    0,
+                    int.Parse(reader.ReadLine())
+                );
+
+                var node1 = new GraphNode(start);
+                var node2 = new GraphNode(size);
+
+                Edges.Add(new GraphEdge(node1, node2));
+            }
+        }
+
+        using (var b = new Bitmap(worldSize, worldSize))
+        {
+            using (Graphics g = Graphics.FromImage(b))
+            {
+                g.Clear(BackgroundColor);
+                DrawEdges(g, Edges);
+                DrawPrefabs(b, g, Prefabs);
+            }
+
+            b.Save(@"graph.png", ImageFormat.Png);
+        }
+    }
+
     public static void Main(string[] args)
     {
 
@@ -730,6 +837,10 @@ public static class CaveViewer
 
             case "bezier":
                 BezierCommand(args);
+                break;
+
+            case "graphdebug":
+                GraphDebugCommand();
                 break;
 
             default:

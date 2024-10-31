@@ -48,6 +48,8 @@ public class CavePrefab
 
     public List<Prefab.Marker> caveMarkers;
 
+    public CavePrefab() { }
+
     public CavePrefab(int index)
     {
         id = index;
