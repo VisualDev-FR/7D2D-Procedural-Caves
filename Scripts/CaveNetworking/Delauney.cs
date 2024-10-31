@@ -27,7 +27,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-
+// TODO: see godot implementation of delaunay triangulation: https://github.com/godotengine/godot/blob/master/core/math/delaunay_2d.h
 public class DelaunayTriangulator
 {
     public IEnumerable<DelauneyTriangle> BowyerWatson(IEnumerable<DelauneyPoint> points, int xMax, int yMax)
