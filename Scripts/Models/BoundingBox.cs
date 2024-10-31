@@ -10,6 +10,15 @@ public class BoundingBox
 
     public Vector3i size;
 
+    public bool Overlaps(BoundingBox other)
+    {
+        bool noOverlapX = start.x + size.x <= other.start.x || other.start.x + other.size.x <= start.x;
+        bool noOverlapY = start.y + size.y <= other.start.y || other.start.y + other.size.y <= start.y;
+        bool noOverlapZ = start.z + size.z <= other.start.z || other.start.z + other.size.z <= start.z;
+
+        return !(noOverlapX || noOverlapY || noOverlapZ);
+    }
+
     public int blocksCount;
 
     public float Density => (float)blocksCount / (size.x * size.y * size.z);
@@ -109,6 +118,8 @@ public class BoundingBox
 
         return size.z;
     }
+
+
 
     public override int GetHashCode()
     {
