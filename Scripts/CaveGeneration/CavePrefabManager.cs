@@ -553,6 +553,7 @@ public class CavePrefabManager
         {
             bool isRwgTile = pdi.prefab.Tags.Test_AnySet(CaveConfig.tagRwgStreetTile);
             bool isUndergound = pdi.prefab.Tags.Test_AnySet(CaveConfig.tagCaveUnderground);
+            bool isCaveEntrance = pdi.prefab.Tags.Test_AnySet(CaveConfig.tagCaveEntrance);
 
             if (isRwgTile)
             {
@@ -570,7 +571,7 @@ public class CavePrefabManager
                     AddPrefab(cavePrefab);
                 }
             }
-            else if (!isUndergound)
+            else if (!isUndergound && !isCaveEntrance)
             {
                 AddPrefab(new CavePrefab(Count, pdi, halfWorldSize));
             }
