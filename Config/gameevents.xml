@@ -14,15 +14,15 @@
                 <property name="value" value="80" />
             </requirement> -->
 
-            <action class="SpawnEntity">
+            <action class="ActionSpawnCaveEntity, ProceduralCaves">
                 <property name="entity_group" value="ZombieSpiderOnlyCaveHorde" />
                 <property name="spawn_count" value="4" />
                 <property name="air_spawn" value="false" />
                 <property name="add_to_group" value="zombies" />
                 <property name="safe_spawn" value="true" />
-                <property name="min_distance" value="10" />
-                <property name="max_distance" value="20" />
-                <property name="spawn_type" value="WanderingHorde" />
+                <property name="min_distance" value="20" />
+                <property name="max_distance" value="30" />
+                <property name="spawn_type" value="NearPosition" />
                 <property name="is_aggressive" value="false" />
             </action>
         </action_sequence>

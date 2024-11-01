@@ -138,7 +138,7 @@ public class CaveChunksProvider
         return caveChunk.Exists(hashcode);
     }
 
-    public Vector3i GetSpawnPositionNearPlayer(Vector3 playerPosition, int minSpawnDist)
+    public Vector3i GetSpawnPositionNearPlayer(Vector3 playerPosition, float minSpawnDist)
     {
         var timer = CaveUtils.StartTimer();
         var world = GameManager.Instance.World;
