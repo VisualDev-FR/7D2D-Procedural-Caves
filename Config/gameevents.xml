@@ -2,17 +2,12 @@
 
     <append xpath="/gameevents">
 
+        <!-- cave horde -->
         <action_sequence name="cave_horde_event">
 
             <property name="action_type" value="Game" />
             <property name="target_type" value="Entity" />
             <property name="allow_while_dead" value="false" />
-
-            <!-- <requirement class="RandomRoll">
-                <property name="min_max" value="0,100" />
-                <property name="operation" value="LTE" />
-                <property name="value" value="80" />
-            </requirement> -->
 
             <action class="ActionSpawnCaveEntity, ProceduralCaves">
                 <property name="entity_group" value="ZombieSpiderOnlyCaveHorde" />
@@ -25,8 +20,19 @@
                 <property name="spawn_type" value="NearPosition" />
                 <property name="is_aggressive" value="false" />
             </action>
+
         </action_sequence>
 
+        <!-- cave_terrain_collapse_event -->
+        <action_sequence name="cave_terrain_collapse_event">
+
+            <property name="action_type" value="Game" />
+            <property name="target_type" value="Entity" />
+            <property name="allow_while_dead" value="false" />
+
+            <action class="ActionCollapseTerrain, ProceduralCaves" />
+
+        </action_sequence>
 
     </append>
 

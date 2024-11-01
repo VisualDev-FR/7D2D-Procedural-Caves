@@ -1,6 +1,6 @@
 <config>
 
-    <!-- handle buffInCave from vanilla buffStatusCheck01 -->
+    <!-- add/remove buffInCave, by checking if player is under terrain at each update of buffStatusCheck01 -->
     <append xpath="/buffs/buff[@name='buffStatusCheck01']">
 
         <effect_group>
@@ -19,19 +19,38 @@
 
     <append xpath="/buffs">
 
-        <buff name="buffCaveHordeEvent" hidden="true" />
+        <!-- cooldown for cave horde spawning -->
+        <buff name="buffCaveZombieEventCoolDown" hidden="true">
+            <duration value="600" />
+        </buff>
 
+        <!-- cooldown for terrain events -->
+        <buff name="buffCaveTerrainEventCoolDown" hidden="true">
+            <duration value="600" />
+        </buff>
+
+        <!-- buff applied when player is under terrain -->
         <buff name="buffInCave" hidden="true" remove_on_death="true">
+
             <update_rate value="1" />
 
             <effect_group>
-                <triggered_effect trigger="onSelfBuffUpdate" action="ModifyCVar" cvar="$spawnEnemiesProb" operation="set" value="randomint(1, 100)" />
-                <triggered_effect trigger="onSelfBuffUpdate" action="CVarLogValue" cvar="$spawnEnemiesProb" />
+                <triggered_effect trigger="onSelfBuffUpdate" action="ModifyCVar" cvar="$zombieHordeProb" operation="set" value="randomint(1, 100)" />
+                <triggered_effect trigger="onSelfBuffUpdate" action="ModifyCVar" cvar="$terrainEventProp" operation="set" value="randomint(1, 100)" />
+                <!-- <triggered_effect trigger="onSelfBuffUpdate" action="CVarLogValue" cvar="$terrainEventProp" /> -->
             </effect_group>
 
             <effect_group>
-                <requirement name="CVarCompare" cvar="$spawnEnemiesProb" operation="LTE" value="20" />
+                <requirement name="!HasBuff" buff="buffCaveZombieEventCoolDown" />
+                <requirement name="CVarCompare" cvar="$zombieHordeProb" operation="LTE" value="20" />
                 <triggered_effect trigger="onSelfBuffUpdate" action="CallGameEvent" event="cave_horde_event" />
+                <triggered_effect trigger="onSelfBuffUpdate" action="AddBuff" buff="buffCaveZombieEventCoolDown" />
+            </effect_group>
+
+            <effect_group>
+                <requirement name="!HasBuff" buff="buffCaveTerrainEventCoolDown" />
+                <requirement name="CVarCompare" cvar="$terrainEventProp" operation="LTE" value="20" />
+                <triggered_effect trigger="onSelfBuffUpdate" action="CallGameEvent" event="cave_terrain_collapse_event" />
             </effect_group>
 
         </buff>

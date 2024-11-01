@@ -46,4 +46,10 @@ public class CaveBlocks
 
         throw new InvalidDataException($"block '{blockName}' does not exist. (case maybe invalid)");
     }
+
+    public static bool IsTerrain(BlockValue blockValue)
+    {
+        return blockValue.rawData > 0 && blockValue.rawData < 255;
+    }
+
 }

@@ -99,6 +99,7 @@
     <Compile Include="Harmony\ModApi.cs" />
 
     <!-- Actions -->
+    <Compile Include="Scripts\Actions\ActionCollapseTerrain.cs" />
     <Compile Include="Scripts\Actions\ActionSpawnCaveEntity.cs" />
 
     <!-- Requirements -->
