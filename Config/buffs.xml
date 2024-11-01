@@ -37,9 +37,9 @@
             <effect_group>
                 <triggered_effect trigger="onSelfBuffUpdate" action="ModifyCVar" cvar="$zombieHordeProb" operation="set" value="randomint(1, 100)" />
                 <triggered_effect trigger="onSelfBuffUpdate" action="ModifyCVar" cvar="$terrainEventProp" operation="set" value="randomint(1, 100)" />
-                <!-- <triggered_effect trigger="onSelfBuffUpdate" action="CVarLogValue" cvar="$terrainEventProp" /> -->
             </effect_group>
 
+            <!-- cave hordes event -->
             <effect_group>
                 <requirement name="!HasBuff" buff="buffCaveZombieEventCoolDown" />
                 <requirement name="CVarCompare" cvar="$zombieHordeProb" operation="LTE" value="20" />
@@ -47,6 +47,7 @@
                 <triggered_effect trigger="onSelfBuffUpdate" action="AddBuff" buff="buffCaveZombieEventCoolDown" />
             </effect_group>
 
+            <!-- terrain collapse event -->
             <effect_group>
                 <requirement name="!HasBuff" buff="buffCaveTerrainEventCoolDown" />
                 <requirement name="CVarCompare" cvar="$terrainEventProp" operation="LTE" value="20" />
