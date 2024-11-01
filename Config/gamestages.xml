@@ -1,0 +1,27 @@
+<config>
+
+    <append xpath="/gamestages">
+
+        <spawner name="ZombieSpiderOnlyCaveHorde">
+            <gamestage stage="1">
+                <spawn group="zombieSpiderGroupGS1" num="1" maxAlive="2" duration="1" />
+            </gamestage>
+            <gamestage stage="50">
+                <spawn group="zombieSpiderGroupGS50" num="2" maxAlive="4" duration="1" />
+            </gamestage>
+            <gamestage stage="100">
+                <spawn group="zombieSpiderGroupGS100" num="3" maxAlive="6" duration="1" />
+            </gamestage>
+            <gamestage stage="200">
+                <spawn group="zombieSpiderGroupGS200" num="4" maxAlive="8" duration="1" />
+            </gamestage>
+            <gamestage stage="400">
+                <spawn group="zombieSpiderGroupGS400" num="5" maxAlive="10" duration="1" />
+            </gamestage>
+            <gamestage stage="800">
+                <spawn group="zombieSpiderGroupGS800" num="6" maxAlive="12" duration="1" />
+            </gamestage>
+        </spawner>
+
+    </append>
+</config>

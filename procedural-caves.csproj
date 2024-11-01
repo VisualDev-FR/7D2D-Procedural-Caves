@@ -98,6 +98,9 @@
     <Compile Include="Harmony\H_WorldEnvironement.cs" />
     <Compile Include="Harmony\ModApi.cs" />
 
+    <!-- Requirements -->
+    <Compile Include="Scripts\Requirements\RequirementIsBelowTerrain.cs" />
+
     <!-- CaveGeneration -->
     <Compile Include="Scripts\CaveGeneration\CaveBuilder.cs" />
     <Compile Include="Scripts\CaveGeneration\CavePrefabChecker.cs" />

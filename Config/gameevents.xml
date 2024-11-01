@@ -1,0 +1,33 @@
+<config>
+
+    <append xpath="/gameevents">
+
+        <action_sequence name="cave_horde_event">
+
+            <property name="action_type" value="Game" />
+            <property name="target_type" value="Entity" />
+            <property name="allow_while_dead" value="false" />
+
+            <!-- <requirement class="RandomRoll">
+                <property name="min_max" value="0,100" />
+                <property name="operation" value="LTE" />
+                <property name="value" value="80" />
+            </requirement> -->
+
+            <action class="SpawnEntity">
+                <property name="entity_group" value="ZombieSpiderOnlyCaveHorde" />
+                <property name="spawn_count" value="4" />
+                <property name="air_spawn" value="false" />
+                <property name="add_to_group" value="zombies" />
+                <property name="safe_spawn" value="true" />
+                <property name="min_distance" value="10" />
+                <property name="max_distance" value="20" />
+                <property name="spawn_type" value="WanderingHorde" />
+                <property name="is_aggressive" value="false" />
+            </action>
+        </action_sequence>
+
+
+    </append>
+
+</config>

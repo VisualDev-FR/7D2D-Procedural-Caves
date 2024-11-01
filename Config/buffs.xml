@@ -1,0 +1,41 @@
+<config>
+
+    <append xpath="/buffs">
+        <buff name="buffInCave" hidden="true" remove_on_death="true">
+
+            <update_rate value="10" />
+
+            <effect_group>
+
+                <triggered_effect trigger="onSelfBuffUpdate" action="ModifyCVar" cvar="$spawnEnemiesProb" operation="set" value="randomint(1, 100)" />
+
+                <triggered_effect trigger="onSelfBuffUpdate" action="CallGameEvent" event="cave_horde_event">
+                    <requirement name="CVarCompare" cvar="$spawnEnemiesProb" operation="LTE" value="10" />
+                </triggered_effect>
+
+                <triggered_effect trigger="onSelfBuffUpdate" action="LogMessage" message="trigger zombies spawn">
+                    <requirement name="CVarCompare" cvar="$spawnEnemiesProb" operation="LTE" value="10" />
+                </triggered_effect>
+            </effect_group>
+
+        </buff>
+    </append>
+
+    <append xpath="/buffs/buff[@name='buffStatusCheck01']">
+
+        <effect_group>
+
+            <triggered_effect trigger="onSelfBuffUpdate" action="AddBuff" buff="buffInCave">
+                <requirement name="!HasBuff" buff="buffInCave" />
+                <requirement name="RequirementIsBelowTerrain, ProceduralCaves" />
+            </triggered_effect>
+
+            <triggered_effect trigger="onSelfBuffUpdate" action="RemoveBuff" buff="buffInCave">
+                <requirement name="HasBuff" buff="buffInCave" />
+                <requirement name="RequirementIsBelowTerrain, ProceduralCaves" invert="true" />
+            </triggered_effect>
+
+        </effect_group>
+
+    </append>
+</config>
