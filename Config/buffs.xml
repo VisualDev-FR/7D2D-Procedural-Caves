@@ -19,6 +19,11 @@
 
     <append xpath="/buffs">
 
+        <!-- prevent all cave events -->
+        <buff name="buffNoCaveEvent" hidden="true">
+            <duration value="600" />
+        </buff>
+
         <!-- cooldown for cave horde spawning -->
         <buff name="buffCaveZombieEventCoolDown" hidden="true">
             <duration value="600" />
@@ -41,6 +46,7 @@
 
             <!-- cave hordes event -->
             <effect_group>
+                <requirement name="!HasBuff" buff="buffNoCaveEvent" />
                 <requirement name="!HasBuff" buff="buffCaveZombieEventCoolDown" />
                 <requirement name="CVarCompare" cvar="$zombieHordeProb" operation="LTE" value="20" />
                 <triggered_effect trigger="onSelfBuffUpdate" action="CallGameEvent" event="cave_horde_event" />
@@ -49,6 +55,7 @@
 
             <!-- terrain collapse event -->
             <effect_group>
+                <requirement name="!HasBuff" buff="buffNoCaveEvent" />
                 <requirement name="!HasBuff" buff="buffCaveTerrainEventCoolDown" />
                 <requirement name="CVarCompare" cvar="$terrainEventProp" operation="LTE" value="20" />
                 <triggered_effect trigger="onSelfBuffUpdate" action="CallGameEvent" event="cave_terrain_collapse_event" />

@@ -49,7 +49,7 @@ public class CaveBlocks
 
     public static bool IsTerrain(BlockValue blockValue)
     {
-        return blockValue.rawData > 0 && blockValue.rawData < 255;
+        return blockValue.Block.shape.IsTerrain();
     }
 
 }

@@ -1,4 +1,5 @@
 using GameEvent.SequenceActions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -8,17 +9,13 @@ public class ActionCollapseTerrain : BaseAction
 
     public override ActionCompleteStates OnPerformAction()
     {
-        Log.Out($"[Cave] ActionCollapseTerrain");
-
         var player = Owner.Target as EntityPlayer;
         var playerPos = new Vector3i(player.position);
         var blockUnderPlayer = GameManager.Instance.World.GetBlock(playerPos + Vector3i.down);
 
         bool isPlayerStandingOnTerrain = CaveBlocks.IsTerrain(blockUnderPlayer);
 
-        Log.Out($"[Cave] isPlayerStandingOnTerrain: {isPlayerStandingOnTerrain}");
-
-        if (isPlayerStandingOnTerrain && CollapseTerrain(playerPos))
+        if (isPlayerStandingOnTerrain && CollapseTerrain(player))
         {
             player.Buffs.AddBuff(buffCaveTerrainEventCoolDownProp);
         }
@@ -26,50 +23,118 @@ public class ActionCollapseTerrain : BaseAction
         return ActionCompleteStates.Complete;
     }
 
-    private bool CollapseTerrain(Vector3i start)
+    private bool CollapseTerrain(EntityPlayer player)
     {
         /* NOTE:
         To reduce stability computations, collapse only the blocks directly
         under the player and set the blocks below to air.
         */
 
-        var blocksToCollapse = new List<Vector3i>();
-        var blocksToDestroy = new List<Vector3i>();
-        var position = Vector3i.zero;
-        var deep = 5;
-        var radius = 5;
+        var playerPos = new Vector3i(player.position);
+        var positionsToFall = new HashSet<Vector3i>();
+        var positionsToDestroy = new HashSet<Vector3i>();
+        var random = new Random();
 
-        for (int x = -radius; x <= radius; x++)
+        if (GameManager.Instance.World.GetPOIAtPosition(playerPos, false) != null)
         {
-            for (int z = -radius; z <= radius; z++)
+            return false;
+        }
+
+        var flatPositions = FindFlatBlocks(playerPos + Vector3i.down);
+
+        Log.Out($"[Cave] flatBlocks: {flatPositions.Count}");
+
+        if (flatPositions.Count < 32)
+        {
+            return false;
+        }
+
+        positionsToFall.UnionWith(flatPositions);
+
+        foreach (var pos in flatPositions)
+        {
+            positionsToFall.Add(new Vector3i(
+                pos.x,
+                pos.y + 1,
+                pos.z
+            ));
+
+            float deep = 5;
+
+            Log.Out($"[Cave] deep: {deep}");
+
+            for (int y = 2; y <= deep; y++)
             {
-                position.x = start.x + x;
-                position.y = Utils.FastMax(2, start.y - 1);
-                position.z = start.z + z;
+                positionsToDestroy.Add(new Vector3i(
+                    pos.x,
+                    playerPos.y - y,
+                    pos.z
+                ));
+            }
+        }
 
-                blocksToCollapse.Add(position);
+        var blockChangeInfos = positionsToDestroy
+            .Select(pos => new BlockChangeInfo(pos, BlockValue.Air, MarchingCubes.DensityAir))
+            .ToList();
 
-                for (int y = -2; y >= -deep; y--)
+        GameManager.Instance.World.SetBlocksRPC(blockChangeInfos);
+        GameManager.Instance.World.AddFallingBlocks(positionsToFall.ToList());
+
+        return true;
+    }
+
+    private HashSet<Vector3i> FindFlatBlocks(Vector3i start)
+    {
+        var timer = CaveUtils.StartTimer();
+        var world = GameManager.Instance.World;
+        var queue = new Queue<Vector3i>();
+        var visited = new HashSet<Vector3i>();
+        var flatBlocks = new HashSet<Vector3i>();
+        var neighbor = Vector3i.zero;
+        var rolls = 0;
+
+        queue.Enqueue(start);
+
+        while (queue.Count > 0 && ++rolls < 100)
+        {
+            Vector3i pos = queue.Dequeue();
+
+            foreach (var offset in CaveUtils.offsetsHorizontal8)
+            {
+                neighbor.x = pos.x + offset.x;
+                neighbor.y = pos.y;
+                neighbor.z = pos.z + offset.z;
+
+                if (!visited.Contains(neighbor) && IsFlatBlock(neighbor, world))
                 {
-                    position.y = Utils.FastMax(2, start.y + y);
-                    blocksToDestroy.Add(position);
-
-                    if (!CaveBlocks.IsTerrain(GameManager.Instance.World.GetBlock(position)))
-                    {
-                        return false;
-                    }
+                    queue.Enqueue(neighbor);
+                    flatBlocks.Add(neighbor);
+                    visited.Add(neighbor);
                 }
             }
         }
 
-        var blockChangeInfos = blocksToDestroy
-            .Select(blockPosition => new BlockChangeInfo(blockPosition, BlockValue.Air, MarchingCubes.DensityAir))
-            .ToList();
+        Log.Out($"[Cave] terrainCollapse, rolls: {rolls}, timer: {timer.ElapsedMilliseconds}ms");
 
-        GameManager.Instance.World.SetBlocksRPC(blockChangeInfos);
-        GameManager.Instance.World.AddFallingBlocks(blocksToCollapse);
+        return flatBlocks;
+    }
 
-        return true;
+    private static bool IsFlatBlock(Vector3i worldPos, World world, int radius = 1)
+    {
+        int x = worldPos.x;
+        int y = worldPos.y;
+        int z = worldPos.z;
+
+        var block = world.GetBlock(x, y, z);
+        var blockBelow = world.GetBlock(x, y - 1, z);
+        var blockAbove = world.GetBlock(x, y + 1, z);
+
+        bool isFlatBlock =
+               CaveBlocks.IsTerrain(block)
+            && CaveBlocks.IsTerrain(blockBelow)
+            && !CaveBlocks.IsTerrain(blockAbove);
+
+        return isFlatBlock;
     }
 
     public override BaseAction Clone()
