@@ -1,5 +1,6 @@
-Priority:
+First release:
     ✘ implement tunneling with code of toolTerrainModelder @cancelled(24-08-29 21:59)
+    ✘ find a way to force rwg POIs choices @cancelled(24-11-02 23:24)
     ✔ debug cave prefab placements regarding surface prefabs @done(24-08-17 22:43)
     ✔ Implement connection regular town POIs to the cave network @done(24-08-18 22:22)
     ✔ implement prefab rename command in cave editor plugin @done(24-08-18 22:22)
@@ -8,117 +9,75 @@ Priority:
     ✔ check cave horde nights @done(24-09-06 19:00)
     ✔ find an efficient way to check if a path exists between two cave blocks (for zombie spawning) @done(24-09-07 22:33)
     ✔ debug low caves zombies spawning @done(24-09-08 15:21)
-    ☐ debug tunnels intersections with surface prefabs
-    ☐ reduce water spawns with a noise map
-    ☐ setup water decoration
-    ☐ attemps to add trapped terrain blocks
-    ☐ setup cave biomes (radiated, spores, water, else ?)
-    ☐ assert abs(prefab.yOffset) < prefab.size.y
-    ☐ integrate small prefabs in tunnels (dirt, decoration, modeled terrain, stalactites, water well)
-    ☐ implement multiple cave networks (good feature + performances hack)
-    ☐ find a way to force rwg POIs choices
-    ☐ implement tunnel terrain smoothing
-    ☐ setup rwg user interface
-    ☐ implmement ore layers
-    ☐ Increase terrain heightmap
-    ☐ set variant boolean attribute on cave prefab to avoid repetion with vanilla ones
-    ☐ allow cave markers inside poi bounds, combining octree cluster parsing + marker directions
-    ☐ allow tunneling inside rwg tiles
-    ☐ store terrain offset in worldinfos.xml
-    ☐ Loading screen with cave pictures
+    ✔ Increase terrain heightmap @done(24-11-02 23:23)
+    ✔ implmement ore layers @done(24-11-02 23:24)
+    ✔ bug: can't place torch inside caveAir @done(24-09-06 19:38)
+    ✔ editor: replace selection by terrain / by stone helper @done(24-08-15 20:49)
+    ✔ editor: place cave marker from selection @done(24-08-15 20:49)
+    ✔ editor: suggest cave tags @done(24-08-15 20:49)
+    ✔ editor: fill selection with procedural terrain @done(24-11-02 23:37)
 
-Optimization:
-    ✔ store all sphere offsets to avoid computing sqrDistance in critical sections @done(24-09-10 22:16)
-    ☐ https://chatgpt.com/share/e5a3ac47-58a9-4971-bece-792fcc9fca21
-    ☐ disable surface meshes (which are not cave entrances) when player is underground
-    ☐ work special vector3sbs(short, byte, short) class as long as possible in cave tunneling, avoiding instanciating caveBlocks
-    ☐ free cavemap memory after saving it, after game exit
-    ☐ handle cave regions loading / unloading
+    ☐ editor: dedicated testing feature, to test how the cave system is builded around
+    ☐ editor: Add missing prefab names into localization.txt
+    ☐ editor: command to add entry in localization.txt
 
-Testing:
-    ☐ block inside cave prefabs must be cave air (H_Prefab.cs)
-    ☐ cluterization of prefabs where size.x != size.z
+    ☐ checking: check cave markers placement
+    ☐ checking: check min entrance deep
+    ☐ checking: assert abs(prefab.yOffset) < prefab.size.y
+    ☐ checking: overlapping markers
 
-Bug:
-    ✔ can't place torch inside caveAir @done(24-09-06 19:38)
-    ☐ floating blocks at tunnels intersections
-    ☐ man in terrain (bugged decoration)
-    ☐ caveAir are displayed in black on the map
+    ☐ generation: increase ore layers width
+    ☐ generation: debug tunnels intersections with surface prefabs
+    ☐ generation: find an efficient way to add water in caves
+    ☐ generation: implement multiple cave networks (good feature + performances hack)
+    ☐ generation: set variant boolean attribute on cave prefab to avoid repetion with vanilla ones
+    ☐ generation: allow cave markers inside poi bounds, combining octree cluster parsing + marker directions
+    ☐ generation: allow tunneling inside rwg tiles
+    ☐ generation: store terrain offset in worldinfos.xml
+    ☐ generation: hidden treasures chests
+    ☐ generation: add trapped sections on flat ground
+    ☐ generation: fix floating blocks at tunnels intersections
 
-Cave generation:
-    ✔ random pois placement @done(24-08-15 22:38)
-    ✔ cave decoration @done(24-08-15 22:38)
-    ✔ poi placement system @done(24-08-15 22:38)
-    ✔ cave entrance system @done(24-08-15 22:38)
-    ✔ allow to cancel the generation @done(24-08-17 21:09)
-    ☐ more procedural rooms
-    ☐ natural fillers (rooms, mazes, canyon, rivers, tensionned stalactites, etc...)
-    ☐ random world generator UI
+    ☐ decoration: setup water decoration
+    ☐ decoration: broken bikes or else mechanical stuff to gather mechanical parts, etc...
+    ☐ decoration: lights to turn on
 
-Editor:
-    ✔ replace selection by terrain / by stone helper @done(24-08-15 20:49)
-    ✔ place cave marker from selection @done(24-08-15 20:49)
-    ✔ suggest cave tags @done(24-08-15 20:49)
-    ☐ check cave markers placement
-    ☐ check min entrance deep
-    ☐ fill selection with procedural terrain
-    ☐ dedicated testing feature, to test how the cave system is builded around
-    ☐ Add missing prefab names into localization.txt
-    ☐ command to add entry in localization.txt
+    ☐ UI: setup rwg user interface
+    ☐ UI: Loading screen with cave pictures
 
-prefab themes:
-    ☐ nest of creatures
-    ☐ trapped tunnels which could be confused with regular ones
-    ☐ pirate treasures
+    ✔ Optimization: store all sphere offsets to avoid computing sqrDistance in critical sections @done(24-09-10 22:16)
+    ☐ Optimization: disable surface meshes (which are not cave entrances) when player is underground
+    ☐ Optimization: work special vector3sbs(short, byte, short) class as long as possible in cave tunneling, avoiding instanciating caveBlocks
+    ☐ Optimization: free cavemap memory after saving it, after game exit
+    ☐ Optimization: handle cave regions loading / unloading
 
 Later:
+    ✘ rare ore vein -> need custom microsplat @cancelled(24-11-02 23:26)
+    ✘ possibility to choose which POIs to include or exlude, grouped by mod or else @cancelled(24-11-02 23:26)
+    ✘ loot in niches dug into the walls or the floor @cancelled(24-11-02 23:28)
+    ✔ horde triggers (like police car ?) @done(24-11-02 23:27)
+    ✔ artifact collections, only complete collection sellable to trader @done(24-11-02 23:27)
+
+    ☐ integrate small prefabs in tunnels (dirt, decoration, modeled terrain, stalactites, water well)
+    ☐ setup cave biomes (radiated, spores, water, else ?)
+    ☐ implement tunnel terrain smoothing
     ☐ special rope with stability + 360 degres climbable
     ☐ live cave map
     ☐ cave navigation with beacons
     ☐ random ropes (some of those are trapped ? with a dedicated sound when it breaks ?)
     ☐ sound ambiance
-    ☐ possibility to choose which POIs to include or exlude, grouped by mod or else
-    ☐ rare ore vein
     ☐ tunnels blocked with dirt
-    ☐ hidden treasures
     ☐ obstacles to jumb over (with traps at the bottom ?)
     ☐ landslide event
     ☐ flooding event
-    ☐ horde triggers (like police car ?)
     ☐ no oxygen event
     ☐ zombie toxic spore events (with particule effects like TLOS ?)
     ☐ radiation event
     ☐ cave fog
-    ☐ artifact collections, only complete collection sellable to trader
     ☐ murals
     ☐ loot bioming
     ☐ new plants which grow in caves only
     ☐ mine structures (or else) along tunnels (via prefab parts ? make new cave parts group ?)
     ☐ tunnel treasure quest
-    ☐ dedicated materials to explore caves (metal detector, gps, gazmask, nbc suit, flares, flare gun, ice axe)
+    ☐ dedicated items to explore caves (metal detector, gps, gazmask, nbc suit, flares, flare gun, ice axe)
     ☐ dedicated game settings tab in saves menu for cave gameplay
-    ☐ broken bikes or else mechanical stuff to gather mechanical parts, etc...
-    ☐ lights to turn on
-    ☐ loot in niches dug into the walls or the floor
-
-Cave zombies:
-    ☐ https://assetstore.unity.com/search#cf-ec_category=3d,characters&q=horror
-    ☐ https://assetstore.unity.com/packages/3d/characters/creatures/mutant-monster-2-261815
-    ☐ https://assetstore.unity.com/packages/3d/characters/creatures/mutantmonster3-261824
-    ☐ https://assetstore.unity.com/packages/3d/characters/creatures/mutant-monster-5-261878
-    ☐ https://assetstore.unity.com/packages/3d/characters/creatures/corrupted-rat-01-211400
-    ☐ https://www.cgtrader.com/3d-models/character/fantasy-character/monster-1321a6d8-4741-4f3f-a411-1b89f196e9ea
-    ☐ https://www.cgtrader.com/3d-models/character/fantasy-character/wendigo-a4d15803-decb-436b-88c1-2582909060b4
-    ☐ https://www.cgtrader.com/3d-models/character/fantasy-character/zombies-3e53ff28-1132-4432-9ad9-f07e57e41e9b
-    ☐ https://www.cgtrader.com/3d-models/character/fantasy-character/ancient-zombie
-    ☐ https://www.cgtrader.com/3d-models/character/fantasy-character/low-poly-epic-skeleton-bloody-creature
-    ☐ https://www.cgtrader.com/3d-models/character/man/human-corpse
-
-Items / blocks:
-    ☐ https://opengameart.org/content/rocks-0
-    ☐ https://www.turbosquid.com/3d-models/3d-stalagmites-rocks-set-1594163
-
-Cancelled:
-    ✘ increase terrain height @cancelled(24-07-10 00:26)
-    ✘ full region reset @cancelled(24-08-15 20:49)
-    ✘ visitmap full -> commande à rouler pour générer toute la map -> voir dans le repertoire de sauvegarde de la partie @cancelled(24-08-15 20:49)
