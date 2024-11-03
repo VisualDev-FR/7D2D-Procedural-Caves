@@ -52,7 +52,8 @@ public class SpawnManagerBiomes_Update
         if (playerPosition.y + CaveConfig.zombieSpawnMarginDeep > GameManager.Instance.World.GetTerrainHeight(playerPosition.x, playerPosition.z))
             return true;
 
-        var spawnPosition = GetZombieSpawnPosition(playerPosition);
+        // TODO: see world.GetRandomSpawnPositionInAreaMinMaxToPlayers
+        var spawnPosition = CaveGenerator.caveChunksProvider.GetSpawnPositionNearPlayer(playerPosition, CaveConfig.minSpawnDist);
         if (spawnPosition == Vector3.zero)
         {
             return false;
@@ -152,8 +153,12 @@ public class SpawnManagerBiomes_Update
             return false;
         }
 
+
         var spawnedGroup = biomeSpawnEntityGroupList.list[index];
         var entityID = EntityGroups.GetRandomFromGroup(spawnedGroup.entityGroupRefName, ref spawnManagerBiome.lastClassId);
+
+        Log.Out($"[Cave] entityGroupName: {spawnedGroup.entityGroupRefName}");
+
         if (entityID == 0)
         {
             _chunkBiomeSpawnData.SetRespawnDelay(entityGroupName, world.worldTime, world.Biomes);
@@ -170,37 +175,32 @@ public class SpawnManagerBiomes_Update
         if (spawnDeadChance > 0f && gameRandom.RandomFloat < spawnDeadChance)
             entity.Kill(DamageResponse.New(_fatal: true));
 
+        TrySpawnDeadAnimal(new Vector3i(spawnPosition), _chunkBiomeSpawnData);
+
         Log.Out($"[Caves] Spawning entity: {entityID} at {spawnPosition}, playerPos=[{playerPosition}]");
 
         return false;
     }
 
-    public static Vector3 GetZombieSpawnPosition(Vector3i playerPosition)
+    private static void TrySpawnDeadAnimal(Vector3i spawnPosition, ChunkAreaBiomeSpawnData _chunkBiomeSpawnData)
     {
-        // TODO: see world.GetRandomSpawnPositionInAreaMinMaxToPlayers
+        var entityGroupName = "DeadAnimals";
+        var deadAnimalSpanwPosition = CaveGenerator.caveChunksProvider.GetSpawnPositionNearPlayer(spawnPosition, 2);
+        var entityID = EntityGroups.GetRandomFromGroup(entityGroupName, ref spawnManagerBiome.lastClassId);
 
-        GameRandom random = GameRandomManager.instance.CreateGameRandom(playerPosition.GetHashCode());
-
-        return CaveGenerator.caveChunksProvider.GetSpawnPositionNearPlayer(playerPosition, CaveConfig.minSpawnDist);
-    }
-
-    private static void SpawnEntity(int id, Vector3 spawnPosition, ChunkAreaBiomeSpawnData _chunkBiomeSpawnData, string entityGroupName)
-    {
-        var entity = EntityFactory.CreateEntity(id, spawnPosition);
-
-        if (entity == null)
-        {
-            Log.Error($"[Cave] null entity for id '{id}'");
+        if (deadAnimalSpanwPosition == Vector3i.zero)
             return;
-        }
-        entity.SetSpawnerSource(EnumSpawnerSource.Dynamic, _chunkBiomeSpawnData.chunk.Key, entityGroupName);
 
-        var myEntity = entity as EntityAlive;
+        _chunkBiomeSpawnData.IncEntitiesSpawned(entityGroupName);
 
-        if (myEntity)
-            myEntity.SetSleeper();
+        Entity entity = EntityFactory.CreateEntity(entityID, spawnPosition);
 
+        if (entity is null)
+            return;
+
+        entity.SetSpawnerSource(EnumSpawnerSource.Biome, _chunkBiomeSpawnData.chunk.Key, entityGroupName);
         GameManager.Instance.World.SpawnEntityInWorld(entity);
-        GameManager.Instance.World.DebugAddSpawnedEntity(entity);
+
+        entity.Kill(DamageResponse.New(true));
     }
 }

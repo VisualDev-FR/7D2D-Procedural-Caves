@@ -24,5 +24,17 @@
             animalDireWolf, 0.05
         </entitygroup>
 
+        <entitygroup name="DeadAnimals">
+            animalRabbit, 10
+            animalChicken, 10
+            animalSnake, 10
+            animalWolf, 10
+            animalBearSmall, 10
+            animalDireWolf, 10
+            animalDoe, 10
+            animalStag, 10
+            none, 20
+        </entitygroup>
+
     </append>
 </configs>
