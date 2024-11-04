@@ -175,8 +175,6 @@ public class SpawnManagerBiomes_Update
         if (spawnDeadChance > 0f && gameRandom.RandomFloat < spawnDeadChance)
             entity.Kill(DamageResponse.New(_fatal: true));
 
-        TrySpawnDeadAnimal(new Vector3i(spawnPosition), _chunkBiomeSpawnData);
-
         Log.Out($"[Caves] Spawning entity: {entityID} at {spawnPosition}, playerPos=[{playerPosition}]");
 
         return false;

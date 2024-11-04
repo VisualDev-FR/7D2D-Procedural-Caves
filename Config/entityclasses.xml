@@ -8,9 +8,9 @@
         <property name="AITask-2" value="DestroyArea" />
         <property name="AITask-3" value="Territorial" />
         <property name="AITask-4" value="ApproachDistraction" />
-        <property name="AITask-5" value="ApproachAndAttackTarget" data="class=EntityPlayer,0,EntityBandit,0,EntityEnemyAnimal,0,EntityAnimal" />
-        <property name="AITask-6" value="ApproachSpot" />
-        <property name="AITask-7" value="EatBlock, ProceduralCaves" />
+        <property name="AITask-5" value="EatBlock, ProceduralCaves" />
+        <property name="AITask-6" value="ApproachAndAttackTarget" data="class=EntityPlayer,0,EntityBandit,0,EntityEnemyAnimal,0,EntityAnimal" />
+        <property name="AITask-7" value="ApproachSpot" />
         <property name="AITask-8" value="Look" />
         <property name="AITask-9" value="Wander" />
         <property name="AITask-10" value="" />
