@@ -8,9 +8,15 @@ public class EAIEatBlock : EAIBase
 
         public BlockValue blockValue;
 
-        public Vector3i Position;
+        public Vector3i position;
 
         public string BlockName => blockValue.Block.blockName;
+
+        public BlockTargetData(Vector3i position)
+        {
+            this.position = position;
+            this.blockValue = GameManager.Instance.World.GetBlock(position);
+        }
     }
 
     public const float cDamageBoostPerAlly = 0.2f;
@@ -56,7 +62,7 @@ public class EAIEatBlock : EAIBase
         }
 
         blockTargetDatas = FindBlockToEat(searchRadius);
-        if (blockTargetDatas.Position == Vector3i.zero)
+        if (blockTargetDatas.position == Vector3i.zero)
         {
             Log.Out($"[Cave] EAIEatBlock: no block to eat found");
             return false;
@@ -116,12 +122,12 @@ public class EAIEatBlock : EAIBase
 
     public void AttackBlock()
     {
-        var targetPos = blockTargetDatas.Position;
+        var targetPos = blockTargetDatas.position;
 
         theEntity.SetLookPosition(targetPos);
         theEntity.moveHelper.SetMoveTo(targetPos, _canBreakBlocks: false);
 
-        Log.Out($"[Cave] move entity '{theEntity.entityId}' to {blockTargetDatas.Position} ({blockTargetDatas.blockValue})");
+        Log.Out($"[Cave] move entity '{theEntity.entityId}' to {blockTargetDatas.position} ({blockTargetDatas.blockValue})");
 
         /* if (!(theEntity.inventory.holdingItemData.actionData[0] is ItemActionAttackData itemActionAttackData))
         {
@@ -181,6 +187,49 @@ public class EAIEatBlock : EAIBase
 
     private BlockTargetData FindBlockToEat(int radius)
     {
+        var timer = CaveUtils.StartTimer();
+        var world = GameManager.Instance.World;
+        var queue = new Queue<Vector3i>();
+        var visited = new HashSet<Vector3i>();
+        var start = new Vector3i(theEntity.position);
+        var rolls = 0;
+
+        queue.Enqueue(start);
+
+        while (queue.Count > 0 && rolls++ < 100)
+        {
+            Vector3i currentPos = queue.Dequeue();
+
+            if (CanEatBlockAt(currentPos))
+            {
+                Log.Out($"[Cave] Block to eat found at '{currentPos}', rolls: {rolls}, timer: {timer.ElapsedMilliseconds}ms");
+                return new BlockTargetData(currentPos);
+            }
+
+            visited.Add(currentPos);
+
+            foreach (var offset in CaveUtils.offsetsNoVertical)
+            {
+                Vector3i neighborPos = currentPos + offset;
+
+                uint block = world.GetBlock(neighborPos).rawData;
+                bool canExtend =
+                       !visited.Contains(neighborPos)
+                    && (block == 0 || block > 255)
+                    && CaveBlocks.IsTerrain(world.GetBlock(neighborPos + Vector3i.down));
+
+                if (!canExtend)
+                    continue;
+
+                queue.Enqueue(neighborPos);
+            }
+        }
+
         return BlockTargetData.Null;
+    }
+
+    private bool CanEatBlockAt(Vector3i position)
+    {
+        return GameManager.Instance.World.GetBlock(position).Block.blockName.StartsWith("goreBlock");
     }
 }

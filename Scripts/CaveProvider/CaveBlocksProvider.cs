@@ -171,6 +171,7 @@ public class CaveChunksProvider
                 Vector3i neighborPos = currentNode.position + offset;
                 uint rawData = world.GetBlock(x + offset.x, y + offset.y, z + offset.z).rawData;
 
+                // TODO: revis this criteria which is too much restrictive
                 bool canExtend =
                        !visited.Contains(neighborPos.GetHashCode())
                     && (rawData == 0 || rawData > 255)
