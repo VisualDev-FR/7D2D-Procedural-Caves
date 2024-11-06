@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.Numerics;
 using GamePath;
 using UnityEngine;
 
@@ -16,32 +14,20 @@ public class EAIEatBlock : EAIBase
 
         public string BlockName => blockValue.Block.blockName;
 
-        public Vector3 getBellyPosition() => position;
+        public Vector3 GetBellyPosition() => new Vector3(
+            position.x + 0.5f,
+            position.y + 0.2f,
+            position.z + 0.5f
+        );
 
         public BlockTargetData(Vector3 position)
         {
-            position.x += 0.5f;
-            position.y += 0.2f;
-            position.z += 0.5f;
-
             this.position = position;
             this.blockValue = GameManager.Instance.World.GetBlock(new Vector3i(position));
         }
     }
 
-    public const float cDamageBoostPerAlly = 0.2f;
-
-    public int attackDelay;
-
-    public float damageBoostPercent;
-
-    public List<Entity> allies = new List<Entity>();
-
     private BlockTargetData entityTarget;
-
-    private readonly int searchRadius = 10;
-
-    private List<BlockValue> targetClasses;
 
     private int attackTimeout;
 
@@ -52,6 +38,8 @@ public class EAIEatBlock : EAIBase
     private int pathCounter;
 
     public Vector2 seekPosOffset;
+
+    private readonly HashSet<string> foodBlockNames = new HashSet<string>();
 
     public override void Init(EntityAlive _theEntity)
     {
@@ -64,68 +52,38 @@ public class EAIEatBlock : EAIBase
     {
         base.SetData(data);
 
-        targetClasses = new List<BlockValue>();
+        foodBlockNames.Clear();
 
-        if (!data.TryGetValue("class", out var _value))
+        if (!data.TryGetValue("placeholder", out string placeholderName))
         {
+            Log.Error($"[Cave] placeholder data missing for entity class '{theEntity.EntityClass.entityClassName}'");
             return;
         }
+
+        foodBlockNames.UnionWith(GetPlaceholderBlocks(placeholderName));
     }
 
     public override bool CanExecute()
     {
 
-        if (theEntity.sleepingOrWakingUp || theEntity.bodyDamage.CurrentStun != 0 || (theEntity.Jumping && !theEntity.isSwimming))
+        if (foodBlockNames.Count == 0 || theEntity.sleepingOrWakingUp || theEntity.bodyDamage.CurrentStun != 0 || (theEntity.Jumping && !theEntity.isSwimming))
         {
-            Log.Out($"[Cave] EAIEatBlock: Can't Execute");
             return false;
         }
 
-        entityTarget = FindBlockToEat(searchRadius);
+        entityTarget = FindBlockToEat();
         if (entityTarget.position == Vector3i.zero)
         {
             return false;
         }
 
-        // Type type = blockTargetPosition.GetType();
-        // for (int i = 0; i < targetClasses.Count; i++)
-        // {
-        //     TargetClass targetClass = targetClasses[i];
-        //     if (targetClass.type != null && targetClass.type.IsAssignableFrom(type))
-        //     {
-        //         chaseTimeMax = targetClass.chaseTimeMax;
-        //         return true;
-        //     }
-        // }
         return true;
     }
 
     public override void Start()
     {
-        /* EAIBreakBlock */
-        // attackDelay = 1;
-        // Vector3i blockPos = theEntity.moveHelper.HitInfo.hit.blockPos;
-        // Block block = theEntity.world.GetBlock(blockPos).Block;
-        // if (block.HasTag(BlockTags.Door) || block.HasTag(BlockTags.ClosetDoor))
-        // {
-        //     theEntity.IsBreakingDoors = true;
-        // }
-
-        /* EAIApproachAndAttackTarget */
-        // entityTargetPos = entityTarget.position;
-        // entityTargetVel = Vector3.zero;
-        // isTargetToEat = entityTarget.IsDead();
         isEating = false;
         theEntity.IsEating = false;
-        // homeTimeout = (theEntity.IsSleeper ? 90f : chaseTimeMax);
-        // hasHome = homeTimeout > 0f;
-        // isGoingHome = false;
-        // if (theEntity.ChaseReturnLocation == Vector3.zero)
-        // {
-        // 	theEntity.ChaseReturnLocation = (theEntity.IsSleeper ? theEntity.SleeperSpawnPosition : theEntity.position);
-        // }
-        // pathCounter = 0;
-        // relocateTicks = 0;
         attackTimeout = 5;
         eatCount = 0;
     }
@@ -148,7 +106,7 @@ public class EAIEatBlock : EAIBase
     public override void Update()
     {
         var isTargetToEat = true;
-        Vector3 entityTargetPos = entityTarget.position;
+        Vector3 entityTargetPos = entityTarget.GetBellyPosition();
         attackTimeout--;
 
         if (isEating)
@@ -182,7 +140,7 @@ public class EAIEatBlock : EAIBase
         float num2 = entityHeight - 0.05f;
         float sqrMaxDist = num2 * num2;
 
-        float sqrTargetDistance = sqrTargetDistanceZX();
+        float sqrTargetDistance = CaveUtils.SqrEuclidianDist(theEntity.position, entityTarget.GetBellyPosition());
         float dy = entityTargetPos.y - theEntity.position.y;
         float dyAbs = Utils.FastAbs(dy);
 
@@ -200,7 +158,7 @@ public class EAIEatBlock : EAIBase
             if (--pathCounter <= 0 && theEntity.CanNavigatePath() && !PathFinderThread.Instance.IsCalculatingPath(theEntity.entityId))
             {
                 pathCounter = 6 + GetRandom(10);
-                Vector3 moveToLocation = GetMoveToLocation(num2);
+                Vector3 moveToLocation = entityTarget.GetBellyPosition();
                 if (moveToLocation.y - theEntity.position.y < -8f)
                 {
                     pathCounter += 40;
@@ -240,7 +198,7 @@ public class EAIEatBlock : EAIBase
         {
             if (theEntity.navigator.noPathAndNotPlanningOne() && pathCounter > 0 && dy < 2.1f)
             {
-                Vector3 moveToLocation2 = GetMoveToLocation(num2);
+                Vector3 moveToLocation2 = entityTarget.GetBellyPosition();
                 theEntity.moveHelper.SetMoveTo(moveToLocation2, _canBreakBlocks: true);
             }
         }
@@ -273,62 +231,6 @@ public class EAIEatBlock : EAIBase
         }
     }
 
-    public float sqrTargetDistanceZX()
-    {
-        return CaveUtils.SqrEuclidianDist(theEntity.position, entityTarget.position);
-    }
-
-    public Vector3 GetMoveToLocation(float maxDist)
-    {
-        var world = GameManager.Instance.World;
-        var pos = entityTarget.position;
-
-        pos = entityTarget.getBellyPosition();
-        pos = world.FindSupportingBlockPos(pos);
-
-        if (maxDist <= 0f)
-            return pos;
-
-        Vector3 vector = new Vector3(theEntity.position.x, pos.y, theEntity.position.z);
-        Vector3 vector2 = pos - vector;
-        float magnitude = vector2.magnitude;
-        if (magnitude < 3f)
-        {
-            if (magnitude <= maxDist)
-            {
-                float num = pos.y - theEntity.position.y;
-                if (num < -3f || num > 1.5f)
-                {
-                    return pos;
-                }
-                return vector;
-            }
-            vector2 *= maxDist / magnitude;
-            Vector3 vector3 = pos - vector2;
-            vector3.y += 0.51f;
-            Vector3i pos2 = World.worldToBlockPos(vector3);
-            BlockValue block = world.GetBlock(pos2);
-            Block block2 = block.Block;
-
-            if (block2.PathType <= 0)
-            {
-                // throw new NotImplementedException("Need to import Physics.Raycast");
-                // if (Physics.Raycast(vector3 - Origin.position, Vector3.down, out var hitInfo, 1.02f, 1082195968))
-                // {
-                //     vector3.y = hitInfo.point.y + Origin.position.y;
-                //     return vector3;
-                // }
-                // if (block2.IsElevator(block.rotation))
-                // {
-                //     vector3.y = pos.y;
-                //     return vector3;
-                // }
-            }
-        }
-
-        return pos;
-    }
-
     private bool DestroyBlock(Vector3 position, int amount)
     {
         var worldPos = new Vector3i(position);
@@ -340,8 +242,13 @@ public class EAIEatBlock : EAIBase
 
         if (blockValue.damage >= blockValue.Block.MaxDamage)
         {
-            blockValue = BlockValue.Air;
             wasDestroyed = true;
+            blockValue = BlockPlaceholderMap.Instance.Replace(
+                CaveBlocks.bloodDecorPlaceholder,
+                Random,
+                (int)position.x,
+                (int)position.z
+            );
         }
 
         world.SetBlockRPC(worldPos, blockValue);
@@ -349,7 +256,7 @@ public class EAIEatBlock : EAIBase
         return wasDestroyed;
     }
 
-    private BlockTargetData FindBlockToEat(int radius)
+    private BlockTargetData FindBlockToEat()
     {
         var timer = CaveUtils.StartTimer();
         var world = GameManager.Instance.World;
@@ -366,7 +273,6 @@ public class EAIEatBlock : EAIBase
 
             if (CanEatBlockAt(currentPos))
             {
-                Log.Out($"[Cave] Block to eat found at '{currentPos}', rolls: {rolls}, timer: {timer.ElapsedMilliseconds}ms");
                 return new BlockTargetData(currentPos);
             }
 
@@ -394,6 +300,28 @@ public class EAIEatBlock : EAIBase
 
     private bool CanEatBlockAt(Vector3i position)
     {
-        return GameManager.Instance.World.GetBlock(position).Block.blockName.StartsWith("goreBlock");
+        var blockName = GameManager.Instance.World.GetBlock(position).Block.blockName;
+        return foodBlockNames.Contains(blockName);
+        // return GameManager.Instance.World.GetBlock(position).Block.blockName.StartsWith("goreBlock");
+    }
+
+    private IEnumerable<string> GetPlaceholderBlocks(string placeholderName)
+    {
+        if (!Block.nameToBlockCaseInsensitive.TryGetValue(placeholderName, out var placeholder))
+        {
+            Log.Error($"[Cave] placeholder not found: '{placeholderName}'");
+            yield break;
+        }
+
+        if (!BlockPlaceholderMap.Instance.placeholders.TryGetValue(placeholder.ToBlockValue(), out var placeholderTargets))
+        {
+            Log.Warning($"[Cave] placeholder '{placeholder.blockName}' not found!");
+            yield break;
+        }
+
+        foreach (var target in placeholderTargets)
+        {
+            yield return target.block.Block.blockName;
+        }
     }
 }

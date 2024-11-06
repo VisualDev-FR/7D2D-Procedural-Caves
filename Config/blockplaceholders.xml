@@ -1,6 +1,30 @@
 ﻿<configs>
     <append xpath="/blockplaceholders">
 
+        <placeholder name="zombieFoodPlaceholder">
+            <block name="goreBlockAnimal" />
+            <block name="bodyBagYellowFlies" />
+            <block name="bodyBagPairMixed" />
+            <block name="bodyBagPairYellow" />
+            <block name="bodyBagPair" />
+            <block name="bodyBagPile" />
+            <block name="bodyBagBlack" />
+            <block name="goreHumanSkull" />
+            <block name="goreBlockHumanBones" />
+            <block name="goreBlockHumanCorpse2Offset" />
+            <block name="goreBlockHumanCorpse3" />
+            <block name="goreBlockHumanCorpse2" />
+            <block name="goreBlockHumanCorpse1" />
+            <block name="goreBlockHumanCorpse" />
+        </placeholder>
+
+        <placeholder name="bloodDecorPlaceholder">
+            <block name="bloodDecor01" prob=".25" />
+            <block name="bloodDecor02" prob=".25" />
+            <block name="bloodDecor05" prob=".25" />
+            <block name="bloodDecor06" prob=".25" />
+        </placeholder>
+
         <!-- ALL BIOMES -->
         <placeholder name="cntCaveFloorShallowWater">
         </placeholder>

@@ -1,4 +1,5 @@
 ﻿<configs>
+
     <append xpath="/blocks">
 
         <block name="caveAir">
@@ -14,6 +15,17 @@
             <property name="CanDestroy" value="false" />
             <property name="Material" value="McaveAir" />
             <drop event="Destroy" count="0" />
+        </block>
+
+        <!-- zombie food -->
+        <block name="zombieFoodPlaceholder">
+            <property name="Extends" value="cntWastelandRandomLootHelper" />
+            <property name="CreativeMode" value="None" />
+        </block>
+
+        <block name="bloodDecorPlaceholder">
+            <property name="Extends" value="cntWastelandRandomLootHelper" />
+            <property name="CreativeMode" value="None" />
         </block>
 
         <!-- placeholders (used for cave decoration) -->
@@ -308,4 +320,5 @@
 
 
     </append>
+
 </configs>
