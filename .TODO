@@ -12,11 +12,15 @@ First release:
     ✔ Increase terrain heightmap @done(24-11-02 23:23)
     ✔ implmement ore layers @done(24-11-02 23:24)
     ✔ bug: can't place torch inside caveAir @done(24-09-06 19:38)
+
+    ✔ ambiance: make zombies eating blocks @done(24-11-06 21:56)
+    ✔ ambiance: make flashlight sparkling @done(24-11-06 21:56)
+    ☐ ambiance: patch world luminosity
+
     ✔ editor: replace selection by terrain / by stone helper @done(24-08-15 20:49)
     ✔ editor: place cave marker from selection @done(24-08-15 20:49)
     ✔ editor: suggest cave tags @done(24-08-15 20:49)
     ✔ editor: fill selection with procedural terrain @done(24-11-02 23:37)
-
     ☐ editor: dedicated testing feature, to test how the cave system is builded around
     ☐ editor: Add missing prefab names into localization.txt
     ☐ editor: command to add entry in localization.txt
@@ -50,6 +54,11 @@ First release:
     ☐ Optimization: work special vector3sbs(short, byte, short) class as long as possible in cave tunneling, avoiding instanciating caveBlocks
     ☐ Optimization: free cavemap memory after saving it, after game exit
     ☐ Optimization: handle cave regions loading / unloading
+
+    ☐ IO: ajouter la version dans les fichiers de sauvegarde de la cavemap
+    ☐ IO: implémenter cavemap.xml
+    ☐ IO: implémenter le reporting de bug qui va créer le zip avec toute les infos de debug
+
 
 Later:
     ✘ rare ore vein -> need custom microsplat @cancelled(24-11-02 23:26)

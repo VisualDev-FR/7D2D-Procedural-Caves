@@ -54,12 +54,12 @@
             </effect_group>
 
             <!-- terrain collapse event -->
-            <effect_group>
+            <!-- <effect_group>
                 <requirement name="!HasBuff" buff="buffNoCaveEvent" />
                 <requirement name="!HasBuff" buff="buffCaveTerrainEventCoolDown" />
                 <requirement name="CVarCompare" cvar="$terrainEventProp" operation="LTE" value="20" />
                 <triggered_effect trigger="onSelfBuffUpdate" action="CallGameEvent" event="cave_terrain_collapse_event" />
-            </effect_group>
+            </effect_group> -->
 
         </buff>
 
