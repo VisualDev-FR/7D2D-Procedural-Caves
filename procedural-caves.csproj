@@ -136,6 +136,9 @@
     <Compile Include="Scripts\ConsoleCmd\CaveDebugConsoleCmd.cs" />
     <Compile Include="Scripts\ConsoleCmd\CaveEditorConsoleCmd.cs" />
     <Compile Include="Scripts\ConsoleCmd\DebugItemConsoleCmd.cs" />
+    
+    <!-- EAI -->
+    <Compile Include="Scripts\EAI\EAIEatBlock.cs" />
 
     <!-- IO -->
     <Compile Include="Scripts\IO\MultiStream.cs" />
