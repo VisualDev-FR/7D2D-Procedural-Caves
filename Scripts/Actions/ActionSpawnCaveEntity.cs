@@ -316,7 +316,7 @@ public class ActionSpawnCaveEntity : ActionSpawnEntity
     // overrided method
     public new bool FindValidPosition(out Vector3 newPoint, Vector3 startPoint, float minDistance, float maxDistance, bool spawnInSafe, float yOffset = 0f, bool spawnInAir = false, float raycastOffset = 0f)
     {
-        newPoint = CaveGenerator.caveChunksProvider.GetSpawnPositionNearPlayer(startPoint, minDistance);
+        newPoint = CaveSpawnManager.GetSpawnPositionNearPlayer(startPoint, minDistance);
 
         Log.Out($"[Cave] FindValidPosition: {newPoint}, startPoint: {startPoint}, minDistance: {minDistance}"); // \n{StackTraceUtility.ExtractStackTrace()}
 

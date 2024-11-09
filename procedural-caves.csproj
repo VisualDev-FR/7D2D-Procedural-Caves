@@ -131,12 +131,13 @@
     <Compile Include="Scripts\CaveProvider\CaveBlocks.cs" />
     <Compile Include="Scripts\CaveProvider\CaveBlocksProvider.cs" />
     <Compile Include="Scripts\CaveProvider\CaveGenerator.cs" />
+    <Compile Include="Scripts\CaveProvider\CaveSpawnManager.cs" />
 
     <!-- ConsoleCmd -->
     <Compile Include="Scripts\ConsoleCmd\CaveDebugConsoleCmd.cs" />
     <Compile Include="Scripts\ConsoleCmd\CaveEditorConsoleCmd.cs" />
     <Compile Include="Scripts\ConsoleCmd\DebugItemConsoleCmd.cs" />
-    
+
     <!-- EAI -->
     <Compile Include="Scripts\EAI\EAIEatBlock.cs" />
 

@@ -53,7 +53,7 @@ public class SpawnManagerBiomes_Update
             return true;
 
         // TODO: see world.GetRandomSpawnPositionInAreaMinMaxToPlayers
-        var spawnPosition = CaveGenerator.caveChunksProvider.GetSpawnPositionNearPlayer(playerPosition, CaveConfig.minSpawnDist);
+        var spawnPosition = CaveSpawnManager.GetSpawnPositionNearPlayer(playerPosition, CaveConfig.minSpawnDist);
         if (spawnPosition == Vector3.zero)
         {
             return false;
@@ -183,7 +183,7 @@ public class SpawnManagerBiomes_Update
     private static void TrySpawnDeadAnimal(Vector3i spawnPosition, ChunkAreaBiomeSpawnData _chunkBiomeSpawnData)
     {
         var entityGroupName = "DeadAnimals";
-        var deadAnimalSpanwPosition = CaveGenerator.caveChunksProvider.GetSpawnPositionNearPlayer(spawnPosition, 2);
+        var deadAnimalSpanwPosition = CaveSpawnManager.GetSpawnPositionNearPlayer(spawnPosition, 2);
         var entityID = EntityGroups.GetRandomFromGroup(entityGroupName, ref spawnManagerBiome.lastClassId);
 
         if (deadAnimalSpanwPosition == Vector3i.zero)
