@@ -45,7 +45,7 @@ public class CaveTunnel
         this.worldSize = worldSize;
 
         FindPath(edge, cachedPrefabs);
-        ThickenTunnel(edge.node1, edge.node2, seed);
+        ThickenTunnel(edge.node1, edge.node2, seed, cachedPrefabs);
     }
 
     // private API
@@ -79,7 +79,7 @@ public class CaveTunnel
 
         int bedRockMargin = CaveConfig.bedRockMargin + 1;
         int terrainMargin = CaveConfig.terrainMargin + 1;
-        int sqrMinPrefabDistance = 100;
+        int sqrMinPrefabDistance = 25;
         int neighborDistance = 1;
         int index = 0;
 
@@ -174,7 +174,7 @@ public class CaveTunnel
         }
     }
 
-    private void ThickenTunnel(GraphNode start, GraphNode target, int seed)
+    private void ThickenTunnel(GraphNode start, GraphNode target, int seed, CavePrefabManager cachedPrefabs)
     {
         // TODO: handle duplicates with that instead of hashset: https://stackoverflow.com/questions/1672412/filtering-duplicates-out-of-an-ienumerable
 
@@ -189,13 +189,15 @@ public class CaveTunnel
         for (int i = 0; i < path.Count; i++)
         {
             var tunnelRadius = noise.Interpolate(i);
-            var sphere = GetSphere(path[i].ToVector3i(), tunnelRadius)
-                .Where(caveBlock =>
-                       caveBlock.y > CaveConfig.bedRockMargin
-                    && caveBlock.y + CaveConfig.terrainMargin < (int)heightMap.GetHeight(caveBlock.x, caveBlock.z));
+            var sphere = GetSphere(path[i].ToVector3i(), tunnelRadius);
 
             blocks.UnionWith(sphere);
         }
+
+        blocks.RemoveWhere(caveBlock =>
+                caveBlock.y <= CaveConfig.bedRockMargin
+            || (caveBlock.y + CaveConfig.terrainMargin) >= (int)heightMap.GetHeight(caveBlock.x, caveBlock.z)
+            || cachedPrefabs.IntersectWithPrefab(caveBlock.ToVector3i()));
     }
 
     private void ReconstructPath(AstarNode currentNode)

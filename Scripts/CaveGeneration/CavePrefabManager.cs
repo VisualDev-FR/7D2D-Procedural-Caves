@@ -8,9 +8,7 @@ public class CavePrefabManager
 {
     private static readonly HashSet<CavePrefab> emptyPrefabsHashset = new HashSet<CavePrefab>();
 
-    public readonly Dictionary<int, List<CavePrefab>> groupedCavePrefabs;
-
-    public readonly Dictionary<int, HashSet<CavePrefab>> nearestPrefabs;
+    public readonly Dictionary<Vector2s, HashSet<CavePrefab>> groupedPrefabs;
 
     public readonly Dictionary<string, List<Vector3i>> prefabPlacements;
 
@@ -41,8 +39,7 @@ public class CavePrefabManager
         this.worldSize = worldSize;
 
         Prefabs = new List<CavePrefab>();
-        groupedCavePrefabs = new Dictionary<int, List<CavePrefab>>();
-        nearestPrefabs = new Dictionary<int, HashSet<CavePrefab>>();
+        groupedPrefabs = new Dictionary<Vector2s, HashSet<CavePrefab>>();
         prefabPlacements = new Dictionary<string, List<Vector3i>>();
     }
 
@@ -52,8 +49,7 @@ public class CavePrefabManager
 
         worldSize = worldBuilder.WorldSize;
         Prefabs = new List<CavePrefab>();
-        groupedCavePrefabs = new Dictionary<int, List<CavePrefab>>();
-        nearestPrefabs = new Dictionary<int, HashSet<CavePrefab>>();
+        groupedPrefabs = new Dictionary<Vector2s, HashSet<CavePrefab>>();
         prefabPlacements = new Dictionary<string, List<Vector3i>>();
     }
 
@@ -84,26 +80,28 @@ public class CavePrefabManager
             prefabPlacements[prefab.PrefabName].Add(prefab.GetCenter());
         }
 
-        foreach (var chunkHash in prefab.GetOverlappingChunkHashes())
+        var overlapingChunks = prefab.GetOverlappingChunks().ToList();
+
+        Log.Out($"[Cave] AddPrefab '{prefab.PrefabName}' at {prefab.position - CaveUtils.HalfWorldSize(worldSize)}, overlappingChunks: {overlapingChunks.Count()}");
+
+        var neighbor = new Vector2s(0, 0);
+
+        foreach (var chunkPos in overlapingChunks)
         {
-            if (!groupedCavePrefabs.ContainsKey(chunkHash))
+            for (int dx = -1; dx <= 1; dx++)
             {
-                groupedCavePrefabs[chunkHash] = new List<CavePrefab>();
-            }
-
-            groupedCavePrefabs[chunkHash].Add(prefab);
-
-            // caching occupied neighbors chunks to avoid computing nearest prefabs in critical sections
-            foreach (var offsetHash in CaveUtils.offsetsHorizontalHashes)
-            {
-                var neighborHashcode = chunkHash + offsetHash;
-
-                if (!nearestPrefabs.ContainsKey(neighborHashcode))
+                for (int dz = -1; dz <= 1; dz++)
                 {
-                    nearestPrefabs[neighborHashcode] = new HashSet<CavePrefab>();
-                }
+                    neighbor.x = (short)(chunkPos.x + dx);
+                    neighbor.z = (short)(chunkPos.z + dz);
 
-                nearestPrefabs[neighborHashcode].Add(prefab);
+                    if (!groupedPrefabs.ContainsKey(neighbor))
+                    {
+                        groupedPrefabs[neighbor] = new HashSet<CavePrefab>();
+                    }
+
+                    groupedPrefabs[neighbor].Add(prefab);
+                }
             }
         }
     }
@@ -135,11 +133,11 @@ public class CavePrefabManager
         return false;
     }
 
-    private HashSet<CavePrefab> GetNearestPrefabsFrom(int x, int z)
+    public HashSet<CavePrefab> GetNearestPrefabsFrom(Vector3i worldPos)
     {
-        var chunkHash = GetChunkHash(x >> 4, z >> 4); // -> (x / 16, z / 16)
+        var chunkPos = new Vector2s(worldPos.x >> 4, worldPos.z >> 4); // -> (x / 16, z / 16)
 
-        if (nearestPrefabs.TryGetValue(chunkHash, out var closePrefabs))
+        if (groupedPrefabs.TryGetValue(chunkPos, out var closePrefabs))
         {
             return closePrefabs;
         }
@@ -151,7 +149,7 @@ public class CavePrefabManager
     {
         var minSqrDist = float.MaxValue;
 
-        foreach (CavePrefab prefab in GetNearestPrefabsFrom(position.x, position.z))
+        foreach (CavePrefab prefab in GetNearestPrefabsFrom(position))
         {
             Vector3i start = prefab.position;
             Vector3i end = start + prefab.Size; // TODO: store end point in prefab to avoid allocating new Vectors here or elsewhere
@@ -167,9 +165,22 @@ public class CavePrefabManager
         return minSqrDist;
     }
 
+    public bool IntersectWithPrefab(Vector3i position)
+    {
+        foreach (CavePrefab prefab in GetNearestPrefabsFrom(position))
+        {
+            if (prefab.Intersect3D(position))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public bool IntersectMarker(CaveBlock block)
     {
-        foreach (CavePrefab prefab in GetNearestPrefabsFrom(block.x, block.z))
+        foreach (CavePrefab prefab in GetNearestPrefabsFrom(block.ToVector3i()))
         {
             if (prefab.IntersectMarker(block.x, block.y, block.z))
             {

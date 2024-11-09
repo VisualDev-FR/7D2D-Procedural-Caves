@@ -42,11 +42,6 @@ public static class CaveUtils
         .Select(offset => PositionHashCode(offset.x, offset.y, offset.z))
         .ToArray();
 
-    public static readonly int[] offsetsHorizontalHashes = offsets
-        .Where(offset => offset.y == 0)
-        .Select(offset => GetChunkHash(offset.x, offset.z))
-        .ToArray();
-
     public static readonly Vector3i[] offsetsHorizontal8 = offsets
         .Where(offset => offset.y == 0)
         .ToArray();
@@ -204,7 +199,7 @@ public static class CaveUtils
         return new Vector3i(Size.z, Size.y, Size.x);
     }
 
-    public static bool Intersect2D(int x, int y, int z, Vector3i position, Vector3i size)
+    public static bool Intersect2D(int x, int z, Vector3i position, Vector3i size)
     {
         if (x < position.x)
             return false;
@@ -223,13 +218,13 @@ public static class CaveUtils
 
     public static bool Intersect3D(int x, int y, int z, Vector3i position, Vector3i size)
     {
-        if (!Intersect2D(x, y, z, position, size))
+        if (!Intersect2D(x, z, position, size))
             return false;
 
         if (y < position.y)
             return false;
 
-        if (y >= position.y + size.z)
+        if (y >= position.y + size.y)
             return false;
 
         return true;

@@ -30,17 +30,17 @@ First release:
     ☐ checking: assert abs(prefab.yOffset) < prefab.size.y
     ☐ checking: overlapping markers
 
-    ☐ generation: increase ore layers width
-    ☐ generation: debug tunnels intersections with surface prefabs
+    ✘ generation: increase ore layers width @cancelled(24-11-09 16:33)
+    ✔ generation: debug tunnels intersections with prefabs @done(24-11-09 22:43)
     ☐ generation: find an efficient way to add water in caves
     ☐ generation: implement multiple cave networks (good feature + performances hack)
     ☐ generation: set variant boolean attribute on cave prefab to avoid repetion with vanilla ones
     ☐ generation: allow cave markers inside poi bounds, combining octree cluster parsing + marker directions
     ☐ generation: allow tunneling inside rwg tiles
     ☐ generation: store terrain offset in worldinfos.xml
-    ☐ generation: hidden treasures chests
     ☐ generation: add trapped sections on flat ground
     ☐ generation: fix floating blocks at tunnels intersections
+    ☐ generation: hidden treasures chests
 
     ☐ decoration: setup water decoration
     ☐ decoration: broken bikes or else mechanical stuff to gather mechanical parts, etc...

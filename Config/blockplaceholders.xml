@@ -312,7 +312,7 @@
 
         <placeholder name="cntCaveCeiling">
 
-            <block name="caveAir" prob="0.100" />
+            <block name="caveAir" prob="0.3" />
 
             <block name="stalactite01" prob=".010" />
             <block name="stalactite02" prob=".010" />

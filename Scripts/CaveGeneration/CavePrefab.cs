@@ -274,35 +274,14 @@ public class CavePrefab
         return false;
     }
 
-    public bool Intersect2D(Vector3i point)
+    public bool Intersect2D(Vector3i pos)
     {
-        if (point.x < position.x)
-            return false;
-
-        if (point.x >= position.x + Size.x)
-            return false;
-
-        if (point.z < position.z)
-            return false;
-
-        if (point.z >= position.z + Size.z)
-            return false;
-
-        return true;
+        return CaveUtils.Intersect2D(pos.x, pos.z, position, Size);
     }
 
     public bool Intersect3D(Vector3i pos)
     {
-        if (!Intersect2D(pos))
-            return false;
-
-        if (pos.y < position.y)
-            return false;
-
-        if (pos.y >= position.y + Size.z)
-            return false;
-
-        return true;
+        return CaveUtils.Intersect3D(pos.x, pos.y, pos.z, position, Size);
     }
 
     private List<Vector3i> GetBoundingPoints()
@@ -356,7 +335,7 @@ public class CavePrefab
         );
     }
 
-    public IEnumerable<int> GetOverlappingChunkHashes()
+    public IEnumerable<Vector2s> GetOverlappingChunks()
     {
         var x0chunk = position.x >> 4;
         var z0chunk = position.z >> 4;
@@ -367,7 +346,7 @@ public class CavePrefab
         {
             for (int z = z0chunk; z <= z1Chunk; z++)
             {
-                yield return CavePrefabManager.GetChunkHash(x, z);
+                yield return new Vector2s(x, z);
             }
         }
     }
@@ -410,7 +389,7 @@ public class CavePrefab
     {
         if (nodes == null)
         {
-            Log.Error($"[Cave] null cavePrefab nodes, isroom: {isRoom}, isBoundaryPrefab: {isBoundaryPrefab}, null pdi: {prefabDataInstance is null}, prefab name: {PrefabName}");
+            Log.Warning($"[Cave] null cavePrefab nodes, isroom: {isRoom}, isBoundaryPrefab: {isBoundaryPrefab}, null pdi: {prefabDataInstance is null}, prefab name: {PrefabName}");
             yield break;
         }
 
