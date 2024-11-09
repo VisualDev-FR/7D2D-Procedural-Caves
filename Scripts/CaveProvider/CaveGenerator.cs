@@ -183,6 +183,7 @@ public class CaveGenerator
         while (maxTries-- > 0)
         {
             blockValue = BlockPlaceholderMap.Instance.Replace(placeHolder, random, worldX, worldZ);
+            blockValue.rotation = (byte)random.Next(4);
 
             if (isFlatFloor && blockValue.type == CaveBlocks.caveAir.type)
             {
@@ -205,7 +206,6 @@ public class CaveGenerator
             yOffset = 1 - blockValue.Block.multiBlockPos.dim.y;
         }
 
-        blockValue.rotation = (byte)random.Next(4);
         chunk.SetBlock(GameManager.Instance.World, posInChunk.x, posInChunk.y + yOffset, posInChunk.z, blockValue);
     }
 
@@ -248,6 +248,11 @@ public class CaveGenerator
                 1,
                 blockValue.Block.BigDecorationRadius
             );
+        }
+
+        if (blockValue.rotation == 1 || blockValue.rotation == 3)
+        {
+            MathUtils.Swap(ref size.x, ref size.z);
         }
 
         int x0 = worldPos.x;
