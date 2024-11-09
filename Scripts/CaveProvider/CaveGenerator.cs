@@ -67,8 +67,7 @@ public class CaveGenerator
         if (caveBlocks == null)
             return;
 
-        var caveBlocksV3i = caveBlocks.Select(block => block.posInChunk.ToVector3i()).ToHashSet();
-        var visited = new HashSet<int>();
+        var visited = caveBlocks.Select(block => block.ToWorldPos(HalfWorldSize)).ToHashSet();
         var neighbor = new Vector3i();
 
         foreach (CaveBlock caveBlock in caveBlocks)
@@ -87,8 +86,7 @@ public class CaveGenerator
                 neighbor.z = blockChunkPos.z + offset.z;
 
                 if (
-                       visited.Contains(neighbor.GetHashCode())
-                    || caveBlocksV3i.Contains(neighbor)
+                       visited.Contains(neighbor)
                     || neighbor.x < 0   // TODO: (neighbor.x & 0b1111) == neighbor.x
                     || neighbor.z < 0   // TODO: (neighbor.z & 0b1111) == neighbor.z
                     || neighbor.x > 15
@@ -105,7 +103,7 @@ public class CaveGenerator
                 chunk.SetBlockRaw(neighbor.x, neighbor.y, neighbor.z, blockValue);
                 chunk.SetDensity(neighbor.x, neighbor.y, neighbor.z, MarchingCubes.DensityTerrain);
 
-                visited.Add(neighbor.GetHashCode());
+                visited.Add(neighbor);
             }
         }
 
