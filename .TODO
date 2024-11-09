@@ -32,6 +32,7 @@ First release:
 
     ✘ generation: increase ore layers width @cancelled(24-11-09 16:33)
     ✔ generation: debug tunnels intersections with prefabs @done(24-11-09 22:43)
+    ☐ generation: add "natural" entrances with virtual cave markers placed in wilderness
     ☐ generation: find an efficient way to add water in caves
     ☐ generation: implement multiple cave networks (good feature + performances hack)
     ☐ generation: set variant boolean attribute on cave prefab to avoid repetion with vanilla ones
