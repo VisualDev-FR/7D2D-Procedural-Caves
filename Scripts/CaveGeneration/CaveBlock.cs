@@ -7,7 +7,7 @@ public class CaveBlock
 
     public Vector2s chunkPos;
 
-    public Vector3bf blockChunkPos;
+    public Vector3bf posInChunk;
 
     public sbyte density;
 
@@ -15,11 +15,11 @@ public class CaveBlock
 
     public MutableInt16 tunnelID;
 
-    public int x => (chunkPos.x << 4) + blockChunkPos.x;
+    public int x => (chunkPos.x << 4) + posInChunk.x;
 
-    public int y => blockChunkPos.y;
+    public int y => posInChunk.y;
 
-    public int z => (chunkPos.z << 4) + blockChunkPos.z;
+    public int z => (chunkPos.z << 4) + posInChunk.z;
 
     public int HashZX() => HashZX(x, z);
 
@@ -90,7 +90,7 @@ public class CaveBlock
 
         chunkPos = new Vector2s(chunk_x, chunk_z);
 
-        blockChunkPos = new Vector3bf(
+        posInChunk = new Vector3bf(
             (byte)(position.x & 15),
             (byte)position.y,
             (byte)(position.z & 15)
@@ -106,7 +106,7 @@ public class CaveBlock
 
         chunkPos = new Vector2s(chunk_x, chunk_z);
 
-        blockChunkPos = new Vector3bf(
+        posInChunk = new Vector3bf(
             (byte)(x & 15),
             (byte)y,
             (byte)(z & 15)
@@ -116,7 +116,7 @@ public class CaveBlock
     public CaveBlock(BinaryReader reader)
     {
         chunkPos = new Vector2s(reader.ReadInt16(), reader.ReadInt16());
-        blockChunkPos = new Vector3bf(reader.ReadUInt16());
+        posInChunk = new Vector3bf(reader.ReadUInt16());
         density = reader.ReadSByte();
         rawData = reader.ReadByte();
         // tunnelID = new MutableInt16(reader.ReadInt16());
@@ -126,7 +126,7 @@ public class CaveBlock
     {
         writer.Write(chunkPos.x);
         writer.Write(chunkPos.z);
-        writer.Write(blockChunkPos.value);
+        writer.Write(posInChunk.value);
         writer.Write(density);
         writer.Write(rawData);
         // writer.Write(tunnelID.value);

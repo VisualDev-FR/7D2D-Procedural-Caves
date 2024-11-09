@@ -314,9 +314,10 @@
 
             <block name="caveAir" prob="0.100" />
 
-            <block name="stalactite01" prob=".015" />
-            <block name="stalactite02" prob=".015" />
-            <block name="stalactite03" prob=".015" />
+            <block name="stalactite01" prob=".010" />
+            <block name="stalactite02" prob=".010" />
+            <block name="stalactite03" prob=".010" />
+            <block name="stalactite04" prob=".010" />
 
             <block name="cobweb" prob=".005" />
             <block name="hangingMoss" prob=".005" />
