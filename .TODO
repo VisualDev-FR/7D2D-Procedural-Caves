@@ -13,7 +13,7 @@ First release:
     ✔ implemement ore layers @done(24-11-02 23:24)
 
     ✔ bug: can't place torch inside caveAir @done(24-09-06 19:38)
-    ☐ zombies spawning in prefab editor
+    ✔ zombies spawning in prefab editor @done(24-11-10 22:31)
 
     ☐ loot: gold teeths, or else jewels on skeletons, dead bodies
 
@@ -34,7 +34,7 @@ First release:
     ☐ checking: assert abs(prefab.yOffset) < prefab.size.y
     ☐ checking: overlapping markers
 
-    ✘ generation: increase ore layers width @cancelled(24-11-09 16:33)
+    ✘ generation: store terrain offset in worldinfos.xml @cancelled(24-11-10 22:32: no reason to do that)
     ✔ generation: debug tunnels intersections with prefabs @done(24-11-09 22:43)
     ✔ generation: improve links between cave rooms and markers @done(24-11-10 13:50)
     ☐ generation: add "natural" entrances with virtual cave markers placed in wilderness
@@ -43,10 +43,9 @@ First release:
     ☐ generation: set variant boolean attribute on cave prefab to avoid repetion with vanilla ones
     ☐ generation: allow cave markers inside poi bounds, combining octree cluster parsing + marker directions
     ☐ generation: allow tunneling inside rwg tiles
-    ☐ generation: store terrain offset in worldinfos.xml
     ☐ generation: add trapped sections on flat ground
-    ☐ generation: fix floating blocks at tunnels intersections
     ☐ generation: burried treasures, skeletons, etc...
+    ☐ generation: tunnels partially blocked
 
     ☐ decoration: setup water decoration
     ☐ decoration: broken bikes, tires, or else mechanical stuff to gather mechanical parts, etc...
@@ -73,15 +72,16 @@ Later:
     ✔ horde triggers (like police car ?) @done(24-11-02 23:27)
     ✔ artifact collections, only complete collection sellable to trader @done(24-11-02 23:27)
 
-    ☐ integrate small prefabs in tunnels (dirt, decoration, modeled terrain, stalactites, water well)
-    ☐ setup cave biomes (radiated, spores, water, else ?)
-    ☐ implement tunnel terrain smoothing
+    ☐ generation: fix floating blocks at tunnels intersections
+    ☐ generation: increase ore layers width
+    ☐ generation: implement tunnel terrain smoothing
+    ☐ generation: integrate small prefabs in tunnels (dirt, decoration, modeled terrain, stalactites, water well)
+    ☐ generation: setup cave biomes (radiated, spores, water, else ?)
     ☐ special rope with stability + 360 degres climbable
     ☐ live cave map
     ☐ cave navigation with beacons
     ☐ random ropes (some of those are trapped ? with a dedicated sound when it breaks ?)
     ☐ sound ambiance
-    ☐ tunnels blocked with dirt
     ☐ obstacles to jumb over (with traps at the bottom ?)
     ☐ landslide event
     ☐ flooding event
