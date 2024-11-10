@@ -13,6 +13,11 @@ public static class WorldBuilder_GenerateData
 
     public static bool Prefix(WorldBuilder __instance, ref IEnumerator __result)
     {
+        if (!CaveConfig.generateCaves)
+        {
+            return true;
+        }
+
         worldBuilder = __instance;
 
         CaveUtils.Assert(worldBuilder != null, "null world builder");
@@ -196,8 +201,11 @@ public static class WorldBuilder_saveRawHeightmap
 {
     public static bool Prefix()
     {
-        WorldBuilder_GenerateData.SaveCaveMap();
-        WorldBuilder_GenerateData.Cleanup();
+        if (CaveConfig.generateCaves)
+        {
+            WorldBuilder_GenerateData.SaveCaveMap();
+            WorldBuilder_GenerateData.Cleanup();
+        }
 
         return true;
     }

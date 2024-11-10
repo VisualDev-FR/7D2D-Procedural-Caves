@@ -1,6 +1,5 @@
 <configs>
 
-    <remove xpath="/windows/window[@name='worldGeneration']//grid/rect[16]" />
     <remove xpath="/windows/window[@name='worldGeneration']//grid/rect[14]" />
     <remove xpath="/windows/window[@name='worldGeneration']//grid/rect[13]" />
     <remove xpath="/windows/window[@name='worldGeneration']//grid/rect[12]" />
@@ -17,7 +16,7 @@
         <!-- terrain offset -->
         <rect>
             <label depth="4" width="150" height="30" style="hover" tooltip_key="xuiTerrainOffsetDesc" text_key="xuiTerrainOffset" font_size="28" color="[white]" justify="right" pivot="topleft" />
-            <combobox name="terrainOffset" depth="108" pos="155,0" width="200" height="32" type="ComboBoxInt" value_min="0" value_max="255" value="5" value_increment="5" value_wrap="false" />
+            <combobox name="terrainOffset" depth="108" pos="155,0" width="200" height="32" type="ComboBoxInt" value_min="0" value_max="200" value="5" value_increment="5" value_wrap="false" />
         </rect>
 
         <!-- cave networks count -->
@@ -40,13 +39,4 @@
 
     </insertAfter>
 
-    <insertAfter xpath="/windows/window[@name='worldGeneration']//grid/rect/label[@text='Preview Quality']/..">
-
-        <!-- cave preview / vanilla preview -->
-        <rect>
-            <label depth="4" width="150" height="30" style="hover" tooltip_key="xuiCavePreviewDesc" text_key="xuiCavePreview" font_size="28" color="[white]" justify="right" pivot="topleft" />
-            <combobox name="cavePreview" depth="108" pos="155,0" width="200" height="32" type="ComboBoxBool" />
-        </rect>
-
-    </insertAfter>
 </configs>

@@ -10,7 +10,7 @@ First release:
     ✔ find an efficient way to check if a path exists between two cave blocks (for zombie spawning) @done(24-09-07 22:33)
     ✔ debug low caves zombies spawning @done(24-09-08 15:21)
     ✔ Increase terrain heightmap @done(24-11-02 23:23)
-    ✔ implmement ore layers @done(24-11-02 23:24)
+    ✔ implemement ore layers @done(24-11-02 23:24)
 
     ✔ bug: can't place torch inside caveAir @done(24-09-06 19:38)
     ☐ zombies spawning in prefab editor

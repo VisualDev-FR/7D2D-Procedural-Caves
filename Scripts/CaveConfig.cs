@@ -1,4 +1,5 @@
 using UnityEngine;
+using WorldGenerationEngineFinal;
 
 public static class CaveConfig
 {
@@ -33,16 +34,25 @@ public static class CaveConfig
     // the min deep (from terrain height) to spawn cave zombies
     public static int zombieSpawnMarginDeep = 5;
 
-    public static bool generateWater = false;
-
-    public static float terrainOffset = 50;
-
     public static bool enableCaveBloodMoon = true;
 
     // the minimun euclidian distance from the player to spawn a zombie
     public static int minSpawnDist = 15;
 
     public static int minSpawnDistBloodMoon = 25;
+
+    // cave generation datas
+    public static bool generateWater = false;
+
+    public static bool generateCaves = false;
+
+    public static float terrainOffset = 50;
+
+    public static WorldBuilder.GenerationSelections caveNetworks;
+
+    public static WorldBuilder.GenerationSelections caveEntrances;
+
+    public static WorldBuilder.GenerationSelections caveWater;
 
     public class CaveLightConfig
     {
