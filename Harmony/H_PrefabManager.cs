@@ -1,11 +1,20 @@
+using HarmonyLib;
 using System.Collections;
 using System.Collections.Generic;
 using WorldGenerationEngineFinal;
 
 
+[HarmonyPatch(typeof(PrefabManager), "LoadPrefabs")]
 public static class H_PrefabManager
 {
-    public static IEnumerator LoadPrefabs(PrefabManager PrefabManager, CavePrefabManager cavePrefabManager)
+    // prefix to be runned when caveGeneration is disabled, to filter underground prefabs
+    public static bool Prefix(PrefabManager __instance, ref IEnumerator __result)
+    {
+        __result = LoadPrefabs(__instance);
+        return false;
+    }
+
+    public static IEnumerator LoadPrefabs(PrefabManager PrefabManager, CavePrefabManager cavePrefabManager = null)
     {
         PrefabManager.ClearDisplayed();
         if (PrefabManager.prefabManagerData.AllPrefabDatas.Count != 0)
@@ -33,7 +42,7 @@ public static class H_PrefabManager
                 Log.Warning("Could not load prefab data for " + location.Name);
 
             // PATCH START //
-            cavePrefabManager.TryCacheCavePrefab(prefabData);
+            cavePrefabManager?.TryCacheCavePrefab(prefabData);
 
             if (!prefabData.Tags.Test_AnySet(filter) && !prefabData.Tags.Test_AllSet(wildernessCaveEntrance))
             {
