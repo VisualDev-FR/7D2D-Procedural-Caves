@@ -15,6 +15,8 @@ public class WorldEnvironment_Update
 
     private static bool patchApplied = false;
 
+    public static bool modActive = true;
+
     public static bool Prefix(WorldEnvironment __instance)
     {
         var localPlayer = __instance.localPlayer ?? GameManager.Instance.World.GetPrimaryPlayer();
@@ -25,12 +27,12 @@ public class WorldEnvironment_Update
         var playerPosition = localPlayer.position;
         var terrainHeight = GameManager.Instance.World.GetHeightAt(playerPosition.x, playerPosition.z);
 
-        if (terrainHeight > playerPosition.y)
+        if (modActive && terrainHeight > playerPosition.y)
         {
             ApplyCaveLighting(terrainHeight - playerPosition.y);
             patchApplied = true;
         }
-        else if (playerPosition.y > terrainHeight && patchApplied)
+        else if ((!modActive || playerPosition.y > terrainHeight) && patchApplied)
         {
             ResetVanillaLighting();
             patchApplied = false;

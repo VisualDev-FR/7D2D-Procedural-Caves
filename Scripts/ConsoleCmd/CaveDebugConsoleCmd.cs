@@ -66,6 +66,11 @@ public class CaveDebugConsoleCmd : ConsoleCmdAbstract
         BlockSelectionUtils.SelectBox(bb);
     }
 
+    private static void LightCommand(List<string> _params)
+    {
+        WorldEnvironment_Update.modActive = !WorldEnvironment_Update.modActive;
+    }
+
     public override void Execute(List<string> _params, CommandSenderInfo _senderInfo)
     {
         if (_params.Count == 0)
@@ -82,6 +87,10 @@ public class CaveDebugConsoleCmd : ConsoleCmdAbstract
 
             case "prefab":
                 PrefabCommand(_params);
+                break;
+
+            case "light":
+                LightCommand(_params);
                 break;
 
             default:
