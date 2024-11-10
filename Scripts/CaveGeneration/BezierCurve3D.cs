@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -28,7 +29,7 @@ public class BezierCurve3D
 
             if (previous != Vector3i.zero)
             {
-                positions.UnionWith(CaveRoom.Bresenham3D(previous, position));
+                positions.UnionWith(Bresenham3D(previous, position));
             }
 
             previous = position;
@@ -38,4 +39,107 @@ public class BezierCurve3D
 
         return positions;
     }
+
+    public static List<Vector3i> Bresenham3D(Vector3i v1, Vector3i v2)
+    {
+        // https://www.geeksforgeeks.org/bresenhams-algorithm-for-3-d-line-drawing/
+
+        var ListOfPoints = new List<Vector3i>
+        {
+            v1
+        };
+
+        int dx = Math.Abs(v2.x - v1.x);
+        int dy = Math.Abs(v2.y - v1.y);
+        int dz = Math.Abs(v2.z - v1.z);
+        int xs;
+        int ys;
+        int zs;
+
+        if (v2.x > v1.x)
+            xs = 1;
+        else
+            xs = -1;
+        if (v2.y > v1.y)
+            ys = 1;
+        else
+            ys = -1;
+        if (v2.z > v1.z)
+            zs = 1;
+        else
+            zs = -1;
+
+        // Driving axis is X-axis"
+        if (dx >= dy && dx >= dz)
+        {
+            int p1 = 2 * dy - dx;
+            int p2 = 2 * dz - dx;
+            while (v1.x != v2.x)
+            {
+                v1.x += xs;
+                if (p1 >= 0)
+                {
+                    v1.y += ys;
+                    p1 -= 2 * dx;
+                }
+                if (p2 >= 0)
+                {
+                    v1.z += zs;
+                    p2 -= 2 * dx;
+                }
+                p1 += 2 * dy;
+                p2 += 2 * dz;
+                ListOfPoints.Add(v1);
+            }
+        }
+        // Driving axis is Y-axis"
+        else if (dy >= dx && dy >= dz)
+        {
+            int p1 = 2 * dx - dy;
+            int p2 = 2 * dz - dy;
+            while (v1.y != v2.y)
+            {
+                v1.y += ys;
+                if (p1 >= 0)
+                {
+                    v1.x += xs;
+                    p1 -= 2 * dy;
+                }
+                if (p2 >= 0)
+                {
+                    v1.z += zs;
+                    p2 -= 2 * dy;
+                }
+                p1 += 2 * dx;
+                p2 += 2 * dz;
+                ListOfPoints.Add(v1);
+            }
+        }
+        // Driving axis is Z-axis"
+        else
+        {
+            int p1 = 2 * dy - dz;
+            int p2 = 2 * dx - dz;
+            while (v1.z != v2.z)
+            {
+                v1.z += zs;
+                if (p1 >= 0)
+                {
+                    v1.y += ys;
+                    p1 -= 2 * dz;
+                }
+                if (p2 >= 0)
+                {
+                    v1.x += xs;
+                    p2 -= 2 * dz;
+                }
+                p1 += 2 * dy;
+                p2 += 2 * dx;
+                ListOfPoints.Add(v1);
+            }
+        }
+
+        return ListOfPoints;
+    }
+
 }

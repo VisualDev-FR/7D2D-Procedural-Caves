@@ -34,8 +34,11 @@ public class CaveRoom
 
     private List<CaveMarker> markers;
 
+    private readonly int seed;
+
     public CaveRoom(Vector3i start, Vector3i size, int seed = -1)
     {
+        this.seed = seed;
         this.size = size;
         offset = start == null ? Vector3i.zero : start;
         rand = new Random(seed);
@@ -45,6 +48,7 @@ public class CaveRoom
 
     public CaveRoom(CavePrefab prefab, int seed = -1)
     {
+        this.seed = seed;
         size = prefab.Size;
         offset = prefab.position;
         rand = new Random(seed);
@@ -106,20 +110,18 @@ public class CaveRoom
 
         foreach (var marker in markers)
         {
-            var path = Bresenham3D(marker.start, center);
+            var path = FindPathToCenter(marker.start, center);
 
             foreach (var p in path)
             {
-                int x = p.x;
-                int y = p.y;
-                int z = p.z;
-
-                if (x >= 0 && y >= 0 && z >= 0 && x < size.x && y < size.y && z < size.z && !map[x, y, z])
-                {
-                    SetSphere(new Vector3i(x, y, z), 2);
-                }
+                SetSphere(p, 3);
             }
         }
+    }
+
+    private bool IsInside(Vector3i p)
+    {
+        return p.x >= 0 && p.y >= 0 && p.z >= 0 && p.x < size.x && p.y < size.y && p.z < size.z;
     }
 
     private void SetSphere(Vector3i center, int radius)
@@ -185,106 +187,44 @@ public class CaveRoom
         return neighborsCount;
     }
 
-    public static List<Vector3i> Bresenham3D(Vector3i v1, Vector3i v2)
+    private IEnumerable<Vector3i> FindPathToCenter(Vector3i start, Vector3i center)
     {
-        // https://www.geeksforgeeks.org/bresenhams-algorithm-for-3-d-line-drawing/
+        var startNode = new AstarNode(start);
+        var queue = new Queue<AstarNode>();
+        var visited = new HashSet<Vector3i>();
+        int index = 0;
 
-        var ListOfPoints = new List<Vector3i>
+        queue.Enqueue(startNode);
+
+        while (queue.Count > 0 && index++ < 10_000)
         {
-            v1
-        };
+            AstarNode currentNode = queue.Dequeue();
 
-        int dx = Math.Abs(v2.x - v1.x);
-        int dy = Math.Abs(v2.y - v1.y);
-        int dz = Math.Abs(v2.z - v1.z);
-        int xs;
-        int ys;
-        int zs;
-
-        if (v2.x > v1.x)
-            xs = 1;
-        else
-            xs = -1;
-        if (v2.y > v1.y)
-            ys = 1;
-        else
-            ys = -1;
-        if (v2.z > v1.z)
-            zs = 1;
-        else
-            zs = -1;
-
-        // Driving axis is X-axis"
-        if (dx >= dy && dx >= dz)
-        {
-            int p1 = 2 * dy - dx;
-            int p2 = 2 * dz - dx;
-            while (v1.x != v2.x)
+            if (IsInside(currentNode.position) && map[currentNode.position.x, currentNode.position.y, currentNode.position.z])
             {
-                v1.x += xs;
-                if (p1 >= 0)
-                {
-                    v1.y += ys;
-                    p1 -= 2 * dx;
-                }
-                if (p2 >= 0)
-                {
-                    v1.z += zs;
-                    p2 -= 2 * dx;
-                }
-                p1 += 2 * dy;
-                p2 += 2 * dz;
-                ListOfPoints.Add(v1);
+                return currentNode.ReconstructPath().Select(block => block.ToVector3i());
             }
-        }
-        // Driving axis is Y-axis"
-        else if (dy >= dx && dy >= dz)
-        {
-            int p1 = 2 * dx - dy;
-            int p2 = 2 * dz - dy;
-            while (v1.y != v2.y)
+
+            visited.Add(currentNode.position);
+
+            foreach (var offset in CaveUtils.offsetsNoVertical)
             {
-                v1.y += ys;
-                if (p1 >= 0)
+                Vector3i neighborPos = currentNode.position + offset;
+
+                if (!IsInside(neighborPos) || visited.Contains(neighborPos))
+                    continue;
+
+                AstarNode neighbor = new AstarNode(neighborPos, currentNode);
+
+                if (!queue.Contains(neighbor))
                 {
-                    v1.x += xs;
-                    p1 -= 2 * dy;
+                    queue.Enqueue(neighbor);
                 }
-                if (p2 >= 0)
-                {
-                    v1.z += zs;
-                    p2 -= 2 * dy;
-                }
-                p1 += 2 * dx;
-                p2 += 2 * dz;
-                ListOfPoints.Add(v1);
-            }
-        }
-        // Driving axis is Z-axis"
-        else
-        {
-            int p1 = 2 * dy - dz;
-            int p2 = 2 * dx - dz;
-            while (v1.z != v2.z)
-            {
-                v1.z += zs;
-                if (p1 >= 0)
-                {
-                    v1.y += ys;
-                    p1 -= 2 * dz;
-                }
-                if (p2 >= 0)
-                {
-                    v1.x += xs;
-                    p2 -= 2 * dz;
-                }
-                p1 += 2 * dy;
-                p2 += 2 * dx;
-                ListOfPoints.Add(v1);
             }
         }
 
-        return ListOfPoints;
+        Log.Warning($"[Cave] room: no path found, index: {index}, seed: {seed}");
+
+        return new List<Vector3i>();
     }
-
 }

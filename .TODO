@@ -36,6 +36,7 @@ First release:
 
     ✘ generation: increase ore layers width @cancelled(24-11-09 16:33)
     ✔ generation: debug tunnels intersections with prefabs @done(24-11-09 22:43)
+    ✔ generation: improve links between cave rooms and markers @done(24-11-10 13:50)
     ☐ generation: add "natural" entrances with virtual cave markers placed in wilderness
     ☐ generation: find an efficient way to add water in caves
     ☐ generation: implement multiple cave networks (good feature + performances hack)
@@ -46,7 +47,6 @@ First release:
     ☐ generation: add trapped sections on flat ground
     ☐ generation: fix floating blocks at tunnels intersections
     ☐ generation: burried treasures, skeletons, etc...
-    ☐ generation: improve links between cave rooms and markers
 
     ☐ decoration: setup water decoration
     ☐ decoration: broken bikes, tires, or else mechanical stuff to gather mechanical parts, etc...
