@@ -11,7 +11,11 @@ First release:
     ✔ debug low caves zombies spawning @done(24-09-08 15:21)
     ✔ Increase terrain heightmap @done(24-11-02 23:23)
     ✔ implmement ore layers @done(24-11-02 23:24)
+
     ✔ bug: can't place torch inside caveAir @done(24-09-06 19:38)
+    ☐ zombies spawning in prefab editor
+
+    ☐ loot: gold teeths, or else jewels on skeletons, dead bodies
 
     ✔ ambiance: make zombies eating blocks @done(24-11-06 21:56)
     ✔ ambiance: make flashlight sparkling @done(24-11-06 21:56)
@@ -41,10 +45,11 @@ First release:
     ☐ generation: store terrain offset in worldinfos.xml
     ☐ generation: add trapped sections on flat ground
     ☐ generation: fix floating blocks at tunnels intersections
-    ☐ generation: hidden treasures chests
+    ☐ generation: burried treasures, skeletons, etc...
+    ☐ generation: improve links between cave rooms and markers
 
     ☐ decoration: setup water decoration
-    ☐ decoration: broken bikes or else mechanical stuff to gather mechanical parts, etc...
+    ☐ decoration: broken bikes, tires, or else mechanical stuff to gather mechanical parts, etc...
     ☐ decoration: lights to turn on
 
     ☐ UI: setup rwg user interface

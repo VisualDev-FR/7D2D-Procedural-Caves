@@ -10,7 +10,7 @@ public class SpawnManagerBiomes_Update
 
     public static bool Prefix(SpawnManagerBiomes __instance, string _spawnerName, bool _bSpawnEnemyEntities, object _userData)
     {
-        if (!GameUtils.IsPlaytesting() && CaveGenerator.isEnabled)
+        if (!GameManager.Instance.IsEditMode() && !GameUtils.IsPlaytesting() && CaveGenerator.isEnabled)
         {
             spawnManagerBiome = __instance;
             return SpawnUpdate(_spawnerName, _bSpawnEnemyEntities, _userData as ChunkAreaBiomeSpawnData);
