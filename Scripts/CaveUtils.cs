@@ -216,18 +216,23 @@ public static class CaveUtils
         return true;
     }
 
-    public static bool Intersect3D(int x, int y, int z, Vector3i position, Vector3i size)
+    public static bool Intersect3D(int x, int y, int z, Vector3i start, Vector3i size)
     {
-        if (!Intersect2D(x, z, position, size))
+        if (!Intersect2D(x, z, start, size))
             return false;
 
-        if (y < position.y)
+        if (y < start.y)
             return false;
 
-        if (y >= position.y + size.y)
+        if (y >= start.y + size.y)
             return false;
 
         return true;
+    }
+
+    public static bool Intersect3D(Vector3i position, Vector3i start, Vector3i size)
+    {
+        return Intersect3D(position.x, position.y, position.z, start, size);
     }
 
     public static List<Vector3i> GetBoundingEdges(Vector3i position, Vector3i size)

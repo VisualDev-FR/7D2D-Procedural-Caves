@@ -28,7 +28,7 @@ public class CaveDebugConsoleCmd : ConsoleCmdAbstract
             return;
         }
 
-        var clusters = TTSReader.Clusterize(prefabInstance);
+        var clusters = BlockClusterizer.Clusterize(prefabInstance);
 
         Log.Out($"[Cluster] player: [{playerPos}], prefab: [{prefabInstance.boundingBoxPosition}], rotation: {prefabInstance.rotation}, name: '{prefabInstance.name}'");
 

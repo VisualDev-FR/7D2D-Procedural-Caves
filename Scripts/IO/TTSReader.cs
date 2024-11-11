@@ -2,151 +2,27 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using UnityEngine;
 
 
 // Light .tts file reader, to read prefab blocks datas from the world builder.
-// His purpose is to collect and clusterize non tunnelable blocks from rwg-street-tile prefabs
+// His purpose is to collect and clusterize non-terrain / underground blocks from prefabs
+// to create volumes where the caveBuilder is not allowed to generate tunnels
 public class TTSReader
 {
-    public static List<BoundingBox> Clusterize(PrefabInstance prefab)
+    public static HashSet<Vector3i> ReadUndergroundBlocks(PrefabInstance prefabInstance)
     {
-        var path = prefab.location.FullPath;
-        var yOffset = prefab.prefab.yOffset;
+        var fullPath = prefabInstance.location.FullPath;
+        var yOffset = prefabInstance.prefab.yOffset;
 
-        return Clusterize(path, yOffset);
+        return ReadUndergroundBlocks(fullPath, yOffset);
     }
 
-    public static List<BoundingBox> Clusterize(string fullPath, int yOffset)
+    public static HashSet<Vector3i> ReadUndergroundBlocks(PrefabDataInstance pdi)
     {
-        var blocks = ReadUndergroundBlocks(fullPath, yOffset);
-        var clusters = ClusterizeBlocks(blocks);
-        // var merged = new List<BoundingBox>();
+        var fullPath = pdi.location.FullPath;
+        var yOffset = pdi.prefab.yOffset;
 
-        // Log.Out($"{blocks.Count} blocks found.");
-
-        // foreach (var cluster in clusters)
-        // {
-        //     var subVolumes = DivideCluster(cluster, blocks, 2);
-
-        //     if (subVolumes.Count > 0)
-        //     {
-        //         merged.AddRange(subVolumes);
-        //     }
-        //     else
-        //     {
-        //         merged.Add(cluster);
-        //     }
-        // }
-
-        // merged = MergeBoundingBoxes(merged);
-
-        return clusters;
-    }
-
-    public static List<BoundingBox> DivideCluster(BoundingBox cluster, HashSet<Vector3i> blocks, int maxDeep)
-    {
-        var result = new List<BoundingBox>();
-
-        foreach (var bb in cluster.Octree())
-        {
-            bool containsBlock = false;
-
-            foreach (var pos in bb.IteratePoints())
-            {
-                if (blocks.Contains(pos))
-                {
-                    containsBlock = true;
-                    bb.blocksCount++;
-                }
-            }
-
-            if (containsBlock && maxDeep > 0)
-            {
-                result.AddRange(DivideCluster(bb, blocks, maxDeep - 1));
-            }
-            else if (containsBlock)
-            {
-                result.Add(bb);
-            }
-
-        }
-
-        return result;
-    }
-
-    public static BoundingBox TryMerge(BoundingBox a, BoundingBox b)
-    {
-        if (a.start.y == b.start.y && a.start.z == b.start.z && a.size.y == b.size.y && a.size.z == b.size.z)
-        {
-            if (a.start.x + a.size.x == b.start.x)
-            {
-                return new BoundingBox(a.start, new Vector3i(a.size.x + b.size.x, a.size.y, a.size.z), a.blocksCount + b.blocksCount);
-            }
-
-            if (b.start.x + b.size.x == a.start.x)
-            {
-                return new BoundingBox(b.start, new Vector3i(b.size.x + a.size.x, b.size.y, b.size.z), a.blocksCount + b.blocksCount);
-            }
-        }
-
-        if (a.start.x == b.start.x && a.start.z == b.start.z && a.size.x == b.size.x && a.size.z == b.size.z)
-        {
-            if (a.start.y + a.size.y == b.start.y)
-            {
-                return new BoundingBox(a.start, new Vector3i(a.size.x, a.size.y + b.size.y, a.size.z), a.blocksCount + b.blocksCount);
-            }
-
-            if (b.start.y + b.size.y == a.start.y)
-            {
-                return new BoundingBox(b.start, new Vector3i(b.size.x, b.size.y + a.size.y, b.size.z), a.blocksCount + b.blocksCount);
-            }
-        }
-
-        if (a.start.x == b.start.x && a.start.y == b.start.y && a.size.x == b.size.x && a.size.y == b.size.y)
-        {
-            if (a.start.z + a.size.z == b.start.z)
-            {
-                return new BoundingBox(a.start, new Vector3i(a.size.x, a.size.y, a.size.z + b.size.z), a.blocksCount + b.blocksCount);
-            }
-
-            if (b.start.z + b.size.z == a.start.z)
-            {
-                return new BoundingBox(b.start, new Vector3i(b.size.x, b.size.y, b.size.z + a.size.z), a.blocksCount + b.blocksCount);
-            }
-        }
-
-        return null;
-    }
-
-    public static List<BoundingBox> MergeBoundingBoxes(List<BoundingBox> boxes)
-    {
-        bool merged;
-
-        do
-        {
-            merged = false;
-            for (int i = 0; i < boxes.Count; i++)
-            {
-                for (int j = i + 1; j < boxes.Count; j++)
-                {
-                    var newBox = TryMerge(boxes[i], boxes[j]);
-                    if (newBox != null)
-                    {
-                        boxes[i] = newBox;
-                        boxes.RemoveAt(j);
-                        merged = true;
-                        break; // Sort de la boucle intérieure après une fusion
-                    }
-                }
-                if (merged)
-                {
-                    break; // Sort de la boucle extérieure pour recommencer à zéro
-                }
-            }
-        } while (merged);
-
-        return boxes;
+        return ReadUndergroundBlocks(fullPath, yOffset);
     }
 
     // NOTE: copied from Prefab.loadBlockData
@@ -256,11 +132,6 @@ public class TTSReader
         return result;
     }
 
-    private static bool IsUnderTerrain(int posY, int yOffset)
-    {
-        return posY < -yOffset - CaveConfig.terrainMargin;
-    }
-
     // NOTE: copied from Prefab.offsetToCoord
     private static Vector3i OffsetToCoord(int _offset, int size_x, int size_y)
     {
@@ -273,70 +144,14 @@ public class TTSReader
         return new Vector3i(x, y, z);
     }
 
+    private static bool IsUnderTerrain(int posY, int yOffset)
+    {
+        return posY < -yOffset - CaveConfig.terrainMargin;
+    }
+
     private static bool IsObstacle(BlockValue block)
     {
         return block.rawData == 0 || block.type > 255 || block.isWater;
-    }
-
-    private static bool IsInClusters(Vector3i pos, List<BoundingBox> clusters)
-    {
-        foreach (var rect in clusters)
-        {
-            if (CaveUtils.Intersect3D(pos.x, pos.y, pos.z, rect.start, rect.size))
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private static List<BoundingBox> ClusterizeBlocks(HashSet<Vector3i> blockPositions)
-    {
-        var blockClusters = new List<BoundingBox>();
-
-        foreach (var start in blockPositions)
-        {
-            if (IsInClusters(start, blockClusters))
-                continue;
-
-            var clusterMin = new Vector3i(int.MaxValue, int.MaxValue, int.MaxValue);
-            var clusterMax = new Vector3i(int.MinValue, int.MinValue, int.MinValue);
-
-            var queue = new HashSet<Vector3i>() { start };
-            var cluster = new HashSet<Vector3i>();
-            var index = 100_000;
-
-            while (queue.Count > 0 && index-- > 0)
-            {
-                Vector3i currentPosition = queue.First();
-
-                clusterMin.x = Utils.FastMin(clusterMin.x, currentPosition.x);
-                clusterMin.y = Utils.FastMin(clusterMin.y, currentPosition.y);
-                clusterMin.z = Utils.FastMin(clusterMin.z, currentPosition.z);
-
-                clusterMax.x = Utils.FastMax(clusterMax.x, currentPosition.x + 1);
-                clusterMax.y = Utils.FastMax(clusterMax.y, currentPosition.y + 1);
-                clusterMax.z = Utils.FastMax(clusterMax.z, currentPosition.z + 1);
-
-                cluster.Add(currentPosition);
-                queue.Remove(currentPosition);
-
-                foreach (var offset in CaveUtils.offsets)
-                {
-                    var position = currentPosition + offset;
-
-                    if (!cluster.Contains(position) && blockPositions.Contains(position))
-                    {
-                        queue.Add(position);
-                    }
-                }
-            }
-
-            blockClusters.Add(new BoundingBox(clusterMin, clusterMax - clusterMin, cluster.Count));
-        }
-
-        return blockClusters;
     }
 
 }

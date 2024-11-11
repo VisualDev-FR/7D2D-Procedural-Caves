@@ -161,6 +161,7 @@
     <Compile Include="Scripts\Noise\Noise1D.cs" />
 
     <!-- Utils -->
+    <Compile Include="Scripts\Utils\BlockClusterizer.cs" />
     <Compile Include="Scripts\Utils\BlockSelectionUtils.cs" />
 
     <!-- Root -->

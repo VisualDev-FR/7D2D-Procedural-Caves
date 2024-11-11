@@ -570,7 +570,7 @@ public class CavePrefabManager
             {
                 if (!rwgTileClusters.TryGetValue(pdi.prefab.Name, out var clusters))
                 {
-                    clusters = TTSReader.Clusterize(pdi.location.FullPath, pdi.prefab.yOffset);
+                    clusters = BlockClusterizer.Clusterize(pdi);
                     rwgTileClusters[pdi.prefab.Name] = clusters;
                 }
 
