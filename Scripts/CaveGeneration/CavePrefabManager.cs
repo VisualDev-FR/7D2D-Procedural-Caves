@@ -84,6 +84,11 @@ public class CavePrefabManager
 
         Log.Out($"[Cave] AddPrefab '{prefab.PrefabName}' at {prefab.position - CaveUtils.HalfWorldSize(worldSize)}, overlappingChunks: {overlapingChunks.Count()}");
 
+        if (overlapingChunks.Count == 0)
+        {
+            Log.Warning("No overlapping chunk");
+        }
+
         var neighbor = new Vector2s(0, 0);
 
         foreach (var chunkPos in overlapingChunks)
@@ -546,48 +551,35 @@ public class CavePrefabManager
             if (pdi.prefab.Tags.Test_AnySet(CaveConfig.tagCave))
             {
                 AddPrefab(new CavePrefab(pdi.id, pdi, halfWorldSize));
-                Log.Out($"[Cave] used cave prefab: {pdi.prefab.Name} at [{pdi.boundingBoxPosition}]");
             }
         }
     }
 
     public void AddSurfacePrefabs()
     {
-        var rwgTileClusters = new Dictionary<string, List<BoundingBox>>();
-        var halfWorldSize = new Vector3i(
-            worldBuilder.WorldSize >> 1,
-            0,
-            worldBuilder.WorldSize >> 1
-        );
+        var prefabClusters = new Dictionary<string, List<BoundingBox>>();
+        var halfWorldSize = CaveUtils.HalfWorldSize(worldSize);
 
         foreach (var pdi in PrefabManager.UsedPrefabsWorld)
         {
-            bool isRwgTile = pdi.prefab.Tags.Test_AnySet(CaveConfig.tagRwgStreetTile);
-            bool isUndergound = pdi.prefab.Tags.Test_AnySet(CaveConfig.tagCaveUnderground);
-            bool isCaveEntrance = pdi.prefab.Tags.Test_AnySet(CaveConfig.tagCaveEntrance);
+            if (pdi.prefab.Tags.Test_AnySet(CaveConfig.tagCave))
+                continue;
 
-            if (isRwgTile)
+            if (!prefabClusters.TryGetValue(pdi.prefab.Name, out var clusters))
             {
-                if (!rwgTileClusters.TryGetValue(pdi.prefab.Name, out var clusters))
-                {
-                    clusters = BlockClusterizer.Clusterize(pdi);
-                    rwgTileClusters[pdi.prefab.Name] = clusters;
-                }
-
-                foreach (var cluster in clusters)
-                {
-                    var position = pdi.boundingBoxPosition + halfWorldSize;
-                    var rectangle = cluster.Transform(position, pdi.rotation, pdi.prefab.size);
-                    var cavePrefab = new CavePrefab(rectangle);
-                    AddPrefab(cavePrefab);
-                }
+                clusters = BlockClusterizer.Clusterize(pdi);
+                prefabClusters[pdi.prefab.Name] = clusters;
             }
-            else if (!isUndergound && !isCaveEntrance)
+
+            foreach (var cluster in clusters)
             {
-                AddPrefab(new CavePrefab(Count, pdi, halfWorldSize));
+                var position = pdi.boundingBoxPosition + halfWorldSize;
+                var rectangle = cluster.Transform(position, pdi.rotation, pdi.prefab.size);
+                var cavePrefab = new CavePrefab(rectangle) { isCluster = true };
+                AddPrefab(cavePrefab);
+
+                Log.Out($"[Cave] add cluster ({pdi.prefab.Name}), position: {rectangle.start}, rotation: {pdi.rotation}, size: {rectangle.size}");
             }
         }
     }
-
-
 }

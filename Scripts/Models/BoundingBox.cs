@@ -161,26 +161,24 @@ public class BoundingBox
                 break;
 
             case 1:
-                pz = parentSize.x;
-                bb.start.x = pz - z;
-                bb.start.z = x;
-                bb.size.x = -sz;
-                bb.size.z = sx;
+                bb.start.x = pz - z - sz;   // x1
+                bb.start.z = x;             // z1
+                bb.size.x = sz;             // sx1
+                bb.size.z = sx;             // sz1
                 break;
 
             case 2:
-                bb.start.x = px - x;
-                bb.start.z = pz - z;
-                bb.size.x = -sx;
-                bb.size.z = -sz;
+                bb.start.x = px - x - sx;   // x2
+                bb.start.z = pz - z - sz;   // z2
+                bb.size.x = sx;             // sx2
+                bb.size.z = sz;             // sz2
                 break;
 
             case 3:
-                px = parentSize.z;
-                bb.start.x = z;
-                bb.start.z = px - x;
-                bb.size.x = sz;
-                bb.size.z = -sx;
+                bb.start.x = z;             // x3
+                bb.start.z = px - x - sx;   // z3
+                bb.size.x = sz;             // sx3
+                bb.size.z = sx;             // sz3
                 break;
 
             default:

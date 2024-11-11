@@ -64,6 +64,8 @@ First release:
     ☐ IO: implémenter cavemap.xml
     ☐ IO: implémenter le reporting de bug qui va créer le zip avec toute les infos de debug
 
+    ☐ bug: command cr break the cave tunnels
+
 
 Later:
     ✘ rare ore vein -> need custom microsplat @cancelled(24-11-02 23:26)

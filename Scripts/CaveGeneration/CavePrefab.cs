@@ -42,28 +42,29 @@ public class CavePrefab
 
     public bool isRoom = false;
 
+    public bool isCluster = false;
+
     public bool isBoundaryPrefab = false;
 
-    public List<GraphNode> nodes;
+    public List<GraphNode> nodes = new List<GraphNode>();
 
-    public List<Prefab.Marker> caveMarkers;
+    public List<Prefab.Marker> caveMarkers = new List<Prefab.Marker>();
 
     public CavePrefab() { }
 
     public CavePrefab(int index)
     {
         id = index;
-        nodes = new List<GraphNode>();
     }
 
     public CavePrefab(BoundingBox rectangle)
     {
         position = rectangle.start;
         Size = rectangle.size;
-        caveMarkers = new List<Prefab.Marker>();
     }
 
     public CavePrefab(int index, PrefabDataInstance pdi, Vector3i offset)
+
     {
         id = index;
         rotation = pdi.rotation;
@@ -77,10 +78,7 @@ public class CavePrefab
     public CavePrefab(int index, Vector3i position, Random rand, int markerCount)
     {
         this.position = position;
-
         id = index;
-        nodes = new List<GraphNode>();
-
         int minPrefabSize = 8;
         int maxPrefabSize = 100;
 
@@ -389,7 +387,7 @@ public class CavePrefab
     {
         if (nodes == null)
         {
-            Log.Warning($"[Cave] null cavePrefab nodes, isroom: {isRoom}, isBoundaryPrefab: {isBoundaryPrefab}, null pdi: {prefabDataInstance is null}, prefab name: {PrefabName}");
+            Log.Warning($"[Cave] null cavePrefab nodes, isCluster: {isCluster}, isroom: {isRoom}, isBoundaryPrefab: {isBoundaryPrefab}, null pdi: {prefabDataInstance is null}, prefab name: {PrefabName}");
             yield break;
         }
 
