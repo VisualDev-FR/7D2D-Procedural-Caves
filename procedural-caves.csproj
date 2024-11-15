@@ -1,179 +1,200 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
-  <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{4069FB6B-DC75-4192-8208-1BF2C0EF7227}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ProceduralCaves</RootNamespace>
-    <AssemblyName>ProceduralCaves</AssemblyName>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <Deterministic>true</Deterministic>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>portable</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>.\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="0Harmony">
-      <HintPath>$(PATH_7D2D)\Mods\0_TFP_Harmony\0Harmony.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Assembly-CSharp">
-      <HintPath>$(PATH_7D2D)\7DaysToDie_Data\Managed\Assembly-CSharp.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="LogLibrary">
-      <HintPath>$(PATH_7D2D)\7DaysToDie_Data\Managed\LogLibrary.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="System.Xml">
-      <HintPath>$(PATH_7D2D)\7DaysToDie_Data\Managed\System.Xml.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="System">
-      <HintPath>$(PATH_7D2D)\7DaysToDie_Data\Managed\System.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="System.Xml.Linq">
-      <HintPath>$(PATH_7D2D)\7DaysToDie_Data\Managed\System.Xml.Linq.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine">
-      <HintPath>$(PATH_7D2D)\7DaysToDie_Data\Managed\UnityEngine.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.ImageConversionModule">
-      <HintPath>$(PATH_7D2D)\7DaysToDie_Data\Managed\UnityEngine.ImageConversionModule.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.AudioModule">
-      <HintPath>$(PATH_7D2D)\7DaysToDie_Data\Managed\UnityEngine.AudioModule.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.CoreModule">
-      <HintPath>$(PATH_7D2D)\7DaysToDie_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.CoreModule">
-      <HintPath>$(PATH_7D2D)\7DaysToDie_Data\Managed\mscorlib.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
 
-    <Reference Include="InControl">
-      <HintPath>$(PATH_7D2D)\7DaysToDie_Data\Managed\InControl.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-  </ItemGroup>
-  <ItemGroup>
-    <!-- Assembly info -->
-    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
 
-    <!-- Harmony -->
-    <Compile Include="Harmony\H_AIDirectorBloodMoonParty.cs" />
-    <Compile Include="Harmony\H_BlockToolSelection.cs" />
-    <Compile Include="Harmony\H_DynamicPrefabDecorator.cs" />
-    <Compile Include="Harmony\H_GameManager.cs" />
-    <Compile Include="Harmony\H_ItemActionPlaceAsBlock.cs" />
-    <Compile Include="Harmony\H_Prefab.cs" />
-    <Compile Include="Harmony\H_PrefabManager.cs" />
-    <Compile Include="Harmony\H_SpawnManagerBiomes.cs" />
-    <Compile Include="Harmony\H_WorldBuilder.cs" />
-    <Compile Include="Harmony\H_WorldEnvironement.cs" />
-    <Compile Include="Harmony\H_XUiC_WorldGenerationWindowGroup.cs" />
-    <Compile Include="Harmony\ModApi.cs" />
+    <PropertyGroup>
+        <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+        <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+        <ProjectGuid>{4069FB6B-DC75-4192-8208-1BF2C0EF7227}</ProjectGuid>
+        <OutputType>Library</OutputType>
+        <AppDesignerFolder>Properties</AppDesignerFolder>
+        <RootNamespace>ProceduralCaves</RootNamespace>
+        <AssemblyName>ProceduralCaves</AssemblyName>
+        <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+        <FileAlignment>512</FileAlignment>
+        <Deterministic>true</Deterministic>
+    </PropertyGroup>
 
-    <!-- Actions -->
-    <Compile Include="Scripts\Actions\ActionCollapseTerrain.cs" />
-    <Compile Include="Scripts\Actions\ActionSpawnCaveEntity.cs" />
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+        <DebugSymbols>true</DebugSymbols>
+        <DebugType>portable</DebugType>
+        <Optimize>false</Optimize>
+        <OutputPath>.\</OutputPath>
+        <DefineConstants>DEBUG;TRACE</DefineConstants>
+        <ErrorReport>prompt</ErrorReport>
+        <WarningLevel>4</WarningLevel>
+    </PropertyGroup>
 
-    <!-- Requirements -->
-    <Compile Include="Scripts\Requirements\RequirementIsBelowTerrain.cs" />
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+        <DebugType>pdbonly</DebugType>
+        <Optimize>true</Optimize>
+        <OutputPath>bin\Release\</OutputPath>
+        <DefineConstants>TRACE</DefineConstants>
+        <ErrorReport>prompt</ErrorReport>
+        <WarningLevel>4</WarningLevel>
+    </PropertyGroup>
 
-    <!-- CaveGeneration -->
-    <Compile Include="Scripts\CaveGeneration\CaveBuilder.cs" />
-    <Compile Include="Scripts\CaveGeneration\CavePrefabChecker.cs" />
-    <Compile Include="Scripts\CaveGeneration\StalactiteGenerator.cs" />
-    <Compile Include="Scripts\CaveGeneration\CaveBlock.cs" />
-    <Compile Include="Scripts\CaveGeneration\CaveChunk.cs" />
-    <Compile Include="Scripts\CaveGeneration\CaveMap.cs" />
-    <Compile Include="Scripts\CaveGeneration\CavePrefab.cs" />
-    <Compile Include="Scripts\CaveGeneration\CavePrefabManager.cs" />
-    <Compile Include="Scripts\CaveGeneration\CaveRegion.cs" />
-    <Compile Include="Scripts\CaveGeneration\CaveRoom.cs" />
-    <Compile Include="Scripts\CaveGeneration\CaveTunnel.cs" />
-    <Compile Include="Scripts\CaveGeneration\HashedPriorityQueue.cs" />
-    <Compile Include="Scripts\CaveGeneration\CaveEntrancesPlanner.cs" />
+    <!-- references -->
+    <ItemGroup>
+        <Reference Include="0Harmony">
+            <HintPath>$(PATH_7D2D)\Mods\0_TFP_Harmony\0Harmony.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
 
-    <!-- CaveNetworking -->
-    <Compile Include="Scripts\CaveNetworking\CaveGraph.cs" />
-    <Compile Include="Scripts\CaveNetworking\Delauney.cs" />
-    <Compile Include="Scripts\CaveNetworking\Graph.cs" />
-    <Compile Include="Scripts\CaveNetworking\GraphEdge.cs" />
-    <Compile Include="Scripts\CaveNetworking\GraphNode.cs" />
+        <Reference Include="Assembly-CSharp">
+            <HintPath>$(PATH_7D2D)\7DaysToDie_Data\Managed\Assembly-CSharp.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
 
-    <!-- CaveRenderer -->
-    <Compile Include="Scripts\CaveProvider\CaveBlocks.cs" />
-    <Compile Include="Scripts\CaveProvider\CaveBlocksProvider.cs" />
-    <Compile Include="Scripts\CaveProvider\CaveGenerator.cs" />
-    <Compile Include="Scripts\CaveProvider\CaveSpawnManager.cs" />
+        <Reference Include="LogLibrary">
+            <HintPath>$(PATH_7D2D)\7DaysToDie_Data\Managed\LogLibrary.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
 
-    <!-- ConsoleCmd -->
-    <Compile Include="Scripts\ConsoleCmd\CaveDebugConsoleCmd.cs" />
-    <Compile Include="Scripts\ConsoleCmd\CaveEditorConsoleCmd.cs" />
-    <Compile Include="Scripts\ConsoleCmd\DebugItemConsoleCmd.cs" />
+        <Reference Include="System.Xml">
+            <HintPath>$(PATH_7D2D)\7DaysToDie_Data\Managed\System.Xml.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
 
-    <!-- EAI -->
-    <Compile Include="Scripts\EAI\EAIEatBlock.cs" />
+        <Reference Include="System">
+            <HintPath>$(PATH_7D2D)\7DaysToDie_Data\Managed\System.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
 
-    <!-- IO -->
-    <Compile Include="Scripts\IO\MultiStream.cs" />
-    <Compile Include="Scripts\IO\TTSReader.cs" />
+        <Reference Include="System.Xml.Linq">
+            <HintPath>$(PATH_7D2D)\7DaysToDie_Data\Managed\System.Xml.Linq.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
 
-    <!-- Models -->
-    <Compile Include="Scripts\Models\AstarNode.cs" />
-    <Compile Include="Scripts\Models\BoundingBox.cs" />
-    <Compile Include="Scripts\Models\Direction.cs" />
-    <Compile Include="Scripts\Models\MutableInt16.cs" />
-    <Compile Include="Scripts\Models\RawHeightMap.cs" />
-    <Compile Include="Scripts\Models\Vector2s.cs" />
-    <Compile Include="Scripts\Models\Vector3bf.cs" />
+        <Reference Include="UnityEngine">
+            <HintPath>$(PATH_7D2D)\7DaysToDie_Data\Managed\UnityEngine.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
 
-    <!-- Noise -->
-    <Compile Include="Scripts\Noise\CaveNoise.cs" />
-    <Compile Include="Scripts\Noise\FastNoiseLite.cs" />
-    <Compile Include="Scripts\Noise\Noise1D.cs" />
+        <Reference Include="UnityEngine.ImageConversionModule">
+            <HintPath>$(PATH_7D2D)\7DaysToDie_Data\Managed\UnityEngine.ImageConversionModule.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
 
-    <!-- Utils -->
-    <Compile Include="Scripts\Utils\BlockClusterizer.cs" />
-    <Compile Include="Scripts\Utils\BlockSelectionUtils.cs" />
+        <Reference Include="UnityEngine.AudioModule">
+            <HintPath>$(PATH_7D2D)\7DaysToDie_Data\Managed\UnityEngine.AudioModule.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
 
-    <!-- Root -->
-    <Compile Include="Scripts\CaveConfig.cs" />
-    <Compile Include="Scripts\CaveUtils.cs" />
+        <Reference Include="UnityEngine.CoreModule">
+            <HintPath>$(PATH_7D2D)\7DaysToDie_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
 
-  </ItemGroup>
-  <ItemGroup />
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <Deterministic>false</Deterministic>
-  </PropertyGroup>
-  <Import Project="$(SolutionDir)\Tools\Directory.Build.targets" Condition="Exists('$(SolutionDir)\Tools\Directory.Build.targets')" />
+        <Reference Include="UnityEngine.CoreModule">
+            <HintPath>$(PATH_7D2D)\7DaysToDie_Data\Managed\mscorlib.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+
+        <Reference Include="InControl">
+            <HintPath>$(PATH_7D2D)\7DaysToDie_Data\Managed\InControl.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+    </ItemGroup>
+
+    <!-- scripts -->
+    <ItemGroup>
+        <!-- Assembly info -->
+        <Compile Include="Properties\AssemblyInfo.cs" />
+
+        <!-- Harmony -->
+        <Compile Include="Harmony\H_AIDirectorBloodMoonParty.cs" />
+        <Compile Include="Harmony\H_BlockToolSelection.cs" />
+        <Compile Include="Harmony\H_DynamicPrefabDecorator.cs" />
+        <Compile Include="Harmony\H_GameManager.cs" />
+        <Compile Include="Harmony\H_ItemActionPlaceAsBlock.cs" />
+        <Compile Include="Harmony\H_Prefab.cs" />
+        <Compile Include="Harmony\H_PrefabManager.cs" />
+        <Compile Include="Harmony\H_SkyManager.cs" />
+        <Compile Include="Harmony\H_SpawnManagerBiomes.cs" />
+        <Compile Include="Harmony\H_WorldBuilder.cs" />
+        <Compile Include="Harmony\H_WorldEnvironement.cs" />
+        <Compile Include="Harmony\H_XUiC_WorldGenerationWindowGroup.cs" />
+        <Compile Include="Harmony\ModApi.cs" />
+
+        <!-- Actions -->
+        <Compile Include="Scripts\Actions\ActionCollapseTerrain.cs" />
+        <Compile Include="Scripts\Actions\ActionSpawnCaveEntity.cs" />
+
+        <!-- Requirements -->
+        <Compile Include="Scripts\Requirements\RequirementIsBelowTerrain.cs" />
+
+        <!-- CaveGeneration -->
+        <Compile Include="Scripts\CaveGeneration\CaveBuilder.cs" />
+        <Compile Include="Scripts\CaveGeneration\CavePrefabChecker.cs" />
+        <Compile Include="Scripts\CaveGeneration\StalactiteGenerator.cs" />
+        <Compile Include="Scripts\CaveGeneration\CaveBlock.cs" />
+        <Compile Include="Scripts\CaveGeneration\CaveChunk.cs" />
+        <Compile Include="Scripts\CaveGeneration\CaveMap.cs" />
+        <Compile Include="Scripts\CaveGeneration\CavePrefab.cs" />
+        <Compile Include="Scripts\CaveGeneration\CavePrefabManager.cs" />
+        <Compile Include="Scripts\CaveGeneration\CaveRegion.cs" />
+        <Compile Include="Scripts\CaveGeneration\CaveRoom.cs" />
+        <Compile Include="Scripts\CaveGeneration\CaveTunnel.cs" />
+        <Compile Include="Scripts\CaveGeneration\HashedPriorityQueue.cs" />
+        <Compile Include="Scripts\CaveGeneration\CaveEntrancesPlanner.cs" />
+
+        <!-- CaveNetworking -->
+        <Compile Include="Scripts\CaveNetworking\CaveGraph.cs" />
+        <Compile Include="Scripts\CaveNetworking\Delauney.cs" />
+        <Compile Include="Scripts\CaveNetworking\Graph.cs" />
+        <Compile Include="Scripts\CaveNetworking\GraphEdge.cs" />
+        <Compile Include="Scripts\CaveNetworking\GraphNode.cs" />
+
+        <!-- CaveRenderer -->
+        <Compile Include="Scripts\CaveProvider\CaveBlocks.cs" />
+        <Compile Include="Scripts\CaveProvider\CaveBlocksProvider.cs" />
+        <Compile Include="Scripts\CaveProvider\CaveGenerator.cs" />
+        <Compile Include="Scripts\CaveProvider\CaveSpawnManager.cs" />
+
+        <!-- ConsoleCmd -->
+        <Compile Include="Scripts\ConsoleCmd\CaveDebugConsoleCmd.cs" />
+        <Compile Include="Scripts\ConsoleCmd\CaveEditorConsoleCmd.cs" />
+        <Compile Include="Scripts\ConsoleCmd\DebugItemConsoleCmd.cs" />
+
+        <!-- EAI -->
+        <Compile Include="Scripts\EAI\EAIEatBlock.cs" />
+
+        <!-- IO -->
+        <Compile Include="Scripts\IO\MultiStream.cs" />
+        <Compile Include="Scripts\IO\TTSReader.cs" />
+
+        <!-- Models -->
+        <Compile Include="Scripts\Models\AstarNode.cs" />
+        <Compile Include="Scripts\Models\BoundingBox.cs" />
+        <Compile Include="Scripts\Models\Direction.cs" />
+        <Compile Include="Scripts\Models\MutableInt16.cs" />
+        <Compile Include="Scripts\Models\RawHeightMap.cs" />
+        <Compile Include="Scripts\Models\Vector2s.cs" />
+        <Compile Include="Scripts\Models\Vector3bf.cs" />
+
+        <!-- Noise -->
+        <Compile Include="Scripts\Noise\CaveNoise.cs" />
+        <Compile Include="Scripts\Noise\FastNoiseLite.cs" />
+        <Compile Include="Scripts\Noise\Noise1D.cs" />
+
+        <!-- Utils -->
+        <Compile Include="Scripts\Utils\BlockClusterizer.cs" />
+        <Compile Include="Scripts\Utils\BlockSelectionUtils.cs" />
+
+        <!-- Root -->
+        <Compile Include="Scripts\CaveConfig.cs" />
+        <Compile Include="Scripts\CaveUtils.cs" />
+
+    </ItemGroup>
+
+    <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+
+    <PropertyGroup>
+        <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+        <Deterministic>false</Deterministic>
+    </PropertyGroup>
+
+    <Import Project="$(SolutionDir)\Tools\Directory.Build.targets" Condition="Exists('$(SolutionDir)\Tools\Directory.Build.targets')" />
 </Project>

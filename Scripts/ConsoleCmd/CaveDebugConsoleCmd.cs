@@ -71,6 +71,23 @@ public class CaveDebugConsoleCmd : ConsoleCmdAbstract
         WorldEnvironment_Update.modActive = !WorldEnvironment_Update.modActive;
     }
 
+    private static void MoonScaleCommand(List<string> _params)
+    {
+        if (_params.Count == 0)
+        {
+            Log.Error($"[Cave] Missing argument: 'scale' (float)");
+            return;
+        }
+
+        if (!float.TryParse(_params[1], out var scale))
+        {
+            Log.Error($"[Cave] Invalid argument: '{_params[1]}'");
+            return;
+        }
+
+        CaveConfig.CaveLightConfig.moonLightScale = scale;
+    }
+
     public override void Execute(List<string> _params, CommandSenderInfo _senderInfo)
     {
         if (_params.Count == 0)
@@ -91,6 +108,10 @@ public class CaveDebugConsoleCmd : ConsoleCmdAbstract
 
             case "light":
                 LightCommand(_params);
+                break;
+
+            case "moon":
+                MoonScaleCommand(_params);
                 break;
 
             default:
