@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 public class CaveDebugConsoleCmd : ConsoleCmdAbstract
@@ -68,7 +69,7 @@ public class CaveDebugConsoleCmd : ConsoleCmdAbstract
 
     private static void LightCommand(List<string> _params)
     {
-        WorldEnvironment_Update.modActive = !WorldEnvironment_Update.modActive;
+        throw new NotImplementedException();
     }
 
     private static void MoonScaleCommand(List<string> _params)

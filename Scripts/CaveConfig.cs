@@ -58,12 +58,6 @@ public static class CaveConfig
     {
         public static float moonLightScale = 0.1f;
 
-        public static float minLight = 0.01f;
-
-        public static readonly Vector2 ambientInsideEquatorScale = new Vector2(minLight, minLight);
-
-        public static readonly Vector2 ambientInsideGroundScale = new Vector2(minLight, minLight);
-
-        public static readonly Vector2 ambientInsideSkyScale = new Vector2(minLight, minLight);
+        public static float sunIntensityScale = 1f;
     }
 }

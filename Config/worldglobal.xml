@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<worldglobal>
+
+    <set xpath="worldglobal/environment/property[@name='ambientEquatorScale']/@value">.3, 0</set>
+    <set xpath="worldglobal/environment/property[@name='ambientGroundScale']/@value">.15, 0</set>
+    <set xpath="worldglobal/environment/property[@name='ambientSkyScale']/@value">.5, 0</set>
+
+    <set xpath="worldglobal/environment/property[@name='ambientMoon']/@value">0, 0</set>
+
+    <set xpath="worldglobal/environment/property[@name='ambientInsideSpeed']/@value">.6</set>
+    <set xpath="worldglobal/environment/property[@name='ambientInsideThreshold']/@value">.1</set>
+    <set xpath="worldglobal/environment/property[@name='ambientInsideEquatorScale']/@value">.2, 0</set>
+    <set xpath="worldglobal/environment/property[@name='ambientInsideGroundScale']/@value">.2, 0</set>
+    <set xpath="worldglobal/environment/property[@name='ambientInsideSkyScale']/@value">.2, 0</set>
+
+</worldglobal>

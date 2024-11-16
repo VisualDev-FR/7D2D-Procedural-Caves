@@ -42,10 +42,6 @@
     <Compile Include="..\Scripts\CaveProvider\CaveBlocksProvider.cs" />
     <Compile Include="..\Scripts\CaveProvider\CaveGenerator.cs" />
 
-    <!-- ConsoleCmd -->
-    <Compile Include="..\Scripts\ConsoleCmd\CaveDebugConsoleCmd.cs" />
-    <Compile Include="..\Scripts\ConsoleCmd\CaveEditorConsoleCmd.cs" />
-
     <!-- IO -->
     <Compile Include="..\Scripts\IO\MultiStream.cs" />
     <Compile Include="..\Scripts\IO\TTSReader.cs" />
