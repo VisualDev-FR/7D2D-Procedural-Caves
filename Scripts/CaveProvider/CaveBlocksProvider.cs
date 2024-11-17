@@ -8,17 +8,19 @@ public class CaveChunksProvider
 {
     public string cavemapDir;
 
-    public CaveGraph caveGraph;
+    public readonly CaveGraph caveGraph;
 
-    public Dictionary<int, CaveRegion> regions;
+    private readonly Dictionary<int, CaveRegion> regions = new Dictionary<int, CaveRegion>();
 
-    public int worldSize;
+    private readonly Queue<int> regionQueue = new Queue<int>();
+
+    private readonly int worldSize;
+
+    private static readonly int maxQueueSize = 4;
 
     public CaveChunksProvider(string worldName, int worldSize)
     {
         this.worldSize = worldSize;
-
-        regions = new Dictionary<int, CaveRegion>();
         cavemapDir = $"{GameIO.GetWorldDir(worldName)}/cavemap";
     }
 
@@ -81,6 +83,17 @@ public class CaveChunksProvider
         }
 
         regions[regionID] = new CaveRegion(filename);
+        regionQueue.Enqueue(regionID);
+
+        Log.Out($"[Cave] Enqueue region '{regionID}'");
+
+        if (regionQueue.Count > maxQueueSize)
+        {
+            int dequeuedID = regionQueue.Dequeue();
+            regions.Remove(dequeuedID);
+
+            Log.Out($"[Cave] Dequeue region '{dequeuedID}'");
+        }
 
         return regions[regionID];
     }

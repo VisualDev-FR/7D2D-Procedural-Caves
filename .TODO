@@ -38,11 +38,10 @@ First release:
     ✔ generation: debug tunnels intersections with prefabs @done(24-11-09 22:43)
     ✔ generation: improve links between cave rooms and markers @done(24-11-10 13:50)
     ☐ generation: add "natural" entrances with virtual cave markers placed in wilderness
-    ☐ generation: find an efficient way to add water in caves
-    ☐ generation: implement multiple cave networks (good feature + performances hack)
     ☐ generation: set variant boolean attribute on cave prefab to avoid repetion with vanilla ones
     ☐ generation: allow cave markers inside poi bounds, combining octree cluster parsing + marker directions
     ☐ generation: allow tunneling inside rwg tiles
+    ☐ generation: find an efficient way to add water in caves
     ☐ generation: add trapped sections on flat ground
     ☐ generation: burried treasures, skeletons, etc...
     ☐ generation: tunnels partially blocked
@@ -51,20 +50,20 @@ First release:
     ☐ decoration: broken bikes, tires, or else mechanical stuff to gather mechanical parts, etc...
     ☐ decoration: lights to turn on
 
-    ☐ UI: setup rwg user interface
+    ✔ UI: setup rwg user interface @done(24-11-17 19:17)
     ☐ UI: Loading screen with cave pictures
 
     ✔ Optimization: store all sphere offsets to avoid computing sqrDistance in critical sections @done(24-09-10 22:16)
+    ✔ Optimization: handle cave regions loading / unloading @done(24-11-17 19:37)
     ☐ Optimization: disable surface meshes (which are not cave entrances) when player is underground
     ☐ Optimization: work special vector3sbs(short, byte, short) class as long as possible in cave tunneling, avoiding instanciating caveBlocks
     ☐ Optimization: free cavemap memory after saving it, after game exit
-    ☐ Optimization: handle cave regions loading / unloading
 
     ☐ IO: ajouter la version dans les fichiers de sauvegarde de la cavemap
     ☐ IO: implémenter cavemap.xml
     ☐ IO: implémenter le reporting de bug qui va créer le zip avec toute les infos de debug
 
-    ☐ bug: command cr break the cave tunnels
+    ☐ bug: command 'cr' break the cave tunnels
 
 
 Later:
@@ -74,6 +73,7 @@ Later:
     ✔ horde triggers (like police car ?) @done(24-11-02 23:27)
     ✔ artifact collections, only complete collection sellable to trader @done(24-11-02 23:27)
 
+    ☐ generation: implement multiple cave networks (good feature + performances hack)
     ☐ generation: fix floating blocks at tunnels intersections
     ☐ generation: increase ore layers width
     ☐ generation: implement tunnel terrain smoothing
