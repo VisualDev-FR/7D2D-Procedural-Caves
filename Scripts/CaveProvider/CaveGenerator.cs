@@ -87,10 +87,8 @@ public class CaveGenerator
 
                 if (
                        visited.Contains(neighbor)
-                    || neighbor.x < 0   // TODO: (neighbor.x & 0b1111) == neighbor.x
-                    || neighbor.z < 0   // TODO: (neighbor.z & 0b1111) == neighbor.z
-                    || neighbor.x > 15
-                    || neighbor.z > 15
+                    || neighbor.x < 0 || neighbor.x > 15
+                    || neighbor.z < 0 || neighbor.z > 15
                     )
                     continue;
 
@@ -141,14 +139,11 @@ public class CaveGenerator
 
     private static void SpawnCaveDecorationAt(GameRandom random, Chunk chunk, CaveBlock caveBlock)
     {
-        Vector3bf posInChunk = caveBlock.posInChunk;
-        Vector3i chunkWorldPos = chunk.GetWorldPos();
+        Vector3i worldPos = caveBlock.ToWorldPos(HalfWorldSize);
 
-        int worldX = chunkWorldPos.x + posInChunk.x;
-        int worldY = posInChunk.y;
-        int worldZ = chunkWorldPos.z + posInChunk.z;
-
-        Vector3i worldPos = new Vector3i(worldX, worldY, worldZ);
+        int worldX = worldPos.x;
+        int worldY = worldPos.y;
+        int worldZ = worldPos.z;
 
         bool lowerIsCave = caveChunksProvider.IsCave(worldX, worldY - 1, worldZ);
         bool upperIsCave = caveChunksProvider.IsCave(worldX, worldY + 1, worldZ);
@@ -204,7 +199,13 @@ public class CaveGenerator
             yOffset = 1 - blockValue.Block.multiBlockPos.dim.y;
         }
 
-        chunk.SetBlock(GameManager.Instance.World, posInChunk.x, posInChunk.y + yOffset, posInChunk.z, blockValue);
+        chunk.SetBlock(
+            GameManager.Instance.World,
+            caveBlock.posInChunk.x,
+            caveBlock.posInChunk.y + yOffset,
+            caveBlock.posInChunk.z,
+            blockValue
+        );
     }
 
     private static bool IsFlatFloor(Vector3i worldPos, int radius = 1)

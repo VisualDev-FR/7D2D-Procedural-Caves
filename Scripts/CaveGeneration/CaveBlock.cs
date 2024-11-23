@@ -152,6 +152,15 @@ public class CaveBlock
         return ToVector3i() - halfWorldSize;
     }
 
+    public Vector3i ToWorldPos(int halfWorldSize)
+    {
+        return new Vector3i(
+            x - halfWorldSize,
+            y,
+            z - halfWorldSize
+        );
+    }
+
     public override string ToString()
     {
         return $"{x},{y},{z}";
