@@ -350,6 +350,19 @@
             <block name="cntCampingTentAngularDamagedBlack" prob=".0001" />
             <block name="cntCampingTentAngularDamagedArmyGreen" prob=".0001" />
 
+            <!-- lights sources -->
+            <block name="lanternDecorLightWhite_player" prob=".0005" />
+            <block name="lanternDecorLightRed_player" prob=".0005" />
+            <block name="lanternDecorLightYellow_player" prob=".0005" />
+            <block name="lanternDecorLightGreen_player" prob=".0005" />
+            <block name="lanternDecorLightBlue_player" prob=".0005" />
+            <block name="lanternDecorLightGrey_player" prob=".0005" />
+            <block name="lanternDecorLightBlack_player" prob=".0005" />
+            <block name="lanterOld_01_Player" prob=".0005" />
+            <block name="lanterOld_02_Player" prob=".0005" />
+            <block name="lanterOld_03_Player" prob=".0005" />
+            <block name="lanterOld_04_Player" prob=".0005" />
+
         </placeholder>
 
         <placeholder name="cntCaveCeiling">
