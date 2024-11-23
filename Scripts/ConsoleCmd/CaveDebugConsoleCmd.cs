@@ -89,6 +89,44 @@ public class CaveDebugConsoleCmd : ConsoleCmdAbstract
         CaveConfig.CaveLightConfig.moonLightScale = scale;
     }
 
+    private static void DecorateCommand(List<string> _params)
+    {
+        var worldPos = BlockSelectionUtils.GetSelectionPosition();
+
+        if (worldPos.Equals(Vector3i.zero))
+        {
+            Log.Warning("[Cave] empty selection.");
+            return;
+        }
+
+        string blockName = GameManager.Instance.World.GetBlock(worldPos).Block.blockName;
+        bool isChild = GameManager.Instance.World.GetBlock(worldPos).ischild;
+        bool isMultiBlock = GameManager.Instance.World.GetBlock(worldPos).Block.isMultiBlock;
+
+        Log.Out($"'{worldPos}' : isChild: {isChild}, isMulti: {isMultiBlock}, name: {blockName}");
+
+        if (_params.Count == 1)
+            return;
+
+        int.TryParse(_params[2], out int rotation);
+
+        var blockID = int.Parse(_params[1]);
+        var blockValue = Block.GetBlockValue(blockID);
+        var chunk = GameManager.Instance.World.GetChunkFromWorldPos(worldPos) as Chunk;
+        var localChunkPos = World.toBlock(worldPos);
+
+        blockValue.rotation = (byte)rotation;
+
+        chunk.SetBlock(
+            GameManager.Instance.World,
+            localChunkPos.x,
+            localChunkPos.y,
+            localChunkPos.z,
+            blockValue,
+            _notifyAddChange: true
+        );
+    }
+
     public override void Execute(List<string> _params, CommandSenderInfo _senderInfo)
     {
         if (_params.Count == 0)
@@ -113,6 +151,10 @@ public class CaveDebugConsoleCmd : ConsoleCmdAbstract
 
             case "moon":
                 MoonScaleCommand(_params);
+                break;
+
+            case "deco":
+                DecorateCommand(_params);
                 break;
 
             default:

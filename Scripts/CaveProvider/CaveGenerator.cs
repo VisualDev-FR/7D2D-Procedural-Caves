@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml;
+using UnityEngine;
 
 
 public class CaveGenerator
@@ -130,14 +131,15 @@ public class CaveGenerator
     private static void DecorateChunk(Chunk chunk, IEnumerable<CaveBlock> caveBlocks)
     {
         var random = GameRandomManager.instance.CreateGameRandom(chunk.GetHashCode());
+        var decoratedPositions = new HashSet<Vector3i>();
 
         foreach (CaveBlock caveBlock in caveBlocks)
         {
-            SpawnCaveDecorationAt(random, chunk, caveBlock);
+            TrySpawnCaveDecoration(random, chunk, caveBlock, decoratedPositions);
         }
     }
 
-    private static void SpawnCaveDecorationAt(GameRandom random, Chunk chunk, CaveBlock caveBlock)
+    private static void TrySpawnCaveDecoration(GameRandom random, Chunk chunk, CaveBlock caveBlock, HashSet<Vector3i> decoratedPositions)
     {
         Vector3i worldPos = caveBlock.ToWorldPos(HalfWorldSize);
 
@@ -170,7 +172,7 @@ public class CaveGenerator
         else
             return;
 
-        var blockValue = BlockValue.Air;
+        var blockValue = CaveBlocks.caveAir;
         int maxTries = 20;
 
         while (maxTries-- > 0)
@@ -178,18 +180,17 @@ public class CaveGenerator
             blockValue = BlockPlaceholderMap.Instance.Replace(placeHolder, random, worldX, worldZ);
             blockValue.rotation = (byte)random.Next(4);
 
-            if (isFlatFloor && blockValue.type == CaveBlocks.caveAir.type)
+            if (isFloor && !CanPlaceFloorDecoration(chunk, blockValue, worldPos, decoratedPositions))
             {
-                blockValue = BlockPlaceholderMap.Instance.Replace(CaveBlocks.cntCaveFloor, random, worldX, worldZ);
-                break;
+                blockValue = CaveBlocks.caveAir;
             }
-            else if (isFlatFloor && CanPlaceFloorDecoration(chunk, blockValue, worldPos))
+            else
             {
                 break;
             }
         }
 
-        if (blockValue.Equals(CaveBlocks.caveAir))
+        if (blockValue.type == CaveBlocks.caveAir.type)
             return;
 
         int yOffset = 0;
@@ -206,6 +207,32 @@ public class CaveGenerator
             caveBlock.posInChunk.z,
             blockValue
         );
+
+        decoratedPositions.UnionWith(GetDecoratedPositions(blockValue, worldPos));
+    }
+
+    private static IEnumerable<Vector3i> GetDecoratedPositions(BlockValue blockValue, Vector3i worldPos)
+    {
+        if (!blockValue.Block.isMultiBlock)
+        {
+            yield return worldPos;
+            yield break;
+        }
+
+        var bounds = GetRotatedBlockBounds(blockValue, worldPos);
+        var position = Vector3i.zero;
+
+        for (int x = bounds.min.x; x <= bounds.max.x; x++)
+        {
+            for (int z = bounds.min.z; z <= bounds.max.z; z++)
+            {
+                position.x = x;
+                position.y = worldPos.y;
+                position.z = z;
+
+                yield return position;
+            }
+        }
     }
 
     private static bool IsFlatFloor(Vector3i worldPos, int radius = 1)
@@ -231,48 +258,101 @@ public class CaveGenerator
         return true;
     }
 
-    private static bool CanPlaceFloorDecoration(Chunk chunk, BlockValue blockValue, Vector3i worldPos)
+    public static bool CanPlaceFloorDecoration(Chunk chunk, BlockValue blockValue, Vector3i worldPos, HashSet<Vector3i> decoratedPositions)
     {
-        var size = Vector3i.zero;
+        var bounds = GetRotatedBlockBounds(blockValue, worldPos);
 
-        if (blockValue.Block.isMultiBlock)
-        {
-            size = blockValue.Block.multiBlockPos.dim - Vector3i.one;
-        }
+        // int margin = blockValue.Block.isMultiBlock ? 1 : 0;
+        int margin = 0;
 
-        if (blockValue.Block.BigDecorationRadius > 0)
-        {
-            size = new Vector3i(
-                blockValue.Block.BigDecorationRadius,
-                1,
-                blockValue.Block.BigDecorationRadius
-            );
-        }
+        int x0 = bounds.xMin - margin;
+        int z0 = bounds.zMin - margin;
+        int x1 = bounds.xMax + margin;
+        int z1 = bounds.zMax + margin;
 
-        if (blockValue.rotation == 1 || blockValue.rotation == 3)
-        {
-            MathUtils.Swap(ref size.x, ref size.z);
-        }
+        int y = worldPos.y;
 
-        int x0 = worldPos.x;
-        int z0 = worldPos.z;
-        int x1 = worldPos.x + size.x;
-        int z1 = worldPos.z + size.z;
-        int y = worldPos.y - 1;
+        // Log.Out($"{blockValue.Block.blockName}, position: {worldPos} rotation: {blockValue.rotation}, [{x0},{z0} -> {x1},{z1}]");
+
+        var position = Vector3i.zero;
 
         for (int x = x0; x <= x1; x++)
         {
             for (int z = z0; z <= z1; z++)
             {
-                // check if there is terrain under the block we are attempting to place
-                if (caveChunksProvider.IsCave(x, y, z))
+                position.x = x;
+                position.y = y;
+                position.z = z;
+
+                bool isAirBelow = caveChunksProvider.IsCave(x, y - 1, z);
+                bool isCaveBlock = caveChunksProvider.IsCave(x, y, z);
+                bool isAlreadyDecorated = decoratedPositions.Contains(position);
+
+                // Log.Out($"---- {x},{y},{z}: isAirBelow: {isAirBelow}, isCaveBlock: {isCaveBlock}, isAlreadyDecorated: {isAlreadyDecorated}");
+
+                if (isAirBelow || (isCaveBlock && isAlreadyDecorated))
                 {
+                    // Log.Out("xxxx invalid placement");
                     return false;
                 }
             }
         }
 
+        // Log.Out("++++ valid placement");
+
         return true;
+    }
+
+    private static BoundsInt GetRotatedBlockBounds(BlockValue blockValue, Vector3i worldPos)
+    {
+        var bounds = new BoundsInt();
+
+        if (!blockValue.Block.isMultiBlock)
+        {
+            bounds.SetMinMax(worldPos, worldPos);
+            return bounds;
+        }
+
+        var size = blockValue.Block.multiBlockPos.dim - Vector3i.one;
+
+        switch (blockValue.rotation)
+        {
+            case 0:
+                bounds.SetMinMax(
+                    worldPos - size,
+                    worldPos
+                );
+                break;
+
+            case 1:
+                bounds.xMin = worldPos.x - size.x;
+                bounds.xMax = worldPos.x;
+                bounds.zMin = worldPos.z;
+                bounds.zMax = worldPos.z + size.z;
+                break;
+
+            case 2:
+                bounds.SetMinMax(
+                    worldPos,
+                    worldPos + size
+                );
+                break;
+
+            case 3:
+                bounds.xMin = worldPos.x;
+                bounds.xMax = worldPos.x + size.x;
+                bounds.zMin = worldPos.z - size.z;
+                bounds.zMax = worldPos.z;
+                break;
+
+            default:
+                throw new Exception($"Invalid rotation: {blockValue.rotation}");
+        }
+
+        bounds.yMin = worldPos.y;
+        bounds.yMax = worldPos.y + size.y;
+
+        return bounds;
     }
 
     private static BlockValue GetBoundingBlockValue(int biomeID, BlockValue currentBlockValue)

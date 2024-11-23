@@ -308,47 +308,47 @@
             <block name="cntBarrelWhiteQuadB" prob=".0001" />
 
             <!-- tents -->
-            <block name="cntCampingTentDomeWhite" prob=".17" />
-            <block name="cntCampingTentDomeRed" prob=".17" />
-            <block name="cntCampingTentDomeOrange" prob=".17" />
-            <block name="cntCampingTentDomeBlue" prob=".17" />
-            <block name="cntCampingTentDomeBlack" prob=".17" />
-            <block name="cntCampingTentDomeArmyGreen" prob=".17" />
+            <block name="cntCampingTentDomeWhite" prob=".0001" />
+            <block name="cntCampingTentDomeRed" prob=".0001" />
+            <block name="cntCampingTentDomeOrange" prob=".0001" />
+            <block name="cntCampingTentDomeBlue" prob=".0001" />
+            <block name="cntCampingTentDomeBlack" prob=".0001" />
+            <block name="cntCampingTentDomeArmyGreen" prob=".0001" />
 
-            <block name="cntCampingTentDomeRainCoverWhite" prob=".17" />
-            <block name="cntCampingTentDomeRainCoverRed" prob=".17" />
-            <block name="cntCampingTentDomeRainCoverOrange" prob=".17" />
-            <block name="cntCampingTentDomeRainCoverBlue" prob=".17" />
-            <block name="cntCampingTentDomeRainCoverBlack" prob=".17" />
-            <block name="cntCampingTentDomeRainCoverArmyGreen" prob=".17" />
+            <block name="cntCampingTentDomeRainCoverWhite" prob=".0001" />
+            <block name="cntCampingTentDomeRainCoverRed" prob=".0001" />
+            <block name="cntCampingTentDomeRainCoverOrange" prob=".0001" />
+            <block name="cntCampingTentDomeRainCoverBlue" prob=".0001" />
+            <block name="cntCampingTentDomeRainCoverBlack" prob=".0001" />
+            <block name="cntCampingTentDomeRainCoverArmyGreen" prob=".0001" />
 
-            <block name="cntCampingTentDomeDamagedWhite" prob=".17" />
-            <block name="cntCampingTentDomeDamagedRed" prob=".17" />
-            <block name="cntCampingTentDomeDamagedOrange" prob=".17" />
-            <block name="cntCampingTentDomeDamagedBlue" prob=".17" />
-            <block name="cntCampingTentDomeDamagedBlack" prob=".17" />
-            <block name="cntCampingTentDomeDamagedArmyGreen" prob=".17" />
+            <block name="cntCampingTentDomeDamagedWhite" prob=".0001" />
+            <block name="cntCampingTentDomeDamagedRed" prob=".0001" />
+            <block name="cntCampingTentDomeDamagedOrange" prob=".0001" />
+            <block name="cntCampingTentDomeDamagedBlue" prob=".0001" />
+            <block name="cntCampingTentDomeDamagedBlack" prob=".0001" />
+            <block name="cntCampingTentDomeDamagedArmyGreen" prob=".0001" />
 
-            <block name="cntCampingTentAngularWhite" prob=".17" />
-            <block name="cntCampingTentAngularRed" prob=".17" />
-            <block name="cntCampingTentAngularOrange" prob=".17" />
-            <block name="cntCampingTentAngularBlue" prob=".17" />
-            <block name="cntCampingTentAngularBlack" prob=".17" />
-            <block name="cntCampingTentAngularArmyGreen" prob=".17" />
+            <block name="cntCampingTentAngularWhite" prob=".0001" />
+            <block name="cntCampingTentAngularRed" prob=".0001" />
+            <block name="cntCampingTentAngularOrange" prob=".0001" />
+            <block name="cntCampingTentAngularBlue" prob=".0001" />
+            <block name="cntCampingTentAngularBlack" prob=".0001" />
+            <block name="cntCampingTentAngularArmyGreen" prob=".0001" />
 
-            <block name="cntCampingTentAngularRainCoverWhite" prob=".17" />
-            <block name="cntCampingTentAngularRainCoverRed" prob=".17" />
-            <block name="cntCampingTentAngularRainCoverOrange" prob=".17" />
-            <block name="cntCampingTentAngularRainCoverBlue" prob=".17" />
-            <block name="cntCampingTentAngularRainCoverBlack" prob=".17" />
-            <block name="cntCampingTentAngularRainCoverArmyGreen" prob=".17" />
+            <block name="cntCampingTentAngularRainCoverWhite" prob=".0001" />
+            <block name="cntCampingTentAngularRainCoverRed" prob=".0001" />
+            <block name="cntCampingTentAngularRainCoverOrange" prob=".0001" />
+            <block name="cntCampingTentAngularRainCoverBlue" prob=".0001" />
+            <block name="cntCampingTentAngularRainCoverBlack" prob=".0001" />
+            <block name="cntCampingTentAngularRainCoverArmyGreen" prob=".0001" />
 
-            <block name="cntCampingTentAngularDamagedWhite" prob=".17" />
-            <block name="cntCampingTentAngularDamagedRed" prob=".17" />
-            <block name="cntCampingTentAngularDamagedOrange" prob=".17" />
-            <block name="cntCampingTentAngularDamagedBlue" prob=".17" />
-            <block name="cntCampingTentAngularDamagedBlack" prob=".17" />
-            <block name="cntCampingTentAngularDamagedArmyGreen" prob=".17" />
+            <block name="cntCampingTentAngularDamagedWhite" prob=".0001" />
+            <block name="cntCampingTentAngularDamagedRed" prob=".0001" />
+            <block name="cntCampingTentAngularDamagedOrange" prob=".0001" />
+            <block name="cntCampingTentAngularDamagedBlue" prob=".0001" />
+            <block name="cntCampingTentAngularDamagedBlack" prob=".0001" />
+            <block name="cntCampingTentAngularDamagedArmyGreen" prob=".0001" />
 
         </placeholder>
 

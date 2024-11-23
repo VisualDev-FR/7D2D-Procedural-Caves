@@ -93,4 +93,10 @@ public class BlockSelectionUtils
 
         activeBoxNames.Clear();
     }
+
+    public static Vector3i GetSelectionPosition()
+    {
+        return BlockToolSelection.Instance.m_selectionStartPoint;
+    }
+
 }
