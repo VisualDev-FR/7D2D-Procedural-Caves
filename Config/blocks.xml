@@ -31,22 +31,22 @@
         <!-- placeholders (used for cave decoration) -->
         <block name="cntCaveFloor">
             <property name="Extends" value="cntWastelandRandomLootHelper" />
-            <property name="CreativeMode" value="Dev" />
+            <property name="CreativeMode" value="None" />
         </block>
 
         <block name="cntCaveFloorFlat">
             <property name="Extends" value="cntWastelandRandomLootHelper" />
-            <property name="CreativeMode" value="Dev" />
+            <property name="CreativeMode" value="None" />
         </block>
 
         <block name="cntCaveCeiling">
             <property name="Extends" value="cntWastelandRandomLootHelper" />
-            <property name="CreativeMode" value="Dev" />
+            <property name="CreativeMode" value="None" />
         </block>
 
         <block name="cntCaveFlatWater">
             <property name="Extends" value="cntWastelandRandomLootHelper" />
-            <property name="CreativeMode" value="Dev" />
+            <property name="CreativeMode" value="None" />
         </block>
 
         <!-- terrain loot -->
@@ -55,26 +55,26 @@
             <property name="CreativeMode" value="None" />
 
             <drop event="Harvest" tag="oreWoodHarvest" name="nugget_01" prob=".005" count="1" />
+            <drop event="Harvest" tag="oreWoodHarvest" name="nugget_02" prob=".005" count="1" />
+            <drop event="Harvest" tag="oreWoodHarvest" name="nugget_03" prob=".005" count="1" />
             <drop event="Harvest" tag="oreWoodHarvest" name="nugget_04" prob=".005" count="1" />
             <drop event="Harvest" tag="oreWoodHarvest" name="nugget_05" prob=".005" count="1" />
 
             <drop event="Harvest" tag="oreWoodHarvest" name="fossil_01" prob=".005" count="1" />
             <drop event="Harvest" tag="oreWoodHarvest" name="fossil_02" prob=".005" count="1" />
             <drop event="Harvest" tag="oreWoodHarvest" name="fossil_03" prob=".005" count="1" />
+            <drop event="Harvest" tag="oreWoodHarvest" name="fossil_04" prob=".005" count="1" />
+            <drop event="Harvest" tag="oreWoodHarvest" name="fossil_05" prob=".005" count="1" />
         </block>
 
         <block name="caveTerrSnow">
             <property name="Extends" value="terrSnow" />
             <property name="CreativeMode" value="None" />
 
-            <drop event="Harvest" tag="oreWoodHarvest" name="nugget_01" prob=".005" count="1" />
-            <drop event="Harvest" tag="oreWoodHarvest" name="nugget_02" prob=".010" count="1" />
-            <drop event="Harvest" tag="oreWoodHarvest" name="nugget_04" prob=".005" count="1" />
-            <drop event="Harvest" tag="oreWoodHarvest" name="nugget_05" prob=".005" count="1" />
-
             <drop event="Harvest" tag="oreWoodHarvest" name="fossil_01" prob=".005" count="1" />
             <drop event="Harvest" tag="oreWoodHarvest" name="fossil_02" prob=".005" count="1" />
             <drop event="Harvest" tag="oreWoodHarvest" name="fossil_03" prob=".005" count="1" />
+            <drop event="Harvest" tag="oreWoodHarvest" name="fossil_04" prob=".005" count="1" />
             <drop event="Harvest" tag="oreWoodHarvest" name="fossil_05" prob=".005" count="1" />
         </block>
 
@@ -101,6 +101,7 @@
             <drop event="Harvest" tag="oreWoodHarvest" name="fossil_02" prob=".005" count="1" />
             <drop event="Harvest" tag="oreWoodHarvest" name="fossil_03" prob=".005" count="1" />
             <drop event="Harvest" tag="oreWoodHarvest" name="fossil_04" prob=".005" count="1" />
+            <drop event="Harvest" tag="oreWoodHarvest" name="fossil_05" prob=".005" count="1" />
         </block>
 
         <block name="caveTerrOreIron">
@@ -132,26 +133,31 @@
         <block name="caveCntWoodenChestClosed">
             <property name="Extends" value="cntWoodenChestClosed" />
             <property name="LootList" value="caveWoodenChest" />
+            <property name="CreativeMode" value="None" />
         </block>
 
         <block name="caveCntWoodenChestMilitaryClosed">
             <property name="Extends" value="cntWoodenChestMilitaryClosed" />
             <property name="LootList" value="caveMilitaryChest" />
+            <property name="CreativeMode" value="None" />
         </block>
 
         <block name="caveCntOldWestChestClosed">
             <property name="Extends" value="cntOldWestChestClosed" />
             <property name="LootList" value="caveOldWestChest" />
+            <property name="CreativeMode" value="None" />
         </block>
 
         <block name="caveCntWoodenChestRottenClosed">
             <property name="Extends" value="cntWoodenChestRottenClosed" />
             <property name="LootList" value="caveRottenChest" />
+            <property name="CreativeMode" value="None" />
         </block>
 
         <block name="caveCntBackpack01">
             <property name="Extends" value="cntBackpack01" />
             <property name="LootList" value="caveCntBackPack" />
+            <property name="CreativeMode" value="None" />
         </block>
 
         <block name="CaveCntBackpack03">
@@ -168,7 +174,6 @@
 
         <block name="CaveCntSportsBag01">
             <property name="Extends" value="caveCntBackpack01" />
-            <property name="CreativeMode" value="None" />
             <property name="CustomIcon" value="cntSportsBag01White" />
             <property name="CustomIconTint" value="CCCCCC" />
             <property name="TintColor" value="CCCCCC" />
@@ -227,7 +232,6 @@
 
         <block name="CaveCntSportsBag02">
             <property name="Extends" value="caveCntBackpack01" />
-            <property name="CreativeMode" value="None" />
             <property name="CustomIcon" value="cntSportsBag02White" />
             <property name="CustomIconTint" value="999999" />
             <property name="TintColor" value="999999" />
@@ -294,6 +298,7 @@
         <block name="CaveCntMilitaryGoodsA">
             <property name="Extends" value="cntMilitaryGoodsA" />
             <property name="LootList" value="caveMilitaryGoods" />
+            <property name="CreativeMode" value="None" />
         </block>
 
         <block name="CaveCntMilitaryGoodsB">

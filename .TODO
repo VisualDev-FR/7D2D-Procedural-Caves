@@ -19,7 +19,7 @@ First release:
 
     ✔ ambiance: make zombies eating blocks @done(24-11-06 21:56)
     ✔ ambiance: make flashlight sparkling @done(24-11-06 21:56)
-    ☐ ambiance: patch world luminosity
+    ✔ ambiance: patch world luminosity @done(24-11-17 19:44)
 
     ✔ editor: replace selection by terrain / by stone helper @done(24-08-15 20:49)
     ✔ editor: place cave marker from selection @done(24-08-15 20:49)
@@ -38,7 +38,6 @@ First release:
     ✔ generation: debug tunnels intersections with prefabs @done(24-11-09 22:43)
     ✔ generation: improve links between cave rooms and markers @done(24-11-10 13:50)
     ☐ generation: add "natural" entrances with virtual cave markers placed in wilderness
-    ☐ generation: set variant boolean attribute on cave prefab to avoid repetion with vanilla ones
     ☐ generation: allow cave markers inside poi bounds, combining octree cluster parsing + marker directions
     ☐ generation: allow tunneling inside rwg tiles
     ☐ generation: find an efficient way to add water in caves
@@ -73,6 +72,7 @@ Later:
     ✔ horde triggers (like police car ?) @done(24-11-02 23:27)
     ✔ artifact collections, only complete collection sellable to trader @done(24-11-02 23:27)
 
+    ☐ generation: set variant boolean attribute on cave prefab to avoid repetion with vanilla ones
     ☐ generation: implement multiple cave networks (good feature + performances hack)
     ☐ generation: fix floating blocks at tunnels intersections
     ☐ generation: increase ore layers width

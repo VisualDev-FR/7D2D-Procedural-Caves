@@ -134,7 +134,6 @@
             <block name="cntTrashPile09" prob=".001" />
             <block name="cntFoodPileSmall" prob=".001" />
             <block name="cntFoodPileMedium" prob=".001" />
-            <block name="cntFoodPileLarge" prob=".001" />
 
             <block name="CaveCntDuffle01" prob=".001" />
             <block name="CaveCntPurse01" prob=".001" />
