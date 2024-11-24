@@ -367,11 +367,6 @@ public class CaveMap
     {
         var layer = new LayerRLE(0);
 
-        // public bool IsInside(int y)
-        // {
-        //     return y >= Start && y < End;
-        // }
-
         foreach (var group in positions.GroupBy(p => CaveBlock.HashZX(p.x, p.z)))
         {
             var hashcode = group.Key;
@@ -393,7 +388,7 @@ public class CaveMap
                         waterLayer.BlockRawData
                     );
                 }
-                else if (waterLayer.Start <= layer.Start && waterLayer.End >= layer.Start && waterLayer.End < layer.End)
+                else if (waterLayer.Start <= layer.Start && waterLayer.End > layer.Start && waterLayer.End < layer.End)
                 {
                     caveblocks[hashcode].RemoveAt(i);
 
