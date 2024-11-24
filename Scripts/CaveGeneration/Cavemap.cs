@@ -45,8 +45,8 @@ public struct LayerRLE
 
         foreach (var pos in positions)
         {
-            start = Utils.FastMin(start, pos.y - 1);
-            end = Utils.FastMax(end, pos.y + 1);
+            start = Utils.FastMin(start, pos.y);
+            end = Utils.FastMax(end, pos.y);
         }
 
         rawData = (start << 16) | (end << 8) | blockRawData;
@@ -64,12 +64,12 @@ public struct LayerRLE
 
     public bool Contains(int y)
     {
-        return y >= Start && y < End;
+        return y >= Start && y <= End;
     }
 
     public IEnumerable<CaveBlock> GetBlocks(int x, int z)
     {
-        for (int y = Start; y < End; y++)
+        for (int y = Start; y <= End; y++)
         {
             yield return new CaveBlock(x, y, z) { rawData = BlockRawData };
         }
@@ -388,7 +388,7 @@ public class CaveMap
                         waterLayer.BlockRawData
                     );
                 }
-                else if (waterLayer.Start <= layer.Start && waterLayer.End > layer.Start && waterLayer.End < layer.End)
+                else if (waterLayer.Start <= layer.Start && waterLayer.End >= layer.Start && waterLayer.End < layer.End)
                 {
                     caveblocks[hashcode].RemoveAt(i);
 
@@ -399,7 +399,7 @@ public class CaveMap
                     ));
 
                     caveblocks[hashcode].Add(LayerRLE.GetHashCode(
-                        waterLayer.End,
+                        waterLayer.End + 1,
                         layer.End,
                         layer.BlockRawData
                     ));
@@ -420,9 +420,7 @@ public class CaveMap
             {
                 var layer = new LayerRLE(hashcode);
 
-                // Logging.Debug(layer.Start, layer.End, layer.End - layer.Start);
-
-                CaveUtils.Assert(layer.Start <= layer.End, "");
+                CaveUtils.Assert(layer.Start <= layer.End, $"Invalid RLE Layer: start={layer.Start}, end={layer.End}");
 
                 foreach (var block in layer.GetBlocks(x, z))
                 {
