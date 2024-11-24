@@ -267,13 +267,15 @@ public class CaveMap
         var startPosition = GetVerticalLowerPoint(waterStart.ToVector3i());
         var neighbor = Vector3i.zero;
 
+        int maxWaterDepth = 3;
+
         queue.Enqueue(startPosition);
 
         while (queue.Count > 0)
         {
             Vector3i currentPos = queue.Dequeue();
 
-            if (cachedPrefabs.IntersectMarker(currentPos))
+            if (cachedPrefabs.IntersectMarker(currentPos) || (startPosition.y - currentPos.y) >= maxWaterDepth)
                 return new HashSet<Vector3i>();
 
             if (visited.Contains(currentPos) || !IsCave(currentPos))
