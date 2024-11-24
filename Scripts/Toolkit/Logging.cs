@@ -1,16 +1,17 @@
 using System.Linq;
 
+public enum LoggingLevel : byte
+{
+    DEBUG,
+    INFO,
+    WARNING,
+    ERROR,
+    NONE,
+}
+
+
 public class Logging
 {
-    public enum LoggingLevel : byte
-    {
-        DEBUG,
-        INFO,
-        WARNING,
-        ERROR,
-        NONE,
-    }
-
     public class Logger
     {
         public LoggingLevel loggingLevel = LoggingLevel.DEBUG;
@@ -63,7 +64,7 @@ public class Logging
 
     private static readonly Logger root = new Logger("Cave", LoggingLevel.DEBUG);
 
-    public static Logger CreateLogger(string name, LoggingLevel level)
+    public static Logger CreateLogger(string name, LoggingLevel level = LoggingLevel.DEBUG)
     {
         return new Logger(name, level);
     }

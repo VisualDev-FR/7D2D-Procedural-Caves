@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
-using Random = System.Random;
+using Logger = Logging.Logger;
 
 public class CaveChunksProvider
 {
@@ -17,6 +17,8 @@ public class CaveChunksProvider
     private readonly int worldSize;
 
     private static readonly int maxQueueSize = 4;
+
+    private readonly Logger logger = Logging.CreateLogger("CaveChunksProvider", LoggingLevel.DEBUG);
 
     public CaveChunksProvider(string worldName, int worldSize)
     {
@@ -78,21 +80,21 @@ public class CaveChunksProvider
 
         if (!File.Exists(filename))
         {
-            Logging.Warning($"cave region not found 'region_{regionID}'");
+            logger.Warning($"cave region not found 'region_{regionID}'");
             return null;
         }
 
         regions[regionID] = new CaveRegion(filename);
         regionQueue.Enqueue(regionID);
 
-        Logging.Info($"Enqueue region '{regionID}'");
+        logger.Info($"Enqueue region '{regionID}'");
 
         if (regionQueue.Count > maxQueueSize)
         {
             int dequeuedID = regionQueue.Dequeue();
             regions.Remove(dequeuedID);
 
-            Logging.Info($"Dequeue region '{dequeuedID}'");
+            logger.Info($"Dequeue region '{dequeuedID}'");
         }
 
         return regions[regionID];
