@@ -335,6 +335,31 @@ public class CaveMap
         }
     }
 
+    public void SetWater(CavePrefabManager cachedPrefabs, HashSet<CaveBlock> localMinimas)
+    {
+        // if (!CaveConfig.generateWater)
+        //     yield break;
+
+        int index = 0;
+
+        CaveUtils.Assert(new CaveBlock() { rawData = 1 }.isWater, "");
+
+        foreach (var waterStart in localMinimas)
+        {
+            index++;
+
+            if (IsWater(waterStart.ToVector3i()))
+                continue;
+
+            HashSet<Vector3i> positions = ExpandWater(waterStart, cachedPrefabs);
+
+            if (positions.Count > 0)
+            {
+                SetWater(positions);
+            }
+        }
+    }
+
     private void SetWater(HashSet<Vector3i> positions)
     {
         var layer = new LayerRLE(0);
@@ -345,7 +370,7 @@ public class CaveMap
             var waterLayer = new LayerRLE(group, 1);
             var layers = caveblocks[hashcode].ToList();
 
-            for (int i = 0; i < layers.Count; i++)
+            for (int i = layers.Count - 1; i >= 0; i--)
             {
                 layer.rawData = layers[i];
 
@@ -360,10 +385,10 @@ public class CaveMap
                     continue;
                 }
 
-                caveblocks[hashcode].RemoveAt(i);
-
                 if (waterLayer.Start <= layer.Start && waterLayer.End < layer.End)
                 {
+                    caveblocks[hashcode].RemoveAt(i);
+
                     caveblocks[hashcode].Add(LayerRLE.GetHashCode(
                         layer.Start,
                         waterLayer.End,
@@ -378,7 +403,8 @@ public class CaveMap
                 }
                 else if (waterLayer.Start > layer.Start)
                 {
-                    throw new Exception("there should never have water upside another layer");
+                    Logging.Warning($"water upside another layer, waterStart: {waterLayer.Start}, layerStart: {layer.Start}");
+                    // throw new Exception("there should never have water upside another layer");
                 }
                 // else if (waterLayer.Start > layer.Start && waterLayer.End >= layer.End)
                 // {

@@ -369,6 +369,7 @@ public static class CaveViewer
                     lock (lockObject)
                     {
                         cavemap.AddTunnel(tunnel);
+                        localMinimas.UnionWith(tunnel.LocalMinimas);
 
                         foreach (CaveBlock caveBlock in tunnel.blocks)
                         {
@@ -382,7 +383,7 @@ public static class CaveViewer
             }
         }
 
-        // cavemap.SetWater(localMinimas, cachedPrefabs);
+        cavemap.SetWater(cachedPrefabs, localMinimas);
 
         Logging.Info($"{cavemap.BlocksCount:N0} cave blocks generated ({cavemap.TunnelsCount} unique tunnels), timer={timer.ElapsedMilliseconds:N0}ms, memory={(GC.GetTotalMemory(true) - memoryBefore) / 1_048_576.0:N1}MB.");
         Logging.Info($"{localMinimas.Count} local minimas");
@@ -392,10 +393,9 @@ public static class CaveViewer
 
         var voxels = cavemap
             .GetBlocks()
-            .Select(block => new Voxell(block.x, block.y, block.z, WaveFrontMaterial.LightBlue))
+            // .Where(block => block.isWater)
+            .Select(block => new Voxell(block.x, block.y, block.z, block.isWater ? WaveFrontMaterial.LightBlue : WaveFrontMaterial.DarkRed))
             .ToHashSet();
-
-        Logging.Info($"{voxels.Count} water blocks");
 
         foreach (var prefab in cachedPrefabs.Prefabs)
         {
