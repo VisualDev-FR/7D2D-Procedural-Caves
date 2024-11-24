@@ -80,51 +80,10 @@ public class CaveMap
 
     public void AddBlocks(IEnumerable<Vector3i> positions, byte rawData)
     {
-        var blockGroup = positions.GroupBy(pos => CaveBlock.HashZX(pos.x, pos.z));
-
-        foreach (var group in blockGroup)
+        AddBlocks(positions.Select(pos => new CaveBlock(pos)
         {
-            int hashZX = group.Key;
-
-            CaveBlock.ZXFromHash(hashZX, out var x, out var z);
-
-            var blocks = group.OrderBy(b => b.y).ToArray();
-
-            // TODO: better handling of tunnels intersection (implement CaveBlockLayer merging)
-            List<int> blockRLE = null;
-
-            lock (_lock)
-            {
-                if (!caveblocks.ContainsKey(hashZX))
-                {
-                    caveblocks[hashZX] = new List<int>();
-                }
-                blockRLE = caveblocks[hashZX];
-            }
-
-            int previousY = blocks[0].y;
-            int startY = blocks[0].y;
-
-            for (int i = 1; i < blocks.Length; i++)
-            {
-                int current = blocks[i].y;
-
-                if (current != previousY + 1)
-                {
-                    lock (_lock)
-                    {
-                        blockRLE.Add(CaveBlockLayer.GetHashCode(startY, previousY, rawData));
-                    }
-                    startY = current;
-                }
-
-                previousY = current;
-            }
-            lock (_lock)
-            {
-                blockRLE.Add(CaveBlockLayer.GetHashCode(startY, previousY, rawData));
-            }
-        }
+            rawData = rawData
+        }));
     }
 
     public void AddBlocks(IEnumerable<CaveBlock> _blocks)
@@ -286,11 +245,6 @@ public class CaveMap
         // }
 
         // return waterHashes;
-    }
-
-    public bool IsCaveAir(int hashcode)
-    {
-        return caveblocks.ContainsKey(hashcode);
     }
 
     public IEnumerator SetWaterCoroutine(CavePrefabManager cachedPrefabs, WorldBuilder worldBuilder, HashSet<CaveBlock> localMinimas)
