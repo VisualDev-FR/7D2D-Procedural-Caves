@@ -7,13 +7,13 @@ using WorldGenerationEngineFinal;
 
 public class CaveBlockLayer
 {
-    private readonly int bitfield;
+    public int rawData;
 
-    public byte Start => (byte)((bitfield >> 16) & 0xFF);
+    public byte Start => (byte)((rawData >> 16) & 0xFF);
 
-    public byte End => (byte)((bitfield >> 8) & 0xFF);
+    public byte End => (byte)((rawData >> 8) & 0xFF);
 
-    public byte BlockRawData => (byte)(bitfield & 0xFF);
+    public byte BlockRawData => (byte)(rawData & 0xFF);
 
     public static int Count(int hash)
     {
@@ -23,12 +23,12 @@ public class CaveBlockLayer
 
     public CaveBlockLayer(int start, int end, byte blockRawData)
     {
-        bitfield = (start << 16) | (end << 8) | blockRawData;
+        rawData = (start << 16) | (end << 8) | blockRawData;
     }
 
     public CaveBlockLayer(int bitfield)
     {
-        this.bitfield = bitfield;
+        this.rawData = bitfield;
     }
 
     public static int GetHashCode(int start, int end, byte blockRawData)
@@ -144,6 +144,28 @@ public class CaveMap
         TunnelsCount++;
     }
 
+    public bool ContainsPosition(Vector3i position)
+    {
+        var hashZX = CaveBlock.HashZX(position.x, position.z);
+
+        if (!caveblocks.ContainsKey(hashZX))
+            return false;
+
+        var layer = new CaveBlockLayer(0);
+
+        foreach (var layerHash in caveblocks[hashZX])
+        {
+            layer.rawData = layerHash;
+
+            if (position.y >= layer.Start && position.y <= layer.End)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public void Save(string dirname, int worldSize)
     {
         int regionGridSize = worldSize / CaveConfig.RegionSize;
@@ -162,121 +184,96 @@ public class CaveMap
         }
     }
 
-    public CaveBlock GetVerticalLowerPoint(CaveBlock start)
+    public Vector3i GetVerticalLowerPoint(Vector3i position)
     {
-        throw new NotImplementedException();
+        while (--position.y > 0)
+        {
+            if (!ContainsPosition(position))
+            {
+                return position + Vector3i.up;
+            }
+        }
 
-        // var x = start.x;
-        // var z = start.z;
-        // var y = start.y;
-
-        // int hashcode = CaveBlock.GetHashCode(x, y, z);
-        // int offsetHashCode = CaveBlock.GetHashCode(0, -1, 0);
-
-        // while (--y > 0)
-        // {
-        //     if (!caveblocks.ContainsKey(hashcode + offsetHashCode))
-        //     {
-        //         return caveblocks[hashcode];
-        //     }
-
-        //     hashcode += offsetHashCode;
-        // }
-
-        // throw new Exception("Lower point not found");
+        throw new Exception("Lower point not found");
     }
 
-    private HashSet<int> ExpandWater(CaveBlock waterStart, CavePrefabManager cachedPrefabs)
+    private HashSet<Vector3i> ExpandWater(CaveBlock waterStart, CavePrefabManager cachedPrefabs)
     {
-        throw new NotImplementedException();
+        CaveUtils.Assert(waterStart is CaveBlock, "null water start");
 
-        // CaveUtils.Assert(waterStart is CaveBlock, "null water start");
+        var queue = new Queue<Vector3i>(1_000);
+        var visited = new HashSet<Vector3i>(100_000);
+        var waterPositions = new HashSet<Vector3i>(100_000);
+        var startPosition = GetVerticalLowerPoint(waterStart.ToVector3i());
+        var neighbor = Vector3i.zero;
 
-        // var queue = new Queue<int>(1_000);
-        // var visited = new HashSet<int>(100_000);
-        // var waterHashes = new HashSet<int>(100_000);
-        // var startPosition = GetVerticalLowerPoint(waterStart);
-        // var start = CaveBlock.GetHashCode(startPosition.x, startPosition.y, startPosition.z);
+        queue.Enqueue(startPosition);
 
-        // queue.Enqueue(start);
+        while (queue.Count > 0)
+        {
+            Vector3i currentPos = queue.Dequeue();
 
-        // while (queue.Count > 0)
-        // {
-        //     int currentHash = queue.Dequeue();
+            if (cachedPrefabs.IntersectMarker(currentPos))
+                return new HashSet<Vector3i>();
 
-        //     if (cachedPrefabs.IntersectMarker(caveblocks[currentHash]))
-        //         return new HashSet<int>();
+            if (visited.Contains(currentPos) || !ContainsPosition(currentPos))
+                continue;
 
-        //     if (visited.Contains(currentHash) || !caveblocks.ContainsKey(currentHash))
-        //         continue;
+            visited.Add(currentPos);
+            waterPositions.Add(currentPos);
 
-        //     visited.Add(currentHash);
-        //     waterHashes.Add(currentHash);
+            foreach (var offset in CaveUtils.offsets)
+            {
+                neighbor.x = currentPos.x + offset.x;
+                neighbor.y = currentPos.y + offset.y;
+                neighbor.z = currentPos.z + offset.z;
 
-        //     foreach (int offsetHash in CaveUtils.offsetHashes)
-        //     {
-        //         /* NOTE:
-        //             f(x, y, z) = Ax + By + z
-        //             f(dx, dy, dz) = Adx + Bdy + dz
-        //             f(x + dx, y + dy, z + dz)
-        //                 = A(x + dx) + B(y + dy) + (z + dz)
-        //                 = Ax + Adx + By + Bdy + z + dz
-        //                 = (Ax + By + z) + Adx + Bdy + dz
-        //                 = f(x, y, z) + f(dx, dy, dz)
-        //             => currentHash = f(x, y, z)
-        //             => offsetHash = f(dx, dy, dz)
-        //             => neighborHash = currentHash + offSetHash
-        //                 -> TODO: SIMD Vectorization ?
-        //                 -> TODO: f(x, y, z) = (x << 13) + (y << 17) + z
-        //         */
+                var shouldEnqueue =
+                    ContainsPosition(neighbor)
+                    && !visited.Contains(neighbor)
+                    && neighbor.y <= startPosition.y;
 
-        //         var neighborHash = currentHash + offsetHash;
+                if (shouldEnqueue)
+                {
+                    queue.Enqueue(neighbor);
+                }
+            }
+        }
 
-        //         var shouldEnqueue =
-        //             caveblocks.ContainsKey(neighborHash)
-        //             && !visited.Contains(neighborHash)
-        //             && caveblocks[neighborHash].y <= startPosition.y;
-
-        //         if (shouldEnqueue)
-        //         {
-        //             queue.Enqueue(neighborHash);
-        //         }
-        //     }
-        // }
-
-        // return waterHashes;
+        return waterPositions;
     }
 
     public IEnumerator SetWaterCoroutine(CavePrefabManager cachedPrefabs, WorldBuilder worldBuilder, HashSet<CaveBlock> localMinimas)
     {
-        if (!CaveConfig.generateWater)
-            yield break;
+        // if (!CaveConfig.generateWater)
+        //     yield break;
 
-        throw new NotImplementedException();
+        int index = 0;
+        var logger = Logging.CreateLogger("Water");
 
-        // int index = 0;
+        foreach (var waterStart in localMinimas)
+        {
+            index++;
 
-        // foreach (var waterStart in localMinimas)
-        // {
-        //     index++;
+            if (worldBuilder.IsCanceled)
+                yield break;
 
-        //     if (worldBuilder.IsCanceled)
-        //         yield break;
+            if (waterStart.isWater)
+                continue;
 
-        //     if (waterStart.isWater)
-        //         continue;
+            HashSet<Vector3i> positions = ExpandWater(waterStart, cachedPrefabs);
 
-        //     HashSet<int> hashcodes = ExpandWater(waterStart, cachedPrefabs);
+            logger.Debug($"{positions.Count} blocks filled");
 
-        //     string message = $"Water processing: {100.0f * index / localMinimas.Count:F0}% ({index} / {localMinimas.Count})";
+            string message = $"Water processing: {100.0f * index / localMinimas.Count:F0}% ({index} / {localMinimas.Count})";
 
-        //     yield return worldBuilder.SetMessage(message);
+            yield return worldBuilder.SetMessage(message);
 
-        //     foreach (var hashcode in hashcodes)
-        //     {
-        //         caveblocks[hashcode].isWater = true;
-        //     }
-        // }
+            // foreach (var hashcode in positions)
+            // {
+            //     SetWater(hashcode, true);
+            // }
+        }
     }
 
     public IEnumerable<CaveBlock> GetBlocks()

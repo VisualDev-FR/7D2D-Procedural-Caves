@@ -183,11 +183,11 @@ public class CavePrefabManager
         return false;
     }
 
-    public bool IntersectMarker(CaveBlock block)
+    public bool IntersectMarker(Vector3i position)
     {
-        foreach (CavePrefab prefab in GetNearestPrefabsFrom(block.ToVector3i()))
+        foreach (CavePrefab prefab in GetNearestPrefabsFrom(position))
         {
-            if (prefab.IntersectMarker(block.x, block.y, block.z))
+            if (prefab.IntersectMarker(position.x, position.y, position.z))
             {
                 return true;
             }
