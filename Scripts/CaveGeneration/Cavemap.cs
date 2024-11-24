@@ -5,30 +5,56 @@ using System.Collections.Generic;
 using WorldGenerationEngineFinal;
 
 
-public class CaveBlockLayer
+public struct LayerRLE
 {
-    private readonly int bitfield;
+    public int rawData;
 
-    public byte Start => (byte)((bitfield >> 16) & 0xFF);
+    public byte Start
+    {
+        get => (byte)((rawData >> 16) & 0xFF);
+        set => rawData = (rawData & ~0x00FF0000) | (value << 16);
+    }
 
-    public byte End => (byte)((bitfield >> 8) & 0xFF);
+    public byte End
+    {
+        get => (byte)((rawData >> 8) & 0xFF);
+        set => rawData = (rawData & ~0x0000FF00) | (value << 8);
+    }
 
-    public byte BlockRawData => (byte)(bitfield & 0xFF);
+    public byte BlockRawData
+    {
+        get => (byte)(rawData & 0xFF);
+        set => rawData = (rawData & ~0x000000FF) | value;
+    }
 
     public static int Count(int hash)
     {
-        var layer = new CaveBlockLayer(hash);
+        var layer = new LayerRLE(hash);
         return layer.End - layer.Start;
     }
 
-    public CaveBlockLayer(int start, int end, byte blockRawData)
+    public LayerRLE(int start, int end, byte blockRawData)
     {
-        bitfield = (start << 16) | (end << 8) | blockRawData;
+        rawData = (start << 16) | (end << 8) | blockRawData;
     }
 
-    public CaveBlockLayer(int bitfield)
+    public LayerRLE(IEnumerable<Vector3i> positions, byte blockRawData)
     {
-        this.bitfield = bitfield;
+        var start = int.MaxValue;
+        var end = int.MinValue;
+
+        foreach (var pos in positions)
+        {
+            start = Utils.FastMin(start, pos.y);
+            end = Utils.FastMax(end, pos.y);
+        }
+
+        rawData = (start << 16) | (end << 8) | blockRawData;
+    }
+
+    public LayerRLE(int bitfield)
+    {
+        this.rawData = bitfield;
     }
 
     public static int GetHashCode(int start, int end, byte blockRawData)
@@ -36,9 +62,9 @@ public class CaveBlockLayer
         return (start << 16) | (end << 8) | blockRawData;
     }
 
-    public bool IsInside(int y)
+    public bool Contains(int y)
     {
-        return y >= Start && y < End;
+        return y >= Start && y <= End;
     }
 
     public IEnumerable<CaveBlock> GetBlocks(int x, int z)
@@ -48,13 +74,24 @@ public class CaveBlockLayer
             yield return new CaveBlock(x, y, z) { rawData = BlockRawData };
         }
     }
+
+    public void SetWater(bool value)
+    {
+        BlockRawData = (byte)(value ? (BlockRawData | 0b0000_0001) : (BlockRawData & 0b1111_1110));
+    }
+
+    public bool IsWater()
+    {
+        return (BlockRawData & 0b0000_0001) != 0;
+    }
+
 }
 
 public class CaveMap
 {
     private readonly Dictionary<int, List<int>> caveblocks;
 
-    public int BlocksCount => caveblocks.Values.Sum(layers => layers.Sum(layerHash => CaveBlockLayer.Count(layerHash)));
+    public int BlocksCount => caveblocks.Values.Sum(layers => layers.Sum(layerHash => LayerRLE.Count(layerHash)));
 
     public readonly int worldSize;
 
@@ -96,44 +133,20 @@ public class CaveMap
 
             CaveBlock.ZXFromHash(hashZX, out var x, out var z);
 
-            var blocks = group.OrderBy(b => b.y).ToArray();
-
-            // TODO: better handling of tunnels intersection (implement CaveBlockLayer merging)
-            List<int> blockRLE = null;
-
-            lock (_lock)
+            if (!caveblocks.ContainsKey(hashZX))
             {
-                if (!caveblocks.ContainsKey(hashZX))
+                lock (_lock)
                 {
                     caveblocks[hashZX] = new List<int>();
                 }
-                blockRLE = caveblocks[hashZX];
             }
 
-            byte previousData = blocks[0].rawData;
-            int previousY = blocks[0].y;
-            int startY = blocks[0].y;
-
-            for (int i = 1; i < blocks.Length; i++)
+            foreach (var layerHash in RLECompress(group))
             {
-                int current = blocks[i].y;
-
-                if (current != previousY + 1 || previousData != blocks[i].rawData)
+                lock (_lock)
                 {
-                    lock (_lock)
-                    {
-                        blockRLE.Add(CaveBlockLayer.GetHashCode(startY, previousY, previousData));
-                    }
-                    startY = current;
+                    caveblocks[hashZX].Add(layerHash);
                 }
-
-                previousY = current;
-                previousData = blocks[i].rawData;
-            }
-
-            lock (_lock)
-            {
-                blockRLE.Add(CaveBlockLayer.GetHashCode(startY, previousY, previousData));
             }
         }
     }
@@ -142,6 +155,75 @@ public class CaveMap
     {
         AddBlocks(tunnel.blocks);
         TunnelsCount++;
+    }
+
+    public IEnumerable<int> RLECompress(IEnumerable<CaveBlock> caveBlocks)
+    {
+        var blocks = caveBlocks.OrderBy(b => b.y).ToArray();
+
+        byte previousData = blocks[0].rawData;
+        int previousY = blocks[0].y;
+        int startY = blocks[0].y;
+
+        for (int i = 1; i < blocks.Length; i++)
+        {
+            int current = blocks[i].y;
+
+            if (current != previousY + 1 || previousData != blocks[i].rawData)
+            {
+                yield return LayerRLE.GetHashCode(startY, previousY, previousData);
+                startY = current;
+            }
+
+            previousY = current;
+            previousData = blocks[i].rawData;
+        }
+
+        yield return LayerRLE.GetHashCode(startY, previousY, previousData);
+    }
+
+    public bool IsCave(Vector3i position)
+    {
+        var hashZX = CaveBlock.HashZX(position.x, position.z);
+
+        if (!caveblocks.ContainsKey(hashZX))
+            return false;
+
+        var layer = new LayerRLE(0);
+
+        foreach (var layerHash in caveblocks[hashZX])
+        {
+            layer.rawData = layerHash;
+
+            if (layer.Contains(position.y))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public bool IsWater(Vector3i position)
+    {
+        var hashZX = CaveBlock.HashZX(position.x, position.z);
+
+        if (!caveblocks.ContainsKey(hashZX))
+            return false;
+
+        var layer = new LayerRLE(0);
+
+        foreach (var layerHash in caveblocks[hashZX])
+        {
+            layer.rawData = layerHash;
+
+            if (layer.Contains(position.y))
+            {
+                return layer.IsWater();
+            }
+        }
+
+        return false;
     }
 
     public void Save(string dirname, int worldSize)
@@ -162,121 +244,170 @@ public class CaveMap
         }
     }
 
-    public CaveBlock GetVerticalLowerPoint(CaveBlock start)
+    public Vector3i GetVerticalLowerPoint(Vector3i position)
     {
-        throw new NotImplementedException();
+        while (position.y-- > 0)
+        {
+            if (!IsCave(position))
+            {
+                return position + Vector3i.up;
+            }
+        }
 
-        // var x = start.x;
-        // var z = start.z;
-        // var y = start.y;
-
-        // int hashcode = CaveBlock.GetHashCode(x, y, z);
-        // int offsetHashCode = CaveBlock.GetHashCode(0, -1, 0);
-
-        // while (--y > 0)
-        // {
-        //     if (!caveblocks.ContainsKey(hashcode + offsetHashCode))
-        //     {
-        //         return caveblocks[hashcode];
-        //     }
-
-        //     hashcode += offsetHashCode;
-        // }
-
-        // throw new Exception("Lower point not found");
+        throw new Exception("Lower point not found");
     }
 
-    private HashSet<int> ExpandWater(CaveBlock waterStart, CavePrefabManager cachedPrefabs)
+    private HashSet<Vector3i> ExpandWater(CaveBlock waterStart, CavePrefabManager cachedPrefabs)
     {
-        throw new NotImplementedException();
+        CaveUtils.Assert(waterStart is CaveBlock, "null water start");
 
-        // CaveUtils.Assert(waterStart is CaveBlock, "null water start");
+        var queue = new Queue<Vector3i>(1_000);
+        var visited = new HashSet<Vector3i>(100_000);
+        var waterPositions = new HashSet<Vector3i>(100_000);
+        var startPosition = GetVerticalLowerPoint(waterStart.ToVector3i());
+        var neighbor = Vector3i.zero;
 
-        // var queue = new Queue<int>(1_000);
-        // var visited = new HashSet<int>(100_000);
-        // var waterHashes = new HashSet<int>(100_000);
-        // var startPosition = GetVerticalLowerPoint(waterStart);
-        // var start = CaveBlock.GetHashCode(startPosition.x, startPosition.y, startPosition.z);
+        int maxWaterDepth = 3;
 
-        // queue.Enqueue(start);
+        queue.Enqueue(startPosition);
 
-        // while (queue.Count > 0)
-        // {
-        //     int currentHash = queue.Dequeue();
+        while (queue.Count > 0)
+        {
+            Vector3i currentPos = queue.Dequeue();
 
-        //     if (cachedPrefabs.IntersectMarker(caveblocks[currentHash]))
-        //         return new HashSet<int>();
+            if (cachedPrefabs.IntersectMarker(currentPos) || (startPosition.y - currentPos.y) >= maxWaterDepth)
+                return new HashSet<Vector3i>();
 
-        //     if (visited.Contains(currentHash) || !caveblocks.ContainsKey(currentHash))
-        //         continue;
+            if (visited.Contains(currentPos) || !IsCave(currentPos))
+                continue;
 
-        //     visited.Add(currentHash);
-        //     waterHashes.Add(currentHash);
+            visited.Add(currentPos);
+            waterPositions.Add(currentPos);
 
-        //     foreach (int offsetHash in CaveUtils.offsetHashes)
-        //     {
-        //         /* NOTE:
-        //             f(x, y, z) = Ax + By + z
-        //             f(dx, dy, dz) = Adx + Bdy + dz
-        //             f(x + dx, y + dy, z + dz)
-        //                 = A(x + dx) + B(y + dy) + (z + dz)
-        //                 = Ax + Adx + By + Bdy + z + dz
-        //                 = (Ax + By + z) + Adx + Bdy + dz
-        //                 = f(x, y, z) + f(dx, dy, dz)
-        //             => currentHash = f(x, y, z)
-        //             => offsetHash = f(dx, dy, dz)
-        //             => neighborHash = currentHash + offSetHash
-        //                 -> TODO: SIMD Vectorization ?
-        //                 -> TODO: f(x, y, z) = (x << 13) + (y << 17) + z
-        //         */
+            foreach (var offset in CaveUtils.offsets)
+            {
+                neighbor.x = currentPos.x + offset.x;
+                neighbor.y = currentPos.y + offset.y;
+                neighbor.z = currentPos.z + offset.z;
 
-        //         var neighborHash = currentHash + offsetHash;
+                var shouldEnqueue =
+                    IsCave(neighbor)
+                    && !visited.Contains(neighbor)
+                    && neighbor.y <= startPosition.y;
 
-        //         var shouldEnqueue =
-        //             caveblocks.ContainsKey(neighborHash)
-        //             && !visited.Contains(neighborHash)
-        //             && caveblocks[neighborHash].y <= startPosition.y;
+                if (shouldEnqueue)
+                {
+                    queue.Enqueue(neighbor);
+                }
+            }
+        }
 
-        //         if (shouldEnqueue)
-        //         {
-        //             queue.Enqueue(neighborHash);
-        //         }
-        //     }
-        // }
-
-        // return waterHashes;
+        return waterPositions;
     }
 
     public IEnumerator SetWaterCoroutine(CavePrefabManager cachedPrefabs, WorldBuilder worldBuilder, HashSet<CaveBlock> localMinimas)
     {
-        if (!CaveConfig.generateWater)
-            yield break;
+        // if (!CaveConfig.generateWater)
+        //     yield break;
 
-        throw new NotImplementedException();
+        int index = 0;
 
-        // int index = 0;
+        CaveUtils.Assert(new CaveBlock() { rawData = 1 }.isWater, "");
 
-        // foreach (var waterStart in localMinimas)
-        // {
-        //     index++;
+        foreach (var waterStart in localMinimas)
+        {
+            index++;
 
-        //     if (worldBuilder.IsCanceled)
-        //         yield break;
+            if (worldBuilder.IsCanceled)
+                yield break;
 
-        //     if (waterStart.isWater)
-        //         continue;
+            if (IsWater(waterStart.ToVector3i()))
+                continue;
 
-        //     HashSet<int> hashcodes = ExpandWater(waterStart, cachedPrefabs);
+            HashSet<Vector3i> positions = ExpandWater(waterStart, cachedPrefabs);
 
-        //     string message = $"Water processing: {100.0f * index / localMinimas.Count:F0}% ({index} / {localMinimas.Count})";
+            string message = $"Water processing: {100.0f * index / localMinimas.Count:F0}% ({index} / {localMinimas.Count})";
 
-        //     yield return worldBuilder.SetMessage(message);
+            yield return worldBuilder.SetMessage(message);
 
-        //     foreach (var hashcode in hashcodes)
-        //     {
-        //         caveblocks[hashcode].isWater = true;
-        //     }
-        // }
+            if (positions.Count > 0)
+            {
+                SetWater(positions);
+            }
+        }
+    }
+
+    public HashSet<Vector3i> SetWater(CavePrefabManager cachedPrefabs, HashSet<CaveBlock> localMinimas)
+    {
+        // if (!CaveConfig.generateWater)
+        //     yield break;
+
+        int index = 0;
+        var result = new HashSet<Vector3i>();
+
+        foreach (var waterStart in localMinimas)
+        {
+            index++;
+
+            if (IsWater(waterStart.ToVector3i()))
+                continue;
+
+            var positions = ExpandWater(waterStart, cachedPrefabs);
+
+            result.UnionWith(positions);
+
+            if (positions.Count > 0)
+            {
+                SetWater(positions);
+            }
+        }
+
+        return result;
+    }
+
+    private void SetWater(HashSet<Vector3i> positions)
+    {
+        var layer = new LayerRLE(0);
+
+        foreach (var group in positions.GroupBy(p => CaveBlock.HashZX(p.x, p.z)))
+        {
+            var hashcode = group.Key;
+            var waterLayer = new LayerRLE(group, 1);
+            var layers = caveblocks[hashcode].ToList();
+
+            for (int i = layers.Count - 1; i >= 0; i--)
+            {
+                layer.rawData = layers[i];
+
+                waterLayer.BlockRawData = layer.BlockRawData;
+                waterLayer.SetWater(true);
+
+                if (waterLayer.Start <= layer.Start && waterLayer.End >= layer.End)
+                {
+                    caveblocks[hashcode][i] = LayerRLE.GetHashCode(
+                        layer.Start,
+                        layer.End,
+                        waterLayer.BlockRawData
+                    );
+                }
+                else if (waterLayer.Start <= layer.Start && waterLayer.End >= layer.Start && waterLayer.End < layer.End)
+                {
+                    caveblocks[hashcode].RemoveAt(i);
+
+                    caveblocks[hashcode].Add(LayerRLE.GetHashCode(
+                        layer.Start,
+                        waterLayer.End,
+                        waterLayer.BlockRawData
+                    ));
+
+                    caveblocks[hashcode].Add(LayerRLE.GetHashCode(
+                        waterLayer.End + 1,
+                        layer.End,
+                        layer.BlockRawData
+                    ));
+                }
+            }
+        }
     }
 
     public IEnumerable<CaveBlock> GetBlocks()
@@ -287,9 +418,13 @@ public class CaveMap
 
             CaveBlock.ZXFromHash(hash, out var x, out var z);
 
-            foreach (var layer in entry.Value)
+            foreach (var hashcode in entry.Value)
             {
-                foreach (var block in new CaveBlockLayer(layer).GetBlocks(x, z))
+                var layer = new LayerRLE(hashcode);
+
+                CaveUtils.Assert(layer.Start <= layer.End, $"Invalid RLE Layer: start={layer.Start}, end={layer.End}");
+
+                foreach (var block in layer.GetBlocks(x, z))
                 {
                     yield return block;
                 }

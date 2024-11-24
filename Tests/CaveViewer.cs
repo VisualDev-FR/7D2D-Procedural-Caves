@@ -369,6 +369,7 @@ public static class CaveViewer
                     lock (lockObject)
                     {
                         cavemap.AddTunnel(tunnel);
+                        localMinimas.UnionWith(tunnel.LocalMinimas);
 
                         foreach (CaveBlock caveBlock in tunnel.blocks)
                         {
@@ -382,7 +383,7 @@ public static class CaveViewer
             }
         }
 
-        // cavemap.SetWater(localMinimas, cachedPrefabs);
+        cavemap.SetWater(cachedPrefabs, localMinimas);
 
         Logging.Info($"{cavemap.BlocksCount:N0} cave blocks generated ({cavemap.TunnelsCount} unique tunnels), timer={timer.ElapsedMilliseconds:N0}ms, memory={(GC.GetTotalMemory(true) - memoryBefore) / 1_048_576.0:N1}MB.");
         Logging.Info($"{localMinimas.Count} local minimas");
@@ -390,12 +391,18 @@ public static class CaveViewer
         if (worldSize > 1024)
             return;
 
-        var voxels = cavemap
-            .GetBlocks()
-            .Select(block => new Voxell(block.x, block.y, block.z, WaveFrontMaterial.LightBlue))
-            .ToHashSet();
+        var voxels = new HashSet<Voxell>();
+        var water = new HashSet<Voxell>();
 
-        Logging.Info($"{voxels.Count} water blocks");
+        foreach (var block in cavemap.GetBlocks())
+        {
+            voxels.Add(new Voxell(block.x, block.y, block.z, block.isWater ? WaveFrontMaterial.LightBlue : WaveFrontMaterial.DarkRed));
+
+            if (block.isWater)
+            {
+                water.Add(new Voxell(block.x, block.y, block.z, WaveFrontMaterial.LightBlue));
+            }
+        }
 
         foreach (var prefab in cachedPrefabs.Prefabs)
         {
@@ -408,6 +415,7 @@ public static class CaveViewer
         }
 
         GenerateObjFile("cave.obj", voxels, false);
+        GenerateObjFile("caveWater.obj", water, false);
     }
 
     public static void CellularAutomaCommand(string[] args)
