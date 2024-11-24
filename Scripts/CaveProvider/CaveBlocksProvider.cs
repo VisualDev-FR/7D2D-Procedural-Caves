@@ -18,7 +18,7 @@ public class CaveChunksProvider
 
     private static readonly int maxQueueSize = 4;
 
-    private readonly Logger logger = Logging.CreateLogger("CaveChunksProvider", LoggingLevel.DEBUG);
+    private readonly Logger logger = Logging.CreateLogger("CaveChunksProvider", Logging.loggingLevel);
 
     public CaveChunksProvider(string worldName, int worldSize)
     {

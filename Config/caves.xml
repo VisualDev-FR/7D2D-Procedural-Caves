@@ -1,6 +1,7 @@
 <configs>
     <append xpath="/caves">
 
+        <property name="LoggingLevel" value="debug" />
         <property name="MaxPrefabPlacementAttempts" value="50" help="myPropertyHelp" />
         <property name="RadiationMargin" value="50" help="myPropertyHelp" />
         <property name="LightFactor" value="0.5" help="myPropertyHelp" />
