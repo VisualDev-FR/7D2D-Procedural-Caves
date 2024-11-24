@@ -544,28 +544,28 @@ public static class CaveViewer
 
     public static void ClusterizeCommand(string[] args)
     {
-        var timer = CaveUtils.StartTimer();
+        // var timer = CaveUtils.StartTimer();
 
-        var prefabName = "army_camp_01";
-        // var path = $"C:/SteamLibrary/steamapps/common/7 Days To Die/Data/Prefabs/RWGTiles/{prefabName}.tts";
-        var path = $"C:/SteamLibrary/steamapps/common/7 Days To Die/Data/Prefabs/POIs/{prefabName}.tts";
-        var yOffset = -7;
+        // var prefabName = "army_camp_01";
+        // // var path = $"C:/SteamLibrary/steamapps/common/7 Days To Die/Data/Prefabs/RWGTiles/{prefabName}.tts";
+        // var path = $"C:/SteamLibrary/steamapps/common/7 Days To Die/Data/Prefabs/POIs/{prefabName}.tts";
+        // var yOffset = -7;
 
-        var clusters = TTSReader.Clusterize(path, yOffset);
+        // var clusters = .Clusterize(path, yOffset);
 
-        Log.Out($"{clusters.Count} clusters found, timer: {timer.ElapsedMilliseconds}ms");
+        // Log.Out($"{clusters.Count} clusters found, timer: {timer.ElapsedMilliseconds}ms");
 
-        var prefabVoxels = TTSReader.ReadUndergroundBlocks(path, yOffset).Select(pos => new Voxell(pos))
-            .ToHashSet();
+        // var prefabVoxels = TTSReader.ReadUndergroundBlocks(path, yOffset).Select(pos => new Voxell(pos))
+        //     .ToHashSet();
 
-        GenerateObjFile("prefab.obj", prefabVoxels, false);
+        // GenerateObjFile("prefab.obj", prefabVoxels, false);
 
 
-        var clusterVoxels = clusters
-            .Select(cluster => new Voxell(cluster.start, cluster.size, WaveFrontMaterial.DarkGreen) { force = true })
-            .ToHashSet();
+        // var clusterVoxels = clusters
+        //     .Select(cluster => new Voxell(cluster.start, cluster.size, WaveFrontMaterial.DarkGreen) { force = true })
+        //     .ToHashSet();
 
-        GenerateObjFile("clusters.obj", clusterVoxels, false);
+        // GenerateObjFile("clusters.obj", clusterVoxels, false);
     }
 
     public static void BoundingCommands(string[] args)

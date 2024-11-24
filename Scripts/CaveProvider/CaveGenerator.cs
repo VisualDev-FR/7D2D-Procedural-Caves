@@ -25,12 +25,12 @@ public class CaveGenerator
             HalfWorldSize = CaveUtils.HalfWorldSize(worldSize);
             isEnabled = true;
 
-            Log.Out($"[Cave] init caveGenerator for world '{worldName}', size: {worldSize}");
+            Logging.Info($"init caveGenerator for world '{worldName}', size: {worldSize}");
         }
         else
         {
             isEnabled = false;
-            Log.Warning($"[Cave] no cavemap found for world '{worldName}'");
+            Logging.Warning($"no cavemap found for world '{worldName}'");
         }
     }
 
@@ -59,7 +59,7 @@ public class CaveGenerator
     {
         if (chunk == null)
         {
-            Log.Warning($"[Cave] Null chunk at {chunk.ChunkPos}");
+            Logging.Warning($"Null chunk at {chunk.ChunkPos}");
             return;
         }
 
@@ -272,7 +272,7 @@ public class CaveGenerator
 
         int y = worldPos.y;
 
-        // Log.Out($"{blockValue.Block.blockName}, position: {worldPos} rotation: {blockValue.rotation}, [{x0},{z0} -> {x1},{z1}]");
+        // Logging.Debug($"{blockValue.Block.blockName}, position: {worldPos} rotation: {blockValue.rotation}, [{x0},{z0} -> {x1},{z1}]");
 
         var position = Vector3i.zero;
 
@@ -288,17 +288,17 @@ public class CaveGenerator
                 bool isCaveBlock = caveChunksProvider.IsCave(x, y, z);
                 bool isAlreadyDecorated = decoratedPositions.Contains(position);
 
-                // Log.Out($"---- {x},{y},{z}: isAirBelow: {isAirBelow}, isCaveBlock: {isCaveBlock}, isAlreadyDecorated: {isAlreadyDecorated}");
+                // Logging.Debug($"---- {x},{y},{z}: isAirBelow: {isAirBelow}, isCaveBlock: {isCaveBlock}, isAlreadyDecorated: {isAlreadyDecorated}");
 
                 if (isAirBelow || (isCaveBlock && isAlreadyDecorated))
                 {
-                    // Log.Out("xxxx invalid placement");
+                    // Logging.Debug("xxxx invalid placement");
                     return false;
                 }
             }
         }
 
-        // Log.Out("++++ valid placement");
+        // Logging.Debug("++++ valid placement");
 
         return true;
     }
