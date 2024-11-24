@@ -246,7 +246,7 @@ public class CaveMap
 
     public Vector3i GetVerticalLowerPoint(Vector3i position)
     {
-        while (--position.y > 0)
+        while (position.y-- > 0)
         {
             if (!IsCave(position))
             {
@@ -342,8 +342,6 @@ public class CaveMap
 
         int index = 0;
 
-        CaveUtils.Assert(new CaveBlock() { rawData = 1 }.isWater, "");
-
         foreach (var waterStart in localMinimas)
         {
             index++;
@@ -364,6 +362,11 @@ public class CaveMap
     {
         var layer = new LayerRLE(0);
 
+        // public bool IsInside(int y)
+        // {
+        //     return y >= Start && y < End;
+        // }
+
         foreach (var group in positions.GroupBy(p => CaveBlock.HashZX(p.x, p.z)))
         {
             var hashcode = group.Key;
@@ -377,15 +380,12 @@ public class CaveMap
                 waterLayer.BlockRawData = layer.BlockRawData;
                 waterLayer.SetWater(true);
 
-                // replace the entire layer
                 if (waterLayer.Start <= layer.Start && waterLayer.End >= layer.End)
                 {
                     layer.SetWater(true);
                     caveblocks[hashcode][i] = layer.rawData;
-                    continue;
                 }
-
-                if (waterLayer.Start <= layer.Start && waterLayer.End < layer.End)
+                else if (waterLayer.Start <= layer.Start && waterLayer.End >= layer.Start && waterLayer.End <= layer.End)
                 {
                     caveblocks[hashcode].RemoveAt(i);
 
@@ -401,33 +401,6 @@ public class CaveMap
                         layer.BlockRawData
                     ));
                 }
-                else if (waterLayer.Start > layer.Start)
-                {
-                    Logging.Warning($"water upside another layer, waterStart: {waterLayer.Start}, layerStart: {layer.Start}");
-                    // throw new Exception("there should never have water upside another layer");
-                }
-                // else if (waterLayer.Start > layer.Start && waterLayer.End >= layer.End)
-                // {
-
-                //     caveblocks[hashcode].Add(LayerRLE.GetHashCode(
-                //         layer.Start,
-                //         waterLayer.Start,
-                //         layer.BlockRawData
-                //     ));
-
-                //     caveblocks[hashcode].Add(LayerRLE.GetHashCode(
-                //         waterLayer.Start,
-                //         layer.End,
-                //         waterLayer.BlockRawData
-                //     ));
-                // }
-                // else if (waterLayer.Start > layer.Start && waterLayer.End < layer.End)
-                // {
-                //     // throw new Exception("there should not have water upside another layer");
-
-
-
-                // }
             }
         }
     }
@@ -440,9 +413,15 @@ public class CaveMap
 
             CaveBlock.ZXFromHash(hash, out var x, out var z);
 
-            foreach (var layer in entry.Value)
+            foreach (var hashcode in entry.Value)
             {
-                foreach (var block in new LayerRLE(layer).GetBlocks(x, z))
+                var layer = new LayerRLE(hashcode);
+
+                // Logging.Debug(layer.Start, layer.End, layer.End - layer.Start);
+
+                CaveUtils.Assert(layer.Start <= layer.End, "");
+
+                foreach (var block in layer.GetBlocks(x, z))
                 {
                     yield return block;
                 }
