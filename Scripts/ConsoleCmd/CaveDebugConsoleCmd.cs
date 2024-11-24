@@ -25,26 +25,26 @@ public class CaveDebugConsoleCmd : ConsoleCmdAbstract
 
         if (prefabInstance == null)
         {
-            Log.Warning($"[Cluster] no prefab found at position [{playerPos}]");
+            Logging.Warning($"[Cluster] no prefab found at position [{playerPos}]");
             return;
         }
 
         var clusters = BlockClusterizer.Clusterize(prefabInstance);
 
-        Log.Out($"[Cluster] player: [{playerPos}], prefab: [{prefabInstance.boundingBoxPosition}], rotation: {prefabInstance.rotation}, name: '{prefabInstance.name}'");
+        Logging.Info($"[Cluster] player: [{playerPos}], prefab: [{prefabInstance.boundingBoxPosition}], rotation: {prefabInstance.rotation}, name: '{prefabInstance.name}'");
 
         if (clusters.Count == 0)
         {
-            Log.Warning($"[Cluster] No cluster found.");
+            Logging.Warning($"[Cluster] No cluster found.");
             return;
         }
 
         for (int i = 0; i < clusters.Count; i++)
         {
             clusters[i] = clusters[i].Transform(prefabInstance);
-            Log.Out($"[Cluster] {clusters[i].start,18} | {clusters[i].size}");
+            Logging.Info($"[Cluster] {clusters[i].start,18} | {clusters[i].size}");
         }
-        Log.Out($"[Cluster] {clusters.Count} clusters found.");
+        Logging.Info($"[Cluster] {clusters.Count} clusters found.");
 
         BlockSelectionUtils.SelectBoxes(clusters);
     }
@@ -56,13 +56,13 @@ public class CaveDebugConsoleCmd : ConsoleCmdAbstract
 
         if (prefabInstance == null)
         {
-            Log.Warning($"[Prefab] no prefab found at position [{playerPos}]");
+            Logging.Warning($"[Prefab] no prefab found at position [{playerPos}]");
             return;
         }
 
         var bb = new BoundingBox(prefabInstance.boundingBoxPosition, prefabInstance.boundingBoxSize);
 
-        Log.Out($"[Prefab] '{prefabInstance.name}', start: [{bb.start}], size: [{bb.size}], rotation: {prefabInstance.rotation}");
+        Logging.Info($"[Prefab] '{prefabInstance.name}', start: [{bb.start}], size: [{bb.size}], rotation: {prefabInstance.rotation}");
 
         BlockSelectionUtils.SelectBox(bb);
     }
@@ -76,13 +76,13 @@ public class CaveDebugConsoleCmd : ConsoleCmdAbstract
     {
         if (_params.Count == 0)
         {
-            Log.Error($"[Cave] Missing argument: 'scale' (float)");
+            Logging.Error($"Missing argument: 'scale' (float)");
             return;
         }
 
         if (!float.TryParse(_params[1], out var scale))
         {
-            Log.Error($"[Cave] Invalid argument: '{_params[1]}'");
+            Logging.Error($"Invalid argument: '{_params[1]}'");
             return;
         }
 
@@ -95,7 +95,7 @@ public class CaveDebugConsoleCmd : ConsoleCmdAbstract
 
         if (worldPos.Equals(Vector3i.zero))
         {
-            Log.Warning("[Cave] empty selection.");
+            Logging.Warning("empty selection.");
             return;
         }
 
@@ -103,7 +103,7 @@ public class CaveDebugConsoleCmd : ConsoleCmdAbstract
         bool isChild = GameManager.Instance.World.GetBlock(worldPos).ischild;
         bool isMultiBlock = GameManager.Instance.World.GetBlock(worldPos).Block.isMultiBlock;
 
-        Log.Out($"'{worldPos}' : isChild: {isChild}, isMulti: {isMultiBlock}, name: {blockName}");
+        Logging.Info($"'{worldPos}' : isChild: {isChild}, isMulti: {isMultiBlock}, name: {blockName}");
 
         if (_params.Count == 1)
             return;
@@ -131,7 +131,7 @@ public class CaveDebugConsoleCmd : ConsoleCmdAbstract
     {
         if (_params.Count == 0)
         {
-            Log.Out(getDescription());
+            Logging.Info(getDescription());
             return;
         }
 
@@ -158,7 +158,7 @@ public class CaveDebugConsoleCmd : ConsoleCmdAbstract
                 break;
 
             default:
-                Log.Error($"Invalid or not implemented command: '{_params[0]}'");
+                Logging.Error($"Invalid or not implemented command: '{_params[0]}'");
                 break;
         }
     }

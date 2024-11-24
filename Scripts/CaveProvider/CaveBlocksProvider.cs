@@ -78,21 +78,21 @@ public class CaveChunksProvider
 
         if (!File.Exists(filename))
         {
-            Log.Warning($"[Cave] cave region not found 'region_{regionID}'");
+            Logging.Warning($"cave region not found 'region_{regionID}'");
             return null;
         }
 
         regions[regionID] = new CaveRegion(filename);
         regionQueue.Enqueue(regionID);
 
-        Log.Out($"[Cave] Enqueue region '{regionID}'");
+        Logging.Info($"Enqueue region '{regionID}'");
 
         if (regionQueue.Count > maxQueueSize)
         {
             int dequeuedID = regionQueue.Dequeue();
             regions.Remove(dequeuedID);
 
-            Log.Out($"[Cave] Dequeue region '{dequeuedID}'");
+            Logging.Info($"Dequeue region '{dequeuedID}'");
         }
 
         return regions[regionID];

@@ -157,7 +157,7 @@ public class SpawnManagerBiomes_Update
         var spawnedGroup = biomeSpawnEntityGroupList.list[index];
         var entityID = EntityGroups.GetRandomFromGroup(spawnedGroup.entityGroupRefName, ref spawnManagerBiome.lastClassId);
 
-        Log.Out($"[Cave] entityGroupName: {spawnedGroup.entityGroupRefName}");
+        Logging.Info($"entityGroupName: {spawnedGroup.entityGroupRefName}");
 
         if (entityID == 0)
         {
@@ -175,7 +175,7 @@ public class SpawnManagerBiomes_Update
         if (spawnDeadChance > 0f && gameRandom.RandomFloat < spawnDeadChance)
             entity.Kill(DamageResponse.New(_fatal: true));
 
-        Log.Out($"[Caves] Spawning entity: {entityID} at {spawnPosition}, playerPos=[{playerPosition}]");
+        Logging.Info($"Spawning entity: {entityID} at {spawnPosition}, playerPos=[{playerPosition}]");
 
         return false;
     }

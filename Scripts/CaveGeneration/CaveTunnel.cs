@@ -61,13 +61,13 @@ public class CaveTunnel
 
         if (cachedPrefabs.MinSqrDistanceToPrefab(start) == 0)
         {
-            Log.Warning($"[Cave] '{edge.Prefab1.PrefabName}' ({start - HalfWorldSize}) intersect with another prefab");
+            Logging.Warning($"'{edge.Prefab1.PrefabName}' ({start - HalfWorldSize}) intersect with another prefab");
             return;
         }
 
         if (cachedPrefabs.MinSqrDistanceToPrefab(target) == 0)
         {
-            Log.Warning($"[Cave] '{edge.Prefab2.PrefabName}' ({target - HalfWorldSize}) intersect with another prefab");
+            Logging.Warning($"'{edge.Prefab2.PrefabName}' ({target - HalfWorldSize}) intersect with another prefab");
             return;
         }
 
@@ -153,7 +153,7 @@ public class CaveTunnel
         var p1 = start - HalfWorldSize;
         var p2 = target - HalfWorldSize;
 
-        Log.Warning($"No Path found from '{edge.Prefab1.PrefabName}' ({p1} / {height1}) to '{edge.Prefab2.PrefabName}' ({p2} / ({height2})) after {index} iterations ");
+        Logging.Warning($"No Path found from '{edge.Prefab1.PrefabName}' ({p1} / {height1}) to '{edge.Prefab2.PrefabName}' ({p2} / ({height2})) after {index} iterations ");
     }
 
     private IEnumerable<CaveBlock> FindLocalMinimas()

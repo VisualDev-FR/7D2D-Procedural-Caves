@@ -20,7 +20,7 @@ public class BlockClusterizer
         var clusters = ClusterizeBlocks(blocks);
         // var merged = new List<BoundingBox>();
 
-        // Log.Out($"{blocks.Count} blocks found.");
+        // Logging.Info($"{blocks.Count} blocks found.");
 
         // foreach (var cluster in clusters)
         // {

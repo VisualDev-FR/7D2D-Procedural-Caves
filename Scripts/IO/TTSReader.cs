@@ -47,7 +47,7 @@ public class TTSReader
         }
         catch (Exception e)
         {
-            Log.Error($"[Cave] Error while reading .tts file '{fullPath}': {e}");
+            Logging.Error($"Error while reading .tts file '{fullPath}': {e}");
             return null;
         }
     }

@@ -318,8 +318,6 @@ public class ActionSpawnCaveEntity : ActionSpawnEntity
     {
         newPoint = CaveSpawnManager.GetSpawnPositionNearPlayer(startPoint, minDistance);
 
-        Log.Out($"[Cave] FindValidPosition: {newPoint}, startPoint: {startPoint}, minDistance: {minDistance}"); // \n{StackTraceUtility.ExtractStackTrace()}
-
         return newPoint != null;
     }
 
@@ -336,7 +334,7 @@ public class ActionSpawnCaveEntity : ActionSpawnEntity
             entity.SetSpawnerSource(EnumSpawnerSource.Dynamic);
             world.SpawnEntityInWorld(entity);
 
-            Log.Out($"[Cave] ActionSpawnCaveEntity: entity spawned at {entity.position}");
+            Logging.Debug($"ActionSpawnCaveEntity: entity spawned at {entity.position}");
 
             if (target != null && spawnSound != "")
             {

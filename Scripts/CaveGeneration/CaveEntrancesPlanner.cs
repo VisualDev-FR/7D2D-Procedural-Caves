@@ -35,13 +35,13 @@ public class CaveEntrancesPlanner
 
         if (wildernessTiles.Count == 0)
         {
-            Log.Error("[Cave] No wilderness streetTile was found");
+            Logging.Error("No wilderness streetTile was found");
             return;
         }
 
         while (usedTileIndexes.Count < maxEntrancesCount && --maxRolls > 0)
         {
-            Log.Out($"[Cave] {wildernessTiles.Count} wilderness tiles available");
+            Logging.Info($"{wildernessTiles.Count} wilderness tiles available");
 
             if (usedTileIndexes.Contains(++tileIndex))
                 continue;
@@ -51,13 +51,13 @@ public class CaveEntrancesPlanner
 
             if (TrySpawnWildernessCaveEntrance(tile, prefab))
             {
-                Log.Out($"[Cave] Entrance spawned: '{prefab.Name}' on tile '{tile.GridPosition}'");
+                Logging.Debug($"Entrance spawned: '{prefab.Name}' on tile '{tile.GridPosition}'");
                 spawnedEntrances.Add(prefab);
                 usedTileIndexes.Add(tileIndex);
             }
             else
             {
-                Log.Out($"[Cave] Fail to spawn prefab '{prefab.Name}' on tile '{tile.GridPosition}'");
+                Logging.Debug($"Fail to spawn prefab '{prefab.Name}' on tile '{tile.GridPosition}'");
             }
         }
 
@@ -190,7 +190,7 @@ public class CaveEntrancesPlanner
                 return new Vector2(prefabPosition.x, prefabPosition.y + sizeZ / 2);
 
             default:
-                throw new Exception($"[Cave] invalid rotation: '{rotation}'");
+                throw new Exception($"invalid rotation: '{rotation}'");
         }
     }
 
@@ -352,8 +352,6 @@ public class CaveEntrancesPlanner
             (int)prefabRectangle.center.x,
             (int)prefabRectangle.center.y
         ));
-
-        Log.Out($"[Cave] median Height: {medianHeight}");
 
         if (medianHeight + wildernessPrefab.yOffset < 2)
         {

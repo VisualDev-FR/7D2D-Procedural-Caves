@@ -42,8 +42,6 @@ public class ActionCollapseTerrain : BaseAction
 
         var flatPositions = FindFlatBlocks(playerPos + Vector3i.down);
 
-        Log.Out($"[Cave] flatBlocks: {flatPositions.Count}");
-
         if (flatPositions.Count < 32)
         {
             return false;
@@ -60,8 +58,6 @@ public class ActionCollapseTerrain : BaseAction
             ));
 
             float deep = 5;
-
-            Log.Out($"[Cave] deep: {deep}");
 
             for (int y = 2; y <= deep; y++)
             {
@@ -114,7 +110,7 @@ public class ActionCollapseTerrain : BaseAction
             }
         }
 
-        Log.Out($"[Cave] terrainCollapse, rolls: {rolls}, timer: {timer.ElapsedMilliseconds}ms");
+        Logging.Info($"terrainCollapse, rolls: {rolls}, timer: {timer.ElapsedMilliseconds}ms");
 
         return flatBlocks;
     }

@@ -25,7 +25,7 @@ public class Logging
         if (loggingLevel < LoggingLevel.DEBUG)
             return;
 
-        global::Log.Out($"[{loggerName}] {ObjectsToString(objects)}");
+        global::Logging.Info($"[{loggerName}] {ObjectsToString(objects)}");
     }
 
     public static void Info(params object[] objects)
@@ -33,7 +33,7 @@ public class Logging
         if (loggingLevel < LoggingLevel.INFO)
             return;
 
-        global::Log.Out($"[{loggerName}] {ObjectsToString(objects)}");
+        global::Logging.Info($"[{loggerName}] {ObjectsToString(objects)}");
     }
 
     public static void Warning(params object[] objects)
@@ -41,7 +41,7 @@ public class Logging
         if (loggingLevel < LoggingLevel.WARNING)
             return;
 
-        global::Log.Warning($"[{loggerName}] {ObjectsToString(objects)}");
+        global::Logging.Warning($"[{loggerName}] {ObjectsToString(objects)}");
     }
 
     public static void Error(params object[] objects)
@@ -49,7 +49,7 @@ public class Logging
         if (loggingLevel < LoggingLevel.ERROR)
             return;
 
-        global::Log.Error($"[{loggerName}] {ObjectsToString(objects)}");
+        global::Logging.Error($"[{loggerName}] {ObjectsToString(objects)}");
     }
 }
 

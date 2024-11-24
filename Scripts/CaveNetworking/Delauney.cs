@@ -149,11 +149,11 @@ public class DelauneyTriangle
 
         if (div == 0)
         {
-            Log.Out($"[Cave] position: ({p0.Prefab.position}), ({p1.Prefab.position}), ({p2.Prefab.position})");
-            Log.Out($"[Cave] rotation: {p0.Prefab.rotation}, {p1.Prefab.rotation}, {p2.Prefab.rotation}");
-            Log.Out($"[Cave] ids: {p0.Prefab.id}, {p1.Prefab.id}, {p2.Prefab.id}");
-            Log.Out($"[Cave] name: {p0.Prefab.PrefabName}, {p1.Prefab.PrefabName}, {p2.Prefab.PrefabName}");
-            Log.Out($"[Cave] marker: {p0.position}, {p1.position}, {p2.position}");
+            Logging.Info($"position: ({p0.Prefab.position}), ({p1.Prefab.position}), ({p2.Prefab.position})");
+            Logging.Info($"rotation: {p0.Prefab.rotation}, {p1.Prefab.rotation}, {p2.Prefab.rotation}");
+            Logging.Info($"ids: {p0.Prefab.id}, {p1.Prefab.id}, {p2.Prefab.id}");
+            Logging.Info($"name: {p0.Prefab.PrefabName}, {p1.Prefab.PrefabName}, {p2.Prefab.PrefabName}");
+            Logging.Info($"marker: {p0.position}, {p1.position}, {p2.position}");
             throw new DivideByZeroException();
         }
 
