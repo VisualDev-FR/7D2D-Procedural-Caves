@@ -6,12 +6,12 @@
         <effect_group>
             <triggered_effect trigger="onSelfBuffUpdate" action="AddBuff" buff="buffInCave">
                 <requirement name="!HasBuff" buff="buffInCave" />
-                <requirement name="RequirementIsBelowTerrain, ProceduralCaves" />
+                <requirement name="RequirementIsBelowTerrain, TheDescent" />
             </triggered_effect>
 
             <triggered_effect trigger="onSelfBuffUpdate" action="RemoveBuff" buff="buffInCave">
                 <requirement name="HasBuff" buff="buffInCave" />
-                <requirement name="RequirementIsBelowTerrain, ProceduralCaves" invert="true" />
+                <requirement name="RequirementIsBelowTerrain, TheDescent" invert="true" />
             </triggered_effect>
         </effect_group>
 

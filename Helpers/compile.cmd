@@ -16,19 +16,12 @@ if exist ".\%MOD_NAME%" rmdir ".\%MOD_NAME%" /s /q
 
 MKDIR .\%MOD_NAME%
 
-echo %ZIP_NAME% >> ".\%MOD_NAME%\version.txt"
-
-xcopy ProceduralCaves.dll %MOD_NAME%\ > nul
-xcopy ProceduralCaves.pdb %MOD_NAME%\ > nul
-xcopy Helpers\installer.cmd %MOD_NAME%\ > nul
+xcopy TheDescent.dll %MOD_NAME%\ > nul
+xcopy TheDescent.pdb %MOD_NAME%\ > nul
 xcopy README.md %MOD_NAME%\ > nul
 xcopy ModInfo.xml %MOD_NAME%\ > nul
-
-if "%1" == ".\procedural-caves.csproj" (
-    xcopy UIAtlases %MOD_NAME%\UIAtlases\ /s > nul
-    xcopy Resources %MOD_NAME%\Resources\ /s > nul
-    xcopy Config %MOD_NAME%\Config\ /s > nul
-)
+xcopy Config %MOD_NAME%\Config\ /s > nul
+xcopy UIAtlases %MOD_NAME%\UIAtlases\ /s > nul
 
 7z.exe a "%ZIP_NAME%.zip" %MOD_NAME% > nul
 

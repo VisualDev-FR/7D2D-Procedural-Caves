@@ -9,7 +9,7 @@
         <property name="AITask-2" value="DestroyArea" />
         <property name="AITask-3" value="Territorial" />
         <property name="AITask-4" value="ApproachDistraction" />
-        <property name="AITask-5" value="EatBlock, ProceduralCaves" data="placeholder=zombieFoodPlaceholder" /> <!-- eat action here -->
+        <property name="AITask-5" value="EatBlock, TheDescent" data="placeholder=zombieFoodPlaceholder" /> <!-- eat action here -->
         <property name="AITask-6" value="ApproachAndAttackTarget" data="class=EntityPlayer,0,EntityBandit,0,EntityEnemyAnimal,0,EntityAnimal" />
         <property name="AITask-7" value="ApproachSpot" />
         <property name="AITask-8" value="Look" />
@@ -33,7 +33,7 @@
         <property name="AITask-3" value="DestroyArea" />
         <property name="AITask-4" value="Territorial" />
         <property name="AITask-5" value="ApproachDistraction" />
-        <property name="AITask-6" value="EatBlock, ProceduralCaves" data="placeholder=zombieFoodPlaceholder" /> <!-- eat action here -->
+        <property name="AITask-6" value="EatBlock, TheDescent" data="placeholder=zombieFoodPlaceholder" /> <!-- eat action here -->
         <property name="AITask-7" value="ApproachAndAttackTarget" data="class=EntityPlayer,0,EntityBandit,0,EntityEnemyAnimal,0,EntityAnimal" />
         <property name="AITask-8" value="ApproachSpot" />
         <property name="AITask-9" value="Look" />
@@ -49,7 +49,7 @@
         <property name="AITask-1" value="BreakBlock" />
         <property name="AITask-2" value="ApproachDistraction" />
         <property name="AITask-3" value="RangedAttackTarget" data="class=EntityPlayer,0,EntityBandit,0,EntityEnemyAnimal" />
-        <property name="AITask-4" value="EatBlock, ProceduralCaves" data="placeholder=zombieFoodPlaceholder" /> <!-- eat action here -->
+        <property name="AITask-4" value="EatBlock, TheDescent" data="placeholder=zombieFoodPlaceholder" /> <!-- eat action here -->
         <property name="AITask-5" value="ApproachAndAttackTarget" data="class=EntityPlayer,0,EntityBandit,0,EntityEnemyAnimal,0,EntityAnimal" />
         <property name="AITask-6" value="ApproachSpot" />
         <property name="AITask-7" value="Look" />
@@ -66,7 +66,7 @@
         <property name="AITask-2" value="ApproachDistraction" />
         <property name="AITask-3" value="RangedAttackTarget" data="class=EntityPlayer,0,EntityBandit,0,EntityEnemyAnimal" />
         <property name="AITask-4" value="DestroyArea" />
-        <property name="AITask-5" value="EatBlock, ProceduralCaves" data="placeholder=zombieFoodPlaceholder" /> <!-- eat action here -->
+        <property name="AITask-5" value="EatBlock, TheDescent" data="placeholder=zombieFoodPlaceholder" /> <!-- eat action here -->
         <property name="AITask-6" value="ApproachAndAttackTarget" data="class=EntityPlayer,0,EntityBandit,0,EntityEnemyAnimal,0,EntityAnimal" />
         <property name="AITask-7" value="ApproachSpot" />
         <property name="AITask-8" value="Look" />

@@ -2,7 +2,7 @@ using System.Reflection;
 
 namespace Harmony
 {
-    public class ProceduralCaves : IModApi
+    public class TheDescent : IModApi
     {
         public void InitMod(Mod _modInstance)
         {

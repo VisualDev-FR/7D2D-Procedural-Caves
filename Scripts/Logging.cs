@@ -1,6 +1,6 @@
 using System.Linq;
 
-namespace ProceduralCaves
+namespace TheDescent
 {
     public enum LoggingLevel
     {

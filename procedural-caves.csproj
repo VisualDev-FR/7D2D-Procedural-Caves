@@ -9,8 +9,8 @@
         <ProjectGuid>{4069FB6B-DC75-4192-8208-1BF2C0EF7227}</ProjectGuid>
         <OutputType>Library</OutputType>
         <AppDesignerFolder>Properties</AppDesignerFolder>
-        <RootNamespace>ProceduralCaves</RootNamespace>
-        <AssemblyName>ProceduralCaves</AssemblyName>
+        <RootNamespace>TheDescent</RootNamespace>
+        <AssemblyName>TheDescent</AssemblyName>
         <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
         <FileAlignment>512</FileAlignment>
         <Deterministic>true</Deterministic>
@@ -100,8 +100,6 @@
 
     <!-- scripts -->
     <ItemGroup>
-        <!-- Assembly info -->
-        <Compile Include="Properties\AssemblyInfo.cs" />
 
         <!-- Harmony -->
         <Compile Include="Harmony\H_AIDirectorBloodMoonParty.cs" />

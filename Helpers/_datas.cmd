@@ -1,6 +1,6 @@
 @echo off
 
-set MOD_NAME=ProceduralCaves
+set MOD_NAME=TheDescent
 
 if not defined PATH_7D2D (
     echo Missing env variable: 'PATH_7D2D'

@@ -9,7 +9,7 @@
             <property name="target_type" value="Entity" />
             <property name="allow_while_dead" value="false" />
 
-            <action class="ActionSpawnCaveEntity, ProceduralCaves">
+            <action class="ActionSpawnCaveEntity, TheDescent">
                 <property name="entity_group" value="ZombieSpiderOnlyCaveHorde" />
                 <property name="spawn_count" value="4" />
                 <property name="air_spawn" value="false" />
@@ -35,7 +35,7 @@
             <property name="target_type" value="Entity" />
             <property name="allow_while_dead" value="false" />
 
-            <action class="ActionCollapseTerrain, ProceduralCaves" />
+            <action class="ActionCollapseTerrain, TheDescent" />
 
         </action_sequence>
 
