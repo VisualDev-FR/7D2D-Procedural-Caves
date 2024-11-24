@@ -56,7 +56,7 @@ public class EAIEatBlock : EAIBase
 
         if (!data.TryGetValue("placeholder", out string placeholderName))
         {
-            Log.Error($"[Cave] placeholder data missing for entity class '{theEntity.EntityClass.entityClassName}'");
+            Logging.Error($"placeholder data missing for entity class '{theEntity.EntityClass.entityClassName}'");
             return;
         }
 
@@ -309,13 +309,13 @@ public class EAIEatBlock : EAIBase
     {
         if (!Block.nameToBlockCaseInsensitive.TryGetValue(placeholderName, out var placeholder))
         {
-            Log.Error($"[Cave] placeholder not found: '{placeholderName}'");
+            Logging.Error($"placeholder not found: '{placeholderName}'");
             yield break;
         }
 
         if (!BlockPlaceholderMap.Instance.placeholders.TryGetValue(placeholder.ToBlockValue(), out var placeholderTargets))
         {
-            Log.Warning($"[Cave] placeholder '{placeholder.blockName}' not found!");
+            Logging.Warning($"placeholder '{placeholder.blockName}' not found!");
             yield break;
         }
 

@@ -387,7 +387,7 @@ public class CavePrefab
     {
         if (nodes == null)
         {
-            Log.Warning($"[Cave] null cavePrefab nodes, isCluster: {isCluster}, isroom: {isRoom}, isBoundaryPrefab: {isBoundaryPrefab}, null pdi: {prefabDataInstance is null}, prefab name: {PrefabName}");
+            Logging.Warning($"null cavePrefab nodes, isCluster: {isCluster}, isroom: {isRoom}, isBoundaryPrefab: {isBoundaryPrefab}, null pdi: {prefabDataInstance is null}, prefab name: {PrefabName}");
             yield break;
         }
 

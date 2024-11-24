@@ -11,24 +11,24 @@ public class DebugItemConsoleCmd : ConsoleCmdAbstract
 
         foreach (var partName in player.parts.Keys)
         {
-            Log.Out($"[DebugItem] part: {partName}");
+            Logging.Info($"[DebugItem] part: {partName}");
         }
 
         foreach (var mod in itemValue.Modifications)
         {
-            Log.Out($"[DebugItem] mod: {mod.ItemClass.Name}");
+            Logging.Info($"[DebugItem] mod: {mod.ItemClass.Name}");
         }
 
         if (itemValue == null)
         {
-            Log.Warning($"[DebugItem] player is not holding an item");
+            Logging.Warning($"[DebugItem] player is not holding an item");
             return;
         }
 
-        Log.Out($"[DebugItem] name: {itemValue.ItemClass.Name}");
-        Log.Out($"[DebugItem] Quality: {itemValue.Quality}");
-        Log.Out($"[DebugItem] useTimes: {itemValue.UseTimes}");
-        Log.Out($"[DebugItem] maxUseTimes: {itemValue.MaxUseTimes}");
+        Logging.Info($"[DebugItem] name: {itemValue.ItemClass.Name}");
+        Logging.Info($"[DebugItem] Quality: {itemValue.Quality}");
+        Logging.Info($"[DebugItem] useTimes: {itemValue.UseTimes}");
+        Logging.Info($"[DebugItem] maxUseTimes: {itemValue.MaxUseTimes}");
     }
 
     public override string[] getCommands()

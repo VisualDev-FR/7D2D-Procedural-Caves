@@ -183,7 +183,7 @@ public static class CaveViewer
             .Select(pos => new Voxell(pos))
             .ToHashSet();
 
-        Log.Out($"blocks: {voxells.Count}, timer: {timer.ElapsedMilliseconds}ms");
+        Logging.Info($"blocks: {voxells.Count}, timer: {timer.ElapsedMilliseconds}ms");
 
         GenerateObjFile("bezier.obj", voxells, true);
     }
@@ -222,10 +222,10 @@ public static class CaveViewer
 
         var edge = new GraphEdge(node1, node2);
 
-        Log.Out($"prefab   {node2.prefab.position}");
-        Log.Out($"start    {node2.marker.start}");
-        Log.Out($"size     {node2.marker.size}");
-        Log.Out($"result   {node2.position}\n");
+        Logging.Info($"prefab   {node2.prefab.position}");
+        Logging.Info($"start    {node2.marker.start}");
+        Logging.Info($"size     {node2.marker.size}");
+        Logging.Info($"result   {node2.position}\n");
 
         CaveTunnel.InitSpheres(5);
 
@@ -235,7 +235,7 @@ public static class CaveViewer
 
         cavemap.AddTunnel(tunnel);
 
-        Log.Out($"{p1.position} -> {p2.position} | Astar dist: {tunnel.path.Count}, eucl dist: {CaveUtils.EuclidianDist(p1.position, p2.position)}, timer: {timer.ElapsedMilliseconds}ms");
+        Logging.Info($"{p1.position} -> {p2.position} | Astar dist: {tunnel.path.Count}, eucl dist: {CaveUtils.EuclidianDist(p1.position, p2.position)}, timer: {timer.ElapsedMilliseconds}ms");
 
         var voxels = new HashSet<Voxell>(){
             new Voxell(p1.position, p1.Size, WaveFrontMaterial.DarkGreen) { force = true },
@@ -287,7 +287,7 @@ public static class CaveViewer
             var caveBlock = new CaveBlock(position);
             var sphere = CaveTunnel.GetSphere(caveBlock.ToVector3i(), radius);
 
-            Log.Out($"radius: {radius}, blocks: {sphere.ToList().Count}, timer: {timer.ElapsedMilliseconds} ms");
+            Logging.Info($"radius: {radius}, blocks: {sphere.ToList().Count}, timer: {timer.ElapsedMilliseconds} ms");
 
             foreach (var block in sphere)
             {
@@ -317,7 +317,7 @@ public static class CaveViewer
 
         var voxels = room.GetBlocks().Select(pos => new Voxell(pos)).ToHashSet();
 
-        Log.Out($"timer: {timer.ElapsedMilliseconds}ms");
+        Logging.Info($"timer: {timer.ElapsedMilliseconds}ms");
 
         // var voxels = new HashSet<Voxell>
         // {
@@ -343,7 +343,7 @@ public static class CaveViewer
 
         cachedPrefabs.AddRandomPrefabs(rand, heightMap, prefabCount, prefabs);
 
-        Log.Out("Start solving graph...");
+        Logging.Info("Start solving graph...");
 
         var memoryBefore = GC.GetTotalMemory(true);
         var graph = new Graph(cachedPrefabs.Prefabs, worldSize);
@@ -362,7 +362,7 @@ public static class CaveViewer
 
                 Parallel.ForEach(graph.Edges, edge =>
                 {
-                    Log.Out($"Cave tunneling: {100.0f * index++ / graph.Edges.Count:F0}% ({index} / {graph.Edges.Count})");
+                    Logging.Info($"Cave tunneling: {100.0f * index++ / graph.Edges.Count:F0}% ({index} / {graph.Edges.Count})");
 
                     var tunnel = new CaveTunnel(edge, cachedPrefabs, heightMap, worldSize, seed);
 
@@ -384,8 +384,8 @@ public static class CaveViewer
 
         // cavemap.SetWater(localMinimas, cachedPrefabs);
 
-        Log.Out($"{cavemap.BlocksCount:N0} cave blocks generated ({cavemap.TunnelsCount} unique tunnels), timer={timer.ElapsedMilliseconds:N0}ms, memory={(GC.GetTotalMemory(true) - memoryBefore) / 1_048_576.0:N1}MB.");
-        Log.Out($"{localMinimas.Count} local minimas");
+        Logging.Info($"{cavemap.BlocksCount:N0} cave blocks generated ({cavemap.TunnelsCount} unique tunnels), timer={timer.ElapsedMilliseconds:N0}ms, memory={(GC.GetTotalMemory(true) - memoryBefore) / 1_048_576.0:N1}MB.");
+        Logging.Info($"{localMinimas.Count} local minimas");
 
         if (worldSize > 1024)
             return;
@@ -395,7 +395,7 @@ public static class CaveViewer
             .Select(block => new Voxell(block.x, block.y, block.z, WaveFrontMaterial.LightBlue))
             .ToHashSet();
 
-        Log.Out($"{voxels.Count} water blocks");
+        Logging.Info($"{voxels.Count} water blocks");
 
         foreach (var prefab in cachedPrefabs.Prefabs)
         {
@@ -423,7 +423,7 @@ public static class CaveViewer
             .Select(pos => new Voxell(pos))
             .ToHashSet();
 
-        Log.Out($"{voxels.Count:N0} blocks, timer: {timer.ElapsedMilliseconds}ms, memory: {GC.GetTotalMemory(true) - memoryBefore:N0} bytes");
+        Logging.Info($"{voxels.Count:N0} blocks, timer: {timer.ElapsedMilliseconds}ms, memory: {GC.GetTotalMemory(true) - memoryBefore:N0} bytes");
 
         GenerateObjFile("cellular.obj", voxels, false);
     }
@@ -454,10 +454,10 @@ public static class CaveViewer
         {
             var prefab = entry.Value;
 
-            Log.Out($"{entry.Key}: {prefab.POIMarkers.Count}");
+            Logging.Info($"{entry.Key}: {prefab.POIMarkers.Count}");
         }
 
-        Log.Out($"{prefabs.Count} prefabs found.");
+        Logging.Info($"{prefabs.Count} prefabs found.");
     }
 
     public static void HexToRgb(string[] args)
@@ -499,10 +499,10 @@ public static class CaveViewer
 
             var idxOffset = Index(offset.x, offset.y, offset.z);
 
-            Log.Out($"{idx1 + idxOffset}, {idx2}");
+            Logging.Info($"{idx1 + idxOffset}, {idx2}");
         }
 
-        Log.Out($"memory: {(GC.GetTotalMemory(true) - memoryBefore) / 1_048_000:N0}MB");
+        Logging.Info($"memory: {(GC.GetTotalMemory(true) - memoryBefore) / 1_048_000:N0}MB");
     }
 
     public static void GenerateObjFile(string filename, HashSet<Voxell> voxels, bool openFile = false)
@@ -538,34 +538,34 @@ public static class CaveViewer
             var timer = CaveUtils.StartTimer();
             var region = new CaveRegion(filename);
 
-            Log.Out($"{i}: ChunkCount={region.ChunkCount}, timer={timer.ElapsedMilliseconds}ms");
+            Logging.Info($"{i}: ChunkCount={region.ChunkCount}, timer={timer.ElapsedMilliseconds}ms");
         }
     }
 
     public static void ClusterizeCommand(string[] args)
     {
-        var timer = CaveUtils.StartTimer();
+        // var timer = CaveUtils.StartTimer();
 
-        var prefabName = "army_camp_01";
-        // var path = $"C:/SteamLibrary/steamapps/common/7 Days To Die/Data/Prefabs/RWGTiles/{prefabName}.tts";
-        var path = $"C:/SteamLibrary/steamapps/common/7 Days To Die/Data/Prefabs/POIs/{prefabName}.tts";
-        var yOffset = -7;
+        // var prefabName = "army_camp_01";
+        // // var path = $"C:/SteamLibrary/steamapps/common/7 Days To Die/Data/Prefabs/RWGTiles/{prefabName}.tts";
+        // var path = $"C:/SteamLibrary/steamapps/common/7 Days To Die/Data/Prefabs/POIs/{prefabName}.tts";
+        // var yOffset = -7;
 
-        var clusters = TTSReader.Clusterize(path, yOffset);
+        // var clusters = .Clusterize(path, yOffset);
 
-        Log.Out($"{clusters.Count} clusters found, timer: {timer.ElapsedMilliseconds}ms");
+        // Logging.Info($"{clusters.Count} clusters found, timer: {timer.ElapsedMilliseconds}ms");
 
-        var prefabVoxels = TTSReader.ReadUndergroundBlocks(path, yOffset).Select(pos => new Voxell(pos))
-            .ToHashSet();
+        // var prefabVoxels = TTSReader.ReadUndergroundBlocks(path, yOffset).Select(pos => new Voxell(pos))
+        //     .ToHashSet();
 
-        GenerateObjFile("prefab.obj", prefabVoxels, false);
+        // GenerateObjFile("prefab.obj", prefabVoxels, false);
 
 
-        var clusterVoxels = clusters
-            .Select(cluster => new Voxell(cluster.start, cluster.size, WaveFrontMaterial.DarkGreen) { force = true })
-            .ToHashSet();
+        // var clusterVoxels = clusters
+        //     .Select(cluster => new Voxell(cluster.start, cluster.size, WaveFrontMaterial.DarkGreen) { force = true })
+        //     .ToHashSet();
 
-        GenerateObjFile("clusters.obj", clusterVoxels, false);
+        // GenerateObjFile("clusters.obj", clusterVoxels, false);
     }
 
     public static void BoundingCommands(string[] args)
@@ -582,7 +582,7 @@ public static class CaveViewer
             voxels.Add(new Voxell(rect.start, rect.size, WaveFrontMaterial.DarkGreen) { force = true });
         }
 
-        Log.Out($"{octree.Count} sub-volumes found.");
+        Logging.Info($"{octree.Count} sub-volumes found.");
 
         GenerateObjFile("bounds.obj", voxels, false);
     }
@@ -627,7 +627,7 @@ public static class CaveViewer
             }
         }
 
-        Log.Out($"{voxels.Count} cave blocks generated");
+        Logging.Info($"{voxels.Count} cave blocks generated");
 
         GenerateObjFile("noise.obj", voxels, false);
     }
@@ -662,7 +662,7 @@ public static class CaveViewer
             b.Save(@"noise1d.png", ImageFormat.Png);
         }
 
-        Log.Out($"timer: {timer.ElapsedMilliseconds}ms");
+        Logging.Info($"timer: {timer.ElapsedMilliseconds}ms");
     }
 
     public static List<string> SplitString(string input, char delimiter)
@@ -710,7 +710,7 @@ public static class CaveViewer
 
             int prefabCount = int.Parse(reader.ReadLine());
 
-            Log.Out("prefabCount: " + prefabCount.ToString());
+            Logging.Info("prefabCount: " + prefabCount.ToString());
             for (int i = 0; i < prefabCount; i++)
             {
                 var start = new Vector3i(
@@ -733,7 +733,7 @@ public static class CaveViewer
 
             int edgesCount = int.Parse(reader.ReadLine());
 
-            Log.Out("edgesCount: " + edgesCount.ToString());
+            Logging.Info("edgesCount: " + edgesCount.ToString());
 
             for (int i = 0; i < edgesCount; i++)
             {
@@ -857,8 +857,8 @@ public static class CaveViewer
         var hash = CaveBlock.HashZX(x, z);
         CaveBlock.ZXFromHash(hash, out var x1, out var z1);
 
-        Log.Out($"{x}, {z}");
-        Log.Out($"{x1}, {z1}");
+        Logging.Info($"{x}, {z}");
+        Logging.Info($"{x1}, {z1}");
 
         CaveUtils.Assert(x == x1, $"x : {x1}, expected: {x}");
         CaveUtils.Assert(z == z1, $"z : {z1}, expected: {z}");

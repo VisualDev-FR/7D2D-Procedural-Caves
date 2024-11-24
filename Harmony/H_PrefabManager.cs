@@ -39,7 +39,7 @@ public static class H_PrefabManager
             PrefabData prefabData = PrefabData.LoadPrefabData(location);
 
             if (prefabData == null || prefabData.Tags.IsEmpty)
-                Log.Warning("Could not load prefab data for " + location.Name);
+                Logging.Warning("Could not load prefab data for " + location.Name);
 
             // PATCH START //
             cavePrefabManager?.TryCacheCavePrefab(prefabData);
@@ -57,7 +57,7 @@ public static class H_PrefabManager
             }
         }
 
-        Log.Out($"LoadPrefabs {PrefabManager.prefabManagerData.AllPrefabDatas.Count} of {prefabs.Count} in {ms.ElapsedMilliseconds * 0.001f}");
+        Logging.Info($"LoadPrefabs {PrefabManager.prefabManagerData.AllPrefabDatas.Count} of {prefabs.Count} in {ms.ElapsedMilliseconds * 0.001f}");
     }
 
 }

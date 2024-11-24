@@ -82,11 +82,11 @@ public class CavePrefabManager
 
         var overlapingChunks = prefab.GetOverlappingChunks().ToList();
 
-        Log.Out($"[Cave] AddPrefab '{prefab.PrefabName}' at {prefab.position - CaveUtils.HalfWorldSize(worldSize)}, overlappingChunks: {overlapingChunks.Count()}");
+        Logging.Info($"AddPrefab '{prefab.PrefabName}' at {prefab.position - CaveUtils.HalfWorldSize(worldSize)}, overlappingChunks: {overlapingChunks.Count()}");
 
         if (overlapingChunks.Count == 0)
         {
-            Log.Warning("No overlapping chunk");
+            Logging.Warning("No overlapping chunk");
         }
 
         var neighbor = new Vector2s(0, 0);
@@ -217,7 +217,7 @@ public class CavePrefabManager
 
     public void AddRandomPrefabs(Random rand, RawHeightMap heightMap, int targetCount, List<PrefabData> prefabs)
     {
-        Log.Out("Start POIs placement...");
+        Logging.Info("Start POIs placement...");
 
         for (int i = 0; i < targetCount; i++)
         {
@@ -230,12 +230,12 @@ public class CavePrefabManager
             }
         }
 
-        Log.Out($"{Count} / {targetCount} prefabs added");
+        Logging.Info($"{Count} / {targetCount} prefabs added");
     }
 
     public void AddRandomPrefabs(Random rand, RawHeightMap heightMap, int targetCount, int minMarkers = 4, int maxMarkers = 4)
     {
-        Log.Out("Start POIs placement...");
+        Logging.Info("Start POIs placement...");
 
         for (int i = 0; i < targetCount; i++)
         {
@@ -248,7 +248,7 @@ public class CavePrefabManager
             }
         }
 
-        Log.Out($"{Count} / {targetCount} prefabs added");
+        Logging.Info($"{Count} / {targetCount} prefabs added");
     }
 
     public void SetupBoundaryPrefabs(Random rand, int tileSize)
@@ -331,7 +331,7 @@ public class CavePrefabManager
             entranceName = wildernessEntranceNames[rand.Next(wildernessEntranceNames.Count)];
         }
 
-        // Log.Out($"[Cave] random selected entrance: '{entranceName}'");
+        // Logging.Info($"random selected entrance: '{entranceName}'");
 
         usedEntrances.Add(entranceName);
 
@@ -461,10 +461,10 @@ public class CavePrefabManager
             AddPrefab(cavePrefab);
             PrefabManager.AddUsedPrefabWorld(-1, pdi);
 
-            Log.Out($"[Cave] cave prefab '{cavePrefab.PrefabName}' added at {cavePrefab.position}");
+            Logging.Info($"cave prefab '{cavePrefab.PrefabName}' added at {cavePrefab.position}");
         }
 
-        Log.Out($"[Cave] {Count} cave prefabs added.");
+        Logging.Info($"{Count} cave prefabs added.");
     }
 
     public void SpawnCaveRooms(int count, Random rand, RawHeightMap heightMap)
@@ -507,7 +507,7 @@ public class CavePrefabManager
 
                 AddPrefab(prefab);
 
-                Log.Out($"Room added at '{position - CaveUtils.HalfWorldSize(worldBuilder.WorldSize)}', size: '{size}'");
+                Logging.Info($"Room added at '{position - CaveUtils.HalfWorldSize(worldBuilder.WorldSize)}', size: '{size}'");
                 break;
             }
         }
@@ -533,7 +533,7 @@ public class CavePrefabManager
             suffix = $"(town entrance)";
         }
 
-        Log.Out($"[Cave] caching prefab '{prefabName}' {suffix}".TrimEnd());
+        Logging.Info($"caching prefab '{prefabName}' {suffix}".TrimEnd());
 
         allCavePrefabs[prefabName] = prefabData;
     }
@@ -578,7 +578,7 @@ public class CavePrefabManager
                 var cavePrefab = new CavePrefab(rectangle) { isCluster = true };
                 AddPrefab(cavePrefab);
 
-                Log.Out($"[Cave] add cluster ({pdi.prefab.Name}), position: {rectangle.start}, rotation: {pdi.rotation}, size: {rectangle.size}");
+                Logging.Info($"add cluster ({pdi.prefab.Name}), position: {rectangle.start}, rotation: {pdi.rotation}, size: {rectangle.size}");
             }
         }
     }

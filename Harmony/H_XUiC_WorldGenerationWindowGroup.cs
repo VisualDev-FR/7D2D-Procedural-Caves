@@ -65,8 +65,8 @@ public class XUiC_WorldGenerationWindowGroup_Generate
         // TODO: remove this line when water will be debugged
         CaveConfig.generateWater = false;
 
-        Log.Out($"[CaveConfig] generateWater: {CaveConfig.generateWater}");
-        Log.Out($"[CaveConfig] terrainOffset: {CaveConfig.terrainOffset}");
+        Logging.Info($"[CaveConfig] generateWater: {CaveConfig.generateWater}");
+        Logging.Info($"[CaveConfig] terrainOffset: {CaveConfig.terrainOffset}");
 
         return true;
     }

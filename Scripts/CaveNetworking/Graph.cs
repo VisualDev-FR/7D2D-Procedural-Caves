@@ -35,13 +35,13 @@ public class Graph
             this.ToFile("C:/tools/DEV/7D2D_Modding/7D2D-Procedural-caves/Tests/graph.txt", prefabs.ToHashSet(), worldSize);
         }
 
-        Log.Out($"[Cave] primary graph : edges: {Edges.Count}, nodes: {Nodes.Count}, timer: {timer.ElapsedMilliseconds:N0}ms");
+        Logging.Info($"primary graph : edges: {Edges.Count}, nodes: {Nodes.Count}, timer: {timer.ElapsedMilliseconds:N0}ms");
 
         Prune();
 
         // TODO: handle this file path properly
         this.ToFile("C:/tools/DEV/7D2D_Modding/7D2D-Procedural-caves/Tests/graph.txt", prefabs.ToHashSet(), worldSize);
-        Log.Out($"[Cave] secondary graph: edges: {Edges.Count}, nodes: {Nodes.Count}, timer: {timer.ElapsedMilliseconds:N0}ms");
+        Logging.Info($"secondary graph: edges: {Edges.Count}, nodes: {Nodes.Count}, timer: {timer.ElapsedMilliseconds:N0}ms");
     }
 
     public void ToFile(string filename, HashSet<CavePrefab> prefabs, int worldSize)
@@ -250,7 +250,7 @@ public class Graph
         {
             if (relatedEdges[node].Count == 0)
             {
-                Log.Error($"[Cave] Node without related edge at [{node.position}]");
+                Logging.Error($"Node without related edge at [{node.position}]");
             }
 
             var edge = relatedEdges[node].OrderBy(e => e.Weight).First();
@@ -258,7 +258,7 @@ public class Graph
             edge.pruned = false;
         }
 
-        Log.Out($"{GetNodesAlone().Count()} pruned Nodes, {notFound} not found");
+        Logging.Info($"{GetNodesAlone().Count()} pruned Nodes, {notFound} not found");
 
         foreach (var edge in Edges.ToList())
         {
@@ -376,7 +376,7 @@ public class Graph
 
         if (bestComb.Count == 0)
         {
-            // Log.Warning("No valid comb found");
+            // Logging.Warning("No valid comb found");
             return false;
         }
 
@@ -391,7 +391,7 @@ public class Graph
 
     private IEnumerable<List<GraphEdge>> GenerateCombinations(List<GraphNode> nodes, List<List<GraphEdge>> edges, GraphEdge[] currentCombination, int depth)
     {
-        // Log.Out($"depth: {depth}, nodes: {nodes.Count}, edges: {edges.Count}");
+        // Logging.Info($"depth: {depth}, nodes: {nodes.Count}, edges: {edges.Count}");
 
         if (depth == edges.Count)
         {

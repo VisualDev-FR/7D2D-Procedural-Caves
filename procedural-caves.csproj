@@ -177,6 +177,9 @@
         <Compile Include="Scripts\Noise\FastNoiseLite.cs" />
         <Compile Include="Scripts\Noise\Noise1D.cs" />
 
+        <!-- Toolkit -->
+        <Compile Include="Scripts\Toolkit\Logging.cs" />
+
         <!-- Utils -->
         <Compile Include="Scripts\Utils\BlockClusterizer.cs" />
         <Compile Include="Scripts\Utils\BlockSelectionUtils.cs" />

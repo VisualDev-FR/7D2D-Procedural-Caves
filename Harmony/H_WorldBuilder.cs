@@ -22,7 +22,7 @@ public static class WorldBuilder_GenerateData
 
         CaveUtils.Assert(worldBuilder != null, "null world builder");
 
-        Log.Out("Patch rand world generator!");
+        Logging.Info("Patch rand world generator!");
         __result = GenerateData();
         return false;
     }
@@ -125,7 +125,7 @@ public static class WorldBuilder_GenerateData
 
         yield return worldBuilder.FinalizeWater();
 
-        Log.Out("RWG final in {0}:{1:00}, r={2:x}", worldBuilder.totalMS.Elapsed.Minutes, worldBuilder.totalMS.Elapsed.Seconds, Rand.Instance.PeekSample());
+        Logging.Info("RWG final in {0}:{1:00}, r={2:x}", worldBuilder.totalMS.Elapsed.Minutes, worldBuilder.totalMS.Elapsed.Seconds, Rand.Instance.PeekSample());
 
         yield break;
     }

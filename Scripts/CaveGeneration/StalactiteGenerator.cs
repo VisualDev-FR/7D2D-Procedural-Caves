@@ -10,7 +10,7 @@ public static class StalactiteGenerator
 
     public static void Generate(Vector3i start)
     {
-        Log.Error("not implemented, give a height to have a result.");
+        Logging.Error("not implemented, give a height to have a result.");
     }
 
     public static void Generate(Vector3i start, int height)

@@ -223,7 +223,7 @@ public class CaveRoom
             }
         }
 
-        Log.Warning($"[Cave] room: no path found, index: {index}, seed: {seed}");
+        Logging.Warning($"room: no path found, index: {index}, seed: {seed}");
 
         return new List<Vector3i>();
     }

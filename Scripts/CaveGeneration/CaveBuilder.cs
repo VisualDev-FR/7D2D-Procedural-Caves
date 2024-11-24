@@ -69,7 +69,7 @@ public class CaveBuilder
             Priority = System.Threading.ThreadPriority.AboveNormal
         };
 
-        Log.Out($"[Cave] Start cave rooms thread");
+        Logging.Info($"Start cave rooms thread");
 
         thread.Start();
 
@@ -161,7 +161,7 @@ public class CaveBuilder
 
         // yield return GenerateCavePreview(cavemap);
 
-        Log.Out($"{cavemap.BlocksCount:N0} cave blocks generated, memory used: {(GC.GetTotalMemory(true) - memoryBefore) / 1_048_576:N1}MB");
+        Logging.Info($"{cavemap.BlocksCount:N0} cave blocks generated, memory used: {(GC.GetTotalMemory(true) - memoryBefore) / 1_048_576:N1}MB");
 
         yield break;
     }
@@ -235,7 +235,7 @@ public class CaveBuilder
             }
             catch (IndexOutOfRangeException)
             {
-                Log.Error($"[Cave] IndexOutOfRangeException: index={index}, position={caveblock}, worldSize={WorldSize}");
+                Logging.Error($"IndexOutOfRangeException: index={index}, position={caveblock}, worldSize={WorldSize}");
             }
         }
 

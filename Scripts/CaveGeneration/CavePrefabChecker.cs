@@ -8,25 +8,25 @@ public class CavePrefabChecker
 
         if (!HasRequiredTags(prefabData))
         {
-            Log.Warning(SkippingBecause(prefabData.Name, $"missing cave type tag: {prefabData.Tags}"));
+            Logging.Warning(SkippingBecause(prefabData.Name, $"missing cave type tag: {prefabData.Tags}"));
             result = false;
         }
 
         if (!ContainsCaveMarkers(prefabData))
         {
-            Log.Warning(SkippingBecause(prefabData.Name, "no cave marker was found."));
+            Logging.Warning(SkippingBecause(prefabData.Name, "no cave marker was found."));
             result = false;
         }
 
         if (!PrefabMarkersAreValid(prefabData))
         {
-            Log.Warning(SkippingBecause(prefabData.Name, "at least one marker is invalid."));
+            Logging.Warning(SkippingBecause(prefabData.Name, "at least one marker is invalid."));
             result = false;
         }
 
         if (HasOverlappingMarkers(prefabData))
         {
-            Log.Warning(SkippingBecause(prefabData.Name, "cave markers overlaps"));
+            Logging.Warning(SkippingBecause(prefabData.Name, "cave markers overlaps"));
             result = false;
         }
 
@@ -86,7 +86,7 @@ public class CavePrefabChecker
 
             if (!isOnBound_x && !isOnBound_z)
             {
-                Log.Out($"[Cave] cave marker out of bounds: [{marker.start}] '{prefab.Name}'");
+                Logging.Warning($"cave marker out of bounds: [{marker.start}] '{prefab.Name}'");
                 return false;
             }
 
@@ -98,7 +98,7 @@ public class CavePrefabChecker
 
     private static string SkippingBecause(string prefabName, string reason)
     {
-        return $"[Cave] skipping '{prefabName}' because {reason}.";
+        return $"skipping '{prefabName}' because {reason}.";
     }
 
 }
