@@ -45,8 +45,8 @@ public struct LayerRLE
 
         foreach (var pos in positions)
         {
-            start = Utils.FastMin(start, pos.y);
-            end = Utils.FastMax(end, pos.y);
+            start = Utils.FastMin(start, pos.y - 1);
+            end = Utils.FastMax(end, pos.y + 1);
         }
 
         rawData = (start << 16) | (end << 8) | blockRawData;
@@ -62,14 +62,14 @@ public struct LayerRLE
         return (start << 16) | (end << 8) | blockRawData;
     }
 
-    public bool IsInside(int y)
+    public bool Contains(int y)
     {
         return y >= Start && y < End;
     }
 
     public IEnumerable<CaveBlock> GetBlocks(int x, int z)
     {
-        for (int y = Start; y <= End; y++)
+        for (int y = Start; y < End; y++)
         {
             yield return new CaveBlock(x, y, z) { rawData = BlockRawData };
         }
@@ -195,7 +195,7 @@ public class CaveMap
         {
             layer.rawData = layerHash;
 
-            if (layer.IsInside(position.y))
+            if (layer.Contains(position.y))
             {
                 return true;
             }
@@ -217,7 +217,7 @@ public class CaveMap
         {
             layer.rawData = layerHash;
 
-            if (layer.IsInside(position.y))
+            if (layer.Contains(position.y))
             {
                 return layer.IsWater();
             }
@@ -335,12 +335,13 @@ public class CaveMap
         }
     }
 
-    public void SetWater(CavePrefabManager cachedPrefabs, HashSet<CaveBlock> localMinimas)
+    public HashSet<Vector3i> SetWater(CavePrefabManager cachedPrefabs, HashSet<CaveBlock> localMinimas)
     {
         // if (!CaveConfig.generateWater)
         //     yield break;
 
         int index = 0;
+        var result = new HashSet<Vector3i>();
 
         foreach (var waterStart in localMinimas)
         {
@@ -349,13 +350,17 @@ public class CaveMap
             if (IsWater(waterStart.ToVector3i()))
                 continue;
 
-            HashSet<Vector3i> positions = ExpandWater(waterStart, cachedPrefabs);
+            var positions = ExpandWater(waterStart, cachedPrefabs);
+
+            result.UnionWith(positions);
 
             if (positions.Count > 0)
             {
                 SetWater(positions);
             }
         }
+
+        return result;
     }
 
     private void SetWater(HashSet<Vector3i> positions)
@@ -382,10 +387,13 @@ public class CaveMap
 
                 if (waterLayer.Start <= layer.Start && waterLayer.End >= layer.End)
                 {
-                    layer.SetWater(true);
-                    caveblocks[hashcode][i] = layer.rawData;
+                    caveblocks[hashcode][i] = LayerRLE.GetHashCode(
+                        layer.Start,
+                        layer.End,
+                        waterLayer.BlockRawData
+                    );
                 }
-                else if (waterLayer.Start <= layer.Start && waterLayer.End >= layer.Start && waterLayer.End <= layer.End)
+                else if (waterLayer.Start <= layer.Start && waterLayer.End >= layer.Start && waterLayer.End < layer.End)
                 {
                     caveblocks[hashcode].RemoveAt(i);
 
