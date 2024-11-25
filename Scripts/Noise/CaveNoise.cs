@@ -99,7 +99,7 @@ public class CaveNoise
 
     public float GetNoise(int x, int z)
     {
-        return noise.GetNoise(x, z) * scale;
+        return noise.GetNoise(x, z);
     }
 }
 

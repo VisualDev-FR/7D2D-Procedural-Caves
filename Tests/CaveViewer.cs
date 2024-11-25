@@ -597,47 +597,54 @@ public static class CaveViewer
 
     public static void NoiseCommand(string[] args)
     {
-        var roomNoise = new CaveNoise(
+        var caveNoise = new CaveNoise(
             seed: 1337,
-            octaves: 2,
-            frequency: 0.015f,
+            octaves: 1,
+            frequency: 0.01f,
             threshold: -0.4f,
             invert: true,
-            noiseType: FastNoiseLite.NoiseType.Perlin,
-            fractalType: FastNoiseLite.FractalType.FBm
+            noiseType: FastNoiseLite.NoiseType.Cellular,
+            fractalType: FastNoiseLite.FractalType.None
         );
-        // using (var b = new Bitmap(CaveBuilder.worldSize, CaveBuilder.worldSize))
-        // {
-        //     using (Graphics g = Graphics.FromImage(b))
-        //     {
-        //         g.Clear(BackgroundColor);
-        //         DrawNoise(b, roomNoise);
-        //     }
 
-        //     b.Save("noise.png", ImageFormat.Png);
-        // }
+        var worldSize = 1024;
 
-        var width = 200;
-        var size = new Vector3i(width, 50, width);
-        var voxels = new HashSet<Voxell>();
+        Color startColor = Color.Black; // Couleur basse (e.g., noir)
+        Color endColor = Color.White;  // Couleur haute (e.g., blanc)
 
-        for (int x = 0; x < size.x; x++)
+        using (var b = new Bitmap(worldSize, worldSize))
         {
-            for (int y = 0; y < size.y; y++)
+            using (Graphics g = Graphics.FromImage(b))
             {
-                for (int z = 0; z < size.z; z++)
+                g.Clear(Color.White);
+
+                for (int x = 0; x < worldSize; x++)
                 {
-                    if (CaveNoise.pathingNoise.IsTerrain(x, y, z))
+                    for (int y = 0; y < worldSize; y++)
                     {
-                        voxels.Add(new Voxell(x, y, z));
+                        float noise = 0.5f * (1 + caveNoise.GetNoise(x, y));
+
+                        CaveUtils.Assert(noise >= 0 && noise <= 1, noise.ToString());
+
+                        Color interpolatedColor = InterpolateColor(startColor, endColor, noise);
+
+                        b.SetPixel(x, y, interpolatedColor);
                     }
                 }
+
+                b.Save("noise.png", ImageFormat.Png);
             }
         }
+    }
 
-        Logging.Info($"{voxels.Count} cave blocks generated");
+    public static Color InterpolateColor(Color start, Color end, float factor)
+    {
+        int r = (int)(start.R + (end.R - start.R) * factor);
+        int g = (int)(start.G + (end.G - start.G) * factor);
+        int b = (int)(start.B + (end.B - start.B) * factor);
+        int a = (int)(start.A + (end.A - start.A) * factor);
 
-        GenerateObjFile("noise.obj", voxels, false);
+        return Color.FromArgb(a, r, g, b);
     }
 
     public static void Noise1dCommand(string[] args)
