@@ -31,8 +31,8 @@ public class CaveNoise
     public static CaveNoise waterNoise = new CaveNoise(
         seed: 1337,
         octaves: 1,
-        frequency: 0.002f,
-        threshold: -0.3f,
+        frequency: 0.01f,
+        threshold: -0.5f,
         invert: true,
         noiseType: FastNoiseLite.NoiseType.Perlin,
         fractalType: FastNoiseLite.FractalType.None

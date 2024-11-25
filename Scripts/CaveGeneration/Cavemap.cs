@@ -267,7 +267,7 @@ public class CaveMap
         var startPosition = GetVerticalLowerPoint(waterStart.ToVector3i());
         var neighbor = Vector3i.zero;
 
-        int maxWaterDepth = 3;
+        int maxWaterDepth = int.MaxValue;
 
         queue.Enqueue(startPosition);
 
@@ -311,24 +311,28 @@ public class CaveMap
         //     yield break;
 
         int index = 0;
+        int count = 0;
 
-        CaveUtils.Assert(new CaveBlock() { rawData = 1 }.isWater, "");
+        CaveNoise.waterNoise.SetSeed(worldBuilder.Seed);
 
         foreach (var waterStart in localMinimas)
         {
             index++;
 
-            if (worldBuilder.IsCanceled)
-                yield break;
+            var startPosition = waterStart.ToVector3i();
 
-            if (IsWater(waterStart.ToVector3i()))
+            if (worldBuilder.IsCanceled || !CaveNoise.waterNoise.IsCave(startPosition.x, startPosition.z) || IsWater(startPosition))
                 continue;
+
+            count++;
 
             HashSet<Vector3i> positions = ExpandWater(waterStart, cachedPrefabs);
 
-            string message = $"Water processing: {100.0f * index / localMinimas.Count:F0}% ({index} / {localMinimas.Count})";
-
-            yield return worldBuilder.SetMessage(message);
+            if (index % 100 == 0)
+            {
+                Logging.Debug($"Water processed: {count} / {index} / {localMinimas.Count}");
+                yield return worldBuilder.SetMessage($"Water processing: {100.0f * index / localMinimas.Count:F0}%");
+            }
 
             if (positions.Count > 0)
             {

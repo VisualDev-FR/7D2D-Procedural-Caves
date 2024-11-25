@@ -604,7 +604,7 @@ public static class CaveViewer
             threshold: -0.5f,
             invert: true,
             noiseType: FastNoiseLite.NoiseType.Perlin,
-            fractalType: FastNoiseLite.FractalType.FBm
+            fractalType: FastNoiseLite.FractalType.None
         );
 
         var worldSize = 6144;
