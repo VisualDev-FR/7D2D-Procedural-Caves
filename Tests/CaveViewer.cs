@@ -595,19 +595,35 @@ public static class CaveViewer
         GenerateObjFile("bounds.obj", voxels, false);
     }
 
+    public enum CaveWater
+    {
+        NONE,
+        LOW,
+        MEDIUM,
+        HIGH,
+        FULL,
+    }
+
+    private static Dictionary<CaveWater, float> waterconfig = new Dictionary<CaveWater, float>(){
+        {CaveWater.LOW, -0.5f},    // 5%
+        {CaveWater.MEDIUM, -0.3f}, // 15%
+        {CaveWater.HIGH, -0.2f},  // 25%
+    };
+
     public static void NoiseCommand(string[] args)
     {
+
         var waterNoise = new CaveNoise(
             seed: 1337,
             octaves: 1,
             frequency: 0.01f,
-            threshold: -0.5f,
+            threshold: waterconfig[CaveWater.HIGH],
             invert: true,
             noiseType: FastNoiseLite.NoiseType.Perlin,
             fractalType: FastNoiseLite.FractalType.None
         );
 
-        var worldSize = 6144;
+        var worldSize = 4096;
 
         Color startColor = Color.Black; // Couleur basse (e.g., noir)
         Color endColor = Color.White;  // Couleur haute (e.g., blanc)
@@ -633,7 +649,7 @@ public static class CaveViewer
                     }
                 }
 
-                Logging.Info($"{100f * count / sqrSize:F1}% ({count:N0} / {sqrSize})");
+                Logging.Info($"{100f * count / sqrSize:F1}% ({count:N0} / {sqrSize:N0})");
                 b.Save("noise.png", ImageFormat.Png);
             }
         }
