@@ -44,6 +44,11 @@
             <property name="CreativeMode" value="None" />
         </block>
 
+        <block name="cntCaveFloorWater">
+            <property name="Extends" value="cntWastelandRandomLootHelper" />
+            <property name="CreativeMode" value="None" />
+        </block>
+
         <block name="cntCaveFlatWater">
             <property name="Extends" value="cntWastelandRandomLootHelper" />
             <property name="CreativeMode" value="None" />

@@ -94,7 +94,7 @@ public class CaveGenerator
                     continue;
 
                 var currentBlock = chunk.GetBlock(neighbor);
-                var blockValue = GetBoundingBlockValue(biomeID, currentBlock);
+                var blockValue = GetBoundingBlockValue(biomeID, currentBlock, caveBlock.isWater && neighbor.y < caveBlock.y);
 
                 if (blockValue.isair)
                     continue;
@@ -157,8 +157,8 @@ public class CaveGenerator
 
         BlockValue placeHolder;
 
-        if (isFlatFloor && isWater)
-            placeHolder = CaveBlocks.cntCaveFlatWater;
+        if (isFloor && isWater)
+            placeHolder = CaveBlocks.cntCaveFloorWater;
 
         else if (isFlatFloor && !isWater)
             placeHolder = CaveBlocks.cntCaveFloorFlat;
@@ -166,7 +166,7 @@ public class CaveGenerator
         else if (isFloor && !isWater)
             placeHolder = CaveBlocks.cntCaveFloor;
 
-        else if (isCeiling)
+        else if (isCeiling && !isWater)
             placeHolder = CaveBlocks.cntCaveCeiling;
 
         else
@@ -355,8 +355,12 @@ public class CaveGenerator
         return bounds;
     }
 
-    private static BlockValue GetBoundingBlockValue(int biomeID, BlockValue currentBlockValue)
+    private static BlockValue GetBoundingBlockValue(int biomeID, BlockValue currentBlockValue, bool isWater)
     {
+        if (isWater)
+        {
+            return CaveBlocks.caveTerrGravel;
+        }
         /* biomes.xml
             <biomemap id="01" name="snow"/>
             <biomemap id="03" name="pine_forest"/>

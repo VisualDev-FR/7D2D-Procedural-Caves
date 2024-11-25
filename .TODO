@@ -37,6 +37,7 @@ First release:
     ✘ generation: store terrain offset in worldinfos.xml @cancelled(24-11-10 22:32: no reason to do that)
     ✔ generation: debug tunnels intersections with prefabs @done(24-11-09 22:43)
     ✔ generation: improve links between cave rooms and markers @done(24-11-10 13:50)
+    ✔ generation: add gravel blocks in water bounding @done(24-11-25 18:08)
     ☐ generation: add "natural" entrances with virtual cave markers placed in wilderness
     ☐ generation: allow cave markers inside poi bounds, combining octree cluster parsing + marker directions
     ☐ generation: allow tunneling inside rwg tiles
@@ -45,9 +46,9 @@ First release:
     ☐ generation: burried treasures, skeletons, etc...
     ☐ generation: tunnels partially blocked
 
-    ☐ decoration: setup water decoration
+    ✔ decoration: setup water decoration @done(24-11-25 18:08)
+    ✔ decoration: lights to turn on @done(24-11-25 18:08)
     ☐ decoration: broken bikes, tires, or else mechanical stuff to gather mechanical parts, etc...
-    ☐ decoration: lights to turn on
 
     ✔ UI: setup rwg user interface @done(24-11-17 19:17)
     ☐ UI: Loading screen with cave pictures

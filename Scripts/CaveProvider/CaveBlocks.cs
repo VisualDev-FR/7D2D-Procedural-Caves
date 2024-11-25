@@ -16,6 +16,8 @@ public class CaveBlocks
 
     public static BlockValue cntCaveFlatWater => GetBlockValue("cntCaveFlatWater");
 
+    public static BlockValue cntCaveFloorWater => GetBlockValue("cntCaveFloorWater");
+
     public static BlockValue zombieFoodPlaceholder => GetBlockValue("zombieFoodPlaceholder");
 
     public static BlockValue bloodDecorPlaceholder => GetBlockValue("bloodDecorPlaceholder");

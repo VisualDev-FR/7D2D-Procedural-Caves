@@ -387,8 +387,14 @@
         </placeholder>
 
         <!-- TODO: pimp water decoration -->
-        <placeholder name="cntCaveFlatWater">
+        <placeholder name="cntCaveFloorWater">
             <block name="caveAir" />
+            <block name="plantedTreeGrassSeed01" prob=".1" />
+            <block name="treeBrownGrassDiagonal" prob=".1" />
+            <block name="treeTallGrassDiagonal" prob=".1" />
+            <block name="treeForestGrassDiagonal" prob=".1" />
+            <block name="treeGreenBrownGrassDiagonal" prob=".1" />
+            <block name="treeDesertShrub" prob=".1" />
         </placeholder>
 
         <!-- FOREST -->
