@@ -597,44 +597,47 @@ public static class CaveViewer
 
     public static void NoiseCommand(string[] args)
     {
-        var caveNoise = new CaveNoise(
+        var waterNoise = new CaveNoise(
             seed: 1337,
             octaves: 1,
             frequency: 0.01f,
-            threshold: -0.4f,
+            threshold: -0.5f,
             invert: true,
-            noiseType: FastNoiseLite.NoiseType.Cellular,
-            fractalType: FastNoiseLite.FractalType.None
+            noiseType: FastNoiseLite.NoiseType.Perlin,
+            fractalType: FastNoiseLite.FractalType.FBm
         );
 
-        var worldSize = 1024;
+        var worldSize = 6144;
 
         Color startColor = Color.Black; // Couleur basse (e.g., noir)
         Color endColor = Color.White;  // Couleur haute (e.g., blanc)
+
+        int count = 0;
+        int sqrSize = worldSize * worldSize;
 
         using (var b = new Bitmap(worldSize, worldSize))
         {
             using (Graphics g = Graphics.FromImage(b))
             {
-                g.Clear(Color.White);
+                g.Clear(Color.Black);
 
                 for (int x = 0; x < worldSize; x++)
                 {
                     for (int y = 0; y < worldSize; y++)
                     {
-                        float noise = 0.5f * (1 + caveNoise.GetNoise(x, y));
-
-                        CaveUtils.Assert(noise >= 0 && noise <= 1, noise.ToString());
-
-                        Color interpolatedColor = InterpolateColor(startColor, endColor, noise);
-
-                        b.SetPixel(x, y, interpolatedColor);
+                        if (waterNoise.IsCave(x, y))
+                        {
+                            b.SetPixel(x, y, Color.LightBlue);
+                            count++;
+                        }
                     }
                 }
 
+                Logging.Info($"{100f * count / sqrSize:F1}% ({count:N0} / {sqrSize})");
                 b.Save("noise.png", ImageFormat.Png);
             }
         }
+
     }
 
     public static Color InterpolateColor(Color start, Color end, float factor)
