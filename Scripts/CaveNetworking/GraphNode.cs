@@ -25,7 +25,7 @@ public class GraphNode
         CaveUtils.Assert(marker != null, $"null marker");
         CaveUtils.Assert(marker.size != null, $"null marker size");
 
-        NodeRadius = Utils.FastMax(1, Utils.FastMin(Utils.FastMax(marker.size.x, marker.size.z), marker.size.y) / 2);
+        NodeRadius = GetNodeRadius();
 
         sqrRadius = NodeRadius * NodeRadius;
 
@@ -43,6 +43,11 @@ public class GraphNode
     public GraphNode(Vector3i position)
     {
         this.position = position;
+    }
+
+    public int GetNodeRadius()
+    {
+        return Utils.FastMax(1, Utils.FastMin(Utils.FastMax(marker.size.x, marker.size.z), marker.size.y) / 2);
     }
 
     public static Vector3i MarkerCenter(Prefab.Marker marker)
@@ -73,6 +78,11 @@ public class GraphNode
 
     public Vector3i Normal(int distance)
     {
+        if (prefab.isNaturalEntrance)
+        {
+            return new Vector3i(position.x, position.y - 5, position.z);
+        }
+
         CaveUtils.Assert(direction != Direction.None, $"Direction sould not be None");
 
         return position + direction.Vector * distance;

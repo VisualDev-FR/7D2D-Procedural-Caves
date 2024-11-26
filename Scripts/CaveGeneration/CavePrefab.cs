@@ -46,6 +46,8 @@ public class CavePrefab
 
     public bool isBoundaryPrefab = false;
 
+    public bool isNaturalEntrance = false;
+
     public List<GraphNode> nodes = new List<GraphNode>();
 
     public List<Prefab.Marker> caveMarkers = new List<Prefab.Marker>();

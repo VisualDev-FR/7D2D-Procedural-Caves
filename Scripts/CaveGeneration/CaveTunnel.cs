@@ -48,7 +48,6 @@ public class CaveTunnel
         ThickenTunnel(edge.node1, edge.node2, seed, cachedPrefabs);
     }
 
-    // private API
     private void FindPath(GraphEdge edge, CavePrefabManager cachedPrefabs)
     {
         var HalfWorldSize = CaveUtils.HalfWorldSize(worldSize);
@@ -178,11 +177,21 @@ public class CaveTunnel
     {
         // TODO: handle duplicates with that instead of hashset: https://stackoverflow.com/questions/1672412/filtering-duplicates-out-of-an-ienumerable
 
-        blocks.UnionWith(start.GetSphere());
-        blocks.UnionWith(target.GetSphere());
+        if (!start.prefab.isNaturalEntrance)
+        {
+            blocks.UnionWith(start.GetSphere());
+        }
+
+        if (!target.prefab.isNaturalEntrance)
+        {
+            blocks.UnionWith(target.GetSphere());
+        }
 
         int r1 = start.NodeRadius;
         int r2 = target.NodeRadius;
+
+        CaveUtils.Assert(r1 > 0, "start radius should be greater than 0");
+        CaveUtils.Assert(r2 > 0, "target radius should be greater than 0");
 
         var noise = new Noise1D(new System.Random(seed), r1, r2, path.Count);
 
@@ -198,6 +207,16 @@ public class CaveTunnel
                 caveBlock.y <= CaveConfig.bedRockMargin
             || (caveBlock.y + CaveConfig.terrainMargin) >= (int)heightMap.GetHeight(caveBlock.x, caveBlock.z)
             || cachedPrefabs.IntersectWithPrefab(caveBlock.ToVector3i()));
+
+        if (start.prefab.isNaturalEntrance)
+        {
+            blocks.UnionWith(GetSphere(start.position, 3));
+        }
+
+        if (target.prefab.isNaturalEntrance)
+        {
+            blocks.UnionWith(GetSphere(target.position, 3));
+        }
     }
 
     private void ReconstructPath(AstarNode currentNode)

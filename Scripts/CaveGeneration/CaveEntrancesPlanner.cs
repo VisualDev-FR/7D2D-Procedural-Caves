@@ -22,6 +22,25 @@ public class CaveEntrancesPlanner
         this.cavePrefabManager = cavePrefabManager;
     }
 
+    public void SpawnNaturalEntrances()
+    {
+        gameRandom = GameRandomManager.Instance.CreateGameRandom(WorldBuilder.Seed);
+
+        var wildernessTiles = GetShuffledWildernessTiles();
+
+        foreach (var tile in wildernessTiles)
+        {
+            if (tile.Used) continue;
+
+            var center = tile.WorldPositionCenter;
+            var height = tile.getHeightCeil(center.x, center.y);
+            var entrancePosition = new Vector3i(center.x, height, center.y);
+
+            cavePrefabManager.AddNaturalEntrance(entrancePosition);
+
+        }
+    }
+
     public void SpawnCaveEntrances()
     {
         gameRandom = GameRandomManager.Instance.CreateGameRandom(WorldBuilder.Seed);
