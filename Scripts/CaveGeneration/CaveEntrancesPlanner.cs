@@ -36,8 +36,10 @@ public class CaveEntrancesPlanner
             var height = tile.getHeightCeil(center.x, center.y);
             var entrancePosition = new Vector3i(center.x, height, center.y);
 
-            cavePrefabManager.AddNaturalEntrance(entrancePosition);
-
+            if (WorldBuilder.GetWater(center.x, center.y) == 0)
+            {
+                cavePrefabManager.AddNaturalEntrance(entrancePosition);
+            }
         }
     }
 

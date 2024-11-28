@@ -43,13 +43,13 @@ public class CaveBlock
         set => rawData = (byte)(value ? (rawData | 0b0000_0010) : (rawData & 0b1111_1101));
     }
 
-    public bool isEntrance
+    public bool skipDecoration
     {
         get => (rawData & 0b0000_0100) != 0;
         set => rawData = (byte)(value ? (rawData | 0b0000_0100) : (rawData & 0b1111_1011));
     }
 
-    public bool bool4
+    public bool isRope
     {
         get => (rawData & 0b0000_1000) != 0;
         set => rawData = (byte)(value ? (rawData | 0b0000_1000) : (rawData & 0b1111_0111));

@@ -78,7 +78,7 @@ public class CaveGenerator
 
             SetCaveBlock(chunk, caveBlock);
 
-            if (caveBlock.isEntrance)
+            if (caveBlock.skipDecoration)
                 continue;
 
             int biomeID = chunk.GetBiomeId(0, 0);
@@ -116,7 +116,12 @@ public class CaveGenerator
     private static void SetCaveBlock(Chunk chunk, CaveBlock caveBlock)
     {
         var blockPosInChunk = caveBlock.posInChunk;
-        var blockValue = caveBlock.isEntrance ? BlockValue.Air : CaveBlocks.caveAir;
+        var blockValue = CaveBlocks.caveAir;
+
+        if (caveBlock.isRope)
+        {
+            blockValue = CaveBlocks.climbableRopeBlock;
+        }
 
         chunk.SetBlockRaw(blockPosInChunk.x, blockPosInChunk.y, blockPosInChunk.z, blockValue);
         chunk.SetDensity(blockPosInChunk.x, blockPosInChunk.y, blockPosInChunk.z, caveBlock.density);
@@ -140,7 +145,7 @@ public class CaveGenerator
 
         foreach (CaveBlock caveBlock in caveBlocks)
         {
-            if (!caveBlock.isEntrance)
+            if (!caveBlock.skipDecoration)
             {
                 TrySpawnCaveDecoration(random, chunk, caveBlock, decoratedPositions);
             }

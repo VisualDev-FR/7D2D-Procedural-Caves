@@ -75,14 +75,19 @@ public struct LayerRLE
         }
     }
 
+    public bool IsWater()
+    {
+        return (BlockRawData & 0b0000_0001) != 0;
+    }
+
     public void SetWater(bool value)
     {
         BlockRawData = (byte)(value ? (BlockRawData | 0b0000_0001) : (BlockRawData & 0b1111_1110));
     }
 
-    public bool IsWater()
+    public void SetRope(bool value)
     {
-        return (BlockRawData & 0b0000_0001) != 0;
+        BlockRawData = (byte)(value ? (BlockRawData | 0b0000_1000) : (BlockRawData & 0b1111_0111));
     }
 
 }
@@ -367,6 +372,20 @@ public class CaveMap
         }
 
         return result;
+    }
+
+    public void SetRope(Vector3i position)
+    {
+        var hashZX = CaveBlock.HashZX(position.x + 1, position.z);
+        var layers = caveblocks[hashZX];
+        var layer = new LayerRLE(0);
+
+        for (int i = 0; i < layers.Count; i++)
+        {
+            layer.rawData = layers[i];
+            layer.SetRope(true);
+            layers[i] = layer.rawData;
+        }
     }
 
     private void SetWater(HashSet<Vector3i> positions)

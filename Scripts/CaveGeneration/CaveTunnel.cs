@@ -210,38 +210,21 @@ public class CaveTunnel
             || cachedPrefabs.IntersectWithPrefab(caveBlock.ToVector3i()));
     }
 
-    public static IEnumerable<CaveBlock> CreateNaturalEntrance(GraphNode node, System.Random random, RawHeightMap heightMap)
+    public static IEnumerable<CaveBlock> CreateNaturalEntrance(GraphNode node, RawHeightMap heightMap)
     {
         var position = node.Normal(0);
-        var direction = new Vector3i
-        {
-            x = random.Next(-1, 2),
-            z = random.Next(-1, 2),
-        };
-
         var entranceTunnel = new HashSet<CaveBlock>();
 
-        for (int i = 0; i < 10; i++)
-        {
-            position.x += direction.x;
-            position.z += direction.z;
-
-            entranceTunnel.UnionWith(GetSphere(position, 2));
-        }
 
         while (position.y < heightMap.GetHeight(position.x, position.z))
         {
-            position.x += direction.x;
             position.y += 1;
-            position.z += direction.z;
-
             entranceTunnel.UnionWith(GetSphere(position, 2));
         }
 
-        foreach (var block in entranceTunnel)
+        foreach (var block in entranceTunnel.Where(block => block.y <= heightMap.GetHeight(block.x, block.z)))
         {
-            block.isEntrance = true;
-
+            block.skipDecoration = true;
             yield return block;
         }
     }

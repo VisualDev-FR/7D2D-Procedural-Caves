@@ -75,26 +75,14 @@ public class CaveBuilder
         return thread;
     }
 
-    private Thread StartEntrancesThread(CavePrefabManager cavePrefabManager)
+    private void SpawnNaturalEntrances()
     {
-        var random = new Random();
-        var thread = new Thread(() =>
+        foreach (var prefab in cavePrefabManager.Prefabs.Where(prefab => prefab.isNaturalEntrance))
         {
-            foreach (var prefab in cavePrefabManager.Prefabs.Where(prefab => prefab.isNaturalEntrance))
-            {
-                var blocks = CaveTunnel.CreateNaturalEntrance(prefab.nodes[0], random, heightMap);
-                cavemap.AddBlocks(blocks);
-            }
-        })
-        {
-            Priority = System.Threading.ThreadPriority.AboveNormal
-        };
-
-        Logging.Info($"Start cave entrances thread");
-
-        thread.Start();
-
-        return thread;
+            var blocks = CaveTunnel.CreateNaturalEntrance(prefab.nodes[0], heightMap);
+            cavemap.AddBlocks(blocks);
+            cavemap.SetRope(prefab.nodes[0].position);
+        }
     }
 
     public IEnumerator GenerateCaveMap()
@@ -121,7 +109,6 @@ public class CaveBuilder
 
         var threads = new List<Thread>() {
             StartRoomsThread(cavePrefabManager),
-            StartEntrancesThread(cavePrefabManager)
         };
 
         foreach (var edgeList in subLists)
@@ -179,6 +166,8 @@ public class CaveBuilder
         }
 
         yield return cavemap.SetWaterCoroutine(cavePrefabManager, worldBuilder, localMinimas);
+
+        SpawnNaturalEntrances();
 
         if (worldBuilder.IsCanceled)
             yield break;
