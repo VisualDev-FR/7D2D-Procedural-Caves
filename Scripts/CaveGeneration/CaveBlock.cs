@@ -37,43 +37,43 @@ public class CaveBlock
         set => rawData = (byte)(value ? (rawData | 0b0000_0001) : (rawData & 0b1111_1110));
     }
 
-    public bool isFloor
+    public bool isRoom
     {
         get => (rawData & 0b0000_0010) != 0;
         set => rawData = (byte)(value ? (rawData | 0b0000_0010) : (rawData & 0b1111_1101));
     }
 
-    public bool isCeiling
+    public bool isEntrance
     {
         get => (rawData & 0b0000_0100) != 0;
         set => rawData = (byte)(value ? (rawData | 0b0000_0100) : (rawData & 0b1111_1011));
     }
 
-    public bool isWallNorth
+    public bool bool4
     {
         get => (rawData & 0b0000_1000) != 0;
         set => rawData = (byte)(value ? (rawData | 0b0000_1000) : (rawData & 0b1111_0111));
     }
 
-    public bool isWallSouth
+    public bool bool5
     {
         get => (rawData & 0b0001_0000) != 0;
         set => rawData = (byte)(value ? (rawData | 0b0001_0000) : (rawData & 0b1110_1111));
     }
 
-    public bool isWallEast
+    public bool bool6
     {
         get => (rawData & 0b0010_0000) != 0;
         set => rawData = (byte)(value ? (rawData | 0b0010_0000) : (rawData & 0b1101_1111));
     }
 
-    public bool isFlat
+    public bool bool7
     {
         get => (rawData & 0b0100_0000) != 0;
         set => rawData = (byte)(value ? (rawData | 0b0100_0000) : (rawData & 0b1011_1111));
     }
 
-    public bool isRoom
+    public bool bool8
     {
         get => (rawData & 0b1000_0000) != 0;
         set => rawData = (byte)(value ? (rawData | 0b1000_0000) : (rawData & 0b0111_1111));

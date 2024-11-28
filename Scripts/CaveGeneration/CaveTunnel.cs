@@ -193,7 +193,8 @@ public class CaveTunnel
         CaveUtils.Assert(r1 > 0, "start radius should be greater than 0");
         CaveUtils.Assert(r2 > 0, "target radius should be greater than 0");
 
-        var noise = new Noise1D(new System.Random(seed), r1, r2, path.Count);
+        var random = new System.Random(seed);
+        var noise = new Noise1D(random, r1, r2, path.Count);
 
         for (int i = 0; i < path.Count; i++)
         {
@@ -207,15 +208,41 @@ public class CaveTunnel
                 caveBlock.y <= CaveConfig.bedRockMargin
             || (caveBlock.y + CaveConfig.terrainMargin) >= (int)heightMap.GetHeight(caveBlock.x, caveBlock.z)
             || cachedPrefabs.IntersectWithPrefab(caveBlock.ToVector3i()));
+    }
 
-        if (start.prefab.isNaturalEntrance)
+    public static IEnumerable<CaveBlock> CreateNaturalEntrance(GraphNode node, System.Random random, RawHeightMap heightMap)
+    {
+        var position = node.Normal(0);
+        var direction = new Vector3i
         {
-            blocks.UnionWith(GetSphere(start.position, 3));
+            x = random.Next(-1, 2),
+            z = random.Next(-1, 2),
+        };
+
+        var entranceTunnel = new HashSet<CaveBlock>();
+
+        for (int i = 0; i < 10; i++)
+        {
+            position.x += direction.x;
+            position.z += direction.z;
+
+            entranceTunnel.UnionWith(GetSphere(position, 2));
         }
 
-        if (target.prefab.isNaturalEntrance)
+        while (position.y < heightMap.GetHeight(position.x, position.z))
         {
-            blocks.UnionWith(GetSphere(target.position, 3));
+            position.x += direction.x;
+            position.y += 1;
+            position.z += direction.z;
+
+            entranceTunnel.UnionWith(GetSphere(position, 2));
+        }
+
+        foreach (var block in entranceTunnel)
+        {
+            block.isEntrance = true;
+
+            yield return block;
         }
     }
 
@@ -231,7 +258,6 @@ public class CaveTunnel
         path.Reverse();
     }
 
-    // static API
     public static readonly int minRadius = 2;
 
     public static readonly int maxRadius = 10;

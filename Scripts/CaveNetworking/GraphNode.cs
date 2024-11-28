@@ -47,7 +47,14 @@ public class GraphNode
 
     public int GetNodeRadius()
     {
-        return Utils.FastMax(1, Utils.FastMin(Utils.FastMax(marker.size.x, marker.size.z), marker.size.y) / 2);
+        var radius = Utils.FastMax(1, Utils.FastMin(Utils.FastMax(marker.size.x, marker.size.z), marker.size.y) / 2);
+
+        if (prefab.isNaturalEntrance)
+        {
+            Logging.Debug($"entrance radius: {radius}");
+        }
+
+        return radius;
     }
 
     public static Vector3i MarkerCenter(Prefab.Marker marker)
@@ -80,7 +87,7 @@ public class GraphNode
     {
         if (prefab.isNaturalEntrance)
         {
-            return new Vector3i(position.x, position.y - 5, position.z);
+            return new Vector3i(position.x, position.y - 10, position.z);
         }
 
         CaveUtils.Assert(direction != Direction.None, $"Direction sould not be None");

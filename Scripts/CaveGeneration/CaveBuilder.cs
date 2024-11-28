@@ -52,7 +52,6 @@ public class CaveBuilder
 
     private Thread StartRoomsThread(CavePrefabManager cavePrefabManager)
     {
-        var lockObject = new object();
         var roomBlock = new CaveBlock()
         {
             isRoom = true,
@@ -76,6 +75,28 @@ public class CaveBuilder
         return thread;
     }
 
+    private Thread StartEntrancesThread(CavePrefabManager cavePrefabManager)
+    {
+        var random = new Random();
+        var thread = new Thread(() =>
+        {
+            foreach (var prefab in cavePrefabManager.Prefabs.Where(prefab => prefab.isNaturalEntrance))
+            {
+                var blocks = CaveTunnel.CreateNaturalEntrance(prefab.nodes[0], random, heightMap);
+                cavemap.AddBlocks(blocks);
+            }
+        })
+        {
+            Priority = System.Threading.ThreadPriority.AboveNormal
+        };
+
+        Logging.Info($"Start cave entrances thread");
+
+        thread.Start();
+
+        return thread;
+    }
+
     public IEnumerator GenerateCaveMap()
     {
         if (worldBuilder.IsCanceled)
@@ -93,12 +114,15 @@ public class CaveBuilder
         cavePrefabManager.AddSurfacePrefabs();
 
         var caveGraph = new Graph(cavePrefabManager.Prefabs, worldBuilder.WorldSize);
-
-        var threads = new List<Thread>() { StartRoomsThread(cavePrefabManager) };
         var subLists = CaveUtils.SplitList(caveGraph.Edges.ToList(), 6);
         var localMinimas = new HashSet<CaveBlock>();
         var lockObject = new object();
         int index = 0;
+
+        var threads = new List<Thread>() {
+            StartRoomsThread(cavePrefabManager),
+            StartEntrancesThread(cavePrefabManager)
+        };
 
         foreach (var edgeList in subLists)
         {
