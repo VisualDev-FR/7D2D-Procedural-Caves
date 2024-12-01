@@ -323,4 +323,14 @@ public static class CaveUtils
         return new Vector3i(worldSize >> 1, 0, worldSize >> 1);
     }
 
+    public static int SqrMagniture(Vector3i vector)
+    {
+        return vector.x * vector.x + vector.y * vector.y + vector.z * vector.z;
+    }
+
+    public static string TotalMemory(long memoryBefore)
+    {
+        return $"{(GC.GetTotalMemory(true) - memoryBefore) / 1_048_576f:N1}MB";
+    }
+
 }
