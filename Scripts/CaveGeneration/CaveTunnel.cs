@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -199,7 +198,7 @@ public class CaveTunnel
         for (int i = 0; i < path.Count; i++)
         {
             var tunnelRadius = noise.Interpolate(i);
-            var sphere = GetSphere(path[i].ToVector3i(), tunnelRadius);
+            var sphere = SphereManager.GetSphere(path[i].ToVector3i(), tunnelRadius);
 
             blocks.UnionWith(sphere);
         }
@@ -219,7 +218,7 @@ public class CaveTunnel
         while (position.y < heightMap.GetHeight(position.x, position.z))
         {
             position.y += 1;
-            entranceTunnel.UnionWith(GetSphere(position, 2));
+            entranceTunnel.UnionWith(SphereManager.GetSphere(position, 2));
         }
 
         foreach (var block in entranceTunnel.Where(block => block.y <= heightMap.GetHeight(block.x, block.z)))
@@ -239,81 +238,6 @@ public class CaveTunnel
         }
 
         path.Reverse();
-    }
-
-    public static readonly int minRadius = 2;
-
-    public static readonly int maxRadius = 10;
-
-    public static readonly Dictionary<int, HashSet<int>> spheresMapping = new Dictionary<int, HashSet<int>>();
-
-    public static readonly Dictionary<int, Vector3i> spheres = InitSpheres();
-
-    public static Dictionary<int, Vector3i> InitSpheres(int maxRadius = -1)
-    {
-        if (maxRadius < 0)
-            maxRadius = CaveTunnel.maxRadius;
-
-        var spheres = new Dictionary<int, Vector3i>() { { 0, Vector3i.zero } };
-        var queue = new HashSet<Vector3i>() { Vector3i.zero };
-        var visited = new HashSet<Vector3i>();
-
-        Vector3i pos = new Vector3i();
-
-        for (int i = minRadius; i <= maxRadius; i++)
-        {
-            spheresMapping[i] = new HashSet<int>() { Vector3i.zero.GetHashCode() };
-        }
-
-        while (queue.Count > 0)
-        {
-            Vector3i currentPosition = queue.First();
-
-            foreach (var offset in CaveUtils.offsets)
-            {
-                pos.x = currentPosition.x + offset.x;
-                pos.y = currentPosition.y + offset.y;
-                pos.z = currentPosition.z + offset.z;
-
-                if (visited.Contains(pos))
-                    continue;
-
-                int magnitude = (int)Math.Sqrt(pos.x * pos.x + pos.y * pos.y + pos.z * pos.z);
-
-                if (magnitude >= maxRadius)
-                    continue;
-
-                for (int radius = magnitude + 1; radius <= maxRadius; radius++)
-                {
-                    if (spheresMapping.ContainsKey(radius))
-                    {
-                        spheresMapping[radius].Add(pos.GetHashCode());
-                    }
-                }
-
-                spheres[pos.GetHashCode()] = pos;
-                queue.Add(pos);
-            }
-
-            visited.Add(currentPosition);
-            queue.Remove(currentPosition);
-        }
-
-        return spheres;
-    }
-
-    public static IEnumerable<CaveBlock> GetSphere(Vector3i center, float _radius)
-    {
-        var radius = (int)Utils.FastClamp(_radius, minRadius, maxRadius);
-
-        foreach (var hashcode in spheresMapping[radius])
-        {
-            yield return new CaveBlock(
-                center.x + spheres[hashcode].x,
-                center.y + spheres[hashcode].y,
-                center.z + spheres[hashcode].z
-            );
-        }
     }
 
     private static bool IsLocalMinima(List<CaveBlock> path, int i)

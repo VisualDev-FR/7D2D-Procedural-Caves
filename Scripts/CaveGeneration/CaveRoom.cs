@@ -69,7 +69,7 @@ public class CaveRoom
 
         AddMarkers();
 
-        var temp = new Vector3i();
+        var blockPos = new Vector3i();
 
         for (int x = 0; x < size.x; x++)
         {
@@ -79,11 +79,11 @@ public class CaveRoom
                 {
                     if ((map[x, y, z] && !invert) || (!map[x, y, z] && invert))
                     {
-                        temp.x = x + offset.x;
-                        temp.y = y + offset.y;
-                        temp.z = z + offset.z;
+                        blockPos.x = x + offset.x;
+                        blockPos.y = y + offset.y;
+                        blockPos.z = z + offset.z;
 
-                        yield return temp;
+                        yield return blockPos;
                     }
                 }
             }
@@ -126,9 +126,9 @@ public class CaveRoom
 
     private void SetSphere(Vector3i center, int radius)
     {
-        foreach (var hashcode in CaveTunnel.spheresMapping[radius])
+        foreach (var hashcode in SphereManager.spheresMapping[radius])
         {
-            var position = CaveTunnel.spheres[hashcode];
+            var position = SphereManager.spheres[hashcode];
 
             int x = center.x + position.x;
             int y = center.y + position.y;

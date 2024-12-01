@@ -183,6 +183,7 @@
         <!-- Utils -->
         <Compile Include="Scripts\Utils\BlockClusterizer.cs" />
         <Compile Include="Scripts\Utils\BlockSelectionUtils.cs" />
+        <Compile Include="Scripts\Utils\SphereManager.cs" />
 
         <!-- Root -->
         <Compile Include="Scripts\CaveConfig.cs" />

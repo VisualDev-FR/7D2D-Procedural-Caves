@@ -31,6 +31,10 @@ public static class CaveConfig
 
     public static int terrainMargin = 2;
 
+    public static int minTunnelRadius = 2;
+
+    public static int maxTunnelRadius = 10;
+
     // the min deep (from terrain height) to spawn cave zombies
     public static int zombieSpawnMarginDeep = 5;
 

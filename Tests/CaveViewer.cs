@@ -227,7 +227,7 @@ public static class CaveViewer
         Logging.Info($"size     {node2.marker.size}");
         Logging.Info($"result   {node2.position}\n");
 
-        CaveTunnel.InitSpheres(5);
+        SphereManager.InitSpheres(5);
 
         var timer = CaveUtils.StartTimer();
         var cavemap = new CaveMap(worldSize);
@@ -277,7 +277,7 @@ public static class CaveViewer
     {
         var voxels = new HashSet<Voxell>();
 
-        for (int i = CaveTunnel.minRadius; i <= CaveTunnel.maxRadius; i++)
+        for (int i = CaveConfig.minTunnelRadius; i <= CaveConfig.maxTunnelRadius; i++)
         {
             int radius = i;
             int pos = i * radius * 3;
@@ -285,7 +285,7 @@ public static class CaveViewer
             var timer = CaveUtils.StartTimer();
             var position = new Vector3i(pos, 20, 20);
             var caveBlock = new CaveBlock(position);
-            var sphere = CaveTunnel.GetSphere(caveBlock.ToVector3i(), radius);
+            var sphere = SphereManager.GetSphere(caveBlock.ToVector3i(), radius);
 
             Logging.Info($"radius: {radius}, blocks: {sphere.ToList().Count}, timer: {timer.ElapsedMilliseconds} ms");
 
@@ -301,7 +301,7 @@ public static class CaveViewer
 
     public static void RoomCommand(string[] args)
     {
-        var _ = CaveTunnel.spheres.Count;
+        var _ = SphereManager.spheres.Count;
 
         var timer = CaveUtils.StartTimer();
         var seed = DateTime.Now.GetHashCode();
