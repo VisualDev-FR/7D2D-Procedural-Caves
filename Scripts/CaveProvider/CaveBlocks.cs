@@ -7,6 +7,8 @@ public class CaveBlocks
     // vanilla blocks
     public static BlockValue concreteBlock => GetBlockValue("concreteShapes:cube");
 
+    public static BlockValue climbableRopeBlock => GetBlockValue("modularRopeTiledSideCentered");
+
     // block placeholders
     public static BlockValue cntCaveFloor => GetBlockValue("cntCaveFloor");
 

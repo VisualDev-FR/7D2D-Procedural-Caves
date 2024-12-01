@@ -8,11 +8,13 @@ public class CavePrefabManager
 {
     private static readonly HashSet<CavePrefab> emptyPrefabsHashset = new HashSet<CavePrefab>();
 
-    public readonly Dictionary<Vector2s, HashSet<CavePrefab>> groupedPrefabs;
+    public readonly Dictionary<Vector2s, HashSet<CavePrefab>> groupedPrefabs = new Dictionary<Vector2s, HashSet<CavePrefab>>();
 
-    public readonly Dictionary<string, List<Vector3i>> prefabPlacements;
+    public readonly Dictionary<string, List<Vector3i>> prefabPlacements = new Dictionary<string, List<Vector3i>>();
 
-    public readonly List<CavePrefab> Prefabs;
+    public readonly List<CavePrefab> Prefabs = new List<CavePrefab>();
+
+    public readonly List<Vector3i> naturalEntrancePositions = new List<Vector3i>();
 
     public WorldBuilder worldBuilder;
 
@@ -37,20 +39,12 @@ public class CavePrefabManager
     public CavePrefabManager(int worldSize)
     {
         this.worldSize = worldSize;
-
-        Prefabs = new List<CavePrefab>();
-        groupedPrefabs = new Dictionary<Vector2s, HashSet<CavePrefab>>();
-        prefabPlacements = new Dictionary<string, List<Vector3i>>();
     }
 
     public CavePrefabManager(WorldBuilder worldBuilder)
     {
         this.worldBuilder = worldBuilder;
-
         worldSize = worldBuilder.WorldSize;
-        Prefabs = new List<CavePrefab>();
-        groupedPrefabs = new Dictionary<Vector2s, HashSet<CavePrefab>>();
-        prefabPlacements = new Dictionary<string, List<Vector3i>>();
     }
 
     public void Cleanup()
@@ -109,6 +103,43 @@ public class CavePrefabManager
                 }
             }
         }
+    }
+
+    public void AddNaturalEntrance(Vector3i position)
+    {
+        naturalEntrancePositions.Add(position);
+
+        Vector2s chunkPos = new Vector2s(
+            position.x / 16,
+            position.z / 16
+        );
+
+        var margin = 30;
+        var start = new Vector3i(position.x - margin, 0, position.z - margin);
+        var size = new Vector3i(margin * 2, 255, margin * 2);
+        var node = new GraphNode(position)
+        {
+            NodeRadius = 3,
+        };
+
+        var prefab = new CavePrefab()
+        {
+            id = Count,
+            position = start,
+            Size = size,
+            isNaturalEntrance = true,
+            nodes = new List<GraphNode>() { node },
+        };
+
+        node.prefab = prefab;
+
+        Prefabs.Add(prefab);
+
+        Logging.Debug($"Natural entrance added at {position - CaveUtils.HalfWorldSize(worldSize)}");
+        Logging.Debug($"---- position: {position}");
+        Logging.Debug($"---- start: {prefab.position}");
+        Logging.Debug($"---- size: {prefab.Size}");
+        Logging.Debug($"---- node: {node.position}");
     }
 
     public bool IsNearSamePrefab(CavePrefab prefab, int minDist)

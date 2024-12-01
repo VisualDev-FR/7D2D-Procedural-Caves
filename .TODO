@@ -21,13 +21,13 @@ First release:
     ✔ ambiance: make flashlight sparkling @done(24-11-06 21:56)
     ✔ ambiance: patch world luminosity @done(24-11-17 19:44)
 
+    ✘ editor: Add missing prefab names into localization.txt @cancelled(24-11-28 18:59)
+    ✘ editor: command to add entry in localization.txt @cancelled(24-11-28 18:59)
     ✔ editor: replace selection by terrain / by stone helper @done(24-08-15 20:49)
     ✔ editor: place cave marker from selection @done(24-08-15 20:49)
     ✔ editor: suggest cave tags @done(24-08-15 20:49)
     ✔ editor: fill selection with procedural terrain @done(24-11-02 23:37)
     ☐ editor: dedicated testing feature, to test how the cave system is builded around
-    ☐ editor: Add missing prefab names into localization.txt
-    ☐ editor: command to add entry in localization.txt
 
     ☐ checking: check cave markers placement
     ☐ checking: check min entrance deep
@@ -38,13 +38,14 @@ First release:
     ✔ generation: debug tunnels intersections with prefabs @done(24-11-09 22:43)
     ✔ generation: improve links between cave rooms and markers @done(24-11-10 13:50)
     ✔ generation: add gravel blocks in water bounding @done(24-11-25 18:08)
-    ☐ generation: add "natural" entrances with virtual cave markers placed in wilderness
+    ✔ generation: add "natural" entrances with virtual cave markers placed in wilderness @done(24-11-28 18:58)
+    ✔ generation: find an efficient way to add water in caves @done(24-11-28 18:58)
     ☐ generation: allow cave markers inside poi bounds, combining octree cluster parsing + marker directions
     ☐ generation: allow tunneling inside rwg tiles
-    ☐ generation: find an efficient way to add water in caves
     ☐ generation: add trapped sections on flat ground
     ☐ generation: burried treasures, skeletons, etc...
     ☐ generation: tunnels partially blocked
+    ☐ generation: find a way to extend the caveTerrain layers when player dig into cave
 
     ✔ decoration: setup water decoration @done(24-11-25 18:08)
     ✔ decoration: lights to turn on @done(24-11-25 18:08)
@@ -53,15 +54,17 @@ First release:
     ✔ UI: setup rwg user interface @done(24-11-17 19:17)
     ☐ UI: Loading screen with cave pictures
 
+    ✘ Optimization: work special vector3sbs(short, byte, short) class as long as possible in cave tunneling, avoiding instanciating caveBlocks @cancelled(24-12-01 12:05)
     ✔ Optimization: store all sphere offsets to avoid computing sqrDistance in critical sections @done(24-09-10 22:16)
     ✔ Optimization: handle cave regions loading / unloading @done(24-11-17 19:37)
     ☐ Optimization: disable surface meshes (which are not cave entrances) when player is underground
-    ☐ Optimization: work special vector3sbs(short, byte, short) class as long as possible in cave tunneling, avoiding instanciating caveBlocks
     ☐ Optimization: free cavemap memory after saving it, after game exit
+    ☐ Optimization: Refactor GetSphere to handle RLE layers instead of blocks
 
-    ☐ IO: ajouter la version dans les fichiers de sauvegarde de la cavemap
-    ☐ IO: implémenter cavemap.xml
-    ☐ IO: implémenter le reporting de bug qui va créer le zip avec toute les infos de debug
+    ☐ IO: store RLE layers instead of blocks
+    ☐ IO: add mod version in cavemap files
+    ☐ IO: setup cavemap.xml
+    ☐ IO: setup bug report generation (zip file with all datas allowing to reproduce the bug)
 
     ☐ bug: command 'cr' break the cave tunnels
 
@@ -70,16 +73,17 @@ Later:
     ✘ rare ore vein -> need custom microsplat @cancelled(24-11-02 23:26)
     ✘ possibility to choose which POIs to include or exlude, grouped by mod or else @cancelled(24-11-02 23:26)
     ✘ loot in niches dug into the walls or the floor @cancelled(24-11-02 23:28)
+    ✘ generation: increase ore layers width @cancelled(24-11-28 19:03)
     ✔ horde triggers (like police car ?) @done(24-11-02 23:27)
     ✔ artifact collections, only complete collection sellable to trader @done(24-11-02 23:27)
 
     ☐ generation: set variant boolean attribute on cave prefab to avoid repetion with vanilla ones
     ☐ generation: implement multiple cave networks (good feature + performances hack)
     ☐ generation: fix floating blocks at tunnels intersections
-    ☐ generation: increase ore layers width
     ☐ generation: implement tunnel terrain smoothing
     ☐ generation: integrate small prefabs in tunnels (dirt, decoration, modeled terrain, stalactites, water well)
     ☐ generation: setup cave biomes (radiated, spores, water, else ?)
+
     ☐ special rope with stability + 360 degres climbable
     ☐ live cave map
     ☐ cave navigation with beacons

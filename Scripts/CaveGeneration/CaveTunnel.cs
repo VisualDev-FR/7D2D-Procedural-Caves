@@ -48,7 +48,6 @@ public class CaveTunnel
         ThickenTunnel(edge.node1, edge.node2, seed, cachedPrefabs);
     }
 
-    // private API
     private void FindPath(GraphEdge edge, CavePrefabManager cachedPrefabs)
     {
         var HalfWorldSize = CaveUtils.HalfWorldSize(worldSize);
@@ -178,13 +177,24 @@ public class CaveTunnel
     {
         // TODO: handle duplicates with that instead of hashset: https://stackoverflow.com/questions/1672412/filtering-duplicates-out-of-an-ienumerable
 
-        blocks.UnionWith(start.GetSphere());
-        blocks.UnionWith(target.GetSphere());
+        if (!start.prefab.isNaturalEntrance)
+        {
+            blocks.UnionWith(start.GetSphere());
+        }
+
+        if (!target.prefab.isNaturalEntrance)
+        {
+            blocks.UnionWith(target.GetSphere());
+        }
 
         int r1 = start.NodeRadius;
         int r2 = target.NodeRadius;
 
-        var noise = new Noise1D(new System.Random(seed), r1, r2, path.Count);
+        CaveUtils.Assert(r1 > 0, "start radius should be greater than 0");
+        CaveUtils.Assert(r2 > 0, "target radius should be greater than 0");
+
+        var random = new System.Random(seed);
+        var noise = new Noise1D(random, r1, r2, path.Count);
 
         for (int i = 0; i < path.Count; i++)
         {
@@ -200,6 +210,25 @@ public class CaveTunnel
             || cachedPrefabs.IntersectWithPrefab(caveBlock.ToVector3i()));
     }
 
+    public static IEnumerable<CaveBlock> CreateNaturalEntrance(GraphNode node, RawHeightMap heightMap)
+    {
+        var position = node.Normal(0);
+        var entranceTunnel = new HashSet<CaveBlock>();
+
+
+        while (position.y < heightMap.GetHeight(position.x, position.z))
+        {
+            position.y += 1;
+            entranceTunnel.UnionWith(GetSphere(position, 2));
+        }
+
+        foreach (var block in entranceTunnel.Where(block => block.y <= heightMap.GetHeight(block.x, block.z)))
+        {
+            block.skipDecoration = true;
+            yield return block;
+        }
+    }
+
     private void ReconstructPath(AstarNode currentNode)
     {
         while (currentNode != null)
@@ -212,7 +241,6 @@ public class CaveTunnel
         path.Reverse();
     }
 
-    // static API
     public static readonly int minRadius = 2;
 
     public static readonly int maxRadius = 10;
