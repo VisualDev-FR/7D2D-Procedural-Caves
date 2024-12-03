@@ -24,11 +24,9 @@ public class AstarNode
         Parent = null;
         position = pos;
         hashcode = position.GetHashCode();
-        direction = new Vector3i(
-            Math.Sign(pos.x - parent.x),
-            Math.Sign(pos.y - parent.y),
-            Math.Sign(pos.z - parent.z)
-        );
+        direction.x = Math.Sign(pos.x - parent.x);
+        direction.y = Math.Sign(pos.y - parent.y);
+        direction.z = Math.Sign(pos.z - parent.z);
     }
 
     public AstarNode(Vector3i pos, AstarNode parent)
@@ -37,11 +35,9 @@ public class AstarNode
         Parent = parent;
         position = pos;
         hashcode = position.GetHashCode();
-        direction = new Vector3i(
-            Math.Sign(pos.x - parent.position.x),
-            Math.Sign(pos.y - parent.position.y),
-            Math.Sign(pos.z - parent.position.z)
-        );
+        direction.x = Math.Sign(pos.x - parent.position.x);
+        direction.y = Math.Sign(pos.y - parent.position.y);
+        direction.z = Math.Sign(pos.z - parent.position.z);
     }
 
     public AstarNode(Vector3i pos)
