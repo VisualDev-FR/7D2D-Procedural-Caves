@@ -123,6 +123,7 @@
         <Compile Include="Scripts\Requirements\RequirementIsBelowTerrain.cs" />
 
         <!-- CaveGeneration -->
+        <Compile Include="Scripts\CaveGeneration\BezierCurve3D.cs" />
         <Compile Include="Scripts\CaveGeneration\CaveBuilder.cs" />
         <Compile Include="Scripts\CaveGeneration\CavePrefabChecker.cs" />
         <Compile Include="Scripts\CaveGeneration\StalactiteGenerator.cs" />

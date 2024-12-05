@@ -11,35 +11,17 @@ public class CaveTunnel
 
     public IEnumerable<CaveBlock> LocalMinimas => FindLocalMinimas();
 
+    private readonly System.Random random;
+
     private readonly RawHeightMap heightMap;
 
     private readonly int worldSize;
-
-    private static readonly Vector3[] INNER_POINTS = new Vector3[17]
-    {
-        new Vector3(0.5f, 0.5f, 0.5f),
-        new Vector3(0f, 0f, 0f),
-        new Vector3(1f, 0f, 0f),
-        new Vector3(0f, 1f, 0f),
-        new Vector3(0f, 0f, 1f),
-        new Vector3(1f, 1f, 0f),
-        new Vector3(0f, 1f, 1f),
-        new Vector3(1f, 0f, 1f),
-        new Vector3(1f, 1f, 1f),
-        new Vector3(0.25f, 0.25f, 0.25f),
-        new Vector3(0.75f, 0.25f, 0.25f),
-        new Vector3(0.25f, 0.75f, 0.25f),
-        new Vector3(0.25f, 0.25f, 0.75f),
-        new Vector3(0.75f, 0.75f, 0.25f),
-        new Vector3(0.25f, 0.75f, 0.75f),
-        new Vector3(0.75f, 0.25f, 0.75f),
-        new Vector3(0.75f, 0.75f, 0.75f)
-    };
 
     public CaveTunnel(GraphEdge edge, CavePrefabManager cachedPrefabs, RawHeightMap heightMap, int worldSize, int seed)
     {
         CaveNoise.pathingNoise.SetSeed(seed);
 
+        this.random = new System.Random(seed);
         this.heightMap = heightMap;
         this.worldSize = worldSize;
 
@@ -69,8 +51,8 @@ public class CaveTunnel
             return;
         }
 
-        var startNode = new AstarNode(start, edge.node1.position);
-        var goalNode = new AstarNode(target, edge.node2.position);
+        var startNode = new AstarNode(start);
+        var goalNode = new AstarNode(target);
 
         var queue = new HashedPriorityQueue<AstarNode>();
         var visited = new HashSet<int>();
@@ -87,25 +69,21 @@ public class CaveTunnel
         {
             AstarNode currentNode = queue.Dequeue();
 
-            if (currentNode.hashcode == goalNode.hashcode)
+            if (currentNode.Equals(goalNode))
             {
                 ReconstructPath(currentNode);
                 return;
             }
 
-            visited.Add(currentNode.hashcode);
+            visited.Add(currentNode.GetHashCode());
 
-            foreach (var offset in CaveUtils.offsetsNoVertical)
+            foreach (var neighborPos in GetAstarNeighbors(currentNode.position, target))
             {
-                Vector3i neighborPos = currentNode.position + offset;
-
-                bool shouldContinue =
+                if (
                     neighborPos.y < bedRockMargin
                     || neighborPos.y + terrainMargin > heightMap.GetHeight(neighborPos.x, neighborPos.z)
-                    || visited.Contains(neighborPos.GetHashCode()); // NOTE: AstarNode and Vector3i must have same hashcode function
-
-                if (shouldContinue)
-                    continue;
+                    || visited.Contains(neighborPos.GetHashCode()) // NOTE: AstarNode and Vector3i must have same hashcode function
+                ) continue;
 
                 float minDist = cachedPrefabs.MinSqrDistanceToPrefab(neighborPos);
 
@@ -116,21 +94,12 @@ public class CaveTunnel
 
                 AstarNode neighbor = new AstarNode(neighborPos, currentNode);
 
-                Vector3i dir = currentNode.direction + neighbor.direction;
-                bool isCave = CaveNoise.pathingNoise.IsCave(neighborPos);
                 int factor = 0;
 
-                if (!isCave) factor += 1;
                 if (minDist < sqrMinPrefabDistance) factor += 1;
-                if (dir.x == 0) factor += 1;
-                if (dir.z == 0) factor += 1;
-                if (neighborPos.y > yMax || neighborPos.y < yMin) factor += 1;
 
                 float tentativeGCost = currentNode.GCost + (neighborDistance << factor);
 
-                // TODO: try to remove condition 'tentativeGCost < neighbor.GCost'
-                // -> it seems to be useless (to be confirmed)
-                // -> try with condition 'tentativeGCost < currentNode.GCost' instead
                 if (tentativeGCost < neighbor.GCost || !queue.Contains(neighbor))
                 {
                     neighbor.GCost = tentativeGCost;
@@ -154,6 +123,28 @@ public class CaveTunnel
         Logging.Warning($"No Path found from '{edge.Prefab1.PrefabName}' ({p1} / {height1}) to '{edge.Prefab2.PrefabName}' ({p2} / ({height2})) after {index} iterations ");
     }
 
+    private IEnumerable<Vector3i> GetAstarNeighbors(Vector3i position, Vector3i target)
+    {
+        if (CaveUtils.SqrEuclidianDist(position, target) < 100)
+        {
+            yield return target;
+            yield break;
+        }
+
+        var dx = 5;
+        var dy = 2;
+        var neighbor = Vector3i.zero;
+
+        foreach (var offset in CaveUtils.offsetsHorizontal8)
+        {
+            neighbor.x = position.x + offset.x * random.Next(-dx, dx + 1);
+            neighbor.z = position.z + offset.z * random.Next(-dx, dx + 1);
+            neighbor.y = position.y + random.Next(-dy, dy + 1);
+
+            yield return neighbor;
+        }
+    }
+
     private IEnumerable<CaveBlock> FindLocalMinimas()
     {
         for (int i = 1; i < path.Count - 1; i++)
@@ -172,7 +163,7 @@ public class CaveTunnel
         }
     }
 
-    private void ThickenTunnel(GraphNode start, GraphNode target, int seed, CavePrefabManager cachedPrefabs)
+    public void ThickenTunnel(GraphNode start, GraphNode target, int seed, CavePrefabManager cachedPrefabs)
     {
         // TODO: handle duplicates with that instead of hashset: https://stackoverflow.com/questions/1672412/filtering-duplicates-out-of-an-ienumerable
 
@@ -230,14 +221,19 @@ public class CaveTunnel
 
     private void ReconstructPath(AstarNode currentNode)
     {
+        var points = new HashSet<Vector3i>();
+
         while (currentNode != null)
         {
-            var block = new CaveBlock(currentNode.position);
-            path.Add(block);
+            points.Add(currentNode.position);
+
+            if (currentNode.Parent != null)
+                points.UnionWith(BezierCurve3D.Bresenham3D(currentNode.position, currentNode.Parent.position));
+
             currentNode = currentNode.Parent;
         }
 
-        path.Reverse();
+        path.AddRange(points.Select(pos => new CaveBlock(pos)));
     }
 
     private static bool IsLocalMinima(List<CaveBlock> path, int i)
