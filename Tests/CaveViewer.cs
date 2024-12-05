@@ -277,7 +277,7 @@ public static class CaveViewer
 
     public static void CaveCommand(string[] args)
     {
-        int worldSize = 1024;
+        int worldSize = 8192;
         int seed = 1337;
         int prefabCount = worldSize / 5;
 
@@ -333,6 +333,9 @@ public static class CaveViewer
 
         Logging.Info($"{cavemap.BlocksCount:N0} cave blocks generated ({cavemap.TunnelsCount} unique tunnels), timer={timer.ElapsedMilliseconds:N0}ms, memory={(GC.GetTotalMemory(true) - memoryBefore) / 1_048_576.0:N1}MB.");
         Logging.Info($"{localMinimas.Count} local minimas");
+
+        Logging.Debug($"region offset: {CaveConfig.RegionSizeOffset}");
+        cavemap.Save("cavemap", worldSize);
 
         if (worldSize > 1024)
             return;
@@ -483,17 +486,23 @@ public static class CaveViewer
 
     public static void RegionCommand(string[] args)
     {
-        string dirname = @"C:\Users\menan\AppData\Roaming\7DaysToDie\GeneratedWorlds\Old Honihebu County\cavemap";
+        var dirname = @"cavemap";
+        var totalBlocks = 0;
 
-        for (int i = 0; i < 16; i++)
+        for (int i = 0; i < 256; i++)
         {
             string filename = $"{dirname}/region_{i}.bin";
 
             var timer = CaveUtils.StartTimer();
             var region = new CaveRegion(filename);
+            var blocksCount = region.BlockCount;
 
-            Logging.Info($"{i}: ChunkCount={region.ChunkCount}, timer={timer.ElapsedMilliseconds}ms");
+            totalBlocks += blocksCount;
+
+            Logging.Info($"{i}: ChunkCount={region.ChunkCount}, blocks: {blocksCount:N0} timer={timer.ElapsedMilliseconds}ms");
         }
+
+        Logging.Info($"Total blocks: {totalBlocks:N0}");
     }
 
     public static void ClusterizeCommand(string[] args)

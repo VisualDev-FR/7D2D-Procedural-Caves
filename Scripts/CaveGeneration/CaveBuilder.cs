@@ -101,11 +101,15 @@ public class CaveBuilder
         cavePrefabManager.SpawnCaveRooms(1000, random, heightMap);
         cavePrefabManager.AddSurfacePrefabs();
 
+        yield return worldBuilder.SetMessage("Setup cave network...", _logToConsole: true);
+
         var caveGraph = new Graph(cavePrefabManager.Prefabs, worldBuilder.WorldSize);
         var subLists = CaveUtils.SplitList(caveGraph.Edges.ToList(), 6);
         var localMinimas = new HashSet<CaveBlock>();
         var lockObject = new object();
         int index = 0;
+
+        yield return worldBuilder.SetMessage("Start room threads...", _logToConsole: true);
 
         var threads = new List<Thread>() {
             StartRoomsThread(cavePrefabManager),

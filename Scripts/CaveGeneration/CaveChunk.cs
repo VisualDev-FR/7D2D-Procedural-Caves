@@ -5,6 +5,8 @@ public class CaveChunk
 {
     private readonly Dictionary<int, CaveBlock> caveBlocks;
 
+    public int BlockCount => caveBlocks.Count;
+
     public CaveChunk()
     {
         caveBlocks = new Dictionary<int, CaveBlock>();

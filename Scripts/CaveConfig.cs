@@ -1,4 +1,4 @@
-using UnityEngine;
+using System;
 using WorldGenerationEngineFinal;
 
 public static class CaveConfig
@@ -20,6 +20,8 @@ public static class CaveConfig
     public static FastTags<TagGroup.Poi> tagRwgStreetTile = FastTags<TagGroup.Poi>.Parse("streettile, rwgonly");
 
     public static readonly int RegionSize = 512;
+
+    public static readonly int RegionSizeOffset = (int)Math.Log(RegionSize, 2);
 
     public static int overLapMargin = 50;
 

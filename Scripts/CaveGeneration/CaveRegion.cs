@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 public class CaveRegion
 {
@@ -7,9 +8,14 @@ public class CaveRegion
 
     public int ChunkCount => CaveChunks.Count;
 
+    public int BlockCount => CaveChunks.Values.Sum(chunk => chunk.BlockCount);
+
     public CaveRegion(string filename)
     {
         CaveChunks = new Dictionary<Vector2s, CaveChunk>();
+
+        var layer = new LayerRLE();
+        var chunkPos = new Vector2s();
 
         using (var stream = new FileStream(filename, FileMode.Open))
         {
@@ -17,14 +23,29 @@ public class CaveRegion
             {
                 while (stream.Position < stream.Length)
                 {
-                    var caveBlock = new CaveBlock(reader);
+                    var x = reader.ReadInt32();
+                    var z = reader.ReadInt32();
+                    var layerCount = reader.ReadInt32();
 
-                    if (!CaveChunks.ContainsKey(caveBlock.chunkPos))
+                    chunkPos.x = (short)(x >> 4);
+                    chunkPos.z = (short)(z >> 4);
+
+                    if (!CaveChunks.ContainsKey(chunkPos))
                     {
-                        CaveChunks[caveBlock.chunkPos] = new CaveChunk();
+                        CaveChunks[chunkPos] = new CaveChunk();
                     }
 
-                    CaveChunks[caveBlock.chunkPos].AddBlock(caveBlock);
+                    var caveChunk = CaveChunks[chunkPos];
+
+                    for (int i = 0; i < layerCount; i++)
+                    {
+                        layer.rawData = reader.ReadInt32();
+
+                        for (int y = layer.Start; y <= layer.End; y++)
+                        {
+                            caveChunk.AddBlock(new CaveBlock(x, y, z) { rawData = layer.BlockRawData });
+                        }
+                    }
                 }
             }
         }

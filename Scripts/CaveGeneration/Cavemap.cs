@@ -237,14 +237,24 @@ public class CaveMap
 
         using (var multistream = new MultiStream(dirname, create: true))
         {
-            foreach (CaveBlock caveBlock in GetBlocks())
+            foreach (var entry in caveblocks)
             {
-                int region_x = caveBlock.x / CaveConfig.RegionSize;
-                int region_z = caveBlock.z / CaveConfig.RegionSize;
+                CaveBlock.ZXFromHash(entry.Key, out var x, out var z);
+
+                int region_x = x >> CaveConfig.RegionSizeOffset;
+                int region_z = z >> CaveConfig.RegionSizeOffset;
                 int regionID = region_x + region_z * regionGridSize;
 
                 var writer = multistream.GetWriter($"region_{regionID}.bin");
-                caveBlock.ToBinaryStream(writer);
+
+                writer.Write(x);
+                writer.Write(z);
+                writer.Write(entry.Value.Count);
+
+                foreach (var layerHash in entry.Value)
+                {
+                    writer.Write(layerHash);
+                }
             }
         }
     }

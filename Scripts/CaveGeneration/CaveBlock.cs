@@ -113,25 +113,6 @@ public class CaveBlock
         );
     }
 
-    public CaveBlock(BinaryReader reader)
-    {
-        chunkPos = new Vector2s(reader.ReadInt16(), reader.ReadInt16());
-        posInChunk = new Vector3bf(reader.ReadUInt16());
-        density = reader.ReadSByte();
-        rawData = reader.ReadByte();
-        // tunnelID = new MutableInt16(reader.ReadInt16());
-    }
-
-    public void ToBinaryStream(BinaryWriter writer)
-    {
-        writer.Write(chunkPos.x);
-        writer.Write(chunkPos.z);
-        writer.Write(posInChunk.value);
-        writer.Write(density);
-        writer.Write(rawData);
-        // writer.Write(tunnelID.value);
-    }
-
     public Vector3i ToVector3i()
     {
         return new Vector3i(x, y, z);
