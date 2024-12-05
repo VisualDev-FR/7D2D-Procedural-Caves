@@ -112,7 +112,6 @@
         <Compile Include="Harmony\H_SkyManager.cs" />
         <Compile Include="Harmony\H_SpawnManagerBiomes.cs" />
         <Compile Include="Harmony\H_WorldBuilder.cs" />
-        <Compile Include="Harmony\H_WorldEnvironement.cs" />
         <Compile Include="Harmony\H_XUiC_WorldGenerationWindowGroup.cs" />
         <Compile Include="Harmony\ModApi.cs" />
 
