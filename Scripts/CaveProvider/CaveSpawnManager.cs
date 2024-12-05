@@ -31,7 +31,7 @@ public class CaveSpawnManager
             int y = currentNode.position.y;
             int z = currentNode.position.z;
 
-            visited.Add(currentNode.hashcode);
+            visited.Add(currentNode.GetHashCode());
 
             foreach (var offset in CaveUtils.offsetsNoVertical)
             {
