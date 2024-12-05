@@ -33,6 +33,9 @@ public class CaveEntrancesPlanner
             if (tile.Used) continue;
 
             var center = tile.WorldPositionCenter;
+            center.x += gameRandom.Next(-20, 20);
+            center.y += gameRandom.Next(-20, 20);
+
             var height = tile.getHeightCeil(center.x, center.y);
             var entrancePosition = new Vector3i(center.x, height, center.y);
 

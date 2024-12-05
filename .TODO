@@ -60,6 +60,7 @@ First release:
     ☐ Optimization: disable surface meshes (which are not cave entrances) when player is underground
     ☐ Optimization: free cavemap memory after saving it, after game exit
     ☐ Optimization: Refactor GetSphere to handle RLE layers instead of blocks
+    ☐ Optimization: multi thread or async reading of .tts files, to reduce time spent in prefabs spawning
 
     ☐ IO: store RLE layers instead of blocks
     ☐ IO: add mod version in cavemap files

@@ -27,6 +27,8 @@ public class CaveBuilder
 
     private int WorldSize => worldBuilder.WorldSize;
 
+    private readonly Logging.Logger logger = Logging.CreateLogger("CaveBuilder");
+
     public readonly string caveTempDir = $"{GameIO.GetUserGameDataDir()}/temp";
 
     public CaveBuilder(WorldBuilder worldBuilder)
@@ -68,7 +70,7 @@ public class CaveBuilder
             Priority = System.Threading.ThreadPriority.AboveNormal
         };
 
-        Logging.Info($"Start cave rooms thread");
+        logger.Info($"Start cave rooms thread");
 
         thread.Start();
 
@@ -90,7 +92,8 @@ public class CaveBuilder
         if (worldBuilder.IsCanceled)
             yield break;
 
-        long memoryBefore = GC.GetTotalMemory(true);
+        var timer = CaveUtils.StartTimer();
+        var memoryBefore = GC.GetTotalMemory(true);
 
         yield return worldBuilder.SetMessage("Spawning cave prefabs...", _logToConsole: true);
 
@@ -101,6 +104,8 @@ public class CaveBuilder
         cavePrefabManager.SpawnCaveRooms(1000, random, heightMap);
         cavePrefabManager.AddSurfacePrefabs();
 
+        logger.Debug($"Prefab timer: {timer.ElapsedMilliseconds / 1000:F1}s");
+
         yield return worldBuilder.SetMessage("Setup cave network...", _logToConsole: true);
 
         var caveGraph = new Graph(cavePrefabManager.Prefabs, worldBuilder.WorldSize);
@@ -109,7 +114,9 @@ public class CaveBuilder
         var lockObject = new object();
         int index = 0;
 
-        yield return worldBuilder.SetMessage("Start room threads...", _logToConsole: true);
+        logger.Debug($"Graph timer: {timer.ElapsedMilliseconds / 1000:F1}ms");
+
+        yield return worldBuilder.SetMessage("Start tunneling threads...", _logToConsole: true);
 
         var threads = new List<Thread>() {
             StartRoomsThread(cavePrefabManager),
@@ -171,14 +178,14 @@ public class CaveBuilder
 
         yield return cavemap.SetWaterCoroutine(cavePrefabManager, worldBuilder, localMinimas);
 
-        SpawnNaturalEntrances();
-
         if (worldBuilder.IsCanceled)
             yield break;
 
+        SpawnNaturalEntrances();
+
         // yield return GenerateCavePreview(cavemap);
 
-        Logging.Info($"{cavemap.BlocksCount:N0} cave blocks generated, memory used: {(GC.GetTotalMemory(true) - memoryBefore) / 1_048_576:N1}MB");
+        logger.Info($"{cavemap.BlocksCount:N0} cave blocks generated, timer: {timer.ElapsedMilliseconds / 1000:F1}s, memory used: {(GC.GetTotalMemory(true) - memoryBefore) / 1_048_576:N1}MB");
 
         yield break;
     }
@@ -252,7 +259,7 @@ public class CaveBuilder
             }
             catch (IndexOutOfRangeException)
             {
-                Logging.Error($"IndexOutOfRangeException: index={index}, position={caveblock}, worldSize={WorldSize}");
+                logger.Error($"IndexOutOfRangeException: index={index}, position={caveblock}, worldSize={WorldSize}");
             }
         }
 
