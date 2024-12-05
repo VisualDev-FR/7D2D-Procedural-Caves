@@ -110,12 +110,12 @@ public static class WorldBuilder_GenerateData
             }
         }
 
-        yield return worldBuilder.SetMessage("Draw Roads", _logToConsole: true);
+		yield return worldBuilder.SetMessage(Localization.Get("xuiRwgDrawRoads"), _logToConsole: true);
         yield return worldBuilder.DrawRoads(worldBuilder.dest);
 
         if (worldBuilder.Towns != 0 || worldBuilder.Wilderness != 0)
         {
-            yield return worldBuilder.SetMessage("Smooth Road Terrain", _logToConsole: true);
+			yield return worldBuilder.SetMessage(Localization.Get("xuiRwgSmoothRoadTerrain"), _logToConsole: true);
             yield return worldBuilder.smoothRoadTerrain(worldBuilder.dest, worldBuilder.HeightMap, worldBuilder.WorldSize);
         }
 
@@ -125,6 +125,7 @@ public static class WorldBuilder_GenerateData
         worldBuilder.wildernessPaths.Clear();
 
         yield return worldBuilder.FinalizeWater();
+		yield return worldBuilder.SerializeData();
 
         Logging.Info("RWG final in {0}:{1:00}, r={2:x}", worldBuilder.totalMS.Elapsed.Minutes, worldBuilder.totalMS.Elapsed.Seconds, Rand.Instance.PeekSample());
 
@@ -197,8 +198,8 @@ public static class WorldBuilder_GenerateData
 }
 
 
-[HarmonyPatch(typeof(WorldBuilder), "saveRawHeightmap")]
-public static class WorldBuilder_saveRawHeightmap
+[HarmonyPatch(typeof(WorldBuilder), "serializeRawHeightmap")]
+public static class WorldBuilder_serializeRawHeightmap
 {
     public static bool Prefix()
     {

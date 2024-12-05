@@ -19,17 +19,19 @@ public class SpawnManagerBiomes_Update
         return true;
     }
 
-    public static bool SpawnUpdate(string _spawnerName, bool _isSpawnEnemy, ChunkAreaBiomeSpawnData _chunkBiomeSpawnData)
+    public static bool SpawnUpdate(string _spawnerName, bool _isSpawnEnemy, ChunkAreaBiomeSpawnData _spawnData)
     {
+        var logger = Logging.CreateLogger("CaveSpawnManager");
+
         var world = GameManager.Instance.World;
         var deepCaveThreshold = 30;
 
-        if (_chunkBiomeSpawnData == null)
+        if (_spawnData == null)
             return false;
 
         _isSpawnEnemy &= !AIDirector.CanSpawn() || world.aiDirector.BloodMoonComponent.BloodMoonActive;
 
-        if (!_isSpawnEnemy && GameStats.GetInt(EnumGameStats.AnimalCount) >= GamePrefs.GetInt(EnumGamePrefs.MaxSpawnedAnimals))
+        if (!_isSpawnEnemy || GameStats.GetInt(EnumGameStats.AnimalCount) >= GamePrefs.GetInt(EnumGamePrefs.MaxSpawnedAnimals))
             return false;
 
         var players = world.GetPlayers();
@@ -39,7 +41,7 @@ public class SpawnManagerBiomes_Update
         {
             EntityPlayer entityPlayer = players[i];
 
-            if (entityPlayer.Spawned && new Rect(entityPlayer.position.x - 40f, entityPlayer.position.z - 40f, 80f, 80f).Overlaps(_chunkBiomeSpawnData.area))
+            if (entityPlayer.Spawned && new Rect(entityPlayer.position.x - 40f, entityPlayer.position.z - 40f, 80f, 80f).Overlaps(_spawnData.area))
             {
                 playerPosition = new Vector3i(entityPlayer.GetPosition());
                 break;
@@ -52,153 +54,109 @@ public class SpawnManagerBiomes_Update
         if (playerPosition.y + CaveConfig.zombieSpawnMarginDeep > GameManager.Instance.World.GetTerrainHeight(playerPosition.x, playerPosition.z))
             return true;
 
-        // TODO: see world.GetRandomSpawnPositionInAreaMinMaxToPlayers
-        var spawnPosition = CaveSpawnManager.GetSpawnPositionNearPlayer(playerPosition, CaveConfig.minSpawnDist);
-        if (spawnPosition == Vector3.zero)
-        {
-            return false;
-        }
 
-        var biome = GameManager.Instance.World.Biomes.GetBiome(_chunkBiomeSpawnData.biomeId);
+        var biome = GameManager.Instance.World.Biomes.GetBiome(_spawnData.biomeId);
         if (biome == null)
         {
             return false;
         }
 
-        var caveType = spawnPosition.y < deepCaveThreshold ? "DeepCave" : "Cave";
+        // TODO: see world.GetRandomSpawnPositionInAreaMinMaxToPlayers
+        /* PATCH START */
+        var _position = CaveSpawnManager.GetSpawnPositionNearPlayer(playerPosition, CaveConfig.minSpawnDist);
+
+        logger.Debug($"player pos: {playerPosition}, spawn position: {_position}");
+
+        if (_position == Vector3.zero)
+        {
+            return false;
+        }
+
+        var caveType = _position.y < deepCaveThreshold ? "DeepCave" : "Cave";
         var biomeSpawnEntityGroupList = BiomeSpawningClass.list[biome.m_sBiomeName + "_" + caveType] ?? BiomeSpawningClass.list[caveType];
+        /* PATCH END */
 
         if (biomeSpawnEntityGroupList == null)
         {
+            logger.Warning("null biomeSpawnEntityGroupList");
             return false;
         }
 
         var eDaytime = world.IsDaytime() ? EDaytime.Day : EDaytime.Night;
         var gameRandom = world.GetGameRandom();
 
-        /* if (!_chunkBiomeSpawnData.checkedPOITags)
-        {
-            _chunkBiomeSpawnData.checkedPOITags = true;
-            FastTags<TagGroup.Poi> none = FastTags<TagGroup.Poi>.none;
-            Vector3i worldPos = _chunkBiomeSpawnData.chunk.GetWorldPos();
-            world.GetPOIsAtXZ(worldPos.x + 16, worldPos.x + 80 - 16, worldPos.z + 16, worldPos.z + 80 - 16, spawnPIs);
-            for (int j = 0; j < spawnPIs.Count; j++)
-            {
-                PrefabInstance prefabInstance = spawnPIs[j];
-                none |= prefabInstance.prefab.Tags;
-            }
-            _chunkBiomeSpawnData.poiTags = none;
-            bool isEmpty = none.IsEmpty;
-            for (int k = 0; k < biomeSpawnEntityGroupList.list.Count; k++)
-            {
-                BiomeSpawnEntityGroupData biomeSpawnEntityGroupData = biomeSpawnEntityGroupList.list[k];
-                if ((biomeSpawnEntityGroupData.POITags.IsEmpty || biomeSpawnEntityGroupData.POITags.Test_AnySet(none)) && (isEmpty || biomeSpawnEntityGroupData.noPOITags.IsEmpty || !biomeSpawnEntityGroupData.noPOITags.Test_AnySet(none)))
-                {
-                    _chunkBiomeSpawnData.groupsEnabledFlags |= 1 << k;
-                }
-            }
-        } */
-
-        string entityGroupName = null;
-        int randomIndex = gameRandom.RandomRange(biomeSpawnEntityGroupList.list.Count);
+        int idHash = 0;
+        int groupIndex = -1;
+        int currentIndex = gameRandom.RandomRange(biomeSpawnEntityGroupList.list.Count);
         int maxTries = Utils.FastMin(5, biomeSpawnEntityGroupList.list.Count);
-        int index = -1;
 
-        for (int i = 0; i < maxTries; i++, randomIndex = (randomIndex + 1) % biomeSpawnEntityGroupList.list.Count)
+        for (int i = 0; i < maxTries; i++)
         {
-            BiomeSpawnEntityGroupData spawnGroup = biomeSpawnEntityGroupList.list[randomIndex];
+            currentIndex = (currentIndex + 1) % biomeSpawnEntityGroupList.list.Count;
 
-            if (spawnGroup.daytime != EDaytime.Any && spawnGroup.daytime != eDaytime)
+            var entityGroupData = biomeSpawnEntityGroupList.list[currentIndex];
+
+            bool dayTimeOK = entityGroupData.daytime == EDaytime.Any || entityGroupData.daytime == eDaytime;
+            bool isEnemyGroup = EntityGroups.IsEnemyGroup(entityGroupData.entityGroupName);
+
+            logger.Debug($"group: {entityGroupData.entityGroupName}, dayTimeOK: {dayTimeOK}");
+
+            if (!dayTimeOK || (isEnemyGroup && !_isSpawnEnemy))
             {
+                logger.Debug($"Can't spawn enemy, isEnemyGroup: {isEnemyGroup}, isSpawnEnemy: {_isSpawnEnemy}");
                 continue;
             }
 
-            bool isEnemyGroup = EntityGroups.IsEnemyGroup(spawnGroup.entityGroupRefName);
-            int spawnCount = spawnGroup.maxCount;
-
-            if (isEnemyGroup)
-                spawnCount = EntitySpawner.ModifySpawnCountByGameDifficulty(spawnCount);
-
-            entityGroupName = spawnGroup.entityGroupRefName + "_" + spawnGroup.daytime.ToStringCached<EDaytime>();
-            ulong respawnDelayWorldTime = _chunkBiomeSpawnData.GetRespawnDelayWorldTime(entityGroupName);
-
-            if (respawnDelayWorldTime != 0)
+            idHash = entityGroupData.idHash;
+            ulong delayWorldTime = _spawnData.GetDelayWorldTime(idHash);
+            if (world.worldTime > delayWorldTime)
             {
-                if (world.worldTime < respawnDelayWorldTime)
+                int spawnCount = entityGroupData.maxCount;
+                if (isEnemyGroup)
                 {
-                    continue;
+                    spawnCount = EntitySpawner.ModifySpawnCountByGameDifficulty(spawnCount);
                 }
-                _chunkBiomeSpawnData.ClearRespawn(entityGroupName);
+                _spawnData.ResetRespawn(idHash, world, spawnCount);
             }
 
-            if (_chunkBiomeSpawnData.GetEntitiesSpawned(entityGroupName) < spawnCount)
+            logger.Debug($"canSpawn '{idHash}': {_spawnData.CanSpawn(idHash)}");
+
+            if (_spawnData.CanSpawn(idHash))
             {
-                index = randomIndex;
+                groupIndex = currentIndex;
                 break;
             }
+
         }
 
-        if (index < 0)
+        if (groupIndex < 0)
         {
+            logger.Warning($"num2 = {groupIndex}");
             return false;
         }
 
-        var bb = new Bounds(spawnPosition, new Vector3(4f, 2.5f, 4f));
-        var spawnNearList = new List<Entity>();
+        Bounds bb = new Bounds(_position, new Vector3(4f, 2.5f, 4f));
+        world.GetEntitiesInBounds(typeof(Entity), bb, spawnManagerBiome.spawnNearList);
+        int count = spawnManagerBiome.spawnNearList.Count;
+        spawnManagerBiome.spawnNearList.Clear();
 
-        world.GetEntitiesInBounds(typeof(Entity), bb, spawnNearList);
-
-        if (spawnNearList.Count > 0)
+        if (count <= 0)
         {
-            return false;
+            int randomFromGroup = EntityGroups.GetRandomFromGroup(biomeSpawnEntityGroupList.list[groupIndex].entityGroupName, ref spawnManagerBiome.lastClassId);
+            if (randomFromGroup != 0)
+            {
+                _spawnData.IncCount(idHash);
+                Entity entity = EntityFactory.CreateEntity(randomFromGroup, _position);
+                entity.SetSpawnerSource(EnumSpawnerSource.Biome, _spawnData.chunk.Key, idHash);
+                world.SpawnEntityInWorld(entity);
+                world.DebugAddSpawnedEntity(entity);
+            }
         }
-
-
-        var spawnedGroup = biomeSpawnEntityGroupList.list[index];
-        var entityID = EntityGroups.GetRandomFromGroup(spawnedGroup.entityGroupRefName, ref spawnManagerBiome.lastClassId);
-
-        Logging.Info($"entityGroupName: {spawnedGroup.entityGroupRefName}");
-
-        if (entityID == 0)
+        else
         {
-            _chunkBiomeSpawnData.SetRespawnDelay(entityGroupName, world.worldTime, world.Biomes);
-            return false;
+            logger.Warning($"count = {count}");
         }
-
-        _chunkBiomeSpawnData.IncEntitiesSpawned(entityGroupName);
-
-        Entity entity = EntityFactory.CreateEntity(entityID, spawnPosition);
-        entity.SetSpawnerSource(EnumSpawnerSource.Biome, _chunkBiomeSpawnData.chunk.Key, entityGroupName);
-        world.SpawnEntityInWorld(entity);
-
-        float spawnDeadChance = spawnedGroup.spawnDeadChance;
-        if (spawnDeadChance > 0f && gameRandom.RandomFloat < spawnDeadChance)
-            entity.Kill(DamageResponse.New(_fatal: true));
-
-        Logging.Info($"Spawning entity: {entityID} at {spawnPosition}, playerPos=[{playerPosition}]");
 
         return false;
-    }
-
-    private static void TrySpawnDeadAnimal(Vector3i spawnPosition, ChunkAreaBiomeSpawnData _chunkBiomeSpawnData)
-    {
-        var entityGroupName = "DeadAnimals";
-        var deadAnimalSpanwPosition = CaveSpawnManager.GetSpawnPositionNearPlayer(spawnPosition, 2);
-        var entityID = EntityGroups.GetRandomFromGroup(entityGroupName, ref spawnManagerBiome.lastClassId);
-
-        if (deadAnimalSpanwPosition == Vector3i.zero)
-            return;
-
-        _chunkBiomeSpawnData.IncEntitiesSpawned(entityGroupName);
-
-        Entity entity = EntityFactory.CreateEntity(entityID, spawnPosition);
-
-        if (entity is null)
-            return;
-
-        entity.SetSpawnerSource(EnumSpawnerSource.Biome, _chunkBiomeSpawnData.chunk.Key, entityGroupName);
-        GameManager.Instance.World.SpawnEntityInWorld(entity);
-
-        entity.Kill(DamageResponse.New(true));
     }
 }
