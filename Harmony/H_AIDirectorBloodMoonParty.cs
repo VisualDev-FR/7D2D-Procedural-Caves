@@ -31,10 +31,14 @@ public class AIDirectorBloodMoonParty_SpawnZombie
 
     private static bool SpawnBloodMoonCaveZombie()
     {
+        var logger = Logging.CreateLogger("CaveBloodMoonDirector");
         var spawnPos = CaveSpawnManager.GetSpawnPositionNearPlayer(target.position, CaveConfig.minSpawnDistBloodMoon);
 
         if (spawnPos == Vector3i.zero)
+        {
+            logger.Debug($"no spawn found from {target.position}");
             return false;
+        }
 
         int et = EntityGroups.GetRandomFromGroup(Instance.partySpawner.spawnGroupName, ref Instance.lastClassId);
 

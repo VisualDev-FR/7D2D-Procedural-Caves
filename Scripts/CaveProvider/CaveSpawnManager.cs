@@ -17,7 +17,7 @@ public class CaveSpawnManager
 
         queue.Enqueue(startNode, float.MaxValue);
 
-        while (queue.Count > 0 && rolls++ < 200 && timer.ElapsedMilliseconds < 2)
+        while (queue.Count > 0 && rolls++ < 1000 && timer.ElapsedMilliseconds < 2)
         {
             AstarNode currentNode = queue.Dequeue();
 

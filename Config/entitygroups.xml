@@ -1,39 +1,16 @@
 <configs>
     <append xpath="/entitygroups">
 
-        <entitygroup name="CaveBigEntities">
-            animalBear
-            animalBossGrace
-            animalZombieBear
-        </entitygroup>
-
         <entitygroup name="ZombiesCaveDay">
-            zombieSteveCrawler, 3.00
-            animalSnake, 2.00
-            zombieBurnt, 2.00
-            zombieSpider, 1.00
-            zombieMaleHazmat, 1.00
-            zombieMutated, 0.25
-            zombieDemolition, 0.25
-            zombieSoldier, 0.25
-            zombieSpiderFeral, 0.25
-            animalWolf, 0.25
-            animalZombieDog, 0.25
-            animalBearSmall, 0.10
+            zombieSteveCrawler
+            zombieBurnt
+            zombieSteveCrawlerFeral
+            animalSnake
+            zombieSpider, .25
+            zombieSpiderFeral, 0.10
             zombieWightFeral, 0.10
+            zombieMutated, 0.10
             animalDireWolf, 0.05
-        </entitygroup>
-
-        <entitygroup name="DeadAnimals">
-            animalRabbit, 10
-            animalChicken, 10
-            animalSnake, 10
-            animalWolf, 10
-            animalBearSmall, 10
-            animalDireWolf, 10
-            animalDoe, 10
-            animalStag, 10
-            none, 20
         </entitygroup>
 
     </append>

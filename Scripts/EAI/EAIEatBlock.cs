@@ -65,6 +65,10 @@ public class EAIEatBlock : EAIBase
 
     public override bool CanExecute()
     {
+        if (GameManager.Instance.World.aiDirector.BloodMoonComponent.BloodMoonActive)
+        {
+            return false;
+        }
 
         if (foodBlockNames.Count == 0 || theEntity.sleepingOrWakingUp || theEntity.bodyDamage.CurrentStun != 0 || (theEntity.Jumping && !theEntity.isSwimming))
         {
