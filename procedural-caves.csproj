@@ -181,6 +181,7 @@
         <Compile Include="Scripts\Toolkit\Logging.cs" />
 
         <!-- Utils -->
+        <Compile Include="Scripts\Utils\BitField.cs" />
         <Compile Include="Scripts\Utils\BlockClusterizer.cs" />
         <Compile Include="Scripts\Utils\BlockSelectionUtils.cs" />
         <Compile Include="Scripts\Utils\SphereManager.cs" />

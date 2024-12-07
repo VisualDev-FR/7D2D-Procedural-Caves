@@ -11,20 +11,20 @@ public struct LayerRLE
 
     public byte Start
     {
-        get => (byte)((rawData >> 16) & 0xFF);
-        set => rawData = (rawData & ~0x00FF0000) | (value << 16);
+        get => Bitfield.GetByte(rawData, 16);
+        set => Bitfield.SetByte(ref rawData, value, 16);
     }
 
     public byte End
     {
-        get => (byte)((rawData >> 8) & 0xFF);
-        set => rawData = (rawData & ~0x0000FF00) | (value << 8);
+        get => Bitfield.GetByte(rawData, 8);
+        set => Bitfield.SetByte(ref rawData, value, 8);
     }
 
     public byte BlockRawData
     {
-        get => (byte)(rawData & 0xFF);
-        set => rawData = (rawData & ~0x000000FF) | value;
+        get => Bitfield.GetByte(rawData, 0);
+        set => Bitfield.SetByte(ref rawData, value, 0);
     }
 
     public static int Count(int hash)
