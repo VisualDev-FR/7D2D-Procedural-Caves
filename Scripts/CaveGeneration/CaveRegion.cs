@@ -14,7 +14,7 @@ public class CaveRegion
     {
         CaveChunks = new Dictionary<Vector2s, CaveChunk>();
 
-        var layer = new LayerRLE();
+        var layer = new RLELayer();
         var chunkPos = new Vector2s();
 
         using (var stream = new FileStream(filename, FileMode.Open))

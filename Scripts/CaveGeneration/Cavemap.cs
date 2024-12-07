@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using WorldGenerationEngineFinal;
 
 
-public struct LayerRLE
+public struct RLELayer
 {
     public int rawData;
 
@@ -27,18 +27,20 @@ public struct LayerRLE
         set => Bitfield.SetByte(ref rawData, value, 0);
     }
 
+    public int Size => End - Start;
+
     public static int Count(int hash)
     {
-        var layer = new LayerRLE(hash);
+        var layer = new RLELayer(hash);
         return layer.End - layer.Start;
     }
 
-    public LayerRLE(int start, int end, byte blockRawData)
+    public RLELayer(int start, int end, byte blockRawData)
     {
         rawData = (start << 16) | (end << 8) | blockRawData;
     }
 
-    public LayerRLE(IEnumerable<Vector3i> positions, byte blockRawData)
+    public RLELayer(IEnumerable<Vector3i> positions, byte blockRawData)
     {
         var start = int.MaxValue;
         var end = int.MinValue;
@@ -52,7 +54,7 @@ public struct LayerRLE
         rawData = (start << 16) | (end << 8) | blockRawData;
     }
 
-    public LayerRLE(int bitfield)
+    public RLELayer(int bitfield)
     {
         this.rawData = bitfield;
     }
@@ -90,13 +92,81 @@ public struct LayerRLE
         BlockRawData = (byte)(value ? (BlockRawData | 0b0000_1000) : (BlockRawData & 0b1111_0111));
     }
 
+    public override int GetHashCode()
+    {
+        return rawData;
+    }
+
+    public static List<int> CompressLayers(IEnumerable<int> layers)
+    {
+        var layer = new RLELayer();
+        var values = new byte?[256];
+        byte minSet = 255;
+        byte maxSet = 0;
+
+        foreach (var layerHash in layers)
+        {
+            layer.rawData = layerHash;
+
+            minSet = minSet < layer.Start ? minSet : layer.Start;
+            maxSet = maxSet > layer.End ? maxSet : layer.End;
+
+            for (int i = layer.Start; i <= layer.End; i++)
+            {
+                if (values[i] is null)
+                {
+                    values[i] = layer.BlockRawData;
+                }
+                else if (values[i].Value != layer.BlockRawData)
+                {
+                    values[i] = (byte)(values[i].Value | layer.BlockRawData);
+                }
+            }
+        }
+
+        var result = new List<int>();
+
+        byte? previousData = values[minSet].Value;
+        int startY = minSet;
+
+        for (int i = minSet + 1; i <= maxSet; i++)
+        {
+            if (values[i] != previousData)
+            {
+                if (previousData.HasValue)
+                {
+                    result.Add(GetHashCode(startY, i - 1, previousData.Value));
+                }
+
+                startY = i;
+                previousData = values[i];
+            }
+        }
+
+        if (previousData.HasValue)
+        {
+            result.Add(GetHashCode(startY, maxSet, previousData.Value));
+        }
+
+        return result;
+    }
+
+    public bool AssertEquals(byte start, byte end, byte data)
+    {
+        CaveUtils.Assert(this.Start == start, $"start, value: '{this.Start}', expected: '{start}'");
+        CaveUtils.Assert(this.End == end, $"end, value: '{this.End}', expected: '{end}'");
+        CaveUtils.Assert(this.BlockRawData == data, $"data, value: '{this.BlockRawData}', expected: '{data}'");
+
+        return true;
+    }
+
 }
 
 public class CaveMap
 {
     private readonly Dictionary<int, List<int>> caveblocks;
 
-    public int BlocksCount => caveblocks.Values.Sum(layers => layers.Sum(layerHash => LayerRLE.Count(layerHash)));
+    public int BlocksCount => caveblocks.Values.Sum(layers => layers.Sum(layerHash => RLELayer.Count(layerHash)));
 
     public readonly int worldSize;
 
@@ -146,7 +216,7 @@ public class CaveMap
                 }
             }
 
-            foreach (var layerHash in RLECompress(group))
+            foreach (var layerHash in RLEEncode(group))
             {
                 lock (_lock)
                 {
@@ -162,7 +232,7 @@ public class CaveMap
         TunnelsCount++;
     }
 
-    public IEnumerable<int> RLECompress(IEnumerable<CaveBlock> caveBlocks)
+    public IEnumerable<int> RLEEncode(IEnumerable<CaveBlock> caveBlocks)
     {
         var blocks = caveBlocks.OrderBy(b => b.y).ToArray();
 
@@ -176,7 +246,7 @@ public class CaveMap
 
             if (current != previousY + 1 || previousData != blocks[i].rawData)
             {
-                yield return LayerRLE.GetHashCode(startY, previousY, previousData);
+                yield return RLELayer.GetHashCode(startY, previousY, previousData);
                 startY = current;
             }
 
@@ -184,7 +254,7 @@ public class CaveMap
             previousData = blocks[i].rawData;
         }
 
-        yield return LayerRLE.GetHashCode(startY, previousY, previousData);
+        yield return RLELayer.GetHashCode(startY, previousY, previousData);
     }
 
     public bool IsCave(Vector3i position)
@@ -194,7 +264,7 @@ public class CaveMap
         if (!caveblocks.ContainsKey(hashZX))
             return false;
 
-        var layer = new LayerRLE(0);
+        var layer = new RLELayer(0);
 
         foreach (var layerHash in caveblocks[hashZX])
         {
@@ -216,7 +286,7 @@ public class CaveMap
         if (!caveblocks.ContainsKey(hashZX))
             return false;
 
-        var layer = new LayerRLE(0);
+        var layer = new RLELayer(0);
 
         foreach (var layerHash in caveblocks[hashZX])
         {
@@ -388,7 +458,7 @@ public class CaveMap
     {
         var hashZX = CaveBlock.HashZX(position.x + 1, position.z);
         var layers = caveblocks[hashZX];
-        var layer = new LayerRLE(0);
+        var layer = new RLELayer(0);
 
         for (int i = 0; i < layers.Count; i++)
         {
@@ -400,12 +470,12 @@ public class CaveMap
 
     private void SetWater(HashSet<Vector3i> positions)
     {
-        var layer = new LayerRLE(0);
+        var layer = new RLELayer(0);
 
         foreach (var group in positions.GroupBy(p => CaveBlock.HashZX(p.x, p.z)))
         {
             var hashcode = group.Key;
-            var waterLayer = new LayerRLE(group, 1);
+            var waterLayer = new RLELayer(group, 1);
             var layers = caveblocks[hashcode].ToList();
 
             for (int i = layers.Count - 1; i >= 0; i--)
@@ -417,7 +487,7 @@ public class CaveMap
 
                 if (waterLayer.Start <= layer.Start && waterLayer.End >= layer.End)
                 {
-                    caveblocks[hashcode][i] = LayerRLE.GetHashCode(
+                    caveblocks[hashcode][i] = RLELayer.GetHashCode(
                         layer.Start,
                         layer.End,
                         waterLayer.BlockRawData
@@ -427,13 +497,13 @@ public class CaveMap
                 {
                     caveblocks[hashcode].RemoveAt(i);
 
-                    caveblocks[hashcode].Add(LayerRLE.GetHashCode(
+                    caveblocks[hashcode].Add(RLELayer.GetHashCode(
                         layer.Start,
                         waterLayer.End,
                         waterLayer.BlockRawData
                     ));
 
-                    caveblocks[hashcode].Add(LayerRLE.GetHashCode(
+                    caveblocks[hashcode].Add(RLELayer.GetHashCode(
                         waterLayer.End + 1,
                         layer.End,
                         layer.BlockRawData
@@ -453,7 +523,7 @@ public class CaveMap
 
             foreach (var hashcode in entry.Value)
             {
-                var layer = new LayerRLE(hashcode);
+                var layer = new RLELayer(hashcode);
 
                 CaveUtils.Assert(layer.Start <= layer.End, $"Invalid RLE Layer: start={layer.Start}, end={layer.End}");
 
