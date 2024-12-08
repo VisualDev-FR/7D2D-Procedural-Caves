@@ -14,6 +14,8 @@ public class Graph
 
     public Dictionary<int, HashSet<GraphEdge>> relatedPrefabs;
 
+    private Logging.Logger logger = Logging.CreateLogger("CaveGraph");
+
     public Graph(IEnumerable<CavePrefab> prefabs, int worldSize)
     {
         Edges = new HashSet<GraphEdge>();
@@ -27,18 +29,18 @@ public class Graph
         {
             BuildDelauneyGraph(prefabs, worldSize);
         }
-        finally
+        catch (Exception e)
         {
             // TODO: handle this file path properly
             // this.ToFile("ignore/graph.txt", prefabs.ToHashSet(), worldSize);
-            Logging.Error($"An error occured while building delauney graph");
+            logger.Error($"Error: {e}");
         }
 
-        Logging.Info($"primary graph : edges: {Edges.Count}, nodes: {Nodes.Count}, timer: {timer.ElapsedMilliseconds:N0}ms");
+        logger.Info($"primary graph : edges: {Edges.Count}, nodes: {Nodes.Count}, timer: {timer.ElapsedMilliseconds:N0}ms");
 
         Prune();
 
-        Logging.Info($"secondary graph: edges: {Edges.Count}, nodes: {Nodes.Count}, timer: {timer.ElapsedMilliseconds:N0}ms");
+        logger.Info($"secondary graph: edges: {Edges.Count}, nodes: {Nodes.Count}, timer: {timer.ElapsedMilliseconds:N0}ms");
     }
 
     public void ToFile(string filename, HashSet<CavePrefab> prefabs, int worldSize)
@@ -247,7 +249,7 @@ public class Graph
         {
             if (relatedEdges[node].Count == 0)
             {
-                Logging.Error($"Node without related edge at [{node.position}]");
+                logger.Error($"Node without related edge at [{node.position}]");
             }
 
             var edge = relatedEdges[node].OrderBy(e => e.Weight).First();
@@ -255,7 +257,7 @@ public class Graph
             edge.pruned = false;
         }
 
-        Logging.Info($"{GetNodesAlone().Count()} pruned Nodes, {notFound} not found");
+        logger.Info($"{GetNodesAlone().Count()} pruned Nodes, {notFound} not found");
 
         foreach (var edge in Edges.ToList())
         {
@@ -373,7 +375,7 @@ public class Graph
 
         if (bestComb.Count == 0)
         {
-            // Logging.Warning("No valid comb found");
+            // logger.Warning("No valid comb found");
             return false;
         }
 
@@ -388,7 +390,7 @@ public class Graph
 
     private IEnumerable<List<GraphEdge>> GenerateCombinations(List<GraphNode> nodes, List<List<GraphEdge>> edges, GraphEdge[] currentCombination, int depth)
     {
-        // Logging.Info($"depth: {depth}, nodes: {nodes.Count}, edges: {edges.Count}");
+        // logger.Info($"depth: {depth}, nodes: {nodes.Count}, edges: {edges.Count}");
 
         if (depth == edges.Count)
         {
