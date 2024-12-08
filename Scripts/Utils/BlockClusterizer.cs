@@ -3,6 +3,12 @@ using System.Linq;
 
 public class BlockClusterizer
 {
+    public static List<BoundingBox> Clusterize(string fullpath, int yOffset)
+    {
+        var blocks = TTSReader.ReadUndergroundBlocks(fullpath, yOffset);
+        return Clusterize(blocks);
+    }
+
     public static List<BoundingBox> Clusterize(PrefabInstance prefabInstance)
     {
         var blocks = TTSReader.ReadUndergroundBlocks(prefabInstance);
