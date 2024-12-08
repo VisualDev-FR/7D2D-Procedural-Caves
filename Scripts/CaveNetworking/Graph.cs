@@ -23,8 +23,6 @@ public class Graph
 
         var timer = CaveUtils.StartTimer();
 
-        this.ToFile("C:/tools/DEV/7D2D_Modding/7D2D-Procedural-caves/Tests/graph.txt", prefabs.ToHashSet(), worldSize);
-
         try
         {
             BuildDelauneyGraph(prefabs, worldSize);
@@ -32,15 +30,14 @@ public class Graph
         finally
         {
             // TODO: handle this file path properly
-            this.ToFile("C:/tools/DEV/7D2D_Modding/7D2D-Procedural-caves/Tests/graph.txt", prefabs.ToHashSet(), worldSize);
+            // this.ToFile("ignore/graph.txt", prefabs.ToHashSet(), worldSize);
+            Logging.Error($"An error occured while building delauney graph");
         }
 
         Logging.Info($"primary graph : edges: {Edges.Count}, nodes: {Nodes.Count}, timer: {timer.ElapsedMilliseconds:N0}ms");
 
         Prune();
 
-        // TODO: handle this file path properly
-        this.ToFile("C:/tools/DEV/7D2D_Modding/7D2D-Procedural-caves/Tests/graph.txt", prefabs.ToHashSet(), worldSize);
         Logging.Info($"secondary graph: edges: {Edges.Count}, nodes: {Nodes.Count}, timer: {timer.ElapsedMilliseconds:N0}ms");
     }
 

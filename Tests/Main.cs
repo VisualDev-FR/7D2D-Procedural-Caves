@@ -272,12 +272,12 @@ public static class CaveViewer
 
         // voxels.UnionWith(prefab.caveMarkers.Select(marker => new Voxell(position + marker.start, marker.size, WaveFrontMaterial.Orange)));
 
-        GenerateObjFile("room.obj", voxels, false);
+        GenerateObjFile("ignore/room.obj", voxels, false);
     }
 
     public static void CaveCommand(string[] args)
     {
-        int worldSize = 8192;
+        int worldSize = 1024;
         int seed = 1337;
         int prefabCount = worldSize / 5;
 
@@ -325,7 +325,7 @@ public static class CaveViewer
                 });
 
                 DrawPrefabs(b, g, cachedPrefabs.Prefabs);
-                b.Save(@"cave.png", ImageFormat.Png);
+                b.Save(@"ignore/cave.png", ImageFormat.Png);
             }
         }
 
@@ -335,7 +335,7 @@ public static class CaveViewer
         Logging.Info($"{localMinimas.Count} local minimas");
 
         Logging.Debug($"region offset: {CaveConfig.RegionSizeOffset}");
-        cavemap.Save("cavemap", worldSize);
+        cavemap.Save("ignore/cavemap", worldSize);
 
         if (worldSize > 1024)
             return;
@@ -363,8 +363,8 @@ public static class CaveViewer
             }
         }
 
-        GenerateObjFile("cave.obj", voxels, false);
-        GenerateObjFile("caveWater.obj", water, false);
+        GenerateObjFile("ignore/cave.obj", voxels, false);
+        GenerateObjFile("ignore/caveWater.obj", water, false);
     }
 
     public static void CellularAutomaCommand(string[] args)
@@ -486,7 +486,7 @@ public static class CaveViewer
 
     public static void RegionCommand(string[] args)
     {
-        var dirname = @"cavemap";
+        var dirname = @"ignore/cavemap";
         var totalBlocks = 0;
 
         for (int i = 0; i < 256; i++)
@@ -687,7 +687,7 @@ public static class CaveViewer
 
     public static void GraphDebugCommand()
     {
-        var filename = "C:/tools/DEV/7D2D_Modding/7D2D-Procedural-caves/Tests/graph.txt";
+        var filename = "ignore/graph.txt";
         var worldSize = 0;
 
         var Prefabs = new List<CavePrefab>();
