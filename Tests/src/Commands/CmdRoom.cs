@@ -6,7 +6,7 @@ public class CmdRoom : CmdAbstract
 {
     public override string[] GetCommands()
     {
-        throw new System.NotImplementedException();
+        return new string[] { "room" };
     }
 
     public override void Execute(List<string> args)

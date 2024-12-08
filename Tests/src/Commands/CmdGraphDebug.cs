@@ -7,7 +7,7 @@ public class CmdGraphDebug : CmdAbstract
 {
     public override string[] GetCommands()
     {
-        throw new System.NotImplementedException();
+        return new string[] { "graphdebug" };
     }
 
     public override void Execute(List<string> args)

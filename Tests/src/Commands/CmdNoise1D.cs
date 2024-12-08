@@ -6,7 +6,7 @@ public class CmdNoise1D : CmdAbstract
 {
     public override string[] GetCommands()
     {
-        throw new System.NotImplementedException();
+        return new string[] { "noise1d" };
     }
 
     public override void Execute(List<string> args)
