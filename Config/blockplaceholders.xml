@@ -45,6 +45,11 @@
             <block name="stalagmite02" prob=".010" />
             <block name="stalagmite03" prob=".010" />
             <block name="stalagmite04" prob=".010" />
+            <block name="stalagmite05" prob=".010" />
+            <block name="stalagmite06" prob=".010" />
+            <block name="stalagmite07" prob=".010" />
+            <block name="stalagmite08" prob=".010" />
+            <block name="stalagmite09" prob=".010" />
 
             <block name="rock01" prob=".005" />
             <block name="rock02" prob=".005" />
@@ -366,6 +371,11 @@
             <block name="stalactite02" prob=".010" />
             <block name="stalactite03" prob=".010" />
             <block name="stalactite04" prob=".010" />
+            <block name="stalactite05" prob=".010" />
+            <block name="stalactite06" prob=".010" />
+            <block name="stalactite07" prob=".010" />
+            <block name="stalactite08" prob=".010" />
+            <block name="stalactite09" prob=".010" />
 
             <block name="cobweb" prob=".005" />
             <block name="hangingMoss" prob=".005" />
