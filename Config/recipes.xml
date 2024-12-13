@@ -93,5 +93,13 @@
             <ingredient name="fossil_05" count="5" />
         </recipe>
 
+        <recipe name="coins_collection" count="1" craft_time="180" craft_exp_gain="1000" always_unlocked="true">
+            <ingredient name="coin_01" count="10" />
+            <ingredient name="coin_02" count="10" />
+            <ingredient name="coin_03" count="10" />
+            <ingredient name="coin_04" count="10" />
+            <ingredient name="coin_05" count="10" />
+        </recipe>
+
     </append>
 </configs>

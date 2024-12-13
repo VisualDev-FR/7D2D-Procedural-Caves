@@ -472,7 +472,7 @@
             <property name="CustomIcon" value="fossils_collection" />
             <property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab" />
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
-            <property name="Material" value="MresourceScrapLeadSmall" />
+            <property name="Material" value="MresourceRockSmall" />
             <property name="Stacknumber" value="10" />
             <property name="EconomicValue" value="175" />
             <property name="Group" value="Resources" />
@@ -482,7 +482,7 @@
             <property name="CustomIcon" value="fossil_01" />
             <property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab" />
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
-            <property name="Material" value="MresourceScrapLeadSmall" />
+            <property name="Material" value="MresourceRockSmall" />
             <property name="Stacknumber" value="10" />
             <property name="EconomicValue" value="175" />
             <property name="Group" value="Resources" />
@@ -492,7 +492,7 @@
             <property name="CustomIcon" value="fossil_02" />
             <property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab" />
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
-            <property name="Material" value="MresourceScrapLeadSmall" />
+            <property name="Material" value="MresourceRockSmall" />
             <property name="Stacknumber" value="10" />
             <property name="EconomicValue" value="175" />
             <property name="Group" value="Resources" />
@@ -502,7 +502,7 @@
             <property name="CustomIcon" value="fossil_03" />
             <property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab" />
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
-            <property name="Material" value="MresourceScrapLeadSmall" />
+            <property name="Material" value="MresourceRockSmall" />
             <property name="Stacknumber" value="10" />
             <property name="EconomicValue" value="175" />
             <property name="Group" value="Resources" />
@@ -512,7 +512,7 @@
             <property name="CustomIcon" value="fossil_04" />
             <property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab" />
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
-            <property name="Material" value="MresourceScrapLeadSmall" />
+            <property name="Material" value="MresourceRockSmall" />
             <property name="Stacknumber" value="10" />
             <property name="EconomicValue" value="175" />
             <property name="Group" value="Resources" />
@@ -522,8 +522,69 @@
             <property name="CustomIcon" value="fossil_05" />
             <property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab" />
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
-            <property name="Material" value="MresourceScrapLeadSmall" />
+            <property name="Material" value="MresourceRockSmall" />
             <property name="Stacknumber" value="10" />
+            <property name="EconomicValue" value="175" />
+            <property name="Group" value="Resources" />
+        </item>
+
+        <!-- coins -->
+        <item name="coins_collection">
+            <property name="CustomIcon" value="coins_collection" />
+            <property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab" />
+            <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
+            <property name="Material" value="MresourceScrapBrassLarge" />
+            <property name="Stacknumber" value="10" />
+            <property name="EconomicValue" value="175" />
+            <property name="Group" value="Resources" />
+        </item>
+
+        <item name="coin_01">
+            <property name="CustomIcon" value="coin_01" />
+            <property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab" />
+            <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
+            <property name="Material" value="MresourceScrapBrassSmall" />
+            <property name="Stacknumber" value="100" />
+            <property name="EconomicValue" value="175" />
+            <property name="Group" value="Resources" />
+        </item>
+
+        <item name="coin_02">
+            <property name="CustomIcon" value="coin_02" />
+            <property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab" />
+            <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
+            <property name="Material" value="MresourceScrapBrassSmall" />
+            <property name="Stacknumber" value="100" />
+            <property name="EconomicValue" value="175" />
+            <property name="Group" value="Resources" />
+        </item>
+
+        <item name="coin_03">
+            <property name="CustomIcon" value="coin_03" />
+            <property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab" />
+            <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
+            <property name="Material" value="MresourceScrapBrassSmall" />
+            <property name="Stacknumber" value="100" />
+            <property name="EconomicValue" value="175" />
+            <property name="Group" value="Resources" />
+        </item>
+
+        <item name="coin_04">
+            <property name="CustomIcon" value="coin_04" />
+            <property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab" />
+            <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
+            <property name="Material" value="MresourceScrapBrassSmall" />
+            <property name="Stacknumber" value="100" />
+            <property name="EconomicValue" value="175" />
+            <property name="Group" value="Resources" />
+        </item>
+
+        <item name="coin_05">
+            <property name="CustomIcon" value="coin_05" />
+            <property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab" />
+            <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
+            <property name="Material" value="MresourceScrapBrassSmall" />
+            <property name="Stacknumber" value="100" />
             <property name="EconomicValue" value="175" />
             <property name="Group" value="Resources" />
         </item>
