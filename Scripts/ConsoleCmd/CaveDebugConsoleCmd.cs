@@ -127,6 +127,15 @@ public class CaveDebugConsoleCmd : ConsoleCmdAbstract
         );
     }
 
+    private static void SpawnCommand(List<string> _params)
+    {
+        CaveConfig.enableCaveSpawn = !CaveConfig.enableCaveSpawn;
+
+        var enabled = CaveConfig.enableCaveSpawn ? "enabled" : "disabled";
+
+        Logging.Info($"cave spawn {enabled}");
+    }
+
     public override void Execute(List<string> _params, CommandSenderInfo _senderInfo)
     {
         if (_params.Count == 0)
@@ -155,6 +164,10 @@ public class CaveDebugConsoleCmd : ConsoleCmdAbstract
 
             case "deco":
                 DecorateCommand(_params);
+                break;
+
+            case "spawn":
+                SpawnCommand(_params);
                 break;
 
             default:

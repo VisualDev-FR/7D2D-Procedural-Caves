@@ -308,6 +308,11 @@ public class ActionSpawnCaveEntity : ActionSpawnEntity
         return ActionCompleteStates.InComplete;
     }
 
+    public override bool CanPerform(Entity player)
+    {
+        return CaveConfig.enableCaveSpawn && !GameManager.Instance.IsEditMode();
+    }
+
     public new bool FindValidPosition(out Vector3 newPoint, Entity entity, float minDistance, float maxDistance, bool spawnInSafe, float yOffset = 0f, bool spawnInAir = false)
     {
         return FindValidPosition(out newPoint, entity.position, minDistance, maxDistance, spawnInSafe, yOffset, spawnInAir);

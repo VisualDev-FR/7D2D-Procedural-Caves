@@ -21,6 +21,11 @@ public class SpawnManagerBiomes_Update
 
     public static bool SpawnUpdate(string _spawnerName, bool _isSpawnEnemy, ChunkAreaBiomeSpawnData _spawnData)
     {
+        if (!CaveConfig.enableCaveSpawn)
+        {
+            return false;
+        }
+
         var logger = Logging.CreateLogger($"CaveSpawnManager");
 
         var world = GameManager.Instance.World;
