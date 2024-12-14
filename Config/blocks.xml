@@ -140,6 +140,50 @@
             <property name="CreativeMode" value="None" />
         </block>
 
+        <!-- cave rocks -->
+        <block name="caveRock01">
+            <property name="Extends" value="rock01" />
+            <property name="CreativeMode" value="Player" />
+            <property name="Model" value="Entities/OutdoorDecor/stoneAPrefab" />
+            <property name="CustomIcon" value="rock01" />
+
+            <drop event="Destroy" tag="oreWoodHarvest" name="geode_01" prob=".010" count="1" />
+            <drop event="Destroy" tag="oreWoodHarvest" name="geode_02" prob=".010" count="1" />
+            <drop event="Destroy" tag="oreWoodHarvest" name="geode_03" prob=".010" count="1" />
+            <drop event="Destroy" tag="oreWoodHarvest" name="geode_04" prob=".010" count="1" />
+            <drop event="Destroy" tag="oreWoodHarvest" name="geode_05" prob=".010" count="1" />
+
+            <drop event="Destroy" tag="oreWoodHarvest" name="fossil_01" prob=".010" count="1" />
+            <drop event="Destroy" tag="oreWoodHarvest" name="fossil_02" prob=".010" count="1" />
+            <drop event="Destroy" tag="oreWoodHarvest" name="fossil_03" prob=".010" count="1" />
+            <drop event="Destroy" tag="oreWoodHarvest" name="fossil_04" prob=".010" count="1" />
+            <drop event="Destroy" tag="oreWoodHarvest" name="fossil_05" prob=".010" count="1" />
+        </block>
+
+        <block name="caveRock02">
+            <property name="Extends" value="caveRock01" />
+            <property name="CreativeMode" value="Player" />
+            <property name="Model" value="Entities/OutdoorDecor/stoneBPrefab" />
+        </block>
+
+        <block name="caveRock03">
+            <property name="Extends" value="caveRock01" />
+            <property name="CreativeMode" value="Player" />
+            <property name="Model" value="Entities/OutdoorDecor/stoneCPrefab" />
+        </block>
+
+        <block name="caveRock04">
+            <property name="Extends" value="caveRock01" />
+            <property name="CreativeMode" value="Player" />
+            <property name="Model" value="Entities/OutdoorDecor/stoneDPrefab" />
+        </block>
+
+        <block name="caveRock05">
+            <property name="Extends" value="caveRock01" />
+            <property name="CreativeMode" value="Player" />
+            <property name="Model" value="Entities/OutdoorDecor/stoneEPrefab" />
+        </block>
+
         <!-- loot container (see placeholders.xml where name starts with 'caveCtn') -->
         <block name="caveCntWoodenChestClosed">
             <property name="Extends" value="cntWoodenChestClosed" />
@@ -334,7 +378,245 @@
             <property name="SortOrder2" value="0063" />
         </block>
 
+        <!-- Camping tents -->
+        <block name="caveCntCampingTentDomeRainCoverWhite">
+            <property name="Extends" value="cntCampingTentDomeRainCoverWhite" />
+            <property name="LootList" value="caveCntCampingTents" />
+            <property name="CreativeMode" value="None" />
+        </block>
 
+        <block name="caveCntCampingTentDomeWhite">
+            <property name="Extends" value="cntCampingTentDomeWhite" />
+            <property name="LootList" value="caveCntCampingTents" />
+            <property name="CreativeMode" value="None" />
+        </block>
+
+        <block name="caveCntCampingTentDomeDamagedWhite">
+            <property name="Extends" value="cntCampingTentDomeDamagedWhite" />
+            <property name="LootList" value="caveCntCampingTents" />
+            <property name="CreativeMode" value="None" />
+        </block>
+
+        <!-- *** CAMPING_TENT_ANGULAR_WHITE -->
+        <block name="caveCntCampingTentAngularRainCoverWhite">
+            <property name="Extends" value="cntCampingTentAngularRainCoverWhite" />
+            <property name="LootList" value="caveCntCampingTents" />
+            <property name="CreativeMode" value="None" />
+        </block>
+
+        <block name="caveCntCampingTentAngularWhite">
+            <property name="Extends" value="cntCampingTentAngularWhite" />
+            <property name="LootList" value="caveCntCampingTents" />
+            <property name="CreativeMode" value="None" />
+        </block>
+
+        <block name="caveCntCampingTentAngularDamagedWhite">
+            <property name="Extends" value="cntCampingTentAngularDamagedWhite" />
+            <property name="LootList" value="caveCntCampingTents" />
+            <property name="CreativeMode" value="None" />
+        </block>
+
+        <!-- *** CAMPING_TENT_DOME_RED -->
+        <block name="caveCntCampingTentDomeRainCoverRed">
+            <property name="Extends" value="cntCampingTentDomeRainCoverRed" />
+            <property name="LootList" value="caveCntCampingTents" />
+            <property name="CreativeMode" value="None" />
+        </block>
+
+        <block name="caveCntCampingTentDomeRed">
+            <property name="Extends" value="cntCampingTentDomeRed" />
+            <property name="LootList" value="caveCntCampingTents" />
+            <property name="CreativeMode" value="None" />
+        </block>
+
+        <block name="caveCntCampingTentDomeDamagedRed">
+            <property name="Extends" value="cntCampingTentDomeDamagedRed" />
+            <property name="LootList" value="caveCntCampingTents" />
+            <property name="CreativeMode" value="None" />
+        </block>
+
+        <!-- *** CAMPING_TENT_ANGULAR_RED -->
+        <block name="caveCntCampingTentAngularRainCoverRed">
+            <property name="Extends" value="cntCampingTentAngularRainCoverRed" />
+            <property name="LootList" value="caveCntCampingTents" />
+            <property name="CreativeMode" value="None" />
+        </block>
+
+        <block name="caveCntCampingTentAngularRed">
+            <property name="Extends" value="cntCampingTentAngularRed" />
+            <property name="LootList" value="caveCntCampingTents" />
+            <property name="CreativeMode" value="None" />
+        </block>
+
+        <block name="caveCntCampingTentAngularDamagedRed">
+            <property name="Extends" value="cntCampingTentAngularDamagedRed" />
+            <property name="LootList" value="caveCntCampingTents" />
+            <property name="CreativeMode" value="None" />
+        </block>
+
+        <!-- *** CAMPING_TENT_DOME_ORANGE -->
+        <block name="caveCntCampingTentDomeRainCoverOrange">
+            <property name="Extends" value="cntCampingTentDomeRainCoverOrange" />
+            <property name="LootList" value="caveCntCampingTents" />
+            <property name="CreativeMode" value="None" />
+        </block>
+
+        <block name="caveCntCampingTentDomeOrange">
+            <property name="Extends" value="cntCampingTentDomeOrange" />
+            <property name="LootList" value="caveCntCampingTents" />
+            <property name="CreativeMode" value="None" />
+        </block>
+
+        <block name="caveCntCampingTentDomeDamagedOrange">
+            <property name="Extends" value="cntCampingTentDomeDamagedOrange" />
+            <property name="LootList" value="caveCntCampingTents" />
+            <property name="CreativeMode" value="None" />
+        </block>
+
+        <!-- *** CAMPING_TENT_ANGULAR_ORANGE -->
+        <block name="caveCntCampingTentAngularRainCoverOrange">
+            <property name="Extends" value="cntCampingTentAngularRainCoverOrange" />
+            <property name="LootList" value="caveCntCampingTents" />
+            <property name="CreativeMode" value="None" />
+        </block>
+
+        <block name="caveCntCampingTentAngularOrange">
+            <property name="Extends" value="cntCampingTentAngularOrange" />
+            <property name="LootList" value="caveCntCampingTents" />
+            <property name="CreativeMode" value="None" />
+        </block>
+
+        <block name="caveCntCampingTentAngularDamagedOrange">
+            <property name="Extends" value="cntCampingTentAngularDamagedOrange" />
+            <property name="LootList" value="caveCntCampingTents" />
+            <property name="CreativeMode" value="None" />
+        </block>
+
+        <!-- *** CAMPING_TENT_DOME_BLUE -->
+        <block name="caveCntCampingTentDomeRainCoverBlue">
+            <property name="Extends" value="cntCampingTentDomeRainCoverBlue" />
+            <property name="LootList" value="caveCntCampingTents" />
+            <property name="CreativeMode" value="None" />
+        </block>
+
+        <block name="caveCntCampingTentDomeBlue">
+            <property name="Extends" value="cntCampingTentDomeBlue" />
+            <property name="LootList" value="caveCntCampingTents" />
+            <property name="CreativeMode" value="None" />
+        </block>
+
+        <block name="caveCntCampingTentDomeDamagedBlue">
+            <property name="Extends" value="cntCampingTentDomeDamagedBlue" />
+            <property name="LootList" value="caveCntCampingTents" />
+            <property name="CreativeMode" value="None" />
+        </block>
+
+        <!-- *** CAMPING_TENT_ANGULAR_BLUE -->
+        <block name="caveCntCampingTentAngularRainCoverBlue">
+            <property name="Extends" value="cntCampingTentAngularRainCoverBlue" />
+            <property name="LootList" value="caveCntCampingTents" />
+            <property name="CreativeMode" value="None" />
+        </block>
+
+        <block name="caveCntCampingTentAngularBlue">
+            <property name="Extends" value="cntCampingTentAngularBlue" />
+            <property name="LootList" value="caveCntCampingTents" />
+            <property name="CreativeMode" value="None" />
+        </block>
+
+        <block name="caveCntCampingTentAngularDamagedBlue">
+            <property name="Extends" value="cntCampingTentAngularDamagedBlue" />
+            <property name="LootList" value="caveCntCampingTents" />
+            <property name="CreativeMode" value="None" />
+        </block>
+
+        <!-- *** CAMPING_TENT_DOME_BLACK -->
+        <block name="caveCntCampingTentDomeRainCoverBlack">
+            <property name="Extends" value="cntCampingTentDomeRainCoverBlack" />
+            <property name="LootList" value="caveCntCampingTents" />
+            <property name="CreativeMode" value="None" />
+        </block>
+
+        <block name="caveCntCampingTentDomeBlack">
+            <property name="Extends" value="cntCampingTentDomeBlack" />
+            <property name="LootList" value="caveCntCampingTents" />
+            <property name="CreativeMode" value="None" />
+        </block>
+
+        <block name="caveCntCampingTentDomeDamagedBlack">
+            <property name="Extends" value="cntCampingTentDomeDamagedBlack" />
+            <property name="LootList" value="caveCntCampingTents" />
+            <property name="CreativeMode" value="None" />
+        </block>
+
+        <!-- *** CAMPING_TENT_ANGULAR_BLACK -->
+        <block name="caveCntCampingTentAngularRainCoverBlack">
+            <property name="Extends" value="cntCampingTentAngularRainCoverBlack" />
+            <property name="LootList" value="caveCntCampingTents" />
+            <property name="CreativeMode" value="None" />
+        </block>
+
+        <block name="caveCntCampingTentAngularBlack">
+            <property name="Extends" value="cntCampingTentAngularBlack" />
+            <property name="LootList" value="caveCntCampingTents" />
+            <property name="CreativeMode" value="None" />
+        </block>
+
+        <block name="caveCntCampingTentAngularDamagedBlack">
+            <property name="Extends" value="cntCampingTentAngularDamagedBlack" />
+            <property name="LootList" value="caveCntCampingTents" />
+            <property name="CreativeMode" value="None" />
+        </block>
+
+        <!-- *** CAMPING_TENT_DOME_ARMY_GREEN -->
+        <block name="caveCntCampingTentDomeRainCoverArmyGreen">
+            <property name="Extends" value="cntCampingTentDomeRainCoverArmyGreen" />
+            <property name="LootList" value="caveCntCampingTents" />
+            <property name="CreativeMode" value="None" />
+        </block>
+
+        <block name="caveCntCampingTentDomeArmyGreen">
+            <property name="Extends" value="cntCampingTentDomeArmyGreen" />
+            <property name="LootList" value="caveCntCampingTents" />
+            <property name="CreativeMode" value="None" />
+        </block>
+
+        <block name="caveCntCampingTentDomeDamagedArmyGreen">
+            <property name="Extends" value="cntCampingTentDomeDamagedArmyGreen" />
+            <property name="LootList" value="caveCntCampingTents" />
+            <property name="CreativeMode" value="None" />
+        </block>
+
+        <!-- *** CAMPING_TENT_ANGULAR_BLUE -->
+        <block name="caveCntCampingTentAngularRainCoverArmyGreen">
+            <property name="Extends" value="cntCampingTentAngularRainCoverArmyGreen" />
+            <property name="LootList" value="caveCntCampingTents" />
+            <property name="CreativeMode" value="None" />
+        </block>
+
+        <block name="caveCntCampingTentAngularArmyGreen">
+            <property name="Extends" value="cntCampingTentAngularArmyGreen" />
+            <property name="LootList" value="caveCntCampingTents" />
+            <property name="CreativeMode" value="None" />
+        </block>
+
+        <block name="caveCntCampingTentAngularDamagedArmyGreen">
+            <property name="Extends" value="cntCampingTentAngularDamagedArmyGreen" />
+            <property name="LootList" value="caveCntCampingTents" />
+            <property name="CreativeMode" value="None" />
+        </block>
+
+        <block name="caveCntCampingTentDomeRandomHelper">
+            <property name="Extends" value="cntCampingTentDomeRandomHelper" />
+            <property name="LootList" value="caveCntCampingTents" />
+            <property name="CreativeMode" value="None" />
+        </block>
+
+        <block name="caveCntCampingTentAngularRandomHelper">
+            <property name="Extends" value="cntCampingTentAngularRandomHelper" />
+            <property name="LootList" value="caveCntCampingTents" />
+            <property name="CreativeMode" value="None" />
+        </block>
     </append>
 
 </configs>

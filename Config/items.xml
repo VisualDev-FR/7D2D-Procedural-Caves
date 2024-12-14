@@ -589,6 +589,67 @@
             <property name="Group" value="Resources" />
         </item>
 
+        <!-- geodes -->
+        <item name="geode_collection">
+            <property name="CustomIcon" value="geode_collection" />
+            <property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab" />
+            <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
+            <property name="Material" value="MresourceRockSmall" />
+            <property name="Stacknumber" value="10" />
+            <property name="EconomicValue" value="175" />
+            <property name="Group" value="Resources" />
+        </item>
+
+        <item name="geode_01">
+            <property name="CustomIcon" value="geode_01" />
+            <property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab" />
+            <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
+            <property name="Material" value="MresourceRockSmall" />
+            <property name="Stacknumber" value="20" />
+            <property name="EconomicValue" value="175" />
+            <property name="Group" value="Resources" />
+        </item>
+
+        <item name="geode_02">
+            <property name="CustomIcon" value="geode_01" />
+            <property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab" />
+            <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
+            <property name="Material" value="MresourceRockSmall" />
+            <property name="Stacknumber" value="20" />
+            <property name="EconomicValue" value="175" />
+            <property name="Group" value="Resources" />
+        </item>
+
+        <item name="geode_03">
+            <property name="CustomIcon" value="geode_01" />
+            <property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab" />
+            <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
+            <property name="Material" value="MresourceRockSmall" />
+            <property name="Stacknumber" value="20" />
+            <property name="EconomicValue" value="175" />
+            <property name="Group" value="Resources" />
+        </item>
+
+        <item name="geode_04">
+            <property name="CustomIcon" value="geode_01" />
+            <property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab" />
+            <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
+            <property name="Material" value="MresourceRockSmall" />
+            <property name="Stacknumber" value="20" />
+            <property name="EconomicValue" value="175" />
+            <property name="Group" value="Resources" />
+        </item>
+
+        <item name="geode_05">
+            <property name="CustomIcon" value="geode_01" />
+            <property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab" />
+            <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
+            <property name="Material" value="MresourceRockSmall" />
+            <property name="Stacknumber" value="20" />
+            <property name="EconomicValue" value="175" />
+            <property name="Group" value="Resources" />
+        </item>
+
         <!-- books -->
         <item name="bookCaversGuide">
             <property name="Extends" value="schematicMaster" />

@@ -11,6 +11,7 @@
             <item count="1" group="dyes" loot_prob_template="low" />
             <item count="1" name="meleeToolPaintTool" loot_prob_template="veryLow" />
             <item count="1" name="aa_battery" loot_prob_template="high" />
+            <item count="1" name="roadFlare" loot_prob_template="high" />
         </lootgroup>
 
         <!-- woodenChest -->
@@ -64,5 +65,32 @@
             <item group="caveGroupMilitaryFootlocker" />
         </lootcontainer>
 
+        <!-- CampingTents -->
+        <lootgroup name="caveGroupCampingTents01">
+            <item group="groupArmorParts" />
+            <item group="groupCupboard" />
+            <item group="survivalMedical" />
+            <item group="skillMagazines" loot_prob_template="medLow" />
+            <item name="drinkJarRiverWater" loot_prob_template="veryLow" />
+        </lootgroup>
+
+        <lootgroup name="caveGroupCampingTents02">
+            <item group="groupWeaponsT0_All" loot_prob_template="ProbT0" />
+            <item group="groupArmorScaled" />
+            <item group="perkBooks" loot_prob_template="low" />
+            <item name="meleeToolFlashlight02" loot_prob_template="low" />
+            <item name="lanternDecorLightBlockVariantHelper" loot_prob_template="low" />
+            <item name="toolCookingPot" loot_prob_template="veryLow" />
+            <item name="toolCookingGrill" loot_prob_template="veryLow" />
+        </lootgroup>
+
+        <lootgroup name="caveGroupCampingTents" count="all">
+            <item group="caveGroupCampingTents01" count="1" />
+            <item group="caveGroupCampingTents02" loot_prob_template="low" force_prob="true" />
+        </lootgroup>
+
+        <lootcontainer name="caveCntCampingTents" count="1" size="6,2" sound_open="UseActions/open_backpack" sound_close="UseActions/close_backpack" open_time="1.5" loot_quality_template="qualPrimitiveItemsTemplate" destroy_on_close="empty">
+            <item group="caveGroupCampingTents" />
+        </lootcontainer>
     </append>
 </configs>
