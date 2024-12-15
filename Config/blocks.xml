@@ -58,6 +58,7 @@
         <block name="caveTerrStone">
             <property name="Extends" value="terrStone" />
             <property name="CreativeMode" value="None" />
+            <property name="Class" value="BlockCaveTerrain, TheDescent" />
 
             <drop event="Harvest" tag="oreWoodHarvest" name="nugget_01" prob=".005" count="1" />
             <drop event="Harvest" tag="oreWoodHarvest" name="nugget_02" prob=".005" count="1" />
