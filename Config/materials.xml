@@ -1,7 +1,6 @@
 <configs>
     <append xpath="/materials">
 
-        <!-- Same as air but with property ground_cover=true to allow any block to replace caveAir  -->
         <material id="McaveAir">
             <property name="collidable" value="false"/>
             <property name="lightopacity" value="0"/>

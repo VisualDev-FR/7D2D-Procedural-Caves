@@ -3,9 +3,9 @@
     <append xpath="/blocks">
 
         <block name="caveAir">
+            <property name="Extends" value="air" />
             <property name="Tags" value="air" />
             <property name="CreativeMode" value="None" />
-            <property name="Extends" value="air" />
             <property name="StabilityFull" value="true" />
             <property name="Shape" value="Invisible" />
             <property name="StabilitySupport" value="true" />

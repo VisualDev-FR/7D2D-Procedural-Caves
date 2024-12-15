@@ -54,6 +54,8 @@
         <lootgroup name="caveGroupBackpacks" count="all">
             <item group="groupBackpacks01" count="1" />
             <item group="groupBackpacks02" loot_prob_template="medLow" force_prob="true" />
+            <item name="roadFlare" loot_prob_template="med" />
+            <item name="aa_battery" loot_prob_template="med" />
         </lootgroup>
 
         <lootcontainer name="caveCntBackpack" count="1" size="6,2" sound_open="UseActions/open_backpack" sound_close="UseActions/close_backpack" open_time="1.5" loot_quality_template="qualPrimitiveItemsTemplate" destroy_on_close="empty">
@@ -67,16 +69,14 @@
 
         <!-- CampingTents -->
         <lootgroup name="caveGroupCampingTents01">
-            <item group="groupArmorParts" />
-            <item group="groupCupboard" />
             <item group="survivalMedical" />
             <item group="skillMagazines" loot_prob_template="medLow" />
-            <item name="drinkJarRiverWater" loot_prob_template="veryLow" />
+            <item name="drinkJarRiverWater" loot_prob_template="med" />
+            <item name="roadFlare" loot_prob_template="med" />
+            <item name="aa_battery" loot_prob_template="med" />
         </lootgroup>
 
         <lootgroup name="caveGroupCampingTents02">
-            <item group="groupWeaponsT0_All" loot_prob_template="ProbT0" />
-            <item group="groupArmorScaled" />
             <item group="perkBooks" loot_prob_template="low" />
             <item name="meleeToolFlashlight02" loot_prob_template="low" />
             <item name="lanternDecorLightBlockVariantHelper" loot_prob_template="low" />
