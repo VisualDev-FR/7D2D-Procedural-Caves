@@ -249,9 +249,7 @@
             <block name="rubblePileBricks" prob=".0005" />
             <block name="rubblePileBricksLong" prob=".0005" />
             <block name="rubblePileBricksSmall" prob=".0005" />
-            <block name="rubblePileCement" prob=".0005" />
             <block name="rubblePileConcreteSmall" prob=".0005" />
-            <block name="rubblePileWoodSmall" prob=".0005" />
             <block name="rubblePileWoodBurntSmall" prob=".0005" />
             <block name="rubblePileWoodBurntLarge" prob=".0005" />
 
@@ -263,17 +261,10 @@
             <block name="woodSpikesTrapBloodPOI" prob=".0001" />
             <block name="ironSpikesTrapBloodPOI" prob=".0001" />
 
-            <block name="barbedFenceDamaged01" prob=".0001" />
-            <block name="barbedFenceDamaged02" prob=".0001" />
             <block name="barbedWireSpindle" prob=".0001" />
             <block name="barbedWireSpindle2" prob=".0001" />
             <block name="barbedWireSpindle3" prob=".0001" />
             <block name="barbedWireSpindle4" prob=".0001" />
-
-            <block name="mineCandyTin" prob=".0001" />
-            <block name="mineCookingPot" prob=".0001" />
-            <block name="mineHubCap" prob=".0001" />
-            <block name="MineAirFilter" prob=".0001" />
 
             <!-- barrels -->
             <block name="burningBarrel" prob=".001" />
@@ -353,10 +344,7 @@
             <block name="caveCntCampingTentAngularDamagedArmyGreen" prob=".0001" />
 
             <!-- lights sources -->
-            <block name="lanterOld_01_Player" prob=".0005" />
-            <block name="lanterOld_02_Player" prob=".0005" />
-            <block name="lanterOld_03_Player" prob=".0005" />
-            <block name="lanterOld_04_Player" prob=".0005" />
+            <block name="lanternOld_01_Player" prob=".0005" />
 
         </placeholder>
 
