@@ -33,7 +33,7 @@ public static class CaveConfig
 
     public static int terrainMargin = 2;
 
-    public static int minTunnelRadius = 2;
+    public static int minTunnelRadius = 3;
 
     public static int maxTunnelRadius = 10;
 

@@ -19,7 +19,7 @@ public class Noise1D
         float y1 = r2;
 
         int maxRadius = CaveUtils.FastMax(r1, r2, 6);
-        int minRadius = 2;
+        int minRadius = CaveConfig.minTunnelRadius;
 
         var points = new List<Vector2> {
             new Vector2(x0, y0),

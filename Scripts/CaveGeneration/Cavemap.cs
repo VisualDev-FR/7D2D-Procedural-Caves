@@ -456,7 +456,7 @@ public class CaveMap
 
     public void SetRope(Vector3i position)
     {
-        var hashZX = CaveBlock.HashZX(position.x + 1, position.z);
+        var hashZX = CaveBlock.HashZX(position.x + 2, position.z);
         var layers = caveblocks[hashZX];
         var layer = new RLELayer(0);
 
