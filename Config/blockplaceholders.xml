@@ -247,7 +247,6 @@
             <block name="rubbishDecor13" prob=".0005" />
 
             <block name="rubblePileBricks" prob=".0005" />
-            <block name="rubblePileBricksLong" prob=".0005" />
             <block name="rubblePileBricksSmall" prob=".0005" />
             <block name="rubblePileConcreteSmall" prob=".0005" />
             <block name="rubblePileWoodBurntSmall" prob=".0005" />

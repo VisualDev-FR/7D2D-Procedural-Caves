@@ -10,7 +10,6 @@
             zombieSpiderFeral, 0.10
             zombieWightFeral, 0.10
             zombieMutated, 0.10
-            animalDireWolf, 0.05
         </entitygroup>
 
     </append>
