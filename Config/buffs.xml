@@ -37,7 +37,7 @@
         <!-- buff applied when player is under terrain -->
         <buff name="buffInCave" hidden="true" remove_on_death="true">
 
-            <update_rate value="1" />
+            <update_rate value="10" />
 
             <effect_group>
                 <triggered_effect trigger="onSelfBuffUpdate" action="ModifyCVar" cvar="$zombieHordeProb" operation="set" value="randomint(1, 100)" />
@@ -48,7 +48,7 @@
             <effect_group>
                 <requirement name="!HasBuff" buff="buffNoCaveEvent" />
                 <requirement name="!HasBuff" buff="buffCaveZombieEventCoolDown" />
-                <requirement name="CVarCompare" cvar="$zombieHordeProb" operation="LTE" value="20" />
+                <requirement name="CVarCompare" cvar="$zombieHordeProb" operation="LTE" value="5" />
                 <triggered_effect trigger="onSelfBuffUpdate" action="CallGameEvent" event="cave_horde_event" />
                 <triggered_effect trigger="onSelfBuffUpdate" action="AddBuff" buff="buffCaveZombieEventCoolDown" />
             </effect_group>

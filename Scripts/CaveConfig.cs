@@ -40,7 +40,9 @@ public static class CaveConfig
     // the min deep (from terrain height) to spawn cave zombies
     public static int zombieSpawnMarginDeep = 5;
 
-    public static bool enableCaveSpawn = false;
+    public static int minSpawnTicksBeforeEnemySpawn = 500;
+
+    public static bool enableCaveSpawn = true;
 
     public static bool enableCaveBloodMoon = true;
 
