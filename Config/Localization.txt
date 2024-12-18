@@ -62,20 +62,20 @@ xuiCavePreviewDesc,Switch between vanilla preview and cave preview,Affiche l'ape
 xuiCavePreview,Preview type,Type d'aperçu
 xuiTerrainOffsetDesc,increase vanilla terrain height,Augmente la profondeur de base du terrain
 xuiTerrainOffset,Terrain offset,Décalage du terrain
-crystals_collection,Rare Gems collection,Collection de pierre précieuses
-crystal_01,Rubis,Rubis
-crystal_02,Amethyst,Améthyste
-crystal_03,Amber,Ambre
-crystal_04,Emerald,Emeraude
-crystal_05,Spahir,Saphir
-raw_crystal_01,Raw Rubis,Rubis brut
-raw_crystal_02,Raw Amethyst,Améthyste brut
-raw_crystal_03,Raw Amber,Ambre brut
-raw_crystal_04,Raw Emerald,Emeraude brut
-raw_crystal_05,Raw Spahir,Saphir brut
-nugget_01,Rubis nugget,Minerais de Rubis
-nugget_02,Amethyst nugget,Minerais d'Améthyste
-nugget_03,Amber nugget,Minerais d'Ambre
-nugget_04,Emerald nugget,Minerais d'Emeraude
-nugget_05,Spahir nugget,Minerais de Saphir
+crystalCollection,Rare Gems collection,Collection de pierre précieuses
+crystal01,Rubis,Rubis
+crystal02,Amethyst,Améthyste
+crystal03,Amber,Ambre
+crystal04,Emerald,Emeraude
+crystal05,Spahir,Saphir
+rawCrystal01,Raw Rubis,Rubis brut
+rawCrystal02,Raw Amethyst,Améthyste brut
+rawCrystal03,Raw Amber,Ambre brut
+rawCrystal04,Raw Emerald,Emeraude brut
+rawCrystal05,Raw Spahir,Saphir brut
+nugget01,Rubis nugget,Minerais de Rubis
+nugget02,Amethyst nugget,Minerais d'Améthyste
+nugget03,Amber nugget,Minerais d'Ambre
+nugget04,Emerald nugget,Minerais d'Emeraude
+nugget05,Spahir nugget,Minerais de Saphir
 the_caver_guide,The Caver's Guide,Le guide du spéléologue

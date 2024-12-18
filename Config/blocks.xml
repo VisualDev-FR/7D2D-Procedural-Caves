@@ -60,60 +60,60 @@
             <property name="CreativeMode" value="None" />
             <property name="Class" value="BlockCaveTerrain, TheDescent" />
 
-            <drop event="Harvest" tag="oreWoodHarvest" name="nugget_01" prob=".005" count="1" />
-            <drop event="Harvest" tag="oreWoodHarvest" name="nugget_02" prob=".005" count="1" />
-            <drop event="Harvest" tag="oreWoodHarvest" name="nugget_03" prob=".005" count="1" />
-            <drop event="Harvest" tag="oreWoodHarvest" name="nugget_04" prob=".005" count="1" />
-            <drop event="Harvest" tag="oreWoodHarvest" name="nugget_05" prob=".005" count="1" />
+            <drop event="Harvest" tag="oreWoodHarvest" name="nugget01" prob=".005" count="1" />
+            <drop event="Harvest" tag="oreWoodHarvest" name="nugget02" prob=".005" count="1" />
+            <drop event="Harvest" tag="oreWoodHarvest" name="nugget03" prob=".005" count="1" />
+            <drop event="Harvest" tag="oreWoodHarvest" name="nugget04" prob=".005" count="1" />
+            <drop event="Harvest" tag="oreWoodHarvest" name="nugget05" prob=".005" count="1" />
 
-            <drop event="Harvest" tag="oreWoodHarvest" name="fossil_01" prob=".005" count="1" />
-            <drop event="Harvest" tag="oreWoodHarvest" name="fossil_02" prob=".005" count="1" />
-            <drop event="Harvest" tag="oreWoodHarvest" name="fossil_03" prob=".005" count="1" />
-            <drop event="Harvest" tag="oreWoodHarvest" name="fossil_04" prob=".005" count="1" />
-            <drop event="Harvest" tag="oreWoodHarvest" name="fossil_05" prob=".005" count="1" />
+            <drop event="Harvest" tag="oreWoodHarvest" name="fossil01" prob=".005" count="1" />
+            <drop event="Harvest" tag="oreWoodHarvest" name="fossil02" prob=".005" count="1" />
+            <drop event="Harvest" tag="oreWoodHarvest" name="fossil03" prob=".005" count="1" />
+            <drop event="Harvest" tag="oreWoodHarvest" name="fossil04" prob=".005" count="1" />
+            <drop event="Harvest" tag="oreWoodHarvest" name="fossil05" prob=".005" count="1" />
         </block>
 
         <block name="caveTerrSnow">
             <property name="Extends" value="terrSnow" />
             <property name="CreativeMode" value="None" />
 
-            <drop event="Harvest" tag="oreWoodHarvest" name="fossil_01" prob=".005" count="1" />
-            <drop event="Harvest" tag="oreWoodHarvest" name="fossil_02" prob=".005" count="1" />
-            <drop event="Harvest" tag="oreWoodHarvest" name="fossil_03" prob=".005" count="1" />
-            <drop event="Harvest" tag="oreWoodHarvest" name="fossil_04" prob=".005" count="1" />
-            <drop event="Harvest" tag="oreWoodHarvest" name="fossil_05" prob=".005" count="1" />
+            <drop event="Harvest" tag="oreWoodHarvest" name="fossil01" prob=".005" count="1" />
+            <drop event="Harvest" tag="oreWoodHarvest" name="fossil02" prob=".005" count="1" />
+            <drop event="Harvest" tag="oreWoodHarvest" name="fossil03" prob=".005" count="1" />
+            <drop event="Harvest" tag="oreWoodHarvest" name="fossil04" prob=".005" count="1" />
+            <drop event="Harvest" tag="oreWoodHarvest" name="fossil05" prob=".005" count="1" />
         </block>
 
         <block name="caveTerrSandStone">
             <property name="Extends" value="terrSandStone" />
             <property name="CreativeMode" value="None" />
 
-            <drop event="Harvest" tag="oreWoodHarvest" name="nugget_01" prob=".005" count="1" />
-            <drop event="Harvest" tag="oreWoodHarvest" name="nugget_03" prob=".010" count="1" />
-            <drop event="Harvest" tag="oreWoodHarvest" name="nugget_04" prob=".005" count="1" />
-            <drop event="Harvest" tag="oreWoodHarvest" name="nugget_05" prob=".005" count="1" />
+            <drop event="Harvest" tag="oreWoodHarvest" name="nugget01" prob=".005" count="1" />
+            <drop event="Harvest" tag="oreWoodHarvest" name="nugget03" prob=".010" count="1" />
+            <drop event="Harvest" tag="oreWoodHarvest" name="nugget04" prob=".005" count="1" />
+            <drop event="Harvest" tag="oreWoodHarvest" name="nugget05" prob=".005" count="1" />
 
-            <drop event="Harvest" tag="oreWoodHarvest" name="fossil_01" prob=".005" count="1" />
-            <drop event="Harvest" tag="oreWoodHarvest" name="fossil_02" prob=".005" count="1" />
-            <drop event="Harvest" tag="oreWoodHarvest" name="fossil_03" prob=".005" count="1" />
-            <drop event="Harvest" tag="oreWoodHarvest" name="fossil_04" prob=".005" count="1" />
+            <drop event="Harvest" tag="oreWoodHarvest" name="fossil01" prob=".005" count="1" />
+            <drop event="Harvest" tag="oreWoodHarvest" name="fossil02" prob=".005" count="1" />
+            <drop event="Harvest" tag="oreWoodHarvest" name="fossil03" prob=".005" count="1" />
+            <drop event="Harvest" tag="oreWoodHarvest" name="fossil04" prob=".005" count="1" />
         </block>
 
         <block name="caveTerrGravel">
             <property name="Extends" value="terrGravel" />
             <property name="CreativeMode" value="None" />
 
-            <drop event="Harvest" tag="oreWoodHarvest" name="fossil_01" prob=".005" count="1" />
-            <drop event="Harvest" tag="oreWoodHarvest" name="fossil_02" prob=".005" count="1" />
-            <drop event="Harvest" tag="oreWoodHarvest" name="fossil_03" prob=".005" count="1" />
-            <drop event="Harvest" tag="oreWoodHarvest" name="fossil_04" prob=".005" count="1" />
-            <drop event="Harvest" tag="oreWoodHarvest" name="fossil_05" prob=".005" count="1" />
+            <drop event="Harvest" tag="oreWoodHarvest" name="fossil01" prob=".005" count="1" />
+            <drop event="Harvest" tag="oreWoodHarvest" name="fossil02" prob=".005" count="1" />
+            <drop event="Harvest" tag="oreWoodHarvest" name="fossil03" prob=".005" count="1" />
+            <drop event="Harvest" tag="oreWoodHarvest" name="fossil04" prob=".005" count="1" />
+            <drop event="Harvest" tag="oreWoodHarvest" name="fossil05" prob=".005" count="1" />
 
-            <drop event="Harvest" tag="oreWoodHarvest" name="coin_01" prob=".005" count="1" />
-            <drop event="Harvest" tag="oreWoodHarvest" name="coin_02" prob=".005" count="1" />
-            <drop event="Harvest" tag="oreWoodHarvest" name="coin_03" prob=".005" count="1" />
-            <drop event="Harvest" tag="oreWoodHarvest" name="coin_04" prob=".005" count="1" />
-            <drop event="Harvest" tag="oreWoodHarvest" name="coin_05" prob=".005" count="1" />
+            <drop event="Harvest" tag="oreWoodHarvest" name="coin01" prob=".005" count="1" />
+            <drop event="Harvest" tag="oreWoodHarvest" name="coin02" prob=".005" count="1" />
+            <drop event="Harvest" tag="oreWoodHarvest" name="coin03" prob=".005" count="1" />
+            <drop event="Harvest" tag="oreWoodHarvest" name="coin04" prob=".005" count="1" />
+            <drop event="Harvest" tag="oreWoodHarvest" name="coin05" prob=".005" count="1" />
         </block>
 
         <block name="caveTerrOreIron">
@@ -148,17 +148,17 @@
             <property name="Model" value="Entities/OutdoorDecor/stoneAPrefab" />
             <property name="CustomIcon" value="rock01" />
 
-            <drop event="Destroy" tag="oreWoodHarvest" name="geode_01" prob=".010" count="1" />
-            <drop event="Destroy" tag="oreWoodHarvest" name="geode_02" prob=".010" count="1" />
-            <drop event="Destroy" tag="oreWoodHarvest" name="geode_03" prob=".010" count="1" />
-            <drop event="Destroy" tag="oreWoodHarvest" name="geode_04" prob=".010" count="1" />
-            <drop event="Destroy" tag="oreWoodHarvest" name="geode_05" prob=".010" count="1" />
+            <drop event="Destroy" tag="oreWoodHarvest" name="geode01" prob=".010" count="1" />
+            <drop event="Destroy" tag="oreWoodHarvest" name="geode02" prob=".010" count="1" />
+            <drop event="Destroy" tag="oreWoodHarvest" name="geode03" prob=".010" count="1" />
+            <drop event="Destroy" tag="oreWoodHarvest" name="geode04" prob=".010" count="1" />
+            <drop event="Destroy" tag="oreWoodHarvest" name="geode05" prob=".010" count="1" />
 
-            <drop event="Destroy" tag="oreWoodHarvest" name="fossil_01" prob=".010" count="1" />
-            <drop event="Destroy" tag="oreWoodHarvest" name="fossil_02" prob=".010" count="1" />
-            <drop event="Destroy" tag="oreWoodHarvest" name="fossil_03" prob=".010" count="1" />
-            <drop event="Destroy" tag="oreWoodHarvest" name="fossil_04" prob=".010" count="1" />
-            <drop event="Destroy" tag="oreWoodHarvest" name="fossil_05" prob=".010" count="1" />
+            <drop event="Destroy" tag="oreWoodHarvest" name="fossil01" prob=".010" count="1" />
+            <drop event="Destroy" tag="oreWoodHarvest" name="fossil02" prob=".010" count="1" />
+            <drop event="Destroy" tag="oreWoodHarvest" name="fossil03" prob=".010" count="1" />
+            <drop event="Destroy" tag="oreWoodHarvest" name="fossil04" prob=".010" count="1" />
+            <drop event="Destroy" tag="oreWoodHarvest" name="fossil05" prob=".010" count="1" />
         </block>
 
         <block name="caveRock02">

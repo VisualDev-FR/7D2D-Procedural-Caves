@@ -3,102 +3,102 @@
     <append xpath="/recipes">
 
         <!-- raw crystals -->
-        <recipe name="raw_crystal_01" count="1" craft_area="workbench" tags="workbenchCrafting" craft_time="60" craft_exp_gain="500" always_unlocked="true">
-            <ingredient name="nugget_01" count="10" />
+        <recipe name="rawCrystal01" count="1" craft_area="workbench" tags="workbenchCrafting" craft_time="60" craft_exp_gain="500" always_unlocked="true">
+            <ingredient name="nugget01" count="10" />
         </recipe>
 
-        <recipe name="raw_crystal_02" count="1" craft_area="workbench" tags="workbenchCrafting" craft_time="60" craft_exp_gain="500" always_unlocked="true">
-            <ingredient name="nugget_02" count="10" />
+        <recipe name="rawCrystal02" count="1" craft_area="workbench" tags="workbenchCrafting" craft_time="60" craft_exp_gain="500" always_unlocked="true">
+            <ingredient name="nugget02" count="10" />
         </recipe>
 
-        <recipe name="raw_crystal_03" count="1" craft_area="workbench" tags="workbenchCrafting" craft_time="60" craft_exp_gain="500" always_unlocked="true">
-            <ingredient name="nugget_03" count="10" />
+        <recipe name="rawCrystal03" count="1" craft_area="workbench" tags="workbenchCrafting" craft_time="60" craft_exp_gain="500" always_unlocked="true">
+            <ingredient name="nugget03" count="10" />
         </recipe>
 
-        <recipe name="raw_crystal_04" count="1" craft_area="workbench" tags="workbenchCrafting" craft_time="60" craft_exp_gain="500" always_unlocked="true">
-            <ingredient name="nugget_04" count="10" />
+        <recipe name="rawCrystal04" count="1" craft_area="workbench" tags="workbenchCrafting" craft_time="60" craft_exp_gain="500" always_unlocked="true">
+            <ingredient name="nugget04" count="10" />
         </recipe>
 
-        <recipe name="raw_crystal_05" count="1" craft_area="workbench" tags="workbenchCrafting" craft_time="60" craft_exp_gain="500" always_unlocked="true">
-            <ingredient name="nugget_05" count="10" />
+        <recipe name="rawCrystal05" count="1" craft_area="workbench" tags="workbenchCrafting" craft_time="60" craft_exp_gain="500" always_unlocked="true">
+            <ingredient name="nugget05" count="10" />
         </recipe>
 
         <!-- crystals -->
-        <recipe name="crystal_01" count="1" craft_area="workbench" tags="workbenchCrafting" craft_time="300" craft_exp_gain="500" always_unlocked="true">
-            <ingredient name="raw_crystal_01" count="5" />
+        <recipe name="crystal01" count="1" craft_area="workbench" tags="workbenchCrafting" craft_time="300" craft_exp_gain="500" always_unlocked="true">
+            <ingredient name="rawCrystal01" count="5" />
         </recipe>
 
-        <recipe name="crystal_02" count="1" craft_area="workbench" tags="workbenchCrafting" craft_time="300" craft_exp_gain="500" always_unlocked="true">
-            <ingredient name="raw_crystal_02" count="5" />
+        <recipe name="crystal02" count="1" craft_area="workbench" tags="workbenchCrafting" craft_time="300" craft_exp_gain="500" always_unlocked="true">
+            <ingredient name="rawCrystal02" count="5" />
         </recipe>
 
-        <recipe name="crystal_03" count="1" craft_area="workbench" tags="workbenchCrafting" craft_time="300" craft_exp_gain="500" always_unlocked="true">
-            <ingredient name="raw_crystal_03" count="5" />
+        <recipe name="crystal03" count="1" craft_area="workbench" tags="workbenchCrafting" craft_time="300" craft_exp_gain="500" always_unlocked="true">
+            <ingredient name="rawCrystal03" count="5" />
         </recipe>
 
-        <recipe name="crystal_04" count="1" craft_area="workbench" tags="workbenchCrafting" craft_time="300" craft_exp_gain="500" always_unlocked="true">
-            <ingredient name="raw_crystal_04" count="5" />
+        <recipe name="crystal04" count="1" craft_area="workbench" tags="workbenchCrafting" craft_time="300" craft_exp_gain="500" always_unlocked="true">
+            <ingredient name="rawCrystal04" count="5" />
         </recipe>
 
-        <recipe name="crystal_05" count="1" craft_area="workbench" tags="workbenchCrafting" craft_time="300" craft_exp_gain="500" always_unlocked="true">
-            <ingredient name="raw_crystal_05" count="5" />
+        <recipe name="crystal05" count="1" craft_area="workbench" tags="workbenchCrafting" craft_time="300" craft_exp_gain="500" always_unlocked="true">
+            <ingredient name="rawCrystal05" count="5" />
         </recipe>
 
         <!-- collections -->
-        <recipe name="medals_collection" count="1" craft_time="180" craft_exp_gain="1000" always_unlocked="true">
-            <ingredient name="medal_01" count="1" />
-            <ingredient name="medal_02" count="1" />
-            <ingredient name="medal_03" count="1" />
-            <ingredient name="medal_04" count="1" />
-            <ingredient name="medal_05" count="1" />
+        <recipe name="oldMedalCollection" count="1" craft_time="180" craft_exp_gain="1000" always_unlocked="true">
+            <ingredient name="oldMedal01" count="1" />
+            <ingredient name="oldMedal02" count="1" />
+            <ingredient name="oldMedal03" count="1" />
+            <ingredient name="oldMedal04" count="1" />
+            <ingredient name="oldMedal05" count="1" />
         </recipe>
 
-        <recipe name="crystals_collection" count="1" craft_time="180" craft_exp_gain="1000" always_unlocked="true">
-            <ingredient name="crystal_01" count="1" />
-            <ingredient name="crystal_02" count="1" />
-            <ingredient name="crystal_03" count="1" />
-            <ingredient name="crystal_04" count="1" />
-            <ingredient name="crystal_05" count="1" />
+        <recipe name="crystalCollection" count="1" craft_time="180" craft_exp_gain="1000" always_unlocked="true">
+            <ingredient name="crystal01" count="1" />
+            <ingredient name="crystal02" count="1" />
+            <ingredient name="crystal03" count="1" />
+            <ingredient name="crystal04" count="1" />
+            <ingredient name="crystal05" count="1" />
         </recipe>
 
-        <recipe name="pirate_collection" count="1" craft_time="180" craft_exp_gain="1000" always_unlocked="true">
-            <ingredient name="pirateTreasure_01" count="1" />
-            <ingredient name="pirateTreasure_02" count="1" />
-            <ingredient name="pirateTreasure_03" count="1" />
-            <ingredient name="pirateTreasure_04" count="1" />
-            <ingredient name="pirateTreasure_05" count="1" />
+        <recipe name="pirateTreasureCollection" count="1" craft_time="180" craft_exp_gain="1000" always_unlocked="true">
+            <ingredient name="pirateTreasure01" count="1" />
+            <ingredient name="pirateTreasure02" count="1" />
+            <ingredient name="pirateTreasure03" count="1" />
+            <ingredient name="pirateTreasure04" count="1" />
+            <ingredient name="pirateTreasure05" count="1" />
         </recipe>
 
-        <recipe name="army_medals_collection" count="1" craft_time="180" craft_exp_gain="1000" always_unlocked="true">
-            <ingredient name="army_medals_01" count="5" />
-            <ingredient name="army_medals_02" count="5" />
-            <ingredient name="army_medals_03" count="5" />
-            <ingredient name="army_medals_04" count="5" />
-            <ingredient name="army_medals_05" count="5" />
+        <recipe name="armyMedalCollection" count="1" craft_time="180" craft_exp_gain="1000" always_unlocked="true">
+            <ingredient name="armyMedal01" count="5" />
+            <ingredient name="armyMedal02" count="5" />
+            <ingredient name="armyMedal03" count="5" />
+            <ingredient name="armyMedal04" count="5" />
+            <ingredient name="armyMedal05" count="5" />
         </recipe>
 
-        <recipe name="jewels_collection" count="1" craft_time="180" craft_exp_gain="1000" always_unlocked="true">
-            <ingredient name="jewel_01" count="5" />
-            <ingredient name="jewel_02" count="5" />
-            <ingredient name="jewel_03" count="5" />
-            <ingredient name="jewel_04" count="5" />
-            <ingredient name="jewel_05" count="5" />
+        <recipe name="jewelCollection" count="1" craft_time="180" craft_exp_gain="1000" always_unlocked="true">
+            <ingredient name="jewel01" count="5" />
+            <ingredient name="jewel02" count="5" />
+            <ingredient name="jewel03" count="5" />
+            <ingredient name="jewel04" count="5" />
+            <ingredient name="jewel05" count="5" />
         </recipe>
 
-        <recipe name="fossils_collection" count="1" craft_time="180" craft_exp_gain="1000" always_unlocked="true">
-            <ingredient name="fossil_01" count="5" />
-            <ingredient name="fossil_02" count="5" />
-            <ingredient name="fossil_03" count="5" />
-            <ingredient name="fossil_04" count="5" />
-            <ingredient name="fossil_05" count="5" />
+        <recipe name="fossilCollection" count="1" craft_time="180" craft_exp_gain="1000" always_unlocked="true">
+            <ingredient name="fossil01" count="5" />
+            <ingredient name="fossil02" count="5" />
+            <ingredient name="fossil03" count="5" />
+            <ingredient name="fossil04" count="5" />
+            <ingredient name="fossil05" count="5" />
         </recipe>
 
-        <recipe name="coins_collection" count="1" craft_time="180" craft_exp_gain="1000" always_unlocked="true">
-            <ingredient name="coin_01" count="10" />
-            <ingredient name="coin_02" count="10" />
-            <ingredient name="coin_03" count="10" />
-            <ingredient name="coin_04" count="10" />
-            <ingredient name="coin_05" count="10" />
+        <recipe name="coinCollection" count="1" craft_time="180" craft_exp_gain="1000" always_unlocked="true">
+            <ingredient name="coin01" count="10" />
+            <ingredient name="coin02" count="10" />
+            <ingredient name="coin03" count="10" />
+            <ingredient name="coin04" count="10" />
+            <ingredient name="coin05" count="10" />
         </recipe>
 
     </append>
