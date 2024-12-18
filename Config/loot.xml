@@ -6,14 +6,53 @@
 <configs>
     <append xpath="/lootcontainers">
 
-        <lootgroup name="rawCrystals" count="2">
-            <item count="1" group="groupJunk" loot_prob_template="veryLow" />
+        <lootgroup name="groupArmyMedals" count="1">
+            <item name="armyMedal01" />
+            <item name="armyMedal02" />
+            <item name="armyMedal03" />
+            <item name="armyMedal04" />
+            <item name="armyMedal05" />
+        </lootgroup>
+
+        <lootgroup name="groupOldMedals" count="1">
+            <item name="oldMedal01" />
+            <item name="oldMedal02" />
+            <item name="oldMedal03" />
+            <item name="oldMedal04" />
+            <item name="oldMedal05" />
+        </lootgroup>
+
+        <lootgroup name="groupCoins" count="1">
+            <item name="coin01" />
+            <item name="coin02" />
+            <item name="coin03" />
+            <item name="coin04" />
+            <item name="coin05" />
+        </lootgroup>
+
+        <lootgroup name="groupJewels" count="1">
+            <item name="jewel01" />
+            <item name="jewel02" />
+            <item name="jewel03" />
+            <item name="jewel04" />
+            <item name="jewel05" />
+        </lootgroup>
+
+        <lootgroup name="groupPirateTreasure" count="1">
+            <item name="pirateTreasure01" />
+            <item name="pirateTreasure02" />
+            <item name="pirateTreasure03" />
+            <item name="pirateTreasure04" />
+            <item name="pirateTreasure05" />
         </lootgroup>
 
         <lootgroup name="caveGroupWoodenChest" count="2">
             <item count="1" group="groupJunk" loot_prob_template="high" />
             <item count="1" group="dyes" loot_prob_template="low" />
-            <item count="1,3" name="roadFlare" loot_prob_template="low" />
+            <item count="1" group="groupOldMedals" loot_prob_template="medLow" force_prob="true" />
+            <item count="1" group="groupPirateTreasure" loot_prob_template="medLow" force_prob="true" />
+            <item count="1" group="groupCoins" loot_prob_template="medLow" force_prob="true" />
+            <item name="roadFlare" loot_prob_template="low" />
         </lootgroup>
 
         <!-- woodenChest -->
@@ -25,11 +64,12 @@
         <lootgroup name="caveGroupMilitaryFootlocker" count="all">
             <item group="groupMilitaryFootlocker01" count="2" />
             <item group="groupMilitaryFootlocker02" loot_prob_template="med" force_prob="true" />
+            <item group="groupArmyMedals" loot_prob_template="medLow" force_prob="true" />
+            <item name="roadFlare" loot_prob_template="medLow" />
         </lootgroup>
 
         <lootcontainer name="caveMilitaryChest" size="6,2" sound_open="UseActions/open_chest" sound_close="UseActions/close_chest" loot_quality_template="qualBaseTemplate" destroy_on_close="empty">
             <item group="caveGroupMilitaryFootlocker" />
-            <item count="1,3" name="roadFlare" loot_prob_template="low" />
         </lootcontainer>
 
         <!-- oldWestChest -->
@@ -58,12 +98,12 @@
         <lootgroup name="caveGroupBackpacks" count="all">
             <item group="groupBackpacks01" count="1" />
             <item group="groupBackpacks02" loot_prob_template="medLow" force_prob="true" />
-            <item name="roadFlare" loot_prob_template="low" />
-            <item name="aa_battery" loot_prob_template="low" />
         </lootgroup>
 
         <lootcontainer name="caveCntBackpack" count="1" size="6,2" sound_open="UseActions/open_backpack" sound_close="UseActions/close_backpack" open_time="1.5" loot_quality_template="qualPrimitiveItemsTemplate" destroy_on_close="empty">
             <item group="caveGroupBackpacks" />
+            <item name="roadFlare" loot_prob_template="low" />
+            <item name="aa_battery" loot_prob_template="low" />
         </lootcontainer>
 
         <!-- militaryGoods -->

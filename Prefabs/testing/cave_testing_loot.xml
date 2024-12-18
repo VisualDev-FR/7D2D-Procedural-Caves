@@ -1,0 +1,70 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<prefab>
+  <property name="CopyAirBlocks" value="True" />
+  <property name="ExcludeDistantPOIMesh" value="False" />
+  <property name="ExcludePOICulling" value="False" />
+  <property name="DistantPOIYOffset" value="0" />
+  <property name="AllowTopSoilDecorations" value="False" />
+  <property name="DifficultyTier" value="0" />
+  <property name="ShowQuestClearCount" value="1" />
+  <property name="TraderArea" value="False" />
+  <property name="PrefabSize" value="86, 2, 45" />
+  <property name="RotationToFaceNorth" value="2" />
+  <property name="Zoning" value="none" />
+  <property class="Stats">
+    <property name="TotalVertices" value="887554" />
+    <property name="TotalTriangles" value="341124" />
+    <property class="BlockEntities">
+      <property name="Vertices" value="853226" />
+      <property name="Triangles" value="321428" />
+    </property>
+    <property class="ChunkMeshes0">
+      <property name="Vertices" value="32080" />
+      <property name="Triangles" value="16040" />
+    </property>
+    <property class="ChunkMeshes1">
+      <property name="Vertices" value="0" />
+      <property name="Triangles" value="0" />
+    </property>
+    <property class="ChunkMeshes2">
+      <property name="Vertices" value="0" />
+      <property name="Triangles" value="0" />
+    </property>
+    <property class="ChunkMeshes3">
+      <property name="Vertices" value="0" />
+      <property name="Triangles" value="0" />
+    </property>
+    <property class="ChunkMeshes4">
+      <property name="Vertices" value="0" />
+      <property name="Triangles" value="0" />
+    </property>
+    <property class="ChunkMeshes5">
+      <property name="Vertices" value="2248" />
+      <property name="Triangles" value="3656" />
+    </property>
+  </property>
+  <property class="IndexedBlockOffsets">
+    <property class="quest_stone">
+      <property name="0" value="34, 1, 38" />
+      <property name="1" value="34, 1, 40" />
+      <property name="2" value="36, 1, 38" />
+      <property name="3" value="36, 1, 40" />
+      <property name="4" value="38, 1, 38" />
+      <property name="5" value="38, 1, 40" />
+      <property name="6" value="40, 1, 38" />
+      <property name="7" value="40, 1, 40" />
+      <property name="8" value="42, 1, 38" />
+      <property name="9" value="42, 1, 40" />
+      <property name="10" value="34, 1, 42" />
+      <property name="11" value="34, 1, 44" />
+      <property name="12" value="36, 1, 42" />
+      <property name="13" value="36, 1, 44" />
+      <property name="14" value="38, 1, 42" />
+      <property name="15" value="38, 1, 44" />
+      <property name="16" value="40, 1, 42" />
+      <property name="17" value="40, 1, 44" />
+      <property name="18" value="42, 1, 42" />
+      <property name="19" value="42, 1, 44" />
+    </property>
+  </property>
+</prefab>
