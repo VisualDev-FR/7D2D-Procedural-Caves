@@ -138,29 +138,29 @@
             <block name="cntFoodPileSmall" prob=".001" />
             <block name="cntFoodPileMedium" prob=".001" />
 
-            <block name="CaveCntDuffle01" prob=".001" />
-            <block name="CaveCntPurse01" prob=".001" />
-            <block name="CaveCntBackpack01" prob=".001" />
-            <block name="CaveCntBackpack03" prob=".001" />
+            <block name="caveCntDuffle01" prob=".001" />
+            <block name="caveCntPurse01" prob=".001" />
+            <block name="caveCntBackpack01" prob=".001" />
+            <block name="caveCntBackpack03" prob=".001" />
 
-            <block name="CaveCntSportsBag01" prob=".0001" />
-            <block name="CaveCntSportsBag01Red" prob=".0001" />
-            <block name="CaveCntSportsBag01Orange" prob=".0001" />
-            <block name="CaveCntSportsBag01Yellow" prob=".0001" />
-            <block name="CaveCntSportsBag01Green" prob=".0001" />
-            <block name="CaveCntSportsBag01Blue" prob=".0001" />
-            <block name="CaveCntSportsBag01Purple" prob=".0001" />
-            <block name="CaveCntSportsBag01Pink" prob=".0001" />
+            <block name="caveCntSportsBag01" prob=".0001" />
+            <block name="caveCntSportsBag01Red" prob=".0001" />
+            <block name="caveCntSportsBag01Orange" prob=".0001" />
+            <block name="caveCntSportsBag01Yellow" prob=".0001" />
+            <block name="caveCntSportsBag01Green" prob=".0001" />
+            <block name="caveCntSportsBag01Blue" prob=".0001" />
+            <block name="caveCntSportsBag01Purple" prob=".0001" />
+            <block name="caveCntSportsBag01Pink" prob=".0001" />
 
-            <block name="CaveCntSportsBag02" prob=".0001" />
-            <block name="CaveCntSportsBag02Brown" prob=".0001" />
-            <block name="CaveCntSportsBag02Red" prob=".0001" />
-            <block name="CaveCntSportsBag02Orange" prob=".0001" />
-            <block name="CaveCntSportsBag02Yellow" prob=".0001" />
-            <block name="CaveCntSportsBag02Green" prob=".0001" />
-            <block name="CaveCntSportsBag02Blue" prob=".0001" />
-            <block name="CaveCntSportsBag02Purple" prob=".0001" />
-            <block name="CaveCntSportsBag02Pink" prob=".0001" />
+            <block name="caveCntSportsBag02" prob=".0001" />
+            <block name="caveCntSportsBag02Brown" prob=".0001" />
+            <block name="caveCntSportsBag02Red" prob=".0001" />
+            <block name="caveCntSportsBag02Orange" prob=".0001" />
+            <block name="caveCntSportsBag02Yellow" prob=".0001" />
+            <block name="caveCntSportsBag02Green" prob=".0001" />
+            <block name="caveCntSportsBag02Blue" prob=".0001" />
+            <block name="caveCntSportsBag02Purple" prob=".0001" />
+            <block name="caveCntSportsBag02Pink" prob=".0001" />
 
             <block name="cntAmmoPileSmall" prob=".002" />
             <block name="cntAmmoPileMedium" prob=".001" />
@@ -250,7 +250,6 @@
             <block name="rubblePileBricksSmall" prob=".0005" />
             <block name="rubblePileConcreteSmall" prob=".0005" />
             <block name="rubblePileWoodBurntSmall" prob=".0005" />
-            <block name="rubblePileWoodBurntLarge" prob=".0005" />
 
             <!-- Traps -->
             <block name="trapSpikesIronDmg1" prob=".0001" />
