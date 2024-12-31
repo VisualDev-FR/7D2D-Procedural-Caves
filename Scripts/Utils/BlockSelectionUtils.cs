@@ -99,4 +99,14 @@ public class BlockSelectionUtils
         return BlockToolSelection.Instance.m_selectionStartPoint;
     }
 
+    public static Prefab.Marker GetSelectedMarker()
+    {
+        if (POIMarkerToolManager.currentSelectionBox != null && POIMarkerToolManager.currentSelectionBox.UserData is Prefab.Marker marker)
+        {
+            return marker;
+        }
+
+        return null;
+    }
+
 }
