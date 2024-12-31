@@ -92,7 +92,7 @@ public static class WorldBuilder_GenerateData
         {
             yield return worldBuilder.WildernessPlanner.Plan(worldBuilder.thisWorldProperties, worldBuilder.Seed);
 
-            // caveBuilder.caveEntrancesPlanner.SpawnCaveEntrances();
+            caveBuilder.caveEntrancesPlanner.SpawnCaveEntrances();
             caveBuilder.caveEntrancesPlanner.SpawnNaturalEntrances();
 
             yield return worldBuilder.smoothWildernessTerrain();
