@@ -14,15 +14,13 @@ public class CavePrefabManager
 
     public readonly List<CavePrefab> Prefabs = new List<CavePrefab>();
 
-    public readonly List<Vector3i> naturalEntrancePositions = new List<Vector3i>();
-
     public WorldBuilder worldBuilder;
 
     public PrefabManager PrefabManager => worldBuilder.PrefabManager;
 
     public int worldSize;
 
-    public int Count => Prefabs.Count;
+    public int PrefabCount => Prefabs.Count;
 
     private readonly List<string> wildernessEntranceNames = new List<string>();
 
@@ -107,31 +105,28 @@ public class CavePrefabManager
 
     public void AddNaturalEntrance(Vector3i position)
     {
-        naturalEntrancePositions.Add(position);
-
-        Vector2s chunkPos = new Vector2s(
-            position.x / 16,
-            position.z / 16
-        );
-
-        var margin = 30;
-        var start = new Vector3i(position.x - margin, 0, position.z - margin);
-        var size = new Vector3i(margin * 2, 255, margin * 2);
-        var node = new GraphNode(position)
-        {
-            NodeRadius = 3,
-        };
+        var start = new Vector3i(position.x - 1, position.y, position.z - 1);
+        var size = new Vector3i(3, 255, 3);
+        var nodeRadius = 3;
 
         var prefab = new CavePrefab()
         {
-            id = Count,
+            id = PrefabCount,
             position = start,
             Size = size,
             isNaturalEntrance = true,
-            nodes = new List<GraphNode>() { node },
+            PrefabName = $"NaturalEntrance_{PrefabCount}"
         };
 
-        node.prefab = prefab;
+        prefab.AddNodes(
+            new List<GraphNode>()
+            {
+                new GraphNode(position + Vector3i.right)   { NodeRadius = nodeRadius, direction = Direction.South },
+                new GraphNode(position + Vector3i.left)    { NodeRadius = nodeRadius, direction = Direction.North },
+                new GraphNode(position + Vector3i.back)    { NodeRadius = nodeRadius, direction = Direction.West },
+                new GraphNode(position + Vector3i.forward) { NodeRadius = nodeRadius, direction = Direction.East },
+            }
+        );
 
         Prefabs.Add(prefab);
 
@@ -139,7 +134,6 @@ public class CavePrefabManager
         Logging.Debug($"---- position: {position}");
         Logging.Debug($"---- start: {prefab.position}");
         Logging.Debug($"---- size: {prefab.Size}");
-        Logging.Debug($"---- node: {node.position}");
     }
 
     public bool IsNearSamePrefab(CavePrefab prefab, int minDist)
@@ -252,7 +246,7 @@ public class CavePrefabManager
 
         for (int i = 0; i < targetCount; i++)
         {
-            var pdi = new PrefabDataInstance(Count + 1, Vector3i.zero, (byte)rand.Next(4), prefabs[i % prefabs.Count]);
+            var pdi = new PrefabDataInstance(PrefabCount + 1, Vector3i.zero, (byte)rand.Next(4), prefabs[i % prefabs.Count]);
             var prefab = new CavePrefab(pdi.id, pdi, Vector3i.zero);
 
             if (TryPlacePrefab(rand, ref prefab, heightMap))
@@ -261,7 +255,7 @@ public class CavePrefabManager
             }
         }
 
-        Logging.Info($"{Count} / {targetCount} prefabs added");
+        Logging.Info($"{PrefabCount} / {targetCount} prefabs added");
     }
 
     public void AddRandomPrefabs(Random rand, RawHeightMap heightMap, int targetCount, int minMarkers = 4, int maxMarkers = 4)
@@ -271,7 +265,7 @@ public class CavePrefabManager
         for (int i = 0; i < targetCount; i++)
         {
             var markerCount = rand.Next(minMarkers, maxMarkers);
-            var prefab = new CavePrefab(Count + 1, Vector3i.zero, rand, markerCount);
+            var prefab = new CavePrefab(PrefabCount + 1, Vector3i.zero, rand, markerCount);
 
             if (TryPlacePrefab(rand, ref prefab, heightMap))
             {
@@ -279,7 +273,7 @@ public class CavePrefabManager
             }
         }
 
-        Logging.Info($"{Count} / {targetCount} prefabs added");
+        Logging.Info($"{PrefabCount} / {targetCount} prefabs added");
     }
 
     public void SetupBoundaryPrefabs(Random rand, int tileSize)
@@ -487,7 +481,7 @@ public class CavePrefabManager
             if (pdi == null)
                 continue;
 
-            var cavePrefab = new CavePrefab(Count + 1, pdi, HalfWorldSize);
+            var cavePrefab = new CavePrefab(PrefabCount + 1, pdi, HalfWorldSize);
 
             AddPrefab(cavePrefab);
             PrefabManager.AddUsedPrefabWorld(-1, pdi);
@@ -495,9 +489,15 @@ public class CavePrefabManager
             Logging.Info($"cave prefab '{cavePrefab.PrefabName}' added at {cavePrefab.position}");
         }
 
-        Logging.Info($"{Count} cave prefabs added.");
+        Logging.Info($"{PrefabCount} cave prefabs added.");
     }
 
+    /// <summary>
+    /// Allocate cave room spaces
+    /// </summary>
+    /// <param name="count">The number of cave rooms to spawn</param>
+    /// <param name="rand"></param>
+    /// <param name="heightMap"></param>
     public void SpawnCaveRooms(int count, Random rand, RawHeightMap heightMap)
     {
         for (int i = 0; i < count; i++)
@@ -525,11 +525,12 @@ public class CavePrefabManager
 
                 position.y = rand.Next(CaveConfig.bedRockMargin, minTerrainHeight - size.y - CaveConfig.terrainMargin);
 
-                var prefab = new CavePrefab(Count)
+                var prefab = new CavePrefab(PrefabCount)
                 {
                     Size = size,
                     position = position,
                     isRoom = true,
+                    PrefabName = $"CaveRoom_{PrefabCount}"
                 };
 
                 prefab.UpdateMarkers(rand);
@@ -569,6 +570,9 @@ public class CavePrefabManager
         allCavePrefabs[prefabName] = prefabData;
     }
 
+    /// <summary>
+    /// Gather the prefabs that have been added by the vanilla PrefabManager
+    /// </summary>
     public void AddUsedCavePrefabs()
     {
         var halfWorldSize = new Vector3i(
@@ -586,6 +590,10 @@ public class CavePrefabManager
         }
     }
 
+    /// <summary>
+    /// Gather all AABB of surface prefabs to store the zones
+    /// where tunnels can't be dig
+    /// </summary>
     public void AddSurfacePrefabs()
     {
         var prefabClusters = new Dictionary<string, List<BoundingBox>>();
@@ -607,6 +615,7 @@ public class CavePrefabManager
                 var position = pdi.boundingBoxPosition + halfWorldSize;
                 var rectangle = cluster.Transform(position, pdi.rotation, pdi.prefab.size);
                 var cavePrefab = new CavePrefab(rectangle) { isCluster = true };
+
                 AddPrefab(cavePrefab);
 
                 Logging.Info($"add cluster ({pdi.prefab.Name}), position: {rectangle.start}, rotation: {pdi.rotation}, size: {rectangle.size}");

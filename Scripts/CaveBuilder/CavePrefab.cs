@@ -34,7 +34,7 @@ public class CavePrefab
 
     public int BoundingRadiusSqr { get; internal set; }
 
-    public string PrefabName => prefabDataInstance?.prefab.Name;
+    public string PrefabName;
 
     public FastTags<TagGroup.Poi> Tags => prefabDataInstance == null ? FastTags<TagGroup.Poi>.none : prefabDataInstance.prefab.Tags;
 
@@ -66,13 +66,13 @@ public class CavePrefab
     }
 
     public CavePrefab(int index, PrefabDataInstance pdi, Vector3i offset)
-
     {
         id = index;
         rotation = pdi.rotation;
         prefabDataInstance = pdi;
         position = pdi.boundingBoxPosition + offset;
         Size = CaveUtils.GetRotatedSize(pdi.boundingBoxSize, rotation);
+        PrefabName = pdi.prefab.Name;
 
         UpdateMarkers(pdi);
     }
@@ -91,6 +91,15 @@ public class CavePrefab
         );
 
         UpdateMarkers(rand, markerCount);
+    }
+
+    public void AddNodes(IEnumerable<GraphNode> _nodes)
+    {
+        foreach (var node in _nodes)
+        {
+            node.prefab = this;
+            nodes.Add(node);
+        }
     }
 
     public Prefab.Marker RandomMarker(Random rand, int rotation, int xMax, int yMax, int zMax, bool aligned = true)

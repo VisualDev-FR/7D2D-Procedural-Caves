@@ -23,6 +23,7 @@ public class GraphNode
         this.prefab = prefab;
 
         CaveUtils.Assert(marker != null, $"null marker");
+        CaveUtils.Assert(marker.start != null, $"null marker start");
         CaveUtils.Assert(marker.size != null, $"null marker size");
 
         NodeRadius = GetNodeRadius();
@@ -40,21 +41,9 @@ public class GraphNode
         CaveUtils.Assert(direction != Direction.None, $"None direction: {prefab.PrefabName}, marker start: [{marker.start}], prefab size:[{prefab.Size}]");
     }
 
-    public GraphNode(Vector3i position)
+    public GraphNode(Vector3i worldPos)
     {
-        this.position = position;
-    }
-
-    public int GetNodeRadius()
-    {
-        var radius = Utils.FastMax(1, Utils.FastMin(Utils.FastMax(marker.size.x, marker.size.z), marker.size.y) / 2);
-
-        if (prefab.isNaturalEntrance)
-        {
-            Logging.Debug($"entrance radius: {radius}");
-        }
-
-        return radius;
+        position = worldPos;
     }
 
     public static Vector3i MarkerCenter(Prefab.Marker marker)
@@ -64,6 +53,18 @@ public class GraphNode
             (int)(marker.start.y + marker.size.y / 2f),
             (int)(marker.start.z + marker.size.z / 2f)
         );
+    }
+
+    private int GetNodeRadius()
+    {
+        var radius = Utils.FastMax(1, Utils.FastMin(Utils.FastMax(marker.size.x, marker.size.z), marker.size.y) / 2);
+
+        if (prefab.isNaturalEntrance)
+        {
+            Logging.Debug($"entrance radius: {radius}");
+        }
+
+        return radius;
     }
 
     private Direction GetDirection()
@@ -85,11 +86,6 @@ public class GraphNode
 
     public Vector3i Normal(int distance)
     {
-        if (prefab.isNaturalEntrance)
-        {
-            return new Vector3i(position.x, position.y - 10, position.z);
-        }
-
         CaveUtils.Assert(direction != Direction.None, $"Direction sould not be None");
 
         return position + direction.Vector * distance;
@@ -114,6 +110,16 @@ public class GraphNode
 
     public IEnumerable<CaveBlock> GetSphere()
     {
+        if (prefab.isNaturalEntrance)
+        {
+            foreach (var block in SphereManager.GetSphere(position, NodeRadius))
+            {
+                yield return block;
+            }
+
+            yield break;
+        }
+
         var center = position;
         var queue = new HashSet<Vector3i>() { center };
         var visited = new HashSet<Vector3i>();

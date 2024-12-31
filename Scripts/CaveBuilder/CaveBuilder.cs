@@ -81,9 +81,11 @@ public class CaveBuilder
     {
         foreach (var prefab in cavePrefabManager.Prefabs.Where(prefab => prefab.isNaturalEntrance))
         {
-            var blocks = CaveTunnel.CreateNaturalEntrance(prefab.nodes[0], heightMap);
+            var center = prefab.position + Vector3i.one;
+            var blocks = CaveTunnel.CreateNaturalEntrance(center, heightMap);
+
             cavemap.AddBlocks(blocks);
-            cavemap.SetRope(prefab.nodes[0].position);
+            cavemap.SetRope(center);
         }
     }
 

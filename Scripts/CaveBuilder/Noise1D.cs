@@ -56,4 +56,9 @@ public class Noise1D
 
         throw new Exception($"Interpolation failed for index: '{index}'");
     }
+
+    public int InterpolateClamped(int index, int minValue, int maxValue)
+    {
+        return Utils.FastClamp(Interpolate(index), minValue, maxValue);
+    }
 }

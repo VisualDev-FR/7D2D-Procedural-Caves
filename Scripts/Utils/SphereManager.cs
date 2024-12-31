@@ -61,10 +61,8 @@ public class SphereManager
         return spheres;
     }
 
-    public static IEnumerable<CaveBlock> GetSphere(Vector3i center, float _radius)
+    public static IEnumerable<CaveBlock> GetSphere(Vector3i center, int radius)
     {
-        var radius = (int)Utils.FastClamp(_radius, CaveConfig.minTunnelRadius, CaveConfig.maxTunnelRadius);
-
         foreach (var hashcode in spheresMapping[radius])
         {
             yield return new CaveBlock(
@@ -72,6 +70,20 @@ public class SphereManager
                 center.y + spheres[hashcode].y,
                 center.z + spheres[hashcode].z
             );
+        }
+    }
+
+    public static IEnumerable<Vector3i> GetSpherePositions(Vector3i center, int radius)
+    {
+        var position = Vector3i.zero;
+
+        foreach (var hashcode in spheresMapping[radius])
+        {
+            position.x = center.x + spheres[hashcode].x;
+            position.y = center.y + spheres[hashcode].y;
+            position.z = center.z + spheres[hashcode].z;
+
+            yield return position;
         }
     }
 

@@ -35,9 +35,6 @@ public class CaveTunnel
         var start = edge.node1.Normal(Utils.FastMax(5, edge.node1.NodeRadius));
         var target = edge.node2.Normal(Utils.FastMax(5, edge.node2.NodeRadius));
 
-        var yMin = Utils.FastMin(start.y, target.y);
-        var yMax = Utils.FastMax(start.y, target.y);
-
         if (cachedPrefabs.MinSqrDistanceToPrefab(start) == 0)
         {
             Logging.Warning($"'{edge.Prefab1.PrefabName}' ({start - HalfWorldSize}) intersect with another prefab");
@@ -166,15 +163,8 @@ public class CaveTunnel
     {
         // TODO: handle duplicates with that instead of hashset: https://stackoverflow.com/questions/1672412/filtering-duplicates-out-of-an-ienumerable
 
-        if (!start.prefab.isNaturalEntrance)
-        {
-            blocks.UnionWith(start.GetSphere());
-        }
-
-        if (!target.prefab.isNaturalEntrance)
-        {
-            blocks.UnionWith(target.GetSphere());
-        }
+        blocks.UnionWith(start.GetSphere());
+        blocks.UnionWith(target.GetSphere());
 
         int r1 = start.NodeRadius;
         int r2 = target.NodeRadius;
@@ -187,7 +177,7 @@ public class CaveTunnel
 
         for (int i = 0; i < path.Count; i++)
         {
-            var tunnelRadius = noise.Interpolate(i);
+            var tunnelRadius = noise.InterpolateClamped(i, CaveConfig.minTunnelRadius + 1, CaveConfig.maxTunnelRadius);
             var sphere = SphereManager.GetSphere(path[i].ToVector3i(), tunnelRadius);
 
             blocks.UnionWith(sphere);
@@ -199,11 +189,9 @@ public class CaveTunnel
             || cachedPrefabs.IntersectWithPrefab(caveBlock.ToVector3i()));
     }
 
-    public static IEnumerable<CaveBlock> CreateNaturalEntrance(GraphNode node, RawHeightMap heightMap)
+    public static IEnumerable<CaveBlock> CreateNaturalEntrance(Vector3i position, RawHeightMap heightMap)
     {
-        var position = node.Normal(0);
         var entranceTunnel = new HashSet<CaveBlock>();
-
 
         while (position.y < heightMap.GetHeight(position.x, position.z))
         {

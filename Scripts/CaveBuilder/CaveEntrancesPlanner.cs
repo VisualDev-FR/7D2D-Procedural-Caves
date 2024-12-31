@@ -26,9 +26,9 @@ public class CaveEntrancesPlanner
     {
         gameRandom = GameRandomManager.Instance.CreateGameRandom(WorldBuilder.Seed);
 
-        var wildernessTiles = GetShuffledWildernessTiles();
+        var minDepth = 20;
 
-        foreach (var tile in wildernessTiles)
+        foreach (var tile in GetShuffledWildernessTiles())
         {
             if (tile.Used) continue;
 
@@ -36,8 +36,12 @@ public class CaveEntrancesPlanner
             center.x += gameRandom.Next(-20, 20);
             center.y += gameRandom.Next(-20, 20);
 
-            var height = tile.getHeightCeil(center.x, center.y);
-            var entrancePosition = new Vector3i(center.x, height, center.y);
+            var terrainHeight = tile.getHeightCeil(center.x, center.y);
+
+            if (terrainHeight < minDepth) continue;
+
+            var entranceY = gameRandom.Next(CaveConfig.bedRockMargin, terrainHeight - minDepth);
+            var entrancePosition = new Vector3i(center.x, entranceY, center.y);
 
             if (WorldBuilder.GetWater(center.x, center.y) == 0)
             {

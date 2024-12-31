@@ -8,6 +8,8 @@ public class Direction
 
     public static Direction West = new Direction(0, -1);
 
+    public static Direction Bottom = new Direction(0, -1, 0);
+
     public static Direction None = new Direction(0, 0);
 
     public Vector3i Vector { get; internal set; }
@@ -15,6 +17,11 @@ public class Direction
     public Direction(int x, int z)
     {
         Vector = new Vector3i(x, 0, z);
+    }
+
+    public Direction(int x, int y, int z)
+    {
+        Vector = new Vector3i(x, y, z);
     }
 
     public static bool operator ==(Direction dir1, Direction dir2)
