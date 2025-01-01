@@ -8,19 +8,21 @@
   <property name="DifficultyTier" value="0" />
   <property name="ShowQuestClearCount" value="1" />
   <property name="TraderArea" value="False" />
-  <property name="PrefabSize" value="86, 2, 45" />
+  <property name="PrefabSize" value="114, 2, 45" />
   <property name="RotationToFaceNorth" value="2" />
   <property name="Zoning" value="none" />
+  <property name="EditorGroups" value="cave" />
+  <property name="Tags" value="cave, test, testonly" />
   <property class="Stats">
-    <property name="TotalVertices" value="887554" />
-    <property name="TotalTriangles" value="341124" />
+    <property name="TotalVertices" value="1266689" />
+    <property name="TotalTriangles" value="760499" />
     <property class="BlockEntities">
-      <property name="Vertices" value="853226" />
-      <property name="Triangles" value="321428" />
+      <property name="Vertices" value="1222057" />
+      <property name="Triangles" value="735651" />
     </property>
     <property class="ChunkMeshes0">
-      <property name="Vertices" value="32080" />
-      <property name="Triangles" value="16040" />
+      <property name="Vertices" value="42384" />
+      <property name="Triangles" value="21192" />
     </property>
     <property class="ChunkMeshes1">
       <property name="Vertices" value="0" />
@@ -46,24 +48,24 @@
   <property class="IndexedBlockOffsets">
     <property class="quest_stone">
       <property name="0" value="34, 1, 38" />
-      <property name="1" value="34, 1, 40" />
-      <property name="2" value="36, 1, 38" />
-      <property name="3" value="36, 1, 40" />
-      <property name="4" value="38, 1, 38" />
-      <property name="5" value="38, 1, 40" />
-      <property name="6" value="40, 1, 38" />
-      <property name="7" value="40, 1, 40" />
-      <property name="8" value="42, 1, 38" />
+      <property name="1" value="36, 1, 38" />
+      <property name="2" value="38, 1, 38" />
+      <property name="3" value="40, 1, 38" />
+      <property name="4" value="42, 1, 38" />
+      <property name="5" value="34, 1, 40" />
+      <property name="6" value="36, 1, 40" />
+      <property name="7" value="38, 1, 40" />
+      <property name="8" value="40, 1, 40" />
       <property name="9" value="42, 1, 40" />
       <property name="10" value="34, 1, 42" />
-      <property name="11" value="34, 1, 44" />
-      <property name="12" value="36, 1, 42" />
-      <property name="13" value="36, 1, 44" />
-      <property name="14" value="38, 1, 42" />
-      <property name="15" value="38, 1, 44" />
-      <property name="16" value="40, 1, 42" />
-      <property name="17" value="40, 1, 44" />
-      <property name="18" value="42, 1, 42" />
+      <property name="11" value="36, 1, 42" />
+      <property name="12" value="38, 1, 42" />
+      <property name="13" value="40, 1, 42" />
+      <property name="14" value="42, 1, 42" />
+      <property name="15" value="34, 1, 44" />
+      <property name="16" value="36, 1, 44" />
+      <property name="17" value="38, 1, 44" />
+      <property name="18" value="40, 1, 44" />
       <property name="19" value="42, 1, 44" />
     </property>
   </property>
