@@ -53,7 +53,6 @@ public class CaveSpawnManager
             }
         }
 
-        // reaching here means that no spawn block was found
         return Vector3i.zero;
     }
 

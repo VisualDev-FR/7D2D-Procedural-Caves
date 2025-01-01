@@ -83,14 +83,17 @@ public class SpawnManagerBiomes_Update
             idHash = entityGroupData.idHash;
             ulong delayWorldTime = _spawnData.GetDelayWorldTime(idHash);
 
-            if (world.worldTime > delayWorldTime)
+            if (world.worldTime > delayWorldTime || delayWorldTime == 0)
             {
                 int spawnCount = EntitySpawner.ModifySpawnCountByGameDifficulty(entityGroupData.maxCount);
-                _spawnData.ResetRespawn(idHash, world, spawnCount);
+                ResetRespawn(_spawnData, entityGroupData, idHash, spawnCount);
             }
 
-            groupIndex = currentIndex;
-            break;
+            if (_spawnData.CanSpawn(idHash))
+            {
+                groupIndex = currentIndex;
+                break;
+            }
         }
 
         if (groupIndex < 0)
@@ -111,6 +114,7 @@ public class SpawnManagerBiomes_Update
         int randomFromGroup = EntityGroups.GetRandomFromGroup(biomeSpawnEntityGroupList.list[groupIndex].entityGroupName, ref spawnManagerBiome.lastClassId);
         if (randomFromGroup == 0)
         {
+            _spawnData.DecMaxCount(idHash);
             return false;
         }
 
@@ -125,6 +129,16 @@ public class SpawnManagerBiomes_Update
         logger.Info($"spawn '{entity.GetDebugName()}' at {spawnPosition}");
 
         return false;
+    }
+    public static void ResetRespawn(ChunkAreaBiomeSpawnData _spawnData, BiomeSpawnEntityGroupData biomeSpawnEntityGroupData, int _idHash, int _maxCount)
+    {
+        var _world = GameManager.Instance.World;
+
+        _spawnData.entitesSpawned.TryGetValue(_idHash, out var value);
+        value.delayWorldTime = _world.worldTime + (ulong)(biomeSpawnEntityGroupData.respawnDelayInWorldTime * _world.RandomRange(0.9f, 1.1f));
+        value.maxCount = _maxCount;
+        _spawnData.entitesSpawned[_idHash] = value;
+        _spawnData.chunk.isModified = true;
     }
 
     private static BiomeSpawnEntityGroupList GetBiomeList(ChunkAreaBiomeSpawnData _spawnData)
