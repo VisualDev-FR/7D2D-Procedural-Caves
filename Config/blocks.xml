@@ -77,6 +77,7 @@
 
         <block name="caveTerrSnow">
             <property name="Extends" value="terrSnow" />
+            <property name="Class" value="BlockCaveTerrain, TheDescent" />
             <property name="CreativeMode" value="Dev" />
             <property name="CustomIconTint" value="A72D34" />
             <property name="CustomIcon" value="terrSnow" />
@@ -90,6 +91,7 @@
 
         <block name="caveTerrSandStone">
             <property name="Extends" value="terrSandStone" />
+            <property name="Class" value="BlockCaveTerrain, TheDescent" />
             <property name="CreativeMode" value="Dev" />
             <property name="CustomIconTint" value="A72D34" />
             <property name="CustomIcon" value="terrSandStone" />
@@ -107,6 +109,7 @@
 
         <block name="caveTerrGravel">
             <property name="Extends" value="terrGravel" />
+            <property name="Class" value="BlockCaveTerrain, TheDescent" />
             <property name="CreativeMode" value="Dev" />
             <property name="CustomIconTint" value="A72D34" />
             <property name="CustomIcon" value="terrGravel" />
@@ -126,6 +129,7 @@
 
         <block name="caveTerrOreIron">
             <property name="Extends" value="terrOreIron" />
+            <property name="Class" value="BlockCaveTerrain, TheDescent" />
             <property name="CreativeMode" value="Dev" />
             <property name="CustomIconTint" value="A72D34" />
             <property name="CustomIcon" value="terrOreIron" />
@@ -133,6 +137,7 @@
 
         <block name="caveTerrOreLead">
             <property name="Extends" value="terrOreLead" />
+            <property name="Class" value="BlockCaveTerrain, TheDescent" />
             <property name="CreativeMode" value="Dev" />
             <property name="CustomIconTint" value="A72D34" />
             <property name="CustomIcon" value="terrOreLead" />
@@ -140,6 +145,7 @@
 
         <block name="caveTerrOreCoal">
             <property name="Extends" value="terrOreCoal" />
+            <property name="Class" value="BlockCaveTerrain, TheDescent" />
             <property name="CreativeMode" value="Dev" />
             <property name="CustomIconTint" value="A72D34" />
             <property name="CustomIcon" value="terrOreCoal" />
@@ -147,6 +153,7 @@
 
         <block name="caveTerrOrePotassiumNitrate">
             <property name="Extends" value="terrOrePotassiumNitrate" />
+            <property name="Class" value="BlockCaveTerrain, TheDescent" />
             <property name="CreativeMode" value="Dev" />
             <property name="CustomIconTint" value="A72D34" />
             <property name="CustomIcon" value="terrOrePotassiumNitrate" />
@@ -154,6 +161,7 @@
 
         <block name="caveTerrOreOilDeposit">
             <property name="Extends" value="terrOreOilDeposit" />
+            <property name="Class" value="BlockCaveTerrain, TheDescent" />
             <property name="CreativeMode" value="Dev" />
             <property name="CustomIconTint" value="A72D34" />
             <property name="CustomIcon" value="terrOreOilDeposit" />
