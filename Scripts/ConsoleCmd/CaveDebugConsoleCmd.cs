@@ -15,7 +15,9 @@ public class CaveDebugConsoleCmd : ConsoleCmdAbstract
 
     public override string getHelp()
     {
-        return getDescription();
+        return @"Cave debug commands:
+            - sgms [value]: set god mode speed, from the given float value
+        ";
     }
 
     private static void ClusterCommand(List<string> _params)
@@ -136,6 +138,13 @@ public class CaveDebugConsoleCmd : ConsoleCmdAbstract
         Logging.Info($"cave spawn {enabled}");
     }
 
+    private static void SetGodModeSpeed(List<string> _params)
+    {
+        var player = GameManager.Instance.World.GetPrimaryPlayer();
+
+        player.GodModeSpeedModifier = float.Parse(_params[1]);
+    }
+
     public override void Execute(List<string> _params, CommandSenderInfo _senderInfo)
     {
         if (_params.Count == 0)
@@ -168,6 +177,10 @@ public class CaveDebugConsoleCmd : ConsoleCmdAbstract
 
             case "spawn":
                 SpawnCommand(_params);
+                break;
+
+            case "sgms":
+                SetGodModeSpeed(_params);
                 break;
 
             default:
