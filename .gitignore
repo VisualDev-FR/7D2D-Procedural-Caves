@@ -1,3 +1,5 @@
+/env
+/docs/_build
 .vscode
 .vs
 obj

@@ -15,3 +15,12 @@
 
 * Follow the above instructions to setup the developement environnement
 * use the command line interface provided in tests: `tests/run.bat <sub-command>`
+
+## Build documentation with shpinx
+
+```
+py -m venv env
+env/scripts/activate
+pip install -r docs/requirements.txt
+sphinx-build -M html ./docs ./docs/_build/
+```
