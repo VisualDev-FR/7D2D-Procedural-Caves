@@ -18,7 +18,7 @@
 # -- Project information -----------------------------------------------------
 
 project = "7D2D - The Descent"
-copyright = "2024, VisualDev-FR"
+copyright = "2025, VisualDev-FR"
 author = "VisualDev"
 
 

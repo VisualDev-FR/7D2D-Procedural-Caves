@@ -5,21 +5,6 @@ using System.Drawing.Imaging;
 public class CmdNoise : CmdAbstract
 {
 
-    public enum CaveWater
-    {
-        NONE,
-        LOW,
-        MEDIUM,
-        HIGH,
-        FULL,
-    }
-
-    private static Dictionary<CaveWater, float> waterconfig = new Dictionary<CaveWater, float>(){
-        {CaveWater.LOW, -0.5f},    // 5%
-        {CaveWater.MEDIUM, -0.3f}, // 15%
-        {CaveWater.HIGH, -0.2f},  // 25%
-    };
-
     public override string[] GetCommands()
     {
         return new string[] { "noise" };
@@ -27,17 +12,7 @@ public class CmdNoise : CmdAbstract
 
     public override void Execute(List<string> args)
     {
-
-        var waterNoise = new CaveNoise(
-            seed: 1337,
-            octaves: 1,
-            frequency: 0.01f,
-            threshold: waterconfig[CaveWater.HIGH],
-            invert: true,
-            noiseType: FastNoiseLite.NoiseType.Perlin,
-            fractalType: FastNoiseLite.FractalType.None
-        );
-
+        var waterNoise = new WaterNoise(1337, CaveConfig.WaterConfig.HIGH);
         var worldSize = 4096;
 
         int count = 0;
@@ -53,7 +28,7 @@ public class CmdNoise : CmdAbstract
                 {
                     for (int y = 0; y < worldSize; y++)
                     {
-                        if (waterNoise.IsCave(x, y))
+                        if (waterNoise.IsWater(x, y))
                         {
                             b.SetPixel(x, y, Color.LightBlue);
                             count++;
@@ -62,7 +37,7 @@ public class CmdNoise : CmdAbstract
                 }
 
                 Logging.Info($"{100f * count / sqrSize:F1}% ({count:N0} / {sqrSize:N0})");
-                b.Save("noise.png", ImageFormat.Png);
+                b.Save("ignore/noise.png", ImageFormat.Png);
             }
         }
 
