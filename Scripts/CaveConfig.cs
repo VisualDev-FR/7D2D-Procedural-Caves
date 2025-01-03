@@ -70,14 +70,4 @@ public static class CaveConfig
 
         public static float sunIntensityScale = 1f;
     }
-
-
-    public enum WaterConfig
-    {
-        NONE,
-        LOW,
-        MEDIUM,
-        HIGH,
-        FULL,
-    }
 }

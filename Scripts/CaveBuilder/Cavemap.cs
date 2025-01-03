@@ -392,13 +392,15 @@ public class CaveMap
 
     public IEnumerator SetWaterCoroutine(CavePrefabManager cachedPrefabs, WorldBuilder worldBuilder, HashSet<CaveBlock> localMinimas)
     {
-        // if (!CaveConfig.generateWater)
-        //     yield break;
+        if (CaveConfig.caveWater == WorldBuilder.GenerationSelections.None)
+        {
+            yield break;
+        }
 
         int index = 0;
         int count = 0;
 
-        CaveNoise.waterNoise.SetSeed(worldBuilder.Seed);
+        var waterNoise = new WaterNoise(worldBuilder.Seed, CaveConfig.caveWater);
 
         foreach (var waterStart in localMinimas)
         {
@@ -406,7 +408,7 @@ public class CaveMap
 
             var startPosition = waterStart.ToVector3i();
 
-            if (worldBuilder.IsCanceled || !CaveNoise.waterNoise.IsCave(startPosition.x, startPosition.z) || IsWater(startPosition))
+            if (worldBuilder.IsCanceled || !waterNoise.IsWater(startPosition.x, startPosition.z) || IsWater(startPosition))
                 continue;
 
             count++;

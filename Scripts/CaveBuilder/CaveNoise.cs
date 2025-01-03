@@ -28,16 +28,6 @@ public class CaveNoise
         fractalType: FastNoiseLite.FractalType.None
     );
 
-    public static CaveNoise waterNoise = new CaveNoise(
-        seed: 1337,
-        octaves: 1,
-        frequency: 0.01f,
-        threshold: -0.5f,
-        invert: true,
-        noiseType: FastNoiseLite.NoiseType.Perlin,
-        fractalType: FastNoiseLite.FractalType.None
-    );
-
     public CaveNoise(int seed, int octaves, float frequency, float threshold, bool invert, FastNoiseLite.NoiseType noiseType, FastNoiseLite.FractalType fractalType)
     {
         this.seed = seed;

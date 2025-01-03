@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
+using WorldGenerationEngineFinal;
 
 public class CmdNoise : CmdAbstract
 {
@@ -12,7 +13,7 @@ public class CmdNoise : CmdAbstract
 
     public override void Execute(List<string> args)
     {
-        var waterNoise = new WaterNoise(1337, CaveConfig.WaterConfig.HIGH);
+        var waterNoise = new WaterNoise(1337, WorldBuilder.GenerationSelections.Few);
         var worldSize = 4096;
 
         int count = 0;
