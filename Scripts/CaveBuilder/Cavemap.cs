@@ -228,8 +228,34 @@ public class CaveMap
 
     public void AddTunnel(CaveTunnel tunnel)
     {
-        AddBlocks(tunnel.blocks);
         TunnelsCount++;
+
+        foreach (var entry in tunnel.layers)
+        {
+            var zxHash = entry.Key;
+            var layerHashes = entry.Value;
+
+            if (!caveblocks.ContainsKey(zxHash))
+            {
+                lock (_lock)
+                {
+                    caveblocks[zxHash] = layerHashes;
+                }
+                continue;
+            }
+            else
+            {
+                lock (_lock)
+                {
+                    caveblocks[zxHash].AddRange(layerHashes);
+                }
+            }
+
+            lock (_lock)
+            {
+                caveblocks[zxHash] = RLELayer.CompressLayers(caveblocks[zxHash]);
+            }
+        }
     }
 
     public IEnumerable<int> RLEEncode(IEnumerable<CaveBlock> caveBlocks)
@@ -342,14 +368,12 @@ public class CaveMap
         throw new Exception("Lower point not found");
     }
 
-    private HashSet<Vector3i> ExpandWater(CaveBlock waterStart, CavePrefabManager cachedPrefabs)
+    private HashSet<Vector3i> ExpandWater(Vector3i waterStart, CavePrefabManager cachedPrefabs)
     {
-        CaveUtils.Assert(waterStart is CaveBlock, "null water start");
-
         var queue = new Queue<Vector3i>(1_000);
         var visited = new HashSet<Vector3i>(100_000);
         var waterPositions = new HashSet<Vector3i>(100_000);
-        var startPosition = GetVerticalLowerPoint(waterStart.ToVector3i());
+        var startPosition = GetVerticalLowerPoint(waterStart);
         var neighbor = Vector3i.zero;
 
         int maxWaterDepth = int.MaxValue;
@@ -390,7 +414,7 @@ public class CaveMap
         return waterPositions;
     }
 
-    public IEnumerator SetWaterCoroutine(CavePrefabManager cachedPrefabs, WorldBuilder worldBuilder, HashSet<CaveBlock> localMinimas)
+    public IEnumerator SetWaterCoroutine(CavePrefabManager cachedPrefabs, WorldBuilder worldBuilder, HashSet<Vector3i> localMinimas)
     {
         if (CaveConfig.caveWater == WorldBuilder.GenerationSelections.None)
         {
@@ -406,7 +430,7 @@ public class CaveMap
         {
             index++;
 
-            var startPosition = waterStart.ToVector3i();
+            var startPosition = waterStart;
 
             if (worldBuilder.IsCanceled || !waterNoise.IsWater(startPosition.x, startPosition.z) || IsWater(startPosition))
                 continue;
@@ -428,7 +452,7 @@ public class CaveMap
         }
     }
 
-    public HashSet<Vector3i> SetWater(CavePrefabManager cachedPrefabs, HashSet<CaveBlock> localMinimas)
+    public HashSet<Vector3i> SetWater(CavePrefabManager cachedPrefabs, HashSet<Vector3i> localMinimas)
     {
         // if (!CaveConfig.generateWater)
         //     yield break;
@@ -440,7 +464,7 @@ public class CaveMap
         {
             index++;
 
-            if (IsWater(waterStart.ToVector3i()))
+            if (IsWater(waterStart))
                 continue;
 
             var positions = ExpandWater(waterStart, cachedPrefabs);

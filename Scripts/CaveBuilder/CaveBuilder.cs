@@ -112,7 +112,7 @@ public class CaveBuilder
 
         var caveGraph = new Graph(cavePrefabManager.Prefabs, worldBuilder.WorldSize);
         var subLists = CaveUtils.SplitList(caveGraph.Edges.ToList(), 6);
-        var localMinimas = new HashSet<CaveBlock>();
+        var localMinimas = new HashSet<Vector3i>();
         var lockObject = new object();
         int index = 0;
 

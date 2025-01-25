@@ -1,14 +1,20 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
+<<<<<<< HEAD:Scripts/CaveBuilder/CaveTunnel.cs
 
+=======
+>>>>>>> 8b8e771 (setup rle tunneling):Scripts/CaveGeneration/CaveTunnel.cs
 
 public class CaveTunnel
 {
-    public readonly List<CaveBlock> path = new List<CaveBlock>();
+    public readonly List<Vector3i> path = new List<Vector3i>();
 
     public readonly HashSet<CaveBlock> blocks = new HashSet<CaveBlock>();
 
-    public IEnumerable<CaveBlock> LocalMinimas => FindLocalMinimas();
+    public readonly Dictionary<int, List<int>> layers = new Dictionary<int, List<int>>();
+
+    public IEnumerable<Vector3i> LocalMinimas => FindLocalMinimas();
 
     private readonly System.Random random;
 
@@ -141,24 +147,6 @@ public class CaveTunnel
         }
     }
 
-    private IEnumerable<CaveBlock> FindLocalMinimas()
-    {
-        for (int i = 1; i < path.Count - 1; i++)
-        {
-            if (IsLocalMinima(path, i))
-            {
-                yield return path[i];
-            }
-            else if (IsStartOfFlatMinimum(path, i))
-            {
-                if (IsFlatMinimum(path, ref i))
-                {
-                    yield return path[i];
-                }
-            }
-        }
-    }
-
     public void ThickenTunnel(GraphNode start, GraphNode target, int seed, CavePrefabManager cachedPrefabs)
     {
         // TODO: handle duplicates with that instead of hashset: https://stackoverflow.com/questions/1672412/filtering-duplicates-out-of-an-ienumerable
@@ -174,19 +162,59 @@ public class CaveTunnel
 
         var random = new System.Random(seed);
         var noise = new Noise1D(random, r1, r2, path.Count);
+        var rleDatas = new List<RLEDatas>();
+        var layer = new RLELayer();
 
         for (int i = 0; i < path.Count; i++)
         {
-            var tunnelRadius = noise.InterpolateClamped(i, CaveConfig.minTunnelRadius + 1, CaveConfig.maxTunnelRadius);
-            var sphere = SphereManager.GetSphere(path[i].ToVector3i(), tunnelRadius);
+            var tunnelRadius = noise.Interpolate(i);
+            var sphere = SphereManager.GetSphereLRE(path[i], tunnelRadius);
 
-            blocks.UnionWith(sphere.Select(pos => new CaveBlock(pos)));
+            rleDatas.AddRange(sphere);
         }
 
-        blocks.RemoveWhere(caveBlock =>
-                caveBlock.y <= CaveConfig.bedRockMargin
-            || (caveBlock.y + CaveConfig.terrainMargin) >= (int)heightMap.GetHeight(caveBlock.x, caveBlock.z)
-            || cachedPrefabs.IntersectWithPrefab(caveBlock.ToVector3i()));
+        foreach (var group in rleDatas.GroupBy(data => new Vector2i(data.x, data.z)))
+        {
+            var zxHash = CaveBlock.HashZX(group.Key.x, group.Key.y);
+            var layerHashes = group.Select(data => RLELayer.GetHashCode(data.yMin, data.yMax, 0));
+
+            if (!layers.ContainsKey(zxHash))
+                layers[zxHash] = new List<int>();
+
+            foreach (var layerHash in RLELayer.CompressLayers(layerHashes))
+            {
+                var terrainHeight = heightMap.GetHeight(group.Key.x, group.Key.y) - CaveConfig.terrainMargin;
+
+                layer.rawData = layerHash;
+                layer.Start = (byte)Utils.FastMax(layer.Start, CaveConfig.bedRockMargin);
+                layer.End = (byte)Utils.FastMin(layer.End, terrainHeight);
+
+                layers[zxHash].Add(layer.GetHashCode());
+            }
+        }
+
+        // blocks.RemoveWhere(caveBlock =>
+        //         caveBlock.y <= CaveConfig.bedRockMargin
+        //     || (caveBlock.y + CaveConfig.terrainMargin) >= (int)heightMap.GetHeight(caveBlock.x, caveBlock.z)
+        //     || cachedPrefabs.IntersectWithPrefab(caveBlock.ToVector3i()));
+    }
+
+    private IEnumerable<Vector3i> FindLocalMinimas()
+    {
+        for (int i = 1; i < path.Count - 1; i++)
+        {
+            if (IsLocalMinima(path, i))
+            {
+                yield return path[i];
+            }
+            else if (IsStartOfFlatMinimum(path, i))
+            {
+                if (IsFlatMinimum(path, ref i))
+                {
+                    yield return path[i];
+                }
+            }
+        }
     }
 
     public static IEnumerable<CaveBlock> CreateNaturalEntrance(Vector3i position, RawHeightMap heightMap)
@@ -222,20 +250,20 @@ public class CaveTunnel
             currentNode = currentNode.Parent;
         }
 
-        path.AddRange(points.Select(pos => new CaveBlock(pos)));
+        path.AddRange(points);
     }
 
-    private static bool IsLocalMinima(List<CaveBlock> path, int i)
+    private static bool IsLocalMinima(List<Vector3i> path, int i)
     {
         return path[i - 1].y > path[i].y && path[i].y < path[i + 1].y;
     }
 
-    private static bool IsStartOfFlatMinimum(List<CaveBlock> path, int i)
+    private static bool IsStartOfFlatMinimum(List<Vector3i> path, int i)
     {
         return path[i - 1].y > path[i].y && path[i].y == path[i + 1].y;
     }
 
-    private static bool IsFlatMinimum(List<CaveBlock> path, ref int i)
+    private static bool IsFlatMinimum(List<Vector3i> path, ref int i)
     {
 
         while (i < path.Count - 1 && path[i].y == path[i + 1].y)
