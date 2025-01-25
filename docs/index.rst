@@ -10,7 +10,6 @@ and offers a *simple* and *intuitive* API.
 .. how to :ref:`installation` the project.
 
 .. note::
-
     This project is under active development.
 
 Contents
@@ -19,7 +18,7 @@ Contents
 .. toctree::
     :maxdepth: 1
 
-    Home <self>
     project_overview
     prefab_editor
     prefab_guideline
+    technical_notes

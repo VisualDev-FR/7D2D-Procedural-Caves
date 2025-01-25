@@ -22,5 +22,7 @@
 py -m venv env
 env/scripts/activate
 pip install -r docs/requirements.txt
-sphinx-build -M html ./docs ./docs/_build/
+sphinx-autobuild docs docs/_build/html
 ```
+
+then documentation is available at [./docs/_build/html/index.html](./docs/_build/html/index.html)
