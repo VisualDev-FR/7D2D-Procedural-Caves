@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 
 public class CaveTunnel
@@ -16,6 +17,8 @@ public class CaveTunnel
 
     private readonly int worldSize;
 
+    public CaveTunnel() { }
+
     public CaveTunnel(GraphEdge edge, CavePrefabManager cachedPrefabs, RawHeightMap heightMap, int worldSize, int seed)
     {
         CaveNoise.pathingNoise.SetSeed(seed);
@@ -28,44 +31,36 @@ public class CaveTunnel
         ThickenTunnel(edge.node1, edge.node2, seed, cachedPrefabs);
     }
 
-    private void FindPath(GraphEdge edge, CavePrefabManager cachedPrefabs)
+    public void FindPath(GraphEdge edge, CavePrefabManager cachedPrefabs)
     {
-        var HalfWorldSize = CaveUtils.HalfWorldSize(worldSize);
-
-        var start = edge.node1.Normal(Utils.FastMax(5, edge.node1.NodeRadius));
-        var target = edge.node2.Normal(Utils.FastMax(5, edge.node2.NodeRadius));
-
-        if (cachedPrefabs.MinSqrDistanceToPrefab(start) == 0)
-        {
-            Logging.Warning($"'{edge.Prefab1.PrefabName}' ({start - HalfWorldSize}) intersect with another prefab");
-            return;
-        }
-
-        if (cachedPrefabs.MinSqrDistanceToPrefab(target) == 0)
-        {
-            Logging.Warning($"'{edge.Prefab2.PrefabName}' ({target - HalfWorldSize}) intersect with another prefab");
-            return;
-        }
+        var start = edge.node1.Normal(edge.node1.NodeRadius);
+        var target = edge.node2.Normal(edge.node2.NodeRadius);
 
         var startNode = new AstarNode(start);
         var goalNode = new AstarNode(target);
 
-        var queue = new HashedPriorityQueue<AstarNode>();
-        var visited = new HashSet<int>();
+        var midPoint = FindMidPoint(start, target, cachedPrefabs);
 
-        int bedRockMargin = CaveConfig.bedRockMargin + 1;
-        int terrainMargin = CaveConfig.terrainMargin + 1;
-        int sqrMinPrefabDistance = 25;
-        int neighborDistance = 1;
+        FindPath(startNode, midPoint, cachedPrefabs);
+        FindPath(goalNode, midPoint, cachedPrefabs);
+    }
+
+    public void FindPath(AstarNode startNode, Vector3i target, CavePrefabManager cachedPrefabs)
+    {
+        var queue = new HashSet<AstarNode>();
+        var visited = new HashSet<int>();
+        var targetHash = target.GetHashCode();
         int index = 0;
 
-        queue.Enqueue(startNode, float.MaxValue);
+        queue.Add(startNode);
 
-        while (queue.Count > 0 && index++ < 1_000_000)
+        while (queue.Count > 0 && index++ < 10_000)
         {
-            AstarNode currentNode = queue.Dequeue();
+            AstarNode currentNode = queue.First();
 
-            if (currentNode.Equals(goalNode))
+            queue.Remove(currentNode);
+
+            if (currentNode.hashcode == targetHash)
             {
                 ReconstructPath(currentNode);
                 return;
@@ -73,71 +68,65 @@ public class CaveTunnel
 
             visited.Add(currentNode.GetHashCode());
 
-            foreach (var neighborPos in GetAstarNeighbors(currentNode.position, target))
+            foreach (var neighborPos in AstarNeighbors(currentNode, target))
             {
-                if (
-                    neighborPos.y < bedRockMargin
-                    || neighborPos.y + terrainMargin > heightMap.GetHeight(neighborPos.x, neighborPos.z)
-                    || visited.Contains(neighborPos.GetHashCode()) // NOTE: AstarNode and Vector3i must have same hashcode function
-                ) continue;
-
-                float minDist = cachedPrefabs.MinSqrDistanceToPrefab(neighborPos);
-
-                if (minDist == 0)
-                {
+                if (neighborPos.y <= CaveConfig.bedRockMargin || neighborPos.y > 200 || cachedPrefabs.MinSqrDistanceToPrefab(neighborPos) < 36)
                     continue;
-                }
 
-                AstarNode neighbor = new AstarNode(neighborPos, currentNode);
-
-                int factor = 0;
-
-                if (minDist < sqrMinPrefabDistance) factor += 1;
-
-                float tentativeGCost = currentNode.GCost + (neighborDistance << factor);
-
-                if (tentativeGCost < neighbor.GCost || !queue.Contains(neighbor))
-                {
-                    neighbor.GCost = tentativeGCost;
-                    neighbor.HCost = CaveUtils.SqrEuclidianDistInt32(neighbor.position, goalNode.position) << factor;
-
-                    if (!queue.Contains(neighbor))
-                    {
-                        queue.Enqueue(neighbor, neighbor.FCost);
-                    }
-                }
+                queue.Add(new AstarNode(neighborPos, currentNode));
+                break;
             }
         }
 
-        // reaching here mean no path was found
-        var height1 = heightMap.GetHeight(start.x, start.z);
-        var height2 = heightMap.GetHeight(target.x, target.z);
-
-        var p1 = start - HalfWorldSize;
-        var p2 = target - HalfWorldSize;
-
-        Logging.Warning($"No Path found from '{edge.Prefab1.PrefabName}' ({p1} / {height1}) to '{edge.Prefab2.PrefabName}' ({p2} / ({height2})) after {index} iterations ");
+        Logging.Warning($"No Path found from {startNode.position} to {target}");
     }
 
-    private IEnumerable<Vector3i> GetAstarNeighbors(Vector3i position, Vector3i target)
+    public Vector3i FindMidPoint(Vector3i p1, Vector3i p2, CavePrefabManager cachedPrefabs)
     {
-        if (CaveUtils.SqrEuclidianDist(position, target) < 100)
+        var dx = 10;
+
+        for (int i = 0; i < 100; i++)
+        {
+            var midPoint = new Vector3i(
+                p1.x + ((p2.x - p1.x) >> 1) + random.Next(-dx, dx + 1),
+                p1.y + ((p2.y - p1.y) >> 1) + random.Next(-dx, dx + 1),
+                p1.z + ((p2.z - p1.z) >> 1) + random.Next(-dx, dx + 1)
+            );
+
+            if (cachedPrefabs.MinSqrDistanceToPrefab(midPoint) > 100)
+            {
+                return midPoint;
+            }
+        }
+
+        return Vector3i.zero;
+    }
+
+    private IEnumerable<Vector3i> AstarNeighbors(AstarNode node, Vector3i target)
+    {
+        var dist = CaveUtils.SqrEuclidianDist(node.position, target);
+
+        if (dist < 100)
         {
             yield return target;
             yield break;
         }
 
-        var dx = 5;
+        Vector3 direction = node.Parent is null ? node.direction : (target - node.position).ToVector3().normalized;
+        Vector3 result;
+
+        var dx = 10;
         var dy = 2;
-        var neighbor = Vector3i.zero;
 
-        foreach (var offset in CaveUtils.offsetsHorizontal8)
+        for (int i = 0; i < 100; i++)
         {
-            neighbor.x = position.x + offset.x * random.Next(-dx, dx + 1);
-            neighbor.z = position.z + offset.z * random.Next(-dx, dx + 1);
-            neighbor.y = position.y + random.Next(-dy, dy + 1);
+            Vector3 pointOnLine = node.position + random.Next(2, 10) * direction;
 
-            yield return neighbor;
+            result.x = pointOnLine.x + random.Next(-dx, dx + 1);
+            result.z = pointOnLine.z + random.Next(-dx, dx + 1);
+            result.y = pointOnLine.y + random.Next(-dy, dy + 1);
+
+            yield return new Vector3i(result);
         }
     }
 

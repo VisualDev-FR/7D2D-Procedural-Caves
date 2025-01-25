@@ -14,14 +14,14 @@ public class CmdCave : CmdAbstract
 
     public override void Execute(List<string> args)
     {
-        int worldSize = 1024;
+        int worldSize = 4096;
         int seed = 1337;
         int prefabCount = worldSize / 5;
 
         var timer = CaveUtils.StartTimer();
         var prefabs = PrefabLoader.LoadPrefabs().Values.ToList();
         var cachedPrefabs = new CavePrefabManager(worldSize);
-        var rand = new System.Random(seed);
+        var rand = new Random(seed);
         var heightMap = new RawHeightMap(worldSize, 128);
 
         cachedPrefabs.AddRandomPrefabs(rand, heightMap, prefabCount, prefabs);
