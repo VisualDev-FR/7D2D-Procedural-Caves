@@ -3,6 +3,8 @@
 .vscode
 .vs
 obj
+/obj
+/libs
 *.zip
 *.dll
 *.pdb
