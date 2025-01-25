@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 
 public class CaveTunnel
@@ -77,7 +78,7 @@ public class CaveTunnel
             }
         }
 
-        Logging.Warning($"No Path found");
+        Logging.Warning($"No Path found from {startNode.position} to {target}");
     }
 
     public Vector3i FindMidPoint(Vector3i p1, Vector3i p2, CavePrefabManager cachedPrefabs)
