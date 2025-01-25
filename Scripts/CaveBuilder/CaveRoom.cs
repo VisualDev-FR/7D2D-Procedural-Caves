@@ -126,20 +126,26 @@ public class CaveRoom
 
     private void SetSphere(Vector3i center, int radius)
     {
-        throw new NotImplementedException();
-        // foreach (var hashcode in SphereManager.spheresMapping[radius])
-        // {
-        //     var position = SphereManager.spheres[hashcode];
+        var layer = new RLELayer();
 
-        //     int x = center.x + position.x;
-        //     int y = center.y + position.y;
-        //     int z = center.z + position.z;
+        foreach (var layerData in SphereManager.GetSphereLRE(center, radius))
+        {
+            int x = layerData.x;
+            int z = layerData.z;
 
-        //     if (x >= 0 && y >= 0 && z >= 0 && x < size.x && y < size.y && z < size.z)
-        //     {
-        //         map[x, y, z] = true;
-        //     }
-        // }
+            if (x < 0 || x >= size.x || z < 0 || z >= size.z)
+                continue;
+
+            layer.rawData = layerData.zxHash;
+
+            for (int y = layer.Start; y <= layer.End; y++)
+            {
+                if (y > 0 && y < size.y)
+                {
+                    map[x, y, z] = true;
+                }
+            }
+        }
     }
 
     private void SmoothMap()

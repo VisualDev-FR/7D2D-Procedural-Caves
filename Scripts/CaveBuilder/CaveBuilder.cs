@@ -94,6 +94,8 @@ public class CaveBuilder
         if (worldBuilder.IsCanceled)
             yield break;
 
+        SphereManager.InitSpheres(10);
+
         var timer = CaveUtils.StartTimer();
         var memoryBefore = GC.GetTotalMemory(true);
 
