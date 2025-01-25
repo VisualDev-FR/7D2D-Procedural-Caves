@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -9,8 +10,15 @@ public class CmdSphere : CmdAbstract
     }
 
     public override void Execute(List<string> args)
-    {
+   {
+        /* before:
+            [Cave] radius: 25, count: 65117
+            [Cave] timer: 3588ms, memory: 5,1MB
+        */
         var voxels = new HashSet<Voxell>();
+        var memoryBefore = GC.GetTotalMemory(true);
+
+        SphereManager.InitSpheres(10);
 
         for (int i = CaveConfig.minTunnelRadius; i <= CaveConfig.maxTunnelRadius; i++)
         {
@@ -19,8 +27,7 @@ public class CmdSphere : CmdAbstract
 
             var timer = CaveUtils.StartTimer();
             var position = new Vector3i(pos, 20, 20);
-            var caveBlock = new CaveBlock(position);
-            var sphere = SphereManager.GetSphere(caveBlock.ToVector3i(), radius);
+            var sphere = SphereManager.GetSphere(position, radius);
 
             Logging.Info($"radius: {radius}, blocks: {sphere.ToList().Count}, timer: {timer.ElapsedMilliseconds} ms");
 
@@ -29,6 +36,9 @@ public class CmdSphere : CmdAbstract
                 voxels.Add(new Voxell(block.x, block.y, block.z));
             }
         }
+
+        Logging.Debug("------------------------");
+        Logging.Debug($"memory: {CaveUtils.TotalMemoryKB(memoryBefore)}");
 
         DrawingUtils.GenerateObjFile("sphere.obj", voxels, false);
     }

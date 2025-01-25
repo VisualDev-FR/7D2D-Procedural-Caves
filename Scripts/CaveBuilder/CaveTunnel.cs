@@ -180,7 +180,7 @@ public class CaveTunnel
             var tunnelRadius = noise.InterpolateClamped(i, CaveConfig.minTunnelRadius + 1, CaveConfig.maxTunnelRadius);
             var sphere = SphereManager.GetSphere(path[i].ToVector3i(), tunnelRadius);
 
-            blocks.UnionWith(sphere);
+            blocks.UnionWith(sphere.Select(pos => new CaveBlock(pos)));
         }
 
         blocks.RemoveWhere(caveBlock =>
@@ -196,7 +196,8 @@ public class CaveTunnel
         while (position.y < heightMap.GetHeight(position.x, position.z))
         {
             position.y += 1;
-            entranceTunnel.UnionWith(SphereManager.GetSphere(position, 2));
+            var blocks = SphereManager.GetSphere(position, 2).Select(pos => new CaveBlock(pos));
+            entranceTunnel.UnionWith(blocks);
         }
 
         foreach (var block in entranceTunnel.Where(block => block.y <= heightMap.GetHeight(block.x, block.z)))
@@ -204,6 +205,7 @@ public class CaveTunnel
             block.skipDecoration = true;
             yield return block;
         }
+
     }
 
     private void ReconstructPath(AstarNode currentNode)

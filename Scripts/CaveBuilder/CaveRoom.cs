@@ -126,19 +126,20 @@ public class CaveRoom
 
     private void SetSphere(Vector3i center, int radius)
     {
-        foreach (var hashcode in SphereManager.spheresMapping[radius])
-        {
-            var position = SphereManager.spheres[hashcode];
+        throw new NotImplementedException();
+        // foreach (var hashcode in SphereManager.spheresMapping[radius])
+        // {
+        //     var position = SphereManager.spheres[hashcode];
 
-            int x = center.x + position.x;
-            int y = center.y + position.y;
-            int z = center.z + position.z;
+        //     int x = center.x + position.x;
+        //     int y = center.y + position.y;
+        //     int z = center.z + position.z;
 
-            if (x >= 0 && y >= 0 && z >= 0 && x < size.x && y < size.y && z < size.z)
-            {
-                map[x, y, z] = true;
-            }
-        }
+        //     if (x >= 0 && y >= 0 && z >= 0 && x < size.x && y < size.y && z < size.z)
+        //     {
+        //         map[x, y, z] = true;
+        //     }
+        // }
     }
 
     private void SmoothMap()
