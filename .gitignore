@@ -1,4 +1,5 @@
 /env
+/build
 /docs/_build
 .vscode
 .vs

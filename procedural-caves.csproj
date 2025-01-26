@@ -102,6 +102,7 @@
     <ItemGroup>
         <Compile Include=".\**\*.cs" />
         <Compile Remove=".\**\Tests\**\*" />
+        <Compile Remove=".\**\build\**\*" />
         <Compile Remove=".\**\obj\**\*" />
         <Compile Remove=".\**\ignore\**\*" />
         <Compile Remove=".\**\bin\**\*" />

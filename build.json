@@ -1,0 +1,13 @@
+{
+    "name": "TheDescent",
+    "csproj": "procedural-caves.csproj",
+    "include": [
+        "Config",
+        "UIAtlases"
+    ],
+    "dependencies": [
+        "../7D2D-cave-lights",
+        "../7D2D-cave-assets",
+        "../7D2D-cave-prefabs"
+    ]
+}
