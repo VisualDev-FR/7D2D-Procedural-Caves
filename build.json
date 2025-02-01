@@ -2,12 +2,15 @@
     "name": "TheDescent",
     "csproj": "procedural-caves.csproj",
     "include": [
+        "ModInfo.xml",
+        "README.md",
+        "Licence.txt",
         "Config",
         "UIAtlases"
     ],
     "dependencies": [
-        "../7D2D-cave-lights",
-        "../7D2D-cave-assets",
+        "../7D2D-cave-lights/cave-lights.zip",
+        "../7D2D-cave-assets/cave-assets.zip",
         "../7D2D-cave-prefabs"
     ]
 }
