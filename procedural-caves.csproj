@@ -100,13 +100,8 @@
 
     <!-- scripts -->
     <ItemGroup>
-        <Compile Include=".\**\*.cs" />
-        <Compile Remove=".\**\Tests\**\*" />
-        <Compile Remove=".\**\build\**\*" />
-        <Compile Remove=".\**\obj\**\*" />
-        <Compile Remove=".\**\ignore\**\*" />
-        <Compile Remove=".\**\bin\**\*" />
-        <Compile Remove=".\**\Properties\**\*" />
+        <Compile Include=".\Scripts\**\*.cs" />
+        <Compile Include=".\Harmony\**\*.cs" />
     </ItemGroup>
 
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
