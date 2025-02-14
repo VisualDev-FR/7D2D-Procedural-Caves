@@ -6,7 +6,7 @@ using UnityEngine;
 [HarmonyPatch(typeof(SpawnManagerBiomes), "Update")]
 public class SpawnManagerBiomes_Update
 {
-    private static readonly Logging.Logger logger = Logging.CreateLogger($"CaveSpawnManager");
+    private static readonly Logging.Logger logger = Logging.CreateLogger($"H_SpawnManagerBiomes_Update");
 
     private static SpawnManagerBiomes spawnManagerBiome;
 
@@ -130,6 +130,7 @@ public class SpawnManagerBiomes_Update
 
         return false;
     }
+
     public static void ResetRespawn(ChunkAreaBiomeSpawnData _spawnData, BiomeSpawnEntityGroupData biomeSpawnEntityGroupData, int _idHash, int _maxCount)
     {
         var _world = GameManager.Instance.World;

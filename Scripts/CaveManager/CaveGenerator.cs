@@ -14,13 +14,16 @@ public class CaveGenerator
 
     public static bool isEnabled = false;
 
-    public static void Init(string worldName)
+    public static int worldSize;
+
+    public static void Init()
     {
+        string worldName = GamePrefs.GetString(EnumGamePrefs.GameWorld);
         string caveMapDir = $"{GameIO.GetWorldDir(worldName)}/cavemap";
 
         if (Directory.Exists(caveMapDir))
         {
-            int worldSize = GetWorldSize(worldName);
+            worldSize = GetWorldSize(worldName);
             caveChunksProvider = new CaveChunksProvider(worldName, worldSize);
             HalfWorldSize = CaveUtils.HalfWorldSize(worldSize);
             isEnabled = true;
@@ -54,6 +57,7 @@ public class CaveGenerator
             throw new Exception("World Size not found!");
         }
     }
+
 
     public static void GenerateCaveChunk(Chunk chunk)
     {
@@ -271,7 +275,7 @@ public class CaveGenerator
         return true;
     }
 
-    public static bool CanPlaceFloorDecoration(Chunk chunk, BlockValue blockValue, Vector3i worldPos, HashSet<Vector3i> decoratedPositions)
+    private static bool CanPlaceFloorDecoration(Chunk chunk, BlockValue blockValue, Vector3i worldPos, HashSet<Vector3i> decoratedPositions)
     {
         var bounds = GetRotatedBlockBounds(blockValue, worldPos);
 

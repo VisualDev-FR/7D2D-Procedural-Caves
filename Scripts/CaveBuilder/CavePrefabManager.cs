@@ -74,7 +74,7 @@ public class CavePrefabManager
 
         var overlapingChunks = prefab.GetOverlappingChunks().ToList();
 
-        Logging.Info($"AddPrefab '{prefab.PrefabName}' at {prefab.position - CaveUtils.HalfWorldSize(worldSize)}, overlappingChunks: {overlapingChunks.Count()}");
+        // Logging.Info($"AddPrefab '{prefab.PrefabName}' at {prefab.position - CaveUtils.HalfWorldSize(worldSize)}, overlappingChunks: {overlapingChunks.Count()}");
 
         if (overlapingChunks.Count == 0)
         {
