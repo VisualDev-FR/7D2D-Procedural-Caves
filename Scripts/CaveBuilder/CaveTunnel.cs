@@ -15,8 +15,6 @@ public class CaveTunnel
 
     private readonly RawHeightMap heightMap;
 
-    private readonly int worldSize;
-
     public CaveTunnel() { }
 
     public CaveTunnel(GraphEdge edge, CavePrefabManager cachedPrefabs, RawHeightMap heightMap, int worldSize, int seed)
@@ -25,7 +23,6 @@ public class CaveTunnel
 
         this.random = new System.Random(seed);
         this.heightMap = heightMap;
-        this.worldSize = worldSize;
 
         FindPath(edge, cachedPrefabs);
         ThickenTunnel(edge.node1, edge.node2, seed, cachedPrefabs);

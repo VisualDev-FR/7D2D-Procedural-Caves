@@ -15,6 +15,7 @@ public static class Program
         new CmdRegion(),
         new CmdRoom(),
         new CmdSphere(),
+        new CmdTunnel(),
     };
 
     public static void Main(string[] args)

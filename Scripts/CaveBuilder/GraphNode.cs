@@ -108,6 +108,13 @@ public class GraphNode
         }
     }
 
+    public int GetMarkerRadius(Prefab.Marker marker)
+    {
+        int radius = Utils.FastMax(5, CaveUtils.FastMax(marker.size.x, marker.size.z, marker.size.y) / 2);
+
+        return radius;
+    }
+
     public IEnumerable<CaveBlock> GetSphere()
     {
         if (prefab.isNaturalEntrance)
@@ -127,7 +134,7 @@ public class GraphNode
 
         var markerStart = prefab.position + marker.start;
         var markerEnd = markerStart + marker.size;
-        var radius = Utils.FastMax(5, CaveUtils.FastMax(marker.size.x, marker.size.z, marker.size.y) / 2);
+        var radius = GetMarkerRadius(marker);
         var sqrRadius = radius * radius;
 
         CaveUtils.Assert(radius >= 5, $"marker radius should be over 5: {radius}");
