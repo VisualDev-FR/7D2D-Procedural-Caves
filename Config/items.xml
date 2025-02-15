@@ -215,7 +215,7 @@
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
             <property name="Material" value="MresourceScrapLeadSmall" />
             <property name="Stacknumber" value="1" />
-            <property name="EconomicValue" value="1275" />
+            <property name="EconomicValue" value="2500" /> <!-- target: 500 -->
             <property name="Group" value="Resources" />
         </item>
 
@@ -225,7 +225,7 @@
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
             <property name="Material" value="MresourceScrapLeadSmall" />
             <property name="Stacknumber" value="10" />
-            <property name="EconomicValue" value="175" />
+            <property name="EconomicValue" value="250" /> <!-- target: 50 / item -->
             <property name="Group" value="Resources" />
         </item>
 
@@ -235,7 +235,7 @@
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
             <property name="Material" value="MresourceScrapLeadSmall" />
             <property name="Stacknumber" value="10" />
-            <property name="EconomicValue" value="175" />
+            <property name="EconomicValue" value="250" />
             <property name="Group" value="Resources" />
         </item>
 
@@ -245,7 +245,7 @@
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
             <property name="Material" value="MresourceScrapLeadSmall" />
             <property name="Stacknumber" value="10" />
-            <property name="EconomicValue" value="175" />
+            <property name="EconomicValue" value="250" />
             <property name="Group" value="Resources" />
         </item>
 
@@ -255,7 +255,7 @@
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
             <property name="Material" value="MresourceScrapLeadSmall" />
             <property name="Stacknumber" value="10" />
-            <property name="EconomicValue" value="175" />
+            <property name="EconomicValue" value="250" />
             <property name="Group" value="Resources" />
         </item>
 
@@ -265,7 +265,7 @@
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
             <property name="Material" value="MresourceScrapLeadSmall" />
             <property name="Stacknumber" value="10" />
-            <property name="EconomicValue" value="175" />
+            <property name="EconomicValue" value="250" />
             <property name="Group" value="Resources" />
         </item>
 
@@ -276,7 +276,7 @@
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
             <property name="Material" value="MresourceScrapLeadSmall" />
             <property name="Stacknumber" value="1" />
-            <property name="EconomicValue" value="1275" />
+            <property name="EconomicValue" value="6375" /> <!-- target: 1275 -->
             <property name="Group" value="Resources" />
         </item>
 
@@ -286,7 +286,7 @@
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
             <property name="Material" value="MresourceScrapLeadSmall" />
             <property name="Stacknumber" value="10" />
-            <property name="EconomicValue" value="175" />
+            <property name="EconomicValue" value="875" /> <!-- target: 175 / item -->
             <property name="Group" value="Resources" />
         </item>
 
@@ -296,7 +296,7 @@
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
             <property name="Material" value="MresourceScrapLeadSmall" />
             <property name="Stacknumber" value="10" />
-            <property name="EconomicValue" value="175" />
+            <property name="EconomicValue" value="875" />
             <property name="Group" value="Resources" />
         </item>
 
@@ -306,7 +306,7 @@
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
             <property name="Material" value="MresourceScrapLeadSmall" />
             <property name="Stacknumber" value="10" />
-            <property name="EconomicValue" value="175" />
+            <property name="EconomicValue" value="875" />
             <property name="Group" value="Resources" />
         </item>
 
@@ -316,7 +316,7 @@
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
             <property name="Material" value="MresourceScrapLeadSmall" />
             <property name="Stacknumber" value="10" />
-            <property name="EconomicValue" value="175" />
+            <property name="EconomicValue" value="875" />
             <property name="Group" value="Resources" />
         </item>
 
@@ -326,7 +326,7 @@
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
             <property name="Material" value="MresourceScrapLeadSmall" />
             <property name="Stacknumber" value="10" />
-            <property name="EconomicValue" value="175" />
+            <property name="EconomicValue" value="875" />
             <property name="Group" value="Resources" />
         </item>
 
@@ -336,8 +336,8 @@
             <property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab" />
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
             <property name="Material" value="MresourceScrapLeadSmall" />
-            <property name="Stacknumber" value="10" />
-            <property name="EconomicValue" value="175" />
+            <property name="Stacknumber" value="1" />
+            <property name="EconomicValue" value="2500" /> <!-- target: 500 -->
             <property name="Group" value="Resources" />
         </item>
 
@@ -347,7 +347,7 @@
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
             <property name="Material" value="MresourceScrapLeadSmall" />
             <property name="Stacknumber" value="10" />
-            <property name="EconomicValue" value="175" />
+            <property name="EconomicValue" value="250" /> <!-- target: 50 / item -->
             <property name="Group" value="Resources" />
         </item>
 
@@ -357,7 +357,7 @@
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
             <property name="Material" value="MresourceScrapLeadSmall" />
             <property name="Stacknumber" value="10" />
-            <property name="EconomicValue" value="175" />
+            <property name="EconomicValue" value="250" />
             <property name="Group" value="Resources" />
         </item>
 
@@ -367,7 +367,7 @@
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
             <property name="Material" value="MresourceScrapLeadSmall" />
             <property name="Stacknumber" value="10" />
-            <property name="EconomicValue" value="175" />
+            <property name="EconomicValue" value="250" />
             <property name="Group" value="Resources" />
         </item>
 
@@ -377,7 +377,7 @@
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
             <property name="Material" value="MresourceScrapLeadSmall" />
             <property name="Stacknumber" value="10" />
-            <property name="EconomicValue" value="175" />
+            <property name="EconomicValue" value="250" />
             <property name="Group" value="Resources" />
         </item>
 
@@ -387,28 +387,18 @@
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
             <property name="Material" value="MresourceScrapLeadSmall" />
             <property name="Stacknumber" value="10" />
-            <property name="EconomicValue" value="175" />
+            <property name="EconomicValue" value="250" />
             <property name="Group" value="Resources" />
         </item>
 
         <!-- jewels -->
-        <item name="jewelCollection">
-            <property name="CustomIcon" value="jewelCollection" />
-            <property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab" />
-            <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
-            <property name="Material" value="MresourceScrapLeadSmall" />
-            <property name="Stacknumber" value="10" />
-            <property name="EconomicValue" value="175" />
-            <property name="Group" value="Resources" />
-        </item>
-
         <item name="jewel01">
             <property name="CustomIcon" value="jewel01" />
             <property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab" />
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
             <property name="Material" value="MresourceScrapLeadSmall" />
-            <property name="Stacknumber" value="10" />
-            <property name="EconomicValue" value="175" />
+            <property name="Stacknumber" value="5" />
+            <property name="EconomicValue" value="1250" /> <!-- target: 250 / item -->
             <property name="Group" value="Resources" />
         </item>
 
@@ -417,8 +407,8 @@
             <property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab" />
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
             <property name="Material" value="MresourceScrapLeadSmall" />
-            <property name="Stacknumber" value="10" />
-            <property name="EconomicValue" value="175" />
+            <property name="Stacknumber" value="5" />
+            <property name="EconomicValue" value="1250" />
             <property name="Group" value="Resources" />
         </item>
 
@@ -427,8 +417,8 @@
             <property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab" />
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
             <property name="Material" value="MresourceScrapLeadSmall" />
-            <property name="Stacknumber" value="10" />
-            <property name="EconomicValue" value="175" />
+            <property name="Stacknumber" value="5" />
+            <property name="EconomicValue" value="1250" />
             <property name="Group" value="Resources" />
         </item>
 
@@ -437,8 +427,8 @@
             <property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab" />
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
             <property name="Material" value="MresourceScrapLeadSmall" />
-            <property name="Stacknumber" value="10" />
-            <property name="EconomicValue" value="175" />
+            <property name="Stacknumber" value="5" />
+            <property name="EconomicValue" value="1250" />
             <property name="Group" value="Resources" />
         </item>
 
@@ -447,8 +437,8 @@
             <property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab" />
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
             <property name="Material" value="MresourceScrapLeadSmall" />
-            <property name="Stacknumber" value="10" />
-            <property name="EconomicValue" value="175" />
+            <property name="Stacknumber" value="5" />
+            <property name="EconomicValue" value="1250" />
             <property name="Group" value="Resources" />
         </item>
 
@@ -458,8 +448,8 @@
             <property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab" />
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
             <property name="Material" value="MresourceRockSmall" />
-            <property name="Stacknumber" value="10" />
-            <property name="EconomicValue" value="175" />
+            <property name="Stacknumber" value="1" />
+            <property name="EconomicValue" value="6250" /> <!-- target: 1250 -->
             <property name="Group" value="Resources" />
         </item>
 
@@ -469,7 +459,7 @@
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
             <property name="Material" value="MresourceRockSmall" />
             <property name="Stacknumber" value="10" />
-            <property name="EconomicValue" value="175" />
+            <property name="EconomicValue" value="125" /> <!-- target: 25 / item -->
             <property name="Group" value="Resources" />
         </item>
 
@@ -479,7 +469,7 @@
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
             <property name="Material" value="MresourceRockSmall" />
             <property name="Stacknumber" value="10" />
-            <property name="EconomicValue" value="175" />
+            <property name="EconomicValue" value="125" />
             <property name="Group" value="Resources" />
         </item>
 
@@ -489,7 +479,7 @@
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
             <property name="Material" value="MresourceRockSmall" />
             <property name="Stacknumber" value="10" />
-            <property name="EconomicValue" value="175" />
+            <property name="EconomicValue" value="125" />
             <property name="Group" value="Resources" />
         </item>
 
@@ -499,7 +489,7 @@
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
             <property name="Material" value="MresourceRockSmall" />
             <property name="Stacknumber" value="10" />
-            <property name="EconomicValue" value="175" />
+            <property name="EconomicValue" value="125" />
             <property name="Group" value="Resources" />
         </item>
 
@@ -509,7 +499,7 @@
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
             <property name="Material" value="MresourceRockSmall" />
             <property name="Stacknumber" value="10" />
-            <property name="EconomicValue" value="175" />
+            <property name="EconomicValue" value="125" />
             <property name="Group" value="Resources" />
         </item>
 
@@ -519,8 +509,8 @@
             <property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab" />
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
             <property name="Material" value="MresourceScrapBrassLarge" />
-            <property name="Stacknumber" value="10" />
-            <property name="EconomicValue" value="175" />
+            <property name="Stacknumber" value="1" />
+            <property name="EconomicValue" value="12500" /> <!-- target: 2500 -->
             <property name="Group" value="Resources" />
         </item>
 
@@ -530,7 +520,7 @@
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
             <property name="Material" value="MresourceScrapBrassSmall" />
             <property name="Stacknumber" value="100" />
-            <property name="EconomicValue" value="175" />
+            <property name="EconomicValue" value="125" /> <!-- target: 25 / item -->
             <property name="Group" value="Resources" />
         </item>
 
@@ -540,7 +530,7 @@
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
             <property name="Material" value="MresourceScrapBrassSmall" />
             <property name="Stacknumber" value="100" />
-            <property name="EconomicValue" value="175" />
+            <property name="EconomicValue" value="125" />
             <property name="Group" value="Resources" />
         </item>
 
@@ -550,7 +540,7 @@
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
             <property name="Material" value="MresourceScrapBrassSmall" />
             <property name="Stacknumber" value="100" />
-            <property name="EconomicValue" value="175" />
+            <property name="EconomicValue" value="125" />
             <property name="Group" value="Resources" />
         </item>
 
@@ -560,7 +550,7 @@
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
             <property name="Material" value="MresourceScrapBrassSmall" />
             <property name="Stacknumber" value="100" />
-            <property name="EconomicValue" value="175" />
+            <property name="EconomicValue" value="125" />
             <property name="Group" value="Resources" />
         </item>
 
@@ -570,28 +560,18 @@
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
             <property name="Material" value="MresourceScrapBrassSmall" />
             <property name="Stacknumber" value="100" />
-            <property name="EconomicValue" value="175" />
+            <property name="EconomicValue" value="125" />
             <property name="Group" value="Resources" />
         </item>
 
         <!-- geodes -->
-        <item name="geodeCollection">
-            <property name="CustomIcon" value="geodeCollection" />
-            <property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab" />
-            <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
-            <property name="Material" value="MresourceRockSmall" />
-            <property name="Stacknumber" value="10" />
-            <property name="EconomicValue" value="175" />
-            <property name="Group" value="Resources" />
-        </item>
-
         <item name="geode01">
             <property name="CustomIcon" value="geode01" />
             <property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab" />
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
             <property name="Material" value="MresourceRockSmall" />
             <property name="Stacknumber" value="20" />
-            <property name="EconomicValue" value="175" />
+            <property name="EconomicValue" value="250" /> <!-- target: 50 / item -->
             <property name="Group" value="Resources" />
         </item>
 
@@ -601,7 +581,7 @@
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
             <property name="Material" value="MresourceRockSmall" />
             <property name="Stacknumber" value="20" />
-            <property name="EconomicValue" value="175" />
+            <property name="EconomicValue" value="250" />
             <property name="Group" value="Resources" />
         </item>
 
@@ -611,7 +591,7 @@
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
             <property name="Material" value="MresourceRockSmall" />
             <property name="Stacknumber" value="20" />
-            <property name="EconomicValue" value="175" />
+            <property name="EconomicValue" value="250" />
             <property name="Group" value="Resources" />
         </item>
 
@@ -621,7 +601,7 @@
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
             <property name="Material" value="MresourceRockSmall" />
             <property name="Stacknumber" value="20" />
-            <property name="EconomicValue" value="175" />
+            <property name="EconomicValue" value="250" />
             <property name="Group" value="Resources" />
         </item>
 
@@ -631,7 +611,7 @@
             <property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab" />
             <property name="Material" value="MresourceRockSmall" />
             <property name="Stacknumber" value="20" />
-            <property name="EconomicValue" value="175" />
+            <property name="EconomicValue" value="250" />
             <property name="Group" value="Resources" />
         </item>
 

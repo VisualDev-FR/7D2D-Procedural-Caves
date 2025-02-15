@@ -70,19 +70,11 @@
         </recipe>
 
         <recipe name="armyMedalCollection" count="1" craft_time="180" craft_exp_gain="1000" always_unlocked="true">
-            <ingredient name="armyMedal01" count="5" />
-            <ingredient name="armyMedal02" count="5" />
-            <ingredient name="armyMedal03" count="5" />
-            <ingredient name="armyMedal04" count="5" />
-            <ingredient name="armyMedal05" count="5" />
-        </recipe>
-
-        <recipe name="jewelCollection" count="1" craft_time="180" craft_exp_gain="1000" always_unlocked="true">
-            <ingredient name="jewel01" count="5" />
-            <ingredient name="jewel02" count="5" />
-            <ingredient name="jewel03" count="5" />
-            <ingredient name="jewel04" count="5" />
-            <ingredient name="jewel05" count="5" />
+            <ingredient name="armyMedal01" count="1" />
+            <ingredient name="armyMedal02" count="1" />
+            <ingredient name="armyMedal03" count="1" />
+            <ingredient name="armyMedal04" count="1" />
+            <ingredient name="armyMedal05" count="1" />
         </recipe>
 
         <recipe name="fossilCollection" count="1" craft_time="180" craft_exp_gain="1000" always_unlocked="true">
