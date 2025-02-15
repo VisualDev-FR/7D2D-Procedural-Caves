@@ -64,7 +64,7 @@ public class AIDirectorBloodMoonParty_SpawnZombie
         AstarManager.Instance.AddLocation(spawnPos, 40);
         var (day, hour, minute) = GameUtils.WorldTimeToElements(world.worldTime);
 
-        Logging.Info($"BloodMoonParty: SpawnZombie grp {Instance.partySpawner}, cnt {Instance.zombies.Count}, {entityEnemy.EntityName}, loot {entityEnemy.lootDropProb}, at player {target.entityId}, day/time {day} {hour:D2}:{minute:D2}");
+        logger.Info($"SpawnZombie grp {Instance.partySpawner}, cnt {Instance.zombies.Count}, {entityEnemy.EntityName}, loot {entityEnemy.lootDropProb}, at player {target.entityId}, day/time {day} {hour:D2}:{minute:D2}");
         return true;
     }
 }

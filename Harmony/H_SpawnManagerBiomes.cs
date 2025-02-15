@@ -6,7 +6,7 @@ using UnityEngine;
 [HarmonyPatch(typeof(SpawnManagerBiomes), "Update")]
 public class SpawnManagerBiomes_Update
 {
-    private static readonly Logging.Logger logger = Logging.CreateLogger($"H_SpawnManagerBiomes_Update");
+    private static readonly Logging.Logger logger = Logging.CreateLogger($"H_SpawnManagerBiomes_Update", LoggingLevel.INFO);
 
     private static SpawnManagerBiomes spawnManagerBiome;
 
@@ -64,40 +64,94 @@ public class SpawnManagerBiomes_Update
         var eDaytime = world.IsDaytime() ? EDaytime.Day : EDaytime.Night;
         var gameRandom = world.GetGameRandom();
 
+        if (!_spawnData.checkedPOITags)
+        {
+            _spawnData.checkedPOITags = true;
+            FastTags<TagGroup.Poi> none = FastTags<TagGroup.Poi>.none;
+            Vector3i worldPos = _spawnData.chunk.GetWorldPos();
+            world.GetPOIsAtXZ(worldPos.x + 16, worldPos.x + 80 - 16, worldPos.z + 16, worldPos.z + 80 - 16, spawnManagerBiome.spawnPIs);
+            for (int j = 0; j < spawnManagerBiome.spawnPIs.Count; j++)
+            {
+                PrefabInstance prefabInstance = spawnManagerBiome.spawnPIs[j];
+                none |= prefabInstance.prefab.Tags;
+            }
+            _spawnData.poiTags = none;
+            bool isEmpty = none.IsEmpty;
+            for (int k = 0; k < biomeSpawnEntityGroupList.list.Count; k++)
+            {
+                BiomeSpawnEntityGroupData biomeSpawnEntityGroupData = biomeSpawnEntityGroupList.list[k];
+                if ((biomeSpawnEntityGroupData.POITags.IsEmpty || biomeSpawnEntityGroupData.POITags.Test_AnySet(none)) && (isEmpty || biomeSpawnEntityGroupData.noPOITags.IsEmpty || !biomeSpawnEntityGroupData.noPOITags.Test_AnySet(none)))
+                {
+                    _spawnData.groupsEnabledFlags |= 1 << k;
+                }
+            }
+        }
+
         int idHash = 0;
         int groupIndex = -1;
         int currentIndex = gameRandom.RandomRange(biomeSpawnEntityGroupList.list.Count);
         int maxTries = Utils.FastMin(5, biomeSpawnEntityGroupList.list.Count);
+        int currentTrie = 0;
 
-        for (int i = 0; i < maxTries; i++)
+        while (currentTrie < maxTries)
         {
+            BiomeSpawnEntityGroupData biomeSpawnEntityGroupData2 = biomeSpawnEntityGroupList.list[currentIndex];
+
+            bool groupEnabled = (_spawnData.groupsEnabledFlags & (1 << currentIndex)) != 0;
+            bool dayTime = biomeSpawnEntityGroupData2.daytime == EDaytime.Any || biomeSpawnEntityGroupData2.daytime == eDaytime;
+
+            logger.Debug("");
+            logger.Debug($"groupName: {biomeSpawnEntityGroupData2.entityGroupName}");
+            logger.Debug($"groupEnabled: {groupEnabled}, dayTime: {dayTime}");
+
+            if (groupEnabled && dayTime)
+            {
+                bool isEnemyGroup = EntityGroups.IsEnemyGroup(biomeSpawnEntityGroupData2.entityGroupName);
+
+                if (!isEnemyGroup || _isSpawnEnemy)
+                {
+                    idHash = biomeSpawnEntityGroupData2.idHash;
+                    ulong delayWorldTime = _spawnData.GetDelayWorldTime(idHash);
+
+                    logger.Debug($"idHash: {idHash}");
+                    logger.Debug($"worldtime: {world.worldTime}, delayWorldTime: {delayWorldTime}");
+
+                    if (world.worldTime > delayWorldTime)
+                    {
+                        int num6 = biomeSpawnEntityGroupData2.maxCount;
+                        if (isEnemyGroup)
+                        {
+                            num6 = EntitySpawner.ModifySpawnCountByGameDifficulty(num6);
+                        }
+                        _spawnData.ResetRespawn(idHash, world, num6);
+                    }
+
+                    // bool canSpawn = _spawnData.CanSpawn(idHash);
+                    bool canSpawn = true;
+
+                    if (_spawnData.entitesSpawned.TryGetValue(idHash, out var value))
+                    {
+                        logger.Debug($"count: {value.count}, maxCount: {value.maxCount}");
+                        canSpawn = value.count < value.maxCount;
+                    }
+
+                    logger.Debug($"canSpawn: {canSpawn}");
+
+                    if (canSpawn)
+                    {
+                        groupIndex = currentIndex;
+                        break;
+                    }
+                }
+            }
+
+            currentTrie++;
             currentIndex = (currentIndex + 1) % biomeSpawnEntityGroupList.list.Count;
-
-            var entityGroupData = biomeSpawnEntityGroupList.list[currentIndex];
-
-            if (entityGroupData.daytime != EDaytime.Any && entityGroupData.daytime != eDaytime)
-            {
-                continue;
-            }
-
-            idHash = entityGroupData.idHash;
-            ulong delayWorldTime = _spawnData.GetDelayWorldTime(idHash);
-
-            if (world.worldTime > delayWorldTime || delayWorldTime == 0)
-            {
-                int spawnCount = EntitySpawner.ModifySpawnCountByGameDifficulty(entityGroupData.maxCount);
-                ResetRespawn(_spawnData, entityGroupData, idHash, spawnCount);
-            }
-
-            if (_spawnData.CanSpawn(idHash))
-            {
-                groupIndex = currentIndex;
-                break;
-            }
         }
 
         if (groupIndex < 0)
         {
+            logger.Debug("groupIndex < 0");
             return false;
         }
 
@@ -114,7 +168,6 @@ public class SpawnManagerBiomes_Update
         int randomFromGroup = EntityGroups.GetRandomFromGroup(biomeSpawnEntityGroupList.list[groupIndex].entityGroupName, ref spawnManagerBiome.lastClassId);
         if (randomFromGroup == 0)
         {
-            _spawnData.DecMaxCount(idHash);
             return false;
         }
 
@@ -129,17 +182,6 @@ public class SpawnManagerBiomes_Update
         logger.Info($"spawn '{entity.GetDebugName()}' at {spawnPosition}");
 
         return false;
-    }
-
-    public static void ResetRespawn(ChunkAreaBiomeSpawnData _spawnData, BiomeSpawnEntityGroupData biomeSpawnEntityGroupData, int _idHash, int _maxCount)
-    {
-        var _world = GameManager.Instance.World;
-
-        _spawnData.entitesSpawned.TryGetValue(_idHash, out var value);
-        value.delayWorldTime = _world.worldTime + (ulong)(biomeSpawnEntityGroupData.respawnDelayInWorldTime * _world.RandomRange(0.9f, 1.1f));
-        value.maxCount = _maxCount;
-        _spawnData.entitesSpawned[_idHash] = value;
-        _spawnData.chunk.isModified = true;
     }
 
     private static BiomeSpawnEntityGroupList GetBiomeList(ChunkAreaBiomeSpawnData _spawnData)

@@ -1,9 +1,21 @@
+<!--
+	 biome
+	 maxcount: byte - the sum of all spawned entities in the group may not exceed this number in a 5 chunk by 5 chunk (80m x 80m) "biome chunk"
+	 respawndelay: game days - .000278 real seconds, .0167 mins
+	 daytime: Any,Day,Night - determines the time of day the entity spawns
+	 tags: restricts the spawn to areas that have any tile/POI with those tags
+	 notags: restricts the spawn to areas that don't have any tiles/POIs with those tags
+	 <property name="TotalAlive" value="3" />
+	 total alive means how many are alive at once.
+	 <property name="TotalPerWave" value="10,20" />Total per wave means a random number between the first and second. The total alive will replenish the dead ranks until TotalPerWave's random number is met.
+-->
+
 <configs>
 
     <append xpath="/spawning">
         <biome name="Cave">
-            <spawn id="az01" maxcount="5" respawndelay="1" time="Any" entitygroup="ZombiesCaveDay" />
-            <spawn id="nz01" maxcount="5" respawndelay="1" time="Night" entitygroup="ZombiesCaveDay" />
+            <spawn id="az01" maxcount="5" respawndelay="0.25" time="Any" entitygroup="ZombiesCaveDay" />
+            <spawn id="nz01" maxcount="5" respawndelay="0.25" time="Night" entitygroup="ZombiesCaveDay" />
         </biome>
     </append>
 

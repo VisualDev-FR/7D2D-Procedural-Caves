@@ -12,5 +12,19 @@
         "../7D2D-cave-lights",
         "../7D2D-cave-assets",
         "../7D2D-cave-prefabs"
+    ],
+    "clear_saves": [
+        {
+            "world": "Old Honihebu County",
+            "save": "Caves"
+        },
+        {
+            "world": "Old Wosayuwe Valley",
+            "save": "Caves"
+        },
+        {
+            "world": "South Usitonu County",
+            "save": "Caves"
+        }
     ]
 }
