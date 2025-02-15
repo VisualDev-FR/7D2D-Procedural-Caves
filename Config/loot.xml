@@ -46,12 +46,13 @@
             <item name="pirateTreasure05" />
         </lootgroup>
 
-        <lootgroup name="caveGroupWoodenChest" count="2">
+        <lootgroup name="caveGroupWoodenChest" count="4">
             <item count="1" group="groupJunk" loot_prob_template="high" />
             <item count="1" group="dyes" loot_prob_template="low" />
             <item count="1" group="groupOldMedals" loot_prob_template="medLow" force_prob="true" />
             <item count="1" group="groupPirateTreasure" loot_prob_template="medLow" force_prob="true" />
             <item count="1" group="groupCoins" loot_prob_template="medLow" force_prob="true" />
+            <item count="1" group="groupAmmoLarge" loot_prob_template="high" force_prob="true" />
             <item name="roadFlare" loot_prob_template="low" />
         </lootgroup>
 
@@ -65,7 +66,8 @@
             <item group="groupMilitaryFootlocker01" count="2" />
             <item group="groupMilitaryFootlocker02" loot_prob_template="med" force_prob="true" />
             <item group="groupArmyMedals" loot_prob_template="medLow" force_prob="true" />
-            <item name="roadFlare" loot_prob_template="medLow" />
+            <item group="groupAmmoLarge" loot_prob_template="high" force_prob="true" />
+            <item name="roadFlare" loot_prob_template="medLow" force_prob="true" />
         </lootgroup>
 
         <lootcontainer name="caveMilitaryChest" size="6,2" sound_open="UseActions/open_chest" sound_close="UseActions/close_chest" loot_quality_template="qualBaseTemplate" destroy_on_close="empty">
@@ -74,8 +76,9 @@
 
         <!-- oldWestChest -->
         <lootgroup name="caveGroupOldWestChest" count="all">
-            <item group="groupOldWestChest01" count="1" />
+            <item count="1" group="groupOldWestChest01"  />
             <item group="groupOldWestChest02" loot_prob_template="veryLow" force_prob="true" />
+            <item group="groupAmmoLarge" loot_prob_template="high" force_prob="true" />
             <item count="1,3" name="roadFlare" loot_prob_template="low" />
         </lootgroup>
 
@@ -88,6 +91,7 @@
             <item group="groupRottenChest01" count="2" />
             <item group="groupRottenChest02" loot_prob_template="med" force_prob="true" />
             <item group="groupRottenChest03" loot_prob_template="veryLow" force_prob="true" />
+            <item group="groupAmmoLarge" loot_prob_template="high" force_prob="true" />
         </lootgroup>
 
         <lootcontainer name="caveRottenChest" size="6,2" sound_open="UseActions/open_chest" sound_close="UseActions/close_chest" loot_quality_template="qualBaseTemplate" destroy_on_close="empty">
@@ -100,10 +104,11 @@
             <item group="groupBackpacks02" loot_prob_template="medLow" force_prob="true" />
         </lootgroup>
 
-        <lootcontainer name="caveCntBackpack" count="1" size="6,2" sound_open="UseActions/open_backpack" sound_close="UseActions/close_backpack" open_time="1.5" loot_quality_template="qualPrimitiveItemsTemplate" destroy_on_close="empty">
+        <lootcontainer name="caveCntBackpack" count="3" size="6,2" sound_open="UseActions/open_backpack" sound_close="UseActions/close_backpack" open_time="1.5" loot_quality_template="qualPrimitiveItemsTemplate" destroy_on_close="empty">
             <item group="caveGroupBackpacks" />
             <item name="roadFlare" loot_prob_template="low" />
             <item name="aa_battery" loot_prob_template="low" />
+            <item group="groupAmmoLarge" loot_prob_template="high"/>
         </lootcontainer>
 
         <!-- militaryGoods -->
@@ -118,6 +123,7 @@
             <item name="drinkJarRiverWater" loot_prob_template="med" />
             <item name="roadFlare" loot_prob_template="med" />
             <item name="aa_battery" loot_prob_template="med" />
+            <item group="groupAmmoLarge" loot_prob_template="high" />
         </lootgroup>
 
         <lootgroup name="caveGroupCampingTents02">
@@ -126,11 +132,12 @@
             <item name="lanternDecorLightBlockVariantHelper" loot_prob_template="low" />
             <item name="toolCookingPot" loot_prob_template="veryLow" />
             <item name="toolCookingGrill" loot_prob_template="veryLow" />
+            <item group="groupAmmoLarge" loot_prob_template="high" />
         </lootgroup>
 
         <lootgroup name="caveGroupCampingTents" count="all">
-            <item group="caveGroupCampingTents01" count="1" />
-            <item group="caveGroupCampingTents02" loot_prob_template="low" force_prob="true" />
+            <item group="caveGroupCampingTents01" count="2" />
+            <item group="caveGroupCampingTents02" count="2" />
         </lootgroup>
 
         <lootcontainer name="caveCntCampingTents" count="1" size="6,2" sound_open="UseActions/open_backpack" sound_close="UseActions/close_backpack" open_time="1.5" loot_quality_template="qualPrimitiveItemsTemplate" destroy_on_close="empty">
