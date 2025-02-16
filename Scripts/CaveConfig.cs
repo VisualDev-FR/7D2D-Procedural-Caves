@@ -64,10 +64,4 @@ public static class CaveConfig
 
     public static WorldBuilder.GenerationSelections caveWater;
 
-    public class CaveLightConfig
-    {
-        public static float moonLightScale = 0.1f;
-
-        public static float sunIntensityScale = 1f;
-    }
 }
