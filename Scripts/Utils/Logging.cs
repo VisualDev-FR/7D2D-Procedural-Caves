@@ -64,7 +64,7 @@ public class Logging
 
     public static readonly LoggingLevel loggingLevel = LoggingLevel.DEBUG;
 
-    private static readonly Logger root = new Logger("Cave", loggingLevel);
+    private static readonly Logger root = new Logger("TheDescent", loggingLevel);
 
     public static Logger CreateLogger(string name, LoggingLevel level = LoggingLevel.DEBUG)
     {

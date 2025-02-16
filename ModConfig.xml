@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<modconfig>
+
+    <!-- the number of game ticks after player spawned, before zombies start to spawn in caves -->
+    <property name="minSpawnTicksBeforeEnemySpawn" value="500" />
+
+    <!-- enable / disable zombie spawn in caves -->
+    <property name="enableCaveSpawn" value="true" />
+
+    <!-- enable / disable zombie spawns in caves during bloodmoon only -->
+    <property name="enableCaveBloodMoon" value="true" />
+
+    <!-- the minimun euclidian distance from the player to spawn a zombie -->
+    <property name="minSpawnDist" value="15" />
+
+    <!-- same as 'minSpawnDist' but for bloodMoon zombies -->
+    <property name="minSpawnDistBloodMoon" value="25" />
+
+</modconfig>
