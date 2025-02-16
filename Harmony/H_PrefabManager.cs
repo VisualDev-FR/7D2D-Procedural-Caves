@@ -25,8 +25,9 @@ public static class H_PrefabManager
         List<PathAbstractions.AbstractedLocation> prefabs = PathAbstractions.PrefabsSearchPaths.GetAvailablePathsList(null, null, null, _ignoreDuplicateNames: true);
 
         // PATCH: add underground prefab filter + create tag to prevent the vanilla rwg from selecting wilderness cave entrances
-        FastTags<TagGroup.Poi> filter = FastTags<TagGroup.Poi>.Parse("navonly,devonly,testonly,biomeonly,underground");
-        FastTags<TagGroup.Poi> wildernessCaveEntrance = FastTags<TagGroup.Poi>.Parse("cave,entrance,wilderness");
+        FastTags<TagGroup.Poi> tagFilter = FastTags<TagGroup.Poi>.Parse("navonly,devonly,testonly,biomeonly,underground");
+        FastTags<TagGroup.Poi> tagWildernessCaveEntrance = FastTags<TagGroup.Poi>.Parse("cave,entrance,wilderness");
+        FastTags<TagGroup.Poi> tagCaveTrader = FastTags<TagGroup.Poi>.Parse("cave,underground,trader");
 
         for (int i = 0; i < prefabs.Count; i++)
         {
@@ -42,9 +43,15 @@ public static class H_PrefabManager
                 Logging.Warning("Could not load prefab data for " + location.Name);
 
             // PATCH START //
+            if (prefabData.Tags.Test_AllSet(tagCaveTrader))
+            {
+                Logging.Warning($"Skip underground trader '{prefabData.Name}'");
+                continue;
+            }
+
             cavePrefabManager?.TryCacheCavePrefab(prefabData);
 
-            if (!prefabData.Tags.Test_AnySet(filter) && !prefabData.Tags.Test_AllSet(wildernessCaveEntrance))
+            if (!prefabData.Tags.Test_AnySet(tagFilter) && !prefabData.Tags.Test_AllSet(tagWildernessCaveEntrance))
             {
                 PrefabManager.prefabManagerData.AllPrefabDatas[location.Name.ToLower()] = prefabData;
             }
