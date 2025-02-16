@@ -3,6 +3,8 @@ using WorldGenerationEngineFinal;
 
 public static class CaveConfig
 {
+    private static ModConfig config = new ModConfig("TheDescent");
+
     public static FastTags<TagGroup.Poi> tagCaveMarker = FastTags<TagGroup.Poi>.Parse("cavenode");
 
     public static FastTags<TagGroup.Poi> tagCaveEntrance = FastTags<TagGroup.Poi>.Parse("entrance");
@@ -40,16 +42,15 @@ public static class CaveConfig
     // the min deep (from terrain height) to spawn cave zombies
     public static int zombieSpawnMarginDeep = 5;
 
-    public static int minSpawnTicksBeforeEnemySpawn = 500;
+    public static int minSpawnTicksBeforeEnemySpawn = config.GetPropertyInt("minSpawnTicksBeforeEnemySpawn");
 
-    public static bool enableCaveSpawn = true;
+    public static bool enableCaveSpawn = config.GetPropertyBool("enableCaveSpawn");
 
-    public static bool enableCaveBloodMoon = true;
+    public static bool enableCaveBloodMoon = config.GetPropertyBool("enableCaveBloodMoon");
 
-    // the minimun euclidian distance from the player to spawn a zombie
-    public static int minSpawnDist = 15;
+    public static int minSpawnDist = config.GetPropertyInt("minSpawnDist");
 
-    public static int minSpawnDistBloodMoon = 25;
+    public static int minSpawnDistBloodMoon = config.GetPropertyInt("minSpawnDistBloodMoon");
 
     // cave generation datas
     public static bool generateWater = false;

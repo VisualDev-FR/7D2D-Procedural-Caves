@@ -3,6 +3,7 @@
     "csproj": "procedural-caves.csproj",
     "include": [
         "ModInfo.xml",
+        "ModConfig.xml",
         "README.md",
         "Licence.txt",
         "Config",
