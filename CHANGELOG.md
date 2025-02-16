@@ -10,8 +10,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - remove worldglobal.xml (moved to cave-lights)
 - remove aa_battery from loot.xml (moved to cave-lights)
 - remove roadFlare from loot.xml (moved to cave-assets)
-- add ModConfig.xml
+- remove collectible items (moved to cave-assets)
 - add possibility to disable cave bloodmoons from ModConfig.xml
+- add ModConfig.xml
 - hotfix: prevent cave trader prefabs to spawn
 
 ## [0.0.1] - 2024-02-15
