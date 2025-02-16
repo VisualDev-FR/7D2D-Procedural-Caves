@@ -14,7 +14,7 @@ public class AIDirectorBloodMoonParty_SpawnZombie
 
     public static bool Prefix(ref AIDirectorBloodMoonParty __instance, World _world, EntityPlayer _target, Vector3 _focusPos, Vector3 _radiusV, ref bool __result)
     {
-        if (!CaveGenerator.isEnabled)
+        if (!CaveGenerator.isEnabled || !CaveConfig.enableCaveBloodMoon)
             return true;
 
         if (_target.position.y + CaveConfig.zombieSpawnMarginDeep > _world.GetHeight((int)_target.position.x, (int)_target.position.z))
