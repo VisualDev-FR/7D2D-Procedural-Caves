@@ -154,7 +154,7 @@ public class CavePrefabManager
 
         foreach (var other in Prefabs)
         {
-            if (CaveUtils.SqrEuclidianDist(center, other.GetCenter()) < sqrMinDist)
+            if (FastMath.SqrEuclidianDist(center, other.GetCenter()) < sqrMinDist)
             {
                 return true;
             }

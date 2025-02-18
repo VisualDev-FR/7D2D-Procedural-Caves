@@ -96,6 +96,12 @@
             <HintPath>$(PATH_7D2D)\7DaysToDie_Data\Managed\InControl.dll</HintPath>
             <Private>False</Private>
         </Reference>
+
+        <Reference Include="ModUtils">
+            <HintPath>$(PATH_7D2D)\mods\7D2D-mod-utils\mod-utils.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+
     </ItemGroup>
 
     <!-- scripts -->

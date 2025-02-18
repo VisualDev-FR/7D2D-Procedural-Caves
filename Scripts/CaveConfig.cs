@@ -5,6 +5,8 @@ public static class CaveConfig
 {
     private static ModConfig config = new ModConfig("TheDescent");
 
+    public static Logging.Logger logger = Logging.CreateLogger("TheDescent", LoggingLevel.DEBUG);
+
     public static FastTags<TagGroup.Poi> tagCaveMarker = FastTags<TagGroup.Poi>.Parse("cavenode");
 
     public static FastTags<TagGroup.Poi> tagCaveEntrance = FastTags<TagGroup.Poi>.Parse("entrance");
@@ -42,15 +44,15 @@ public static class CaveConfig
     // the min deep (from terrain height) to spawn cave zombies
     public static int zombieSpawnMarginDeep = 5;
 
-    public static int minSpawnTicksBeforeEnemySpawn = config.GetPropertyInt("minSpawnTicksBeforeEnemySpawn");
+    public static int minSpawnTicksBeforeEnemySpawn = config.GetInt("minSpawnTicksBeforeEnemySpawn");
 
-    public static bool enableCaveSpawn = config.GetPropertyBool("enableCaveSpawn");
+    public static bool enableCaveSpawn = config.GetBool("enableCaveSpawn");
 
-    public static bool enableCaveBloodMoon = config.GetPropertyBool("enableCaveBloodMoon");
+    public static bool enableCaveBloodMoon = config.GetBool("enableCaveBloodMoon");
 
-    public static int minSpawnDist = config.GetPropertyInt("minSpawnDist");
+    public static int minSpawnDist = config.GetInt("minSpawnDist");
 
-    public static int minSpawnDistBloodMoon = config.GetPropertyInt("minSpawnDistBloodMoon");
+    public static int minSpawnDistBloodMoon = config.GetInt("minSpawnDistBloodMoon");
 
     // cave generation datas
     public static bool generateWater = false;

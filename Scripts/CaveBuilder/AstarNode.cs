@@ -75,6 +75,6 @@ public class AstarNode
 
     public float SqrEuclidianDist(AstarNode other)
     {
-        return CaveUtils.SqrEuclidianDist(position, other.position);
+        return FastMath.SqrEuclidianDist(position, other.position);
     }
 }

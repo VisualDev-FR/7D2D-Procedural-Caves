@@ -101,7 +101,7 @@ public class CaveTunnel
 
     private IEnumerable<Vector3i> AstarNeighbors(AstarNode node, Vector3i target)
     {
-        var dist = CaveUtils.SqrEuclidianDist(node.position, target);
+        var dist = FastMath.SqrEuclidianDist(node.position, target);
 
         if (dist < 100)
         {

@@ -369,7 +369,7 @@ public class CaveMap
             visited.Add(currentPos);
             waterPositions.Add(currentPos);
 
-            foreach (var offset in CaveUtils.offsets)
+            foreach (var offset in BFSUtils.offsets)
             {
                 neighbor.x = currentPos.x + offset.x;
                 neighbor.y = currentPos.y + offset.y;

@@ -1,98 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using System.Reflection;
-using System.Runtime.CompilerServices;
-using UnityEngine;
 
 public static class CaveUtils
 {
-    public static readonly Vector3i[] offsets = new Vector3i[]
-    {
-        new Vector3i(1, 0, 0),
-        new Vector3i(-1, 0, 0),
-        new Vector3i(0, 1, 0),
-        new Vector3i(0, -1, 0),
-        new Vector3i(0, 0, 1),
-        new Vector3i(0, 0, -1),
-        new Vector3i(0, 1, 1),
-        new Vector3i(0, -1, 1),
-        new Vector3i(0, 1, -1),
-        new Vector3i(0, -1, -1),
-        new Vector3i(1, 0, 1),
-        new Vector3i(-1, 0, 1),
-        new Vector3i(1, 0, -1),
-        new Vector3i(-1, 0, -1),
-        new Vector3i(1, 1, 0),
-        new Vector3i(1, -1, 0),
-        new Vector3i(-1, 1, 0),
-        new Vector3i(-1, -1, 0),
-        new Vector3i(1, 1, 1),
-        new Vector3i(1, -1, 1),
-        new Vector3i(1, 1, -1),
-        new Vector3i(1, -1, -1),
-        new Vector3i(-1, 1, 1),
-        new Vector3i(-1, -1, 1),
-        new Vector3i(-1, 1, -1),
-        new Vector3i(-1, -1, -1)
-    };
-
-    public static readonly int[] offsetHashes = offsets
-        .Select(offset => PositionHashCode(offset.x, offset.y, offset.z))
-        .ToArray();
-
-    public static readonly Vector3i[] offsetsHorizontal8 = offsets
-        .Where(offset => offset.y == 0)
-        .ToArray();
-
-    public static readonly Vector3i[] offsetsHorizontal4 = offsets
-        .Where(offset => offset.y == 0 && (offset.x == 0 || offset.z == 0))
-        .ToArray();
-
-    public static readonly Vector3i[] offsetsNoDiagonal = offsets
-        .Where(offset =>
-               (offset.x == 0 && offset.y == 0)
-            || (offset.x == 0 && offset.z == 0)
-            || (offset.y == 0 && offset.z == 0))
-        .ToArray();
-
-    public static readonly Vector3i[] offsetsNoVertical = offsets
-        .Where(offset => offset.y == 0 || offset.x != 0 || offset.z != 0)
-        .ToArray();
-
-    public static readonly Vector3i[] offsetsBelow = offsets
-        .Where(offset => offset.y == -1)
-        .ToArray();
-
-    public static int PositionHashCode(int x, int y, int z)
-    {
-        // Hashing function of Vector3i
-        return x * 8976890 + y * 981131 + z;
-    }
-
-    public static int GetChunkHash(int x, int z)
-    {
-        return x + z * 1031;
-    }
-
-    public static Stopwatch StartTimer()
-    {
-        var timer = new Stopwatch();
-        timer.Start();
-        return timer;
-    }
-
-    public static void Assert(bool condition, string message)
-    {
-        if (!condition) throw new Exception($"Assertion error: {message}");
-    }
-
-    public static int FastMin(int a, int b)
-    {
-        return a < b ? a : b;
-    }
-
     public static int FastMax(int a, int b)
     {
         return a > b ? a : b;
@@ -125,39 +36,9 @@ public static class CaveUtils
         return c;
     }
 
-    public static string TimeFormat(Stopwatch timer, string format = @"hh\:mm\:ss")
+    public static int FastMin(int a, int b)
     {
-        return TimeSpan.FromSeconds(timer.ElapsedMilliseconds / 1000).ToString(format);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static float SqrEuclidianDist(Vector3i p1, Vector3i p2)
-    {
-        float dx = p1.x - p2.x;
-        float dy = p1.y - p2.y;
-        float dz = p1.z - p2.z;
-
-        return dx * dx + dy * dy + dz * dz;
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static float SqrEuclidianDist(Vector3 p1, Vector3 p2)
-    {
-        float dx = p1.x - p2.x;
-        float dy = p1.y - p2.y;
-        float dz = p1.z - p2.z;
-
-        return dx * dx + dy * dy + dz * dz;
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int SqrEuclidianDistInt32(Vector3i p1, Vector3i p2)
-    {
-        int dx = p1.x - p2.x;
-        int dy = p1.y - p2.y;
-        int dz = p1.z - p2.z;
-
-        return dx * dx + dy * dy + dz * dz;
+        return a < b ? a : b;
     }
 
     public static float FastAbs(float value)
@@ -168,9 +49,14 @@ public static class CaveUtils
         return -value;
     }
 
-    public static float EuclidianDist(Vector3i p1, Vector3i p2)
+    public static int GetChunkHash(int x, int z)
     {
-        return (float)Math.Sqrt(SqrEuclidianDist(p1, p2));
+        return x + z * 1031;
+    }
+
+    public static void Assert(bool condition, string message)
+    {
+        if (!condition) throw new Exception($"Assertion error: {message}");
     }
 
     public static HashSet<Vector3i> GetPointsInside(Vector3i p1, Vector3i p2)
@@ -279,29 +165,10 @@ public static class CaveUtils
         return true;
     }
 
-    public static int SqrDistanceToRectangle3D(Vector3i point, Vector3i min, Vector3i max)
-    {
-        int dx = FastMax(min.x - point.x, 0, point.x - max.x);
-        int dy = FastMax(min.y - point.y, 0, point.y - max.y);
-        int dz = FastMax(min.z - point.z, 0, point.z - max.z);
-
-        return dx * dx + dy * dy + dz * dz;
-    }
-
     public static void SetField<T>(object instance, string fieldName, object value)
     {
         var field = typeof(T).GetField(fieldName, BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic);
         field.SetValue(instance, value);
-    }
-
-    public static string ToBinaryString(int value, int bits = 32)
-    {
-        return Convert.ToString(value, 2).PadLeft(bits, '0');
-    }
-
-    public static string ToHexString(int value, int bits = 8)
-    {
-        return value.ToString($"x{bits}");
     }
 
     public static List<List<T>> SplitList<T>(List<T> parent, int count)
@@ -323,19 +190,12 @@ public static class CaveUtils
         return new Vector3i(worldSize >> 1, 0, worldSize >> 1);
     }
 
-    public static int SqrMagniture(Vector3i vector)
+    public static int SqrDistanceToRectangle3D(Vector3i point, Vector3i min, Vector3i max)
     {
-        return vector.x * vector.x + vector.y * vector.y + vector.z * vector.z;
-    }
+        int dx = FastMax(min.x - point.x, 0, point.x - max.x);
+        int dy = FastMax(min.y - point.y, 0, point.y - max.y);
+        int dz = FastMax(min.z - point.z, 0, point.z - max.z);
 
-    public static string TotalMemoryMB(long memoryBefore)
-    {
-        return $"{(GC.GetTotalMemory(true) - memoryBefore) / 1_048_576f:N1}MB";
+        return dx * dx + dy * dy + dz * dz;
     }
-
-    public static string TotalMemoryKB(long memoryBefore)
-    {
-        return $"{(GC.GetTotalMemory(true) - memoryBefore) * 1000 / 1_048_576f:N1}KB";
-    }
-
 }

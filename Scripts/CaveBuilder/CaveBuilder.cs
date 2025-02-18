@@ -94,7 +94,7 @@ public class CaveBuilder
         if (worldBuilder.IsCanceled)
             yield break;
 
-        var timer = CaveUtils.StartTimer();
+        var timer = ProfilingUtils.StartTimer();
         var memoryBefore = GC.GetTotalMemory(true);
 
         yield return worldBuilder.SetMessage("Spawning cave prefabs...", _logToConsole: true);

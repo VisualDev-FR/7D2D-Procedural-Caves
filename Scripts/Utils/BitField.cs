@@ -1,3 +1,4 @@
+using System;
 using System.Runtime.CompilerServices;
 
 public class Bitfield
@@ -28,4 +29,15 @@ public class Bitfield
         int mask = 1 << offset;
         rawData = (byte)(value ? (rawData | mask) : (rawData & ~mask));
     }
+
+    public static string ToBinaryString(int value, int bits = 32)
+    {
+        return Convert.ToString(value, 2).PadLeft(bits, '0');
+    }
+
+    public static string ToHexString(int value, int bits = 8)
+    {
+        return value.ToString($"x{bits}");
+    }
+
 }

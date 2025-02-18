@@ -81,7 +81,7 @@ public class ActionCollapseTerrain : BaseAction
 
     private HashSet<Vector3i> FindFlatBlocks(Vector3i start)
     {
-        var timer = CaveUtils.StartTimer();
+        var timer = ProfilingUtils.StartTimer();
         var world = GameManager.Instance.World;
         var queue = new Queue<Vector3i>();
         var visited = new HashSet<Vector3i>();
@@ -95,7 +95,7 @@ public class ActionCollapseTerrain : BaseAction
         {
             Vector3i pos = queue.Dequeue();
 
-            foreach (var offset in CaveUtils.offsetsHorizontal8)
+            foreach (var offset in BFSUtils.offsetsHorizontal8)
             {
                 neighbor.x = pos.x + offset.x;
                 neighbor.y = pos.y;

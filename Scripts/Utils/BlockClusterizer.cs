@@ -78,7 +78,7 @@ public class BlockClusterizer
                 cluster.Add(currentPosition);
                 queue.Remove(currentPosition);
 
-                foreach (var offset in CaveUtils.offsets)
+                foreach (var offset in BFSUtils.offsets)
                 {
                     var position = currentPosition + offset;
 

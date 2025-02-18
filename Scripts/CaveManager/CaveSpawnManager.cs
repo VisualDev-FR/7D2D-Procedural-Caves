@@ -7,7 +7,7 @@ public class CaveSpawnManager
 
     public static Vector3i GetSpawnPositionNearPlayer(Vector3 playerPosition, float minSpawnDist)
     {
-        var timer = CaveUtils.StartTimer();
+        var timer = ProfilingUtils.StartTimer();
         var world = GameManager.Instance.World;
         var queue = new HashedPriorityQueue<AstarNode>();
         var visited = new HashSet<int>();
@@ -33,7 +33,7 @@ public class CaveSpawnManager
 
             visited.Add(currentNode.GetHashCode());
 
-            foreach (var offset in CaveUtils.offsetsNoVertical)
+            foreach (var offset in BFSUtils.offsetsNoVertical)
             {
                 Vector3i neighborPos = currentNode.position + offset;
                 uint rawData = world.GetBlock(x + offset.x, y + offset.y, z + offset.z).rawData;
