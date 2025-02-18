@@ -17,17 +17,6 @@
             <drop event="Destroy" count="0" />
         </block>
 
-        <!-- zombie food -->
-        <block name="zombieFoodPlaceholder">
-            <property name="Extends" value="cntWastelandRandomLootHelper" />
-            <property name="CreativeMode" value="None" />
-        </block>
-
-        <block name="bloodDecorPlaceholder">
-            <property name="Extends" value="cntWastelandRandomLootHelper" />
-            <property name="CreativeMode" value="None" />
-        </block>
-
         <!-- placeholders (used for cave decoration) -->
         <block name="cntCaveFloor">
             <property name="Extends" value="cntWastelandRandomLootHelper" />

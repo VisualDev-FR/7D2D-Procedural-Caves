@@ -12,7 +12,8 @@
     "dependencies": [
         "../7D2D-cave-lights",
         "../7D2D-cave-assets",
-        "../7D2D-cave-prefabs"
+        "../7D2D-cave-prefabs",
+        "../7D2D-cave-entities"
     ],
     "clear_saves": [
         {

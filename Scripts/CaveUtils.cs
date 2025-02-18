@@ -332,6 +332,7 @@ public static class CaveUtils
     {
         return $"{(GC.GetTotalMemory(true) - memoryBefore) / 1_048_576f:N1}MB";
     }
+
     public static string TotalMemoryKB(long memoryBefore)
     {
         return $"{(GC.GetTotalMemory(true) - memoryBefore) * 1000 / 1_048_576f:N1}KB";

@@ -52,13 +52,13 @@
             <Private>False</Private>
         </Reference>
 
-        <Reference Include="System.Xml">
-            <HintPath>$(PATH_7D2D)\7DaysToDie_Data\Managed\System.Xml.dll</HintPath>
+        <Reference Include="System">
+            <HintPath>$(PATH_7D2D)\7DaysToDie_Data\Managed\System.dll</HintPath>
             <Private>False</Private>
         </Reference>
 
-        <Reference Include="System">
-            <HintPath>$(PATH_7D2D)\7DaysToDie_Data\Managed\System.dll</HintPath>
+        <Reference Include="System.Xml">
+            <HintPath>$(PATH_7D2D)\7DaysToDie_Data\Managed\System.Xml.dll</HintPath>
             <Private>False</Private>
         </Reference>
 
