@@ -6,15 +6,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+- add possibility to disable cave bloodmoons from ModConfig.xml
+- add ModConfig.xml
+
+### Changed
 - remove H_SkyManager (moved to cave-lights)
 - remove worldglobal.xml (moved to cave-lights)
 - remove aa_battery from loot.xml (moved to cave-lights)
 - remove roadFlare from loot.xml (moved to cave-assets)
 - remove collectible items (moved to cave-assets)
 - remove EAIEatBlock (moved to cave-entities)
-- add possibility to disable cave bloodmoons from ModConfig.xml
-- add ModConfig.xml
-- hotfix: prevent cave trader prefabs to spawn
+
+### Fixed
+- prevent cave trader prefabs to spawn (temporary fix)
+- prevent NullReferenceException if a prefab fails to load
+- (caveLights) prevent NullReferenceException when a lightSource's transform was not found
 
 ## [0.0.1] - 2024-02-15
 
