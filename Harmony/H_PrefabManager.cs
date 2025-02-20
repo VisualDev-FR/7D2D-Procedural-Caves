@@ -39,8 +39,11 @@ public static class H_PrefabManager
 
             PrefabData prefabData = PrefabData.LoadPrefabData(location);
 
-            if (prefabData == null || prefabData.Tags.IsEmpty)
+            if (prefabData is null || prefabData.Tags.IsEmpty)
+            {
                 Logging.Warning("Could not load prefab data for " + location.Name);
+                continue;
+            }
 
             // PATCH START //
             if (prefabData.Tags.Test_AllSet(tagCaveTrader))
