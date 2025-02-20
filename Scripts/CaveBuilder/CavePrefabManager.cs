@@ -336,7 +336,7 @@ public class CavePrefabManager
     public List<PrefabData> GetUndergroundPrefabs()
     {
         return allCavePrefabs.Values
-            .Where(p => p.Tags.Test_AnySet(CaveConfig.tagCaveUnderground))
+            .Where(p => p.Tags.Test_AnySet(CaveTags.tagUnderground))
             .ToList();
     }
 
@@ -366,7 +366,7 @@ public class CavePrefabManager
     public List<PrefabDataInstance> GetPrefabsAbove(Vector3i position, Vector3i size)
     {
         var prefabs = PrefabManager.UsedPrefabsWorld.Where(pdi =>
-            !pdi.prefab.Tags.Test_AnySet(CaveConfig.tagCaveUnderground)
+            !pdi.prefab.Tags.Test_AnySet(CaveTags.tagUnderground)
             && CaveUtils.OverLaps2D(position, size, pdi.boundingBoxPosition, pdi.boundingBoxSize)
         );
 
@@ -547,7 +547,7 @@ public class CavePrefabManager
 
     public void TryCacheCavePrefab(PrefabData prefabData)
     {
-        if (!prefabData.Tags.Test_AnySet(CaveConfig.tagCave) || !CavePrefabChecker.IsValid(prefabData))
+        if (!prefabData.Tags.Test_AnySet(CaveTags.tagCave) || !CavePrefabChecker.IsValid(prefabData))
         {
             return;
         }
@@ -555,12 +555,12 @@ public class CavePrefabManager
         string prefabName = prefabData.Name.ToLower();
         string suffix = "";
 
-        if (prefabData.Tags.Test_AllSet(CaveConfig.tagCaveWildernessEntrance))
+        if (prefabData.Tags.Test_AllSet(CaveTags.tagWildernessEntrance))
         {
             suffix = "(wild entrance)";
             wildernessEntranceNames.Add(prefabName);
         }
-        else if (prefabData.Tags.Test_AllSet(CaveConfig.tagCaveEntrance))
+        else if (prefabData.Tags.Test_AllSet(CaveTags.tagCaveEntrance))
         {
             suffix = $"(town entrance)";
         }
@@ -583,7 +583,7 @@ public class CavePrefabManager
 
         foreach (var pdi in PrefabManager.UsedPrefabsWorld)
         {
-            if (pdi.prefab.Tags.Test_AnySet(CaveConfig.tagCave))
+            if (pdi.prefab.Tags.Test_AnySet(CaveTags.tagCave))
             {
                 AddPrefab(new CavePrefab(pdi.id, pdi, halfWorldSize));
             }
@@ -601,7 +601,7 @@ public class CavePrefabManager
 
         foreach (var pdi in PrefabManager.UsedPrefabsWorld)
         {
-            if (pdi.prefab.Tags.Test_AnySet(CaveConfig.tagCave))
+            if (pdi.prefab.Tags.Test_AnySet(CaveTags.tagCave))
                 continue;
 
             if (!prefabClusters.TryGetValue(pdi.prefab.Name, out var clusters))

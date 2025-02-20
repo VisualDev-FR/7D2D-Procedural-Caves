@@ -27,7 +27,6 @@ public static class H_PrefabManager
         // PATCH: add underground prefab filter + create tag to prevent the vanilla rwg from selecting wilderness cave entrances
         FastTags<TagGroup.Poi> tagFilter = FastTags<TagGroup.Poi>.Parse("navonly,devonly,testonly,biomeonly,underground");
         FastTags<TagGroup.Poi> tagWildernessCaveEntrance = FastTags<TagGroup.Poi>.Parse("cave,entrance,wilderness");
-        FastTags<TagGroup.Poi> tagCaveTrader = FastTags<TagGroup.Poi>.Parse("cave,underground,trader");
 
         for (int i = 0; i < prefabs.Count; i++)
         {
@@ -46,7 +45,7 @@ public static class H_PrefabManager
             }
 
             // PATCH START //
-            if (prefabData.Tags.Test_AllSet(tagCaveTrader))
+            if (prefabData.Tags.Test_AllSet(CaveTags.tagCaveTrader))
             {
                 Logging.Warning($"Skip underground trader '{prefabData.Name}'");
                 continue;

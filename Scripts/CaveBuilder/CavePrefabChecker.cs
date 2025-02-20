@@ -36,7 +36,7 @@ public class CavePrefabChecker
     private static bool HasOverlappingMarkers(PrefabData prefab)
     {
         var markers = prefab.POIMarkers
-            .Where(marker => marker.tags.Test_AnySet(CaveConfig.tagCaveMarker))
+            .Where(marker => marker.tags.Test_AnySet(CaveTags.tagCaveMarker))
             .ToList();
 
         for (int i = 0; i < markers.Count; i++)
@@ -58,14 +58,14 @@ public class CavePrefabChecker
 
     private static bool HasRequiredTags(PrefabData prefab)
     {
-        return prefab.Tags.Test_AnySet(CaveConfig.requiredCaveTags);
+        return prefab.Tags.Test_AnySet(CaveTags.requiredCaveTags);
     }
 
     private static bool ContainsCaveMarkers(PrefabData prefab)
     {
         foreach (var marker in prefab.POIMarkers)
         {
-            if (marker.tags.Test_AnySet(CaveConfig.tagCaveMarker))
+            if (marker.tags.Test_AnySet(CaveTags.tagCaveMarker))
             {
                 return true;
             }
@@ -78,7 +78,7 @@ public class CavePrefabChecker
     {
         foreach (var marker in prefab.POIMarkers)
         {
-            if (!marker.tags.Test_AnySet(CaveConfig.tagCaveMarker))
+            if (!marker.tags.Test_AnySet(CaveTags.tagCaveMarker))
                 continue;
 
             bool isOnBound_x = marker.start.x == -1 || marker.start.x == prefab.size.x;

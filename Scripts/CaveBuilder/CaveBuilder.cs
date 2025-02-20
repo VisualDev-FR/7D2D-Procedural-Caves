@@ -208,11 +208,11 @@ public class CaveBuilder
         {
             var prefabColor = regularPrefabColor;
 
-            if (pdi.prefab.Tags.Test_AnySet(CaveConfig.tagCaveEntrance))
+            if (pdi.prefab.Tags.Test_AnySet(CaveTags.tagCaveEntrance))
             {
                 prefabColor = caveEntrancesColor;
             }
-            else if (pdi.prefab.Tags.Test_AnySet(CaveConfig.tagCave))
+            else if (pdi.prefab.Tags.Test_AnySet(CaveTags.tagCave))
             {
                 prefabColor = cavePrefabsColor;
             }

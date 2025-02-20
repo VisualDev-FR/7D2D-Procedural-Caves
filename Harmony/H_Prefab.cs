@@ -10,9 +10,9 @@ public static class Prefab_GetBlock
         if (
             __result.isair
             && !GameManager.Instance.IsEditMode()
-            && __instance.tags.Test_AnySet(CaveConfig.tagCave)
+            && __instance.tags.Test_AnySet(CaveTags.tagCave)
             // && __instance.tags.Test_AnySet(CaveConfig.tagCaveAir)
-            && (_y < -__instance.yOffset || __instance.tags.Test_AnySet(CaveConfig.tagCaveUnderground))
+            && (_y < -__instance.yOffset || __instance.tags.Test_AnySet(CaveTags.tagUnderground))
         )
         {
             __result = CaveBlocks.caveAir;
