@@ -23,7 +23,7 @@ public class Graph
         relatedEdges = new Dictionary<GraphNode, HashSet<GraphEdge>>();
         relatedPrefabs = new Dictionary<int, HashSet<GraphEdge>>();
 
-        var timer = CaveUtils.StartTimer();
+        var timer = ProfilingUtils.StartTimer();
 
         try
         {
@@ -432,7 +432,7 @@ public class Graph
         foreach (var edge in eligibleEdges)
         {
             var node2 = edge.Prefab1 != node.prefab ? edge.node1 : edge.node2;
-            var weight = CaveUtils.SqrEuclidianDist(node.position, node2.position) - edge.Weight;
+            var weight = FastMath.SqrEuclidianDist(node.position, node2.position) - edge.Weight;
 
             if (weight < minWeight)
             {

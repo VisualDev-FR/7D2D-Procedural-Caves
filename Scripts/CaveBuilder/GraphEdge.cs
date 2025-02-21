@@ -33,7 +33,7 @@ public class GraphEdge : IComparable<GraphEdge>
     {
         this.node1 = node1;
         this.node2 = node2;
-        Weight = CaveUtils.SqrEuclidianDist(node1.position, node2.position);
+        Weight = FastMath.SqrEuclidianDist(node1.position, node2.position);
         center = new Vector3i(
             (node1.position.x + node2.position.x) >> 1,
             (node1.position.y + node2.position.y) >> 1,
@@ -46,7 +46,7 @@ public class GraphEdge : IComparable<GraphEdge>
         this.id = id;
         this.node1 = node1;
         this.node2 = node2;
-        Weight = CaveUtils.SqrEuclidianDist(node1.position, node2.position);
+        Weight = FastMath.SqrEuclidianDist(node1.position, node2.position);
         center = new Vector3i(
             (node1.position.x + node2.position.x) >> 1,
             (node1.position.y + node2.position.y) >> 1,

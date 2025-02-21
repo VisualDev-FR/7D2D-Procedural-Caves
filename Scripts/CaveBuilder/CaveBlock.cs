@@ -1,6 +1,3 @@
-using System;
-using System.IO;
-
 public class CaveBlock
 {
     public const sbyte defaultDensity = sbyte.MaxValue;
@@ -125,7 +122,7 @@ public class CaveBlock
 
     public static int GetHashCode(int x, int y, int z)
     {
-        return CaveUtils.PositionHashCode(x, y, z);
+        return BFSUtils.PositionHashCode(x, y, z);
     }
 
     public Vector3i ToWorldPos(Vector3i halfWorldSize)

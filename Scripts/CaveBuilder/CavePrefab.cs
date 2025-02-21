@@ -38,7 +38,7 @@ public class CavePrefab
 
     public FastTags<TagGroup.Poi> Tags => prefabDataInstance == null ? FastTags<TagGroup.Poi>.none : prefabDataInstance.prefab.Tags;
 
-    public bool isEntrance => Tags.Test_AnySet(CaveConfig.tagCaveEntrance);
+    public bool isEntrance => Tags.Test_AnySet(CaveTags.tagCaveEntrance);
 
     public bool isRoom = false;
 
@@ -149,7 +149,7 @@ public class CavePrefab
 
         foreach (var marker in pdi.prefab.RotatePOIMarkers(true, rotation))
         {
-            if (!marker.tags.Test_AnySet(CaveConfig.tagCaveMarker))
+            if (!marker.tags.Test_AnySet(CaveTags.tagCaveMarker))
                 continue;
 
             caveMarkers.Add(marker);

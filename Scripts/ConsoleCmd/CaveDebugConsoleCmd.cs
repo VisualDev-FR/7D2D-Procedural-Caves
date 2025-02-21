@@ -69,28 +69,6 @@ public class CaveDebugConsoleCmd : ConsoleCmdAbstract
         BlockSelectionUtils.SelectBox(bb);
     }
 
-    private static void LightCommand(List<string> _params)
-    {
-        throw new NotImplementedException();
-    }
-
-    private static void MoonScaleCommand(List<string> _params)
-    {
-        if (_params.Count == 0)
-        {
-            Logging.Error($"Missing argument: 'scale' (float)");
-            return;
-        }
-
-        if (!float.TryParse(_params[1], out var scale))
-        {
-            Logging.Error($"Invalid argument: '{_params[1]}'");
-            return;
-        }
-
-        CaveConfig.CaveLightConfig.moonLightScale = scale;
-    }
-
     private static void DecorateCommand(List<string> _params)
     {
         var worldPos = BlockSelectionUtils.GetSelectionPosition();
@@ -161,14 +139,6 @@ public class CaveDebugConsoleCmd : ConsoleCmdAbstract
 
             case "prefab":
                 PrefabCommand(_params);
-                break;
-
-            case "light":
-                LightCommand(_params);
-                break;
-
-            case "moon":
-                MoonScaleCommand(_params);
                 break;
 
             case "deco":

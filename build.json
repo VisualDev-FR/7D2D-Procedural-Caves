@@ -3,6 +3,7 @@
     "csproj": "procedural-caves.csproj",
     "include": [
         "ModInfo.xml",
+        "ModConfig.xml",
         "README.md",
         "Licence.txt",
         "Config",
@@ -11,7 +12,9 @@
     "dependencies": [
         "../7D2D-cave-lights",
         "../7D2D-cave-assets",
-        "../7D2D-cave-prefabs"
+        "../7D2D-cave-prefabs",
+        "../7D2D-cave-entities",
+        "../7D2D-mod-utils"
     ],
     "clear_saves": [
         {
@@ -24,6 +27,10 @@
         },
         {
             "world": "South Usitonu County",
+            "save": "Caves"
+        },
+        {
+            "world": "Old Bocera Moutains",
             "save": "Caves"
         }
     ]

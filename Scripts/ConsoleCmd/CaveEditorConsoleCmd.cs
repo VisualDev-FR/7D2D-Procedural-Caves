@@ -145,7 +145,7 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
             _start: start,
             _size: size,
             _group: "cave",
-            _tags: CaveConfig.tagCaveMarker,
+            _tags: CaveTags.tagCaveMarker,
             _type: Prefab.Marker.MarkerTypes.None,
             isSelected: false
         );
@@ -384,7 +384,7 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
         var prefabInstance = GetCurrentPrefab();
 
         prefabInstance.prefab.editorGroups.Add("cave");
-        prefabInstance.prefab.Tags = CaveConfig.tagCave;
+        prefabInstance.prefab.Tags = CaveTags.tagCave;
         // prefabInstance.prefab.editorGroups.Add(playername);
     }
 
@@ -397,7 +397,7 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
             prefabInstance.prefab.editorGroups.Add("cave");
         }
 
-        prefabInstance.prefab.Tags |= CaveConfig.tagCave;
+        prefabInstance.prefab.Tags |= CaveTags.tagCave;
 
         if (args.Count == 2)
         {
@@ -405,12 +405,12 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
             switch (args[1].ToLower())
             {
                 case "entrance":
-                    prefabInstance.prefab.Tags |= CaveConfig.tagCaveEntrance;
+                    prefabInstance.prefab.Tags |= CaveTags.tagCaveEntrance;
                     break;
 
                 case "underground":
                 case "ug":
-                    prefabInstance.prefab.Tags |= CaveConfig.tagCaveUnderground;
+                    prefabInstance.prefab.Tags |= CaveTags.tagUnderground;
                     break;
 
                 default:

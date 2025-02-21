@@ -150,7 +150,7 @@ public class GraphNode
             yield return new CaveBlock(currentPosition);
 
             // TODO: use tunnels.GetSphere
-            foreach (Vector3i offset in CaveUtils.offsets)
+            foreach (Vector3i offset in BFSUtils.offsets)
             {
                 Vector3i pos = currentPosition + offset;
 
@@ -160,7 +160,7 @@ public class GraphNode
                     || pos.y < markerStart.y || pos.y >= markerEnd.y
                     || (direction.Vector.x == 0 && (pos.x < markerStart.x || pos.x >= markerEnd.x))
                     || (direction.Vector.z == 0 && (pos.z < markerStart.z || pos.z >= markerEnd.z))
-                    || CaveUtils.SqrEuclidianDist(pos, center) >= sqrRadius;
+                    || FastMath.SqrEuclidianDist(pos, center) >= sqrRadius;
 
                 if (!shouldContinue)
                 {

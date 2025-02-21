@@ -62,8 +62,8 @@ public class XUiC_WorldGenerationWindowGroup_GenerateButton_OnPressed
         CaveConfig.generateWater = CaveConfig.caveWater != WorldBuilder.GenerationSelections.None;
         CaveConfig.generateCaves = CaveConfig.caveNetworks != WorldBuilder.GenerationSelections.None;
 
-        Logging.Info($"[CaveConfig] generateWater: {CaveConfig.generateWater}");
-        Logging.Info($"[CaveConfig] terrainOffset: {CaveConfig.terrainOffset}");
+        Logging.Info($"generateWater: {CaveConfig.generateWater}");
+        Logging.Info($"terrainOffset: {CaveConfig.terrainOffset}");
 
         return true;
     }

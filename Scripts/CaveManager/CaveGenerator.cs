@@ -87,7 +87,7 @@ public class CaveGenerator
 
             int biomeID = chunk.GetBiomeId(0, 0);
 
-            foreach (var offset in CaveUtils.offsets)
+            foreach (var offset in BFSUtils.offsets)
             {
                 // TODO: neighborHash + offsetHash
                 neighbor.x = blockChunkPos.x + offset.x;

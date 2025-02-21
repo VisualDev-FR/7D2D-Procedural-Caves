@@ -24,7 +24,7 @@ public class BlockCaveTerrain : Block
 
         blockChangeInfos.Add(new BlockChangeInfo(_clrIdx, _blockPos, CaveBlocks.caveAir));
 
-        foreach (var offset in CaveUtils.offsets)
+        foreach (var offset in BFSUtils.offsets)
         {
             neighborPos.x = _blockPos.x + offset.x;
             neighborPos.y = _blockPos.y + offset.y;

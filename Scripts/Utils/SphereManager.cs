@@ -28,7 +28,7 @@ public class SphereManager
         {
             Vector3i currentPosition = queue.First();
 
-            foreach (var offset in CaveUtils.offsets)
+            foreach (var offset in BFSUtils.offsets)
             {
                 pos.x = currentPosition.x + offset.x;
                 pos.y = currentPosition.y + offset.y;

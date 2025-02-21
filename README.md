@@ -1,15 +1,17 @@
 # 7D2D - Procedural Caves Generator
 
-## Setup developpement environement
+## Requirements
 
-* Installing 7days to die
-* setup the environemment variable `PATH_7D2D` (C:/.../steam/steamapps/common/7 days to die)
-* Installing 7-zip [from here](https://7-zip.org/download.html)
-* Adding the 7-zip executable (7z.exe) to your environement variable `path`
+* Windows 10+
+* 7 Days to die 1.3+
+* .NET Framework 4.8+
 
 ## Build the mod
 
-* `helpers/compile.bat`: compiles the dll, then creates a ready to release zip archive of the mod
+```
+cd path/to/cloned/repo
+dotnet build
+```
 
 ## Running local viewer
 

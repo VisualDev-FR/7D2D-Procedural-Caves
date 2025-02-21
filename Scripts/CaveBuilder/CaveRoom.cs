@@ -176,7 +176,7 @@ public class CaveRoom
     {
         int neighborsCount = 0;
 
-        foreach (var offset in CaveUtils.offsets)
+        foreach (var offset in BFSUtils.offsets)
         {
             if (map[x + offset.x, y + offset.y, z + offset.z])
             {
@@ -207,7 +207,7 @@ public class CaveRoom
 
             visited.Add(currentNode.position);
 
-            foreach (var offset in CaveUtils.offsetsNoVertical)
+            foreach (var offset in BFSUtils.offsetsNoVertical)
             {
                 Vector3i neighborPos = currentNode.position + offset;
 
