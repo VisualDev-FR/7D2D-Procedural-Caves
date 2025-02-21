@@ -8,9 +8,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [0.0.2] - 2024-02-21
 
-### Added
-- Added the possibility to disable cave bloodmoons from `ModConfig.xml`
-- Added `ModConfig.xml`
+## Added
+- Added 7D2D-mod-utils (shared library)
+- Added `TheDescent/ModConfig.xml`
+- Added `TheDescent-cave-lights/ModConfig.xml`
+- Added the possibility to disable cave bloodmoons from `TheDescent/ModConfig.xml`
 
 ### Changed
 - Removed `H_SkyManager` (moved to cave-lights)
