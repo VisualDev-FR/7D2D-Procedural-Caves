@@ -6,23 +6,27 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.0.2] - 2024-02-21
+
 ### Added
-- add possibility to disable cave bloodmoons from ModConfig.xml
-- add ModConfig.xml
+- Added the possibility to disable cave bloodmoons from `ModConfig.xml`
+- Added `ModConfig.xml`
 
 ### Changed
-- remove H_SkyManager (moved to cave-lights)
-- remove worldglobal.xml (moved to cave-lights)
-- remove aa_battery from loot.xml (moved to cave-lights)
-- remove roadFlare from loot.xml (moved to cave-assets)
-- remove collectible items (moved to cave-assets)
-- remove EAIEatBlock (moved to cave-entities)
-- prevent traders to propose quests at underground prefabs
-- prevent spawning of cave trader prefabs during rwg
+- Removed `H_SkyManager` (moved to cave-lights)
+- Removed `worldglobal.xml` (moved to cave-lights)
+- Removed `aa_battery` from `loot.xml` (moved to cave-lights)
+- Removed `roadFlare` from `loot.xml` (moved to cave-assets)
+- Removed collectible items (moved to cave-assets)
+- Removed `EAIEatBlock` (moved to cave-entities)
+- Prevented traders from offering quests at underground prefabs
+- Prevented spawning of cave trader prefabs during RWG
 
 ### Fixed
-- prevent NullReferenceException if a prefab fails to load
-- (caveLights) prevent NullReferenceException when a lightSource's transform was not found
+- Prevented `NullReferenceException` if a prefab fails to load
+- (caveLights) Prevented `NullReferenceException` when a `lightSource`'s transform was not found
+- (caveLights) Fixed blocked `modArmorNightVision` turning on
+
 
 ## [0.0.1] - 2024-02-15
 
