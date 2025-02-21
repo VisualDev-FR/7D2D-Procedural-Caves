@@ -17,9 +17,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - remove roadFlare from loot.xml (moved to cave-assets)
 - remove collectible items (moved to cave-assets)
 - remove EAIEatBlock (moved to cave-entities)
+- prevent traders to propose quests at underground prefabs
+- prevent spawning of cave trader prefabs during rwg
 
 ### Fixed
-- prevent cave trader prefabs to spawn (temporary fix)
 - prevent NullReferenceException if a prefab fails to load
 - (caveLights) prevent NullReferenceException when a lightSource's transform was not found
 

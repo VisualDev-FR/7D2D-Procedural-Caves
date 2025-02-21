@@ -5,7 +5,7 @@
     <!-- the number of game ticks after player spawned, before zombies start to spawn in caves -->
     <property name="minSpawnTicksBeforeEnemySpawn" value="500" />
 
-    <!-- enable / disable zombie spawn in caves -->
+    <!-- enable / disable zombie spawn in caves, use the command 'cd spawn' to toggle once in game -->
     <property name="enableCaveSpawn" value="true" />
 
     <!-- enable / disable zombie spawns in caves during bloodmoon only -->
