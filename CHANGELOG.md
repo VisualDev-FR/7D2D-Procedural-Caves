@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.0.3] - 2024-02-22
+
+### Changed
+- (cavelights) remove custom progression to unlock items
+
+### Fixed
+- Fixed vanilla LootFromXml.cs to prevent crashing if a lootgroop is not found
+
 ## [0.0.2] - 2024-02-21
 
 ## Added
@@ -36,5 +44,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 
 [unreleased]: https://github.com/VisualDev-FR/7D2D-Procedural-Caves/compare/master...unreleased
+[0.0.3]: https://github.com/VisualDev-FR/7D2D-Procedural-Caves/compare/0.0.2...0.0.3
 [0.0.2]: https://github.com/VisualDev-FR/7D2D-Procedural-Caves/compare/0.0.1...0.0.2
 [0.0.1]: https://github.com/VisualDev-FR/7D2D-Procedural-Caves/tree/0.0.1
