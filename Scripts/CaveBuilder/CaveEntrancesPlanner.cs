@@ -69,8 +69,6 @@ public class CaveEntrancesPlanner
 
         while (usedTileIndexes.Count < maxEntrancesCount && --maxRolls > 0)
         {
-            Logging.Info($"{wildernessTiles.Count} wilderness tiles available");
-
             if (usedTileIndexes.Contains(++tileIndex))
                 continue;
 
@@ -79,13 +77,8 @@ public class CaveEntrancesPlanner
 
             if (TrySpawnWildernessCaveEntrance(tile, prefab))
             {
-                Logging.Debug($"Entrance spawned: '{prefab.Name}' on tile '{tile.GridPosition}'");
                 spawnedEntrances.Add(prefab);
                 usedTileIndexes.Add(tileIndex);
-            }
-            else
-            {
-                Logging.Debug($"Fail to spawn prefab '{prefab.Name}' on tile '{tile.GridPosition}'");
             }
         }
 

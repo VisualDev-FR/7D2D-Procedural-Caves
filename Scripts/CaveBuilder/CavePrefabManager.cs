@@ -129,11 +129,6 @@ public class CavePrefabManager
         );
 
         Prefabs.Add(prefab);
-
-        Logging.Debug($"Natural entrance added at {position - CaveUtils.HalfWorldSize(worldSize)}");
-        Logging.Debug($"---- position: {position}");
-        Logging.Debug($"---- start: {prefab.position}");
-        Logging.Debug($"---- size: {prefab.Size}");
     }
 
     public bool IsNearSamePrefab(CavePrefab prefab, int minDist)
