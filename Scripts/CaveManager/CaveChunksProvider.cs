@@ -2,28 +2,34 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
-using Logger = Logging.Logger;
-
 public class CaveChunksProvider
 {
-    public string cavemapDir;
-
-    public readonly CaveGraph caveGraph;
+    private static readonly Logging.Logger logger = Logging.CreateLogger<CaveChunksProvider>();
 
     private readonly Dictionary<int, CaveRegion> regions = new Dictionary<int, CaveRegion>();
 
     private readonly Queue<int> regionQueue = new Queue<int>();
 
-    private readonly int worldSize;
-
     private static readonly int maxQueueSize = 4;
 
-    private readonly Logger logger = Logging.CreateLogger("CaveChunksProvider", Logging.loggingLevel);
+    public readonly string cavemapDir;
 
-    public CaveChunksProvider(string worldName, int worldSize)
+    public readonly string cavemapSaveDir;
+
+    private readonly int worldSize;
+
+    public CaveChunksProvider(int worldSize)
     {
         this.worldSize = worldSize;
-        cavemapDir = $"{GameIO.GetWorldDir(worldName)}/cavemap";
+
+        cavemapDir = $"{GameIO.GetWorldDir()}/cavemap";
+        cavemapSaveDir = $"{GameIO.GetSaveGameDir()}/cavemap";
+
+        if (!Directory.Exists(cavemapDir))
+            logger.Warning($"Cavemap not found at '{cavemapDir}'");
+
+        if (!Directory.Exists(cavemapSaveDir))
+            Directory.CreateDirectory(cavemapSaveDir);
     }
 
     public int GetRegionID(Vector2s chunkPos)
@@ -76,15 +82,10 @@ public class CaveChunksProvider
 
     private CaveRegion CreateCaveRegion(int regionID)
     {
-        string filename = $"{cavemapDir}/region_{regionID}.bin";
+        regions[regionID] = new CaveRegion(regionID);
+        regions[regionID].TryRead($"{cavemapDir}/region_{regionID}.bin");
+        regions[regionID].TryRead($"{cavemapSaveDir}/region_{regionID}.bin");
 
-        if (!File.Exists(filename))
-        {
-            logger.Warning($"cave region not found 'region_{regionID}'");
-            return null;
-        }
-
-        regions[regionID] = new CaveRegion(filename);
         regionQueue.Enqueue(regionID);
 
         logger.Info($"Enqueue region '{regionID}'");

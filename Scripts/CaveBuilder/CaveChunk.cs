@@ -3,14 +3,9 @@ using System.Linq;
 
 public class CaveChunk
 {
-    private readonly Dictionary<int, CaveBlock> caveBlocks;
+    private readonly Dictionary<int, CaveBlock> caveBlocks = new Dictionary<int, CaveBlock>();
 
     public int BlockCount => caveBlocks.Count;
-
-    public CaveChunk()
-    {
-        caveBlocks = new Dictionary<int, CaveBlock>();
-    }
 
     public void AddBlock(CaveBlock block)
     {
