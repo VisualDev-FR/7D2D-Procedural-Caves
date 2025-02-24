@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using HarmonyLib;
 using UnityEngine;
 
@@ -5,11 +6,15 @@ using UnityEngine;
 public static class CaveSpawnTracker
 {
     public static Dictionary<EntityPlayer, Vector3i> lastPlayerPositions = new Dictionary<EntityPlayer, Vector3i>();
+
     public static Dictionary<EntityPlayer, List<Vector3i>> playerMovementHistory = new Dictionary<EntityPlayer, List<Vector3i>>();
+
     public static HashSet<Vector3i> recentSpawnPositions = new HashSet<Vector3i>();
 
     public static int minPlayerMovementThreshold = 5; // Minimum movement to trigger a new spawn
+
     public static int movementTrackingLimit = 5; // How many recent positions to store
+
     public static int maxTrackedSpawns = 15; // Limit tracked spawn locations
 
     public static bool HasPlayerMovedSignificantly(EntityPlayer player, Vector3i currentPos)
@@ -34,7 +39,7 @@ public static class CaveSpawnTracker
         float totalDistance = 0f;
         for (int i = 1; i < history.Count; i++)
         {
-            totalDistance += RebirthUtilities.Vector3iDistance(history[i - 1], history[i]);
+            totalDistance += FastMath.EuclidianDist(history[i - 1], history[i]);
         }
 
         // Check if movement is significant
@@ -89,15 +94,15 @@ public class SpawnManagerBiomes_Update
 
         Vector3i playerPosition = new Vector3i(player.GetPosition());
 
+        if (playerPosition.y + CaveConfig.zombieSpawnMarginDeep > world.GetTerrainHeight(playerPosition.x, playerPosition.z))
+        {
+            return true;
+        }
+
         // Ensure the player has moved significantly
         if (!CaveSpawnTracker.HasPlayerMovedSignificantly(player, playerPosition))
         {
             return false;
-        }
-
-        if (playerPosition.y + CaveConfig.zombieSpawnMarginDeep > world.GetTerrainHeight(playerPosition.x, playerPosition.z))
-        {
-            return true;
         }
 
         Vector3i spawnPosition = CaveSpawnManager.GetSpawnPositionNearPlayer(playerPosition, CaveConfig.minSpawnDist);
@@ -122,8 +127,8 @@ public class SpawnManagerBiomes_Update
                                         player.position.x + minDistance, player.position.y + minHeight, player.position.z + minDistance),
             new List<Entity>());
 
-        int random = Manager.random.RandomRange(0, 101);
-        float distance = RebirthUtilities.Vector3iDistance(playerPosition, spawnPosition);
+        int random = new System.Random().Next(0, 101);
+        float distance = FastMath.EuclidianDist(playerPosition, spawnPosition);
 
         if (distance < 15 || entitiesInBounds.Count > 4 || random < 20)
         {
