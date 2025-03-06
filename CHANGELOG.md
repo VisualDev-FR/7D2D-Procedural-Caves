@@ -8,6 +8,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [0.0.4] - 2024-02-22
 
+### Fixed
+- (cave-entities) Fix assembly reference to EAIEatBlock
+
 ## [0.0.3] - 2024-02-22
 
 ### Changed

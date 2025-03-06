@@ -1,3 +1,9 @@
+0.0.4:
+    ☐ better way to determine if a player is in cave or not
+    ☐ make cave-light configurable from xml
+    ☐ isolate cave traders from other traders
+    ☐ improve zombie spawning with ramsay's proposal
+
 First release:
     ✘ implement tunneling with code of toolTerrainModelder @cancelled(24-08-29 21:59)
     ✘ find a way to force rwg POIs choices @cancelled(24-11-02 23:24)
