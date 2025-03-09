@@ -10,9 +10,18 @@ public class CaveRegion
 
     public int BlockCount => CaveChunks.Values.Sum(chunk => chunk.BlockCount);
 
-    public CaveRegion(string filename)
+    public readonly int regionID;
+
+    public CaveRegion(int regionID)
     {
-        CaveChunks = new Dictionary<Vector2s, CaveChunk>();
+        this.regionID = regionID;
+        this.CaveChunks = new Dictionary<Vector2s, CaveChunk>();
+    }
+
+    public void TryRead(string filename)
+    {
+        if (!File.Exists(filename))
+            return;
 
         var layer = new RLELayer();
         var chunkPos = new Vector2s();
