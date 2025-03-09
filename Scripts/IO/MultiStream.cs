@@ -25,12 +25,12 @@ public class MultiStream : IDisposable
         streams = new Dictionary<string, FileStream>();
     }
 
-    private BinaryWriter CreateWriter(string name)
+    private BinaryWriter CreateWriter(string name, FileMode filemode = FileMode.Create)
     {
         if (writers.ContainsKey(name))
             throw new InvalidOperationException($"A similar writer is Already open: '{name}'");
 
-        var stream = new FileStream($"{path}/{name}", FileMode.Create);
+        var stream = new FileStream($"{path}/{name}", filemode);
         var writer = new BinaryWriter(stream);
 
         streams[name] = stream;
@@ -39,14 +39,14 @@ public class MultiStream : IDisposable
         return writer;
     }
 
-    public BinaryWriter GetWriter(string name)
+    public BinaryWriter GetWriter(string name, FileMode filemode = FileMode.Create)
     {
         if (writers.TryGetValue(name, out var writer))
         {
             return writer;
         }
 
-        return CreateWriter(name);
+        return CreateWriter(name, filemode);
     }
 
     public void Dispose()

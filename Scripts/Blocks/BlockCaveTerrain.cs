@@ -6,12 +6,14 @@ public class BlockCaveTerrain : Block
 
     public override DestroyedResult OnBlockDestroyedBy(WorldBase _world, int _clrIdx, Vector3i _blockPos, BlockValue _blockValue, int _entityId, bool _bUseHarvestTool)
     {
+        CaveGenerator.caveChunksProvider.RegisterAsCaveBlock(_blockPos);
         UpdateNeighbors(_clrIdx, _blockPos);
         return DestroyedResult.Remove;
     }
 
     public override DestroyedResult OnBlockDestroyedByExplosion(WorldBase _world, int _clrIdx, Vector3i _blockPos, BlockValue _blockValue, int _playerThatStartedExpl)
     {
+        CaveGenerator.caveChunksProvider.RegisterAsCaveBlock(_blockPos);
         UpdateNeighbors(_clrIdx, _blockPos);
         return base.OnBlockDestroyedByExplosion(_world, _clrIdx, _blockPos, _blockValue, _playerThatStartedExpl);
     }

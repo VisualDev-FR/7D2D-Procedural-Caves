@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityEngine;
 
 public class CaveChunksProvider
@@ -7,6 +8,8 @@ public class CaveChunksProvider
     private static readonly Logging.Logger logger = Logging.CreateLogger<CaveChunksProvider>();
 
     private readonly Dictionary<int, CaveRegion> regions = new Dictionary<int, CaveRegion>();
+
+    private readonly HashSet<CaveBlock> blocksToSave = new HashSet<CaveBlock>();
 
     private readonly Queue<int> regionQueue = new Queue<int>();
 
@@ -150,4 +153,41 @@ public class CaveChunksProvider
         return caveChunk.Exists(hashcode);
     }
 
+    public void RegisterAsCaveBlock(Vector3i position)
+    {
+        blocksToSave.Add(new CaveBlock(position));
+
+        if (blocksToSave.Count > 1000)
+        {
+            SaveBlocks();
+        }
+    }
+
+    public void SaveBlocks()
+    {
+        if (blocksToSave.Count == 0)
+            return;
+
+        var groupedBlocks = blocksToSave.GroupBy(block => GetRegionID(block.chunkPos));
+
+        using (var multistream = new MultiStream(cavemapSaveDir, create: true))
+        {
+            foreach (var group in groupedBlocks)
+            {
+                var regionID = group.Key;
+                var writer = multistream.GetWriter($"region_{regionID}.bin", FileMode.Append);
+
+                foreach (CaveBlock caveblock in group)
+                {
+                    writer.Write(caveblock.x);
+                    writer.Write(caveblock.y);
+                    writer.Write(caveblock.z);
+                }
+            }
+        }
+
+        blocksToSave.Clear();
+
+        logger.Info("{n} cave regions saved.");
+    }
 }
