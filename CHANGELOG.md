@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Fixed
 - (cave-entities) Fix assembly reference to EAIEatBlock
+- (cave-lights)   Fix NullReferenceException if no Light component can be found on lightTransform (see [this commit](https://github.com/VisualDev-FR/7D2D-Powered-flashights/commit/6d8ef6e3e4012b3a6a105d4e05343658bd132ee6))
 
 ## [0.0.3] - 2024-02-22
 
