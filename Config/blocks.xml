@@ -17,7 +17,7 @@
             <drop event="Destroy" count="0" />
         </block>
 
-        <!-- placeholders (used for cave decoration) -->
+        <!-- cave decoration placeholders (used for cave decoration) -->
         <block name="cntCaveFloor">
             <property name="Extends" value="cntWastelandRandomLootHelper" />
             <property name="CreativeMode" value="None" />
@@ -38,7 +38,167 @@
             <property name="CreativeMode" value="None" />
         </block>
 
-        <block name="cntCaveFlatWater">
+        <block name="cntCaveFloorFlatWater">
+            <property name="Extends" value="cntWastelandRandomLootHelper" />
+            <property name="CreativeMode" value="None" />
+        </block>
+
+        <block name="cntCaveCeilingWater">
+            <property name="Extends" value="cntWastelandRandomLootHelper" />
+            <property name="CreativeMode" value="None" />
+        </block>
+
+        <!-- forest decoration placeholders -->
+        <block name="cntCaveFloor_pine_forest">
+            <property name="Extends" value="cntWastelandRandomLootHelper" />
+            <property name="CreativeMode" value="None" />
+        </block>
+
+        <block name="cntCaveFloorFlat_pine_forest">
+            <property name="Extends" value="cntWastelandRandomLootHelper" />
+            <property name="CreativeMode" value="None" />
+        </block>
+
+        <block name="cntCaveCeiling_pine_forest">
+            <property name="Extends" value="cntWastelandRandomLootHelper" />
+            <property name="CreativeMode" value="None" />
+        </block>
+
+        <block name="cntCaveFloorWater_pine_forest">
+            <property name="Extends" value="cntWastelandRandomLootHelper" />
+            <property name="CreativeMode" value="None" />
+        </block>
+
+        <block name="cntCaveFloorFlatWater_pine_forest">
+            <property name="Extends" value="cntWastelandRandomLootHelper" />
+            <property name="CreativeMode" value="None" />
+        </block>
+
+        <block name="cntCaveCeilingWater_pine_forest">
+            <property name="Extends" value="cntWastelandRandomLootHelper" />
+            <property name="CreativeMode" value="None" />
+        </block>
+
+        <!-- burnt forest decoration placeholder -->
+        <block name="cntCaveFloor_burnt_forest">
+            <property name="Extends" value="cntWastelandRandomLootHelper" />
+            <property name="CreativeMode" value="None" />
+        </block>
+
+        <block name="cntCaveFloorFlat_burnt_forest">
+            <property name="Extends" value="cntWastelandRandomLootHelper" />
+            <property name="CreativeMode" value="None" />
+        </block>
+
+        <block name="cntCaveCeiling_burnt_forest">
+            <property name="Extends" value="cntWastelandRandomLootHelper" />
+            <property name="CreativeMode" value="None" />
+        </block>
+
+        <block name="cntCaveFloorWater_burnt_forest">
+            <property name="Extends" value="cntWastelandRandomLootHelper" />
+            <property name="CreativeMode" value="None" />
+        </block>
+
+        <block name="cntCaveFloorFlatWater_burnt_forest">
+            <property name="Extends" value="cntWastelandRandomLootHelper" />
+            <property name="CreativeMode" value="None" />
+        </block>
+
+        <block name="cntCaveCeilingWater_burnt_forest">
+            <property name="Extends" value="cntWastelandRandomLootHelper" />
+            <property name="CreativeMode" value="None" />
+        </block>
+
+        <!-- desert decoration placeholders -->
+        <block name="cntCaveFloor_desert">
+            <property name="Extends" value="cntWastelandRandomLootHelper" />
+            <property name="CreativeMode" value="None" />
+        </block>
+
+        <block name="cntCaveFloorFlat_desert">
+            <property name="Extends" value="cntWastelandRandomLootHelper" />
+            <property name="CreativeMode" value="None" />
+        </block>
+
+        <block name="cntCaveCeiling_desert">
+            <property name="Extends" value="cntWastelandRandomLootHelper" />
+            <property name="CreativeMode" value="None" />
+        </block>
+
+        <block name="cntCaveFloorWater_desert">
+            <property name="Extends" value="cntWastelandRandomLootHelper" />
+            <property name="CreativeMode" value="None" />
+        </block>
+
+        <block name="cntCaveFloorFlatWater_desert">
+            <property name="Extends" value="cntWastelandRandomLootHelper" />
+            <property name="CreativeMode" value="None" />
+        </block>
+
+        <block name="cntCaveCeilingWater_desert">
+            <property name="Extends" value="cntWastelandRandomLootHelper" />
+            <property name="CreativeMode" value="None" />
+        </block>
+
+        <!-- snow decoration placeholder -->
+        <block name="cntCaveFloor_snow">
+            <property name="Extends" value="cntWastelandRandomLootHelper" />
+            <property name="CreativeMode" value="None" />
+        </block>
+
+        <block name="cntCaveFloorFlat_snow">
+            <property name="Extends" value="cntWastelandRandomLootHelper" />
+            <property name="CreativeMode" value="None" />
+        </block>
+
+        <block name="cntCaveCeiling_snow">
+            <property name="Extends" value="cntWastelandRandomLootHelper" />
+            <property name="CreativeMode" value="None" />
+        </block>
+
+        <block name="cntCaveFloorWater_snow">
+            <property name="Extends" value="cntWastelandRandomLootHelper" />
+            <property name="CreativeMode" value="None" />
+        </block>
+
+        <block name="cntCaveFloorFlatWater_snow">
+            <property name="Extends" value="cntWastelandRandomLootHelper" />
+            <property name="CreativeMode" value="None" />
+        </block>
+
+        <block name="cntCaveCeilingWater_snow">
+            <property name="Extends" value="cntWastelandRandomLootHelper" />
+            <property name="CreativeMode" value="None" />
+        </block>
+
+        <!-- wasteland decoration placeholders -->
+        <block name="cntCaveFloor_wasteland">
+            <property name="Extends" value="cntWastelandRandomLootHelper" />
+            <property name="CreativeMode" value="None" />
+        </block>
+
+        <block name="cntCaveFloorFlat_wasteland">
+            <property name="Extends" value="cntWastelandRandomLootHelper" />
+            <property name="CreativeMode" value="None" />
+        </block>
+
+        <block name="cntCaveCeiling_wasteland">
+            <property name="Extends" value="cntWastelandRandomLootHelper" />
+            <property name="CreativeMode" value="None" />
+        </block>
+
+        <block name="cntCaveFloorWater_wasteland">
+            <property name="Extends" value="cntWastelandRandomLootHelper" />
+            <property name="CreativeMode" value="None" />
+        </block>
+
+        <block name="cntCaveFloorFlatWater_wasteland">
+            <property name="Extends" value="cntWastelandRandomLootHelper" />
+            <property name="CreativeMode" value="None" />
+        </block>
+
+        <block name="cntCaveCeilingWater_wasteland">
             <property name="Extends" value="cntWastelandRandomLootHelper" />
             <property name="CreativeMode" value="None" />
         </block>

@@ -58,7 +58,6 @@ public class CaveGenerator
         }
     }
 
-
     public static void GenerateCaveChunk(Chunk chunk)
     {
         if (chunk == null)
@@ -156,6 +155,63 @@ public class CaveGenerator
         }
     }
 
+    private static string GetBiomeName(int worldX, int worldZ)
+    {
+        var biomeDefinition = GameManager.Instance.World.ChunkCache.ChunkProvider
+            .GetBiomeProvider()
+            .GetBiomeAt(worldX, worldZ);
+
+        if (biomeDefinition is null)
+            return "";
+
+        return biomeDefinition.m_sBiomeName;
+    }
+
+    private static bool IsPlaceholderEmpty(BlockValue placeholder)
+    {
+        if (BlockPlaceholderMap.Instance.placeholders.TryGetValue(placeholder, out var placeholderTargets))
+        {
+            return placeholderTargets.Count == 0;
+        }
+
+        return true;
+    }
+
+    private static BlockValue GetBiomePlaceholder(string biomeName, string placeholderName)
+    {
+        var placeholder = CaveBlocks.TryGetBlockValue($"{placeholderName}_{biomeName}");
+
+        if (!placeholder.isair && !IsPlaceholderEmpty(placeholder))
+        {
+            return placeholder;
+        }
+
+        return CaveBlocks.GetBlockValue(placeholderName);
+    }
+
+    private static BlockValue GetDecorationPlaceholder(string biomeName, bool isFloor, bool isWater, bool isFlatFloor, bool isCeiling)
+    {
+        if (isFlatFloor && !isWater)
+            return GetBiomePlaceholder(biomeName, "cntCaveFloorFlat");
+
+        if (isFloor && !isWater)
+            return GetBiomePlaceholder(biomeName, "cntCaveFloor");
+
+        if (isCeiling && !isWater)
+            return GetBiomePlaceholder(biomeName, "cntCaveCeiling");
+
+        if (isFlatFloor && isWater)
+            return GetBiomePlaceholder(biomeName, "cntCaveFloorFlatWater");
+
+        if (isFloor && isWater)
+            return GetBiomePlaceholder(biomeName, "cntCaveFloorWater");
+
+        if (isCeiling && isWater)
+            return GetBiomePlaceholder(biomeName, "cntCaveCeilingWater");
+
+        return BlockValue.Air;
+    }
+
     private static void TrySpawnCaveDecoration(GameRandom random, Chunk chunk, CaveBlock caveBlock, HashSet<Vector3i> decoratedPositions)
     {
         Vector3i worldPos = caveBlock.ToWorldPos(HalfWorldSize);
@@ -172,21 +228,10 @@ public class CaveGenerator
         bool isFlatFloor = IsFlatFloor(worldPos);
         bool isWater = caveBlock.isWater;
 
-        BlockValue placeHolder;
+        var biomeName = GetBiomeName(worldPos.x, worldPos.z).ToLower();
+        var placeHolder = GetDecorationPlaceholder(biomeName, isFloor, isWater, isFlatFloor, isCeiling);
 
-        if (isFloor && isWater)
-            placeHolder = CaveBlocks.cntCaveFloorWater;
-
-        else if (isFlatFloor && !isWater)
-            placeHolder = CaveBlocks.cntCaveFloorFlat;
-
-        else if (isFloor && !isWater)
-            placeHolder = CaveBlocks.cntCaveFloor;
-
-        else if (isCeiling && !isWater)
-            placeHolder = CaveBlocks.cntCaveCeiling;
-
-        else
+        if (placeHolder.isair)
             return;
 
         var blockValue = CaveBlocks.caveAir;
