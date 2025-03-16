@@ -2,6 +2,9 @@
 
 <modconfig>
 
+    <!-- param to reduce the moon light intensity (vanilla value = 1) -->
+    <property name="moonLightScale" value="0.1" />
+
     <!-- the number of game ticks after player spawned, before zombies start to spawn in caves -->
     <property name="minSpawnTicksBeforeEnemySpawn" value="500" />
 

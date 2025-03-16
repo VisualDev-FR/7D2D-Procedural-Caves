@@ -11,6 +11,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Added
 - Support for custom decoration in each biome through blockplaceholders.xml
 
+### Changed
+- brings back worldglobal.xml from cavelights
+- brings back moon light modifier from cavelights
+
 ### Fixed
 - (cave-entities) Fix assembly reference to EAIEatBlock
 - (cave-lights)   Fix NullReferenceException if no Light component can be found on lightTransform (see [this commit](https://github.com/VisualDev-FR/7D2D-Powered-flashights/commit/6d8ef6e3e4012b3a6a105d4e05343658bd132ee6))
