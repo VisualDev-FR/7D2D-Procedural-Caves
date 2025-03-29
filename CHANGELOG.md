@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
-## [0.0.4] - 2024-02-22
+## [0.0.4] - 2024-03-29
 
 ### Added
 - Support for custom decoration in each biome through blockplaceholders.xml
@@ -16,6 +16,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - brings back moon light modifier from cavelights
 
 ### Fixed
+- (mod-utils)     Fix case sensitivity of ModConfig.xml (issues on linux, see [this commit](https://github.com/VisualDev-FR/7D2D-mod-utils/commit/34f348a1e697a848c4c9aa498be65e2bc08528ba))
 - (cave-entities) Fix assembly reference to EAIEatBlock
 - (cave-lights)   Fix NullReferenceException if no Light component can be found on lightTransform (see [this commit](https://github.com/VisualDev-FR/7D2D-Powered-flashights/commit/6d8ef6e3e4012b3a6a105d4e05343658bd132ee6))
 
