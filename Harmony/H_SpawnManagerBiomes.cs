@@ -9,7 +9,7 @@ public static class CaveSpawnTracker
 
     public static Dictionary<EntityPlayer, List<Vector3i>> playerMovementHistory = new Dictionary<EntityPlayer, List<Vector3i>>();
 
-    public static HashSet<Vector3i> recentSpawnPositions = new HashSet<Vector3i>();
+    public static HashSet<int> recentSpawnChunks = new HashSet<int>();
 
     public static int minPlayerMovementThreshold = 5; // Minimum movement to trigger a new spawn
 
@@ -51,12 +51,35 @@ public static class CaveSpawnTracker
 
         return false;
     }
+
+    public static void AddSpawnPosition(Vector3i position)
+    {
+        var chunkHash = BFSUtils.PositionHashCode(
+            position.x << 4,
+            position.y << 4,
+            position.z << 4
+        );
+
+        recentSpawnChunks.Add(chunkHash);
+    }
+
+    public static bool HasRecentSpawnAt(Vector3i position)
+    {
+        var chunkHash = BFSUtils.PositionHashCode(
+            position.x << 4,
+            position.y << 4,
+            position.z << 4
+        );
+
+        return recentSpawnChunks.Contains(chunkHash);
+    }
 }
+
 
 [HarmonyPatch(typeof(SpawnManagerBiomes), "Update")]
 public class SpawnManagerBiomes_Update
 {
-    private static readonly Logging.Logger logger = Logging.CreateLogger($"H_SpawnManagerBiomes_Update", LoggingLevel.INFO);
+    private static readonly Logging.Logger logger = Logging.CreateLogger($"TheDescent.H_SpawnManagerBiomes_Update", LoggingLevel.INFO);
 
     private static SpawnManagerBiomes spawnManagerBiome;
 
@@ -107,18 +130,16 @@ public class SpawnManagerBiomes_Update
 
         Vector3i spawnPosition = CaveSpawnManager.GetSpawnPositionNearPlayer(playerPosition, CaveConfig.minSpawnDist);
 
-        if (spawnPosition == Vector3.zero || CaveSpawnTracker.recentSpawnPositions.Contains(spawnPosition))
+        if (spawnPosition == Vector3.zero || CaveSpawnTracker.HasRecentSpawnAt(spawnPosition))
         {
             return false;
         }
 
         // Limit tracked spawn locations
-        if (CaveSpawnTracker.recentSpawnPositions.Count >= CaveSpawnTracker.maxTrackedSpawns)
+        if (CaveSpawnTracker.recentSpawnChunks.Count >= CaveSpawnTracker.maxTrackedSpawns)
         {
-            CaveSpawnTracker.recentSpawnPositions.Clear();
+            CaveSpawnTracker.recentSpawnChunks.Clear();
         }
-
-        CaveSpawnTracker.recentSpawnPositions.Add(spawnPosition);
 
         int minDistance = 25;
         int minHeight = 15;
@@ -147,6 +168,10 @@ public class SpawnManagerBiomes_Update
         world.SpawnEntityInWorld(entity);
         world.DebugAddSpawnedEntity(entity);
         entity.Buffs.SetCustomVar("$spawnedDescent", 1f);
+
+        logger.Info($"spawn '{entity.GetDebugName()}' at {spawnPosition}");
+
+        CaveSpawnTracker.AddSpawnPosition(spawnPosition);
 
         return false;
     }
