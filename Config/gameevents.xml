@@ -21,11 +21,6 @@
                 <property name="is_aggressive" value="false" />
             </action>
 
-            <action class="AddBuff">
-                <property name="buff_name" value="buffFlashlightDisabled" />
-                <property name="duration" value="10" />
-            </action>
-
         </action_sequence>
 
         <!-- cave_terrain_collapse_event -->

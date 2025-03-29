@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Changed
 - brings back worldglobal.xml from cavelights
 - brings back moon light modifier from cavelights
+- prevents flashlights disabling during cave horde game event
 
 ### Fixed
 - (mod-utils)     Fix case sensitivity of ModConfig.xml (issues on linux, see [this commit](https://github.com/VisualDev-FR/7D2D-mod-utils/commit/34f348a1e697a848c4c9aa498be65e2bc08528ba))
