@@ -3,9 +3,11 @@ using WorldGenerationEngineFinal;
 
 public static class CaveConfig
 {
-    private static ModConfig config = new ModConfig("TheDescent");
+    private static ModConfig config = new ModConfig("TheDescent", version: 1);
 
     public static Logging.Logger logger = Logging.CreateLogger("TheDescent", LoggingLevel.DEBUG);
+
+    public static float moonLightScale = config.GetFloat("moonLightScale");
 
     public static readonly int RegionSize = 512;
 

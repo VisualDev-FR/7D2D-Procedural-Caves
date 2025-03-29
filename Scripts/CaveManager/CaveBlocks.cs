@@ -1,6 +1,6 @@
 # pragma warning disable IDE1006
 
-using System.IO;
+using System.Collections.Generic;
 
 public class CaveBlocks
 {
@@ -8,17 +8,6 @@ public class CaveBlocks
     public static BlockValue concreteBlock => GetBlockValue("concreteShapes:cube");
 
     public static BlockValue climbableRopeBlock => GetBlockValue("modularRopeTiledSideCentered");
-
-    // block placeholders
-    public static BlockValue cntCaveFloor => GetBlockValue("cntCaveFloor");
-
-    public static BlockValue cntCaveFloorFlat => GetBlockValue("cntCaveFloorFlat");
-
-    public static BlockValue cntCaveCeiling => GetBlockValue("cntCaveCeiling");
-
-    public static BlockValue cntCaveFlatWater => GetBlockValue("cntCaveFlatWater");
-
-    public static BlockValue cntCaveFloorWater => GetBlockValue("cntCaveFloorWater");
 
     // cave blocks
     public static BlockValue caveAir => GetBlockValue("caveAir");
@@ -41,6 +30,16 @@ public class CaveBlocks
 
     public static BlockValue caveTerrOreOilDeposit => GetBlockValue("caveTerrOreOilDeposit");
 
+    public static BlockValue TryGetBlockValue(string blockName)
+    {
+        if (Block.nameToBlock.TryGetValue(blockName, out var block))
+        {
+            return block.ToBlockValue();
+        }
+
+        return BlockValue.Air;
+    }
+
     public static BlockValue GetBlockValue(string blockName)
     {
         if (Block.nameToBlock.TryGetValue(blockName, out var block))
@@ -48,7 +47,7 @@ public class CaveBlocks
             return block.ToBlockValue();
         }
 
-        throw new InvalidDataException($"block '{blockName}' does not exist. (case maybe invalid)");
+        throw new KeyNotFoundException($"block '{blockName}' does not exist. (case maybe invalid)");
     }
 
     public static bool IsTerrain(BlockValue blockValue)

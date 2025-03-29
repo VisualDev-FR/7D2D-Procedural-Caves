@@ -1,17 +1,37 @@
-﻿<configs>
+﻿<!-- README
+
+Cave Decoration
+===============
+
+The decoration placeholders (cntCaveFloor, cntCaveFloorFlat, etc.)
+can be overridden if a biome-specific placeholder is defined.
+
+By default, TheDescent will try to load the biome-specific placeholder,
+and if it is empty, it will use the default placeholder (without a biome suffix).
+
+To add new placeholders for a custom biome, you must:
+    * create biome-specific placeholders that you want (cntCaveFloor_customBiome, cntCaveFloorFlat_customBiome, etc.)
+    * note that the biome name suffix comes from BiomeDefinition.m_sBiomeName
+    * in blocks.xml, create one block per created placeholder (see blocks.xml/cntCaveFloor for example)
+
+Glossary:
+    * cntCaveFloorFlat      = a space on the ground where it's possible to place a MultiBlock
+    * cntCaveFloor          = a space on the ground to place any block of size 1x1x1
+    * cntCaveCeiling        = a space on cave ceiling, to block size is checked
+    * cntCaveFloorWaterFlat = same as cntCaveFloorFlat, but applied if underwater
+    * cntCaveFloorWater     = same as cntCaveFloor, but applied if underwater
+    * cntCaveCeilingWater   = same as cntCaveCeiling, but applied if underwater
+
+TODO:
+    * Add cntLuggage<Medium,Big>Closed in cave decoration
+    * Add Shallow water placeholders
+    * Add Deep water placeholders
+-->
+
+<configs>
     <append xpath="/blockplaceholders">
 
-        <!-- ALL BIOMES -->
-        <placeholder name="cntCaveFloorShallowWater">
-        </placeholder>
-
-        <placeholder name="cntCaveFloorDeepWater">
-        </placeholder>
-
-        <placeholder name="cntCaveCeilingWater">
-        </placeholder>
-
-        <!-- TODO: Add cntLuggage<Medium,Big>Closed in cave decoration -->
+        <!-- DEFAULT PLACEHOLDERS -->
         <placeholder name="cntCaveFloor">
 
             <block name="caveAir" prob="0.3" />
@@ -343,12 +363,6 @@
 
         </placeholder>
 
-        <placeholder name="cntCaveWall">
-            <block name="caveAir" />
-            <block name="cntDeskSafe" prob=".0001" />
-        </placeholder>
-
-        <!-- TODO: pimp water decoration -->
         <placeholder name="cntCaveFloorWater">
             <block name="caveAir" />
             <block name="plantedTreeGrassSeed01" prob=".1" />
@@ -359,109 +373,121 @@
             <block name="treeDesertShrub" prob=".1" />
         </placeholder>
 
+        <placeholder name="cntCaveFloorFlatWater">
+            <block name="caveAir" />
+            <block name="plantedTreeGrassSeed01" prob=".1" />
+            <block name="treeBrownGrassDiagonal" prob=".1" />
+            <block name="treeTallGrassDiagonal" prob=".1" />
+            <block name="treeForestGrassDiagonal" prob=".1" />
+            <block name="treeGreenBrownGrassDiagonal" prob=".1" />
+            <block name="treeDesertShrub" prob=".1" />
+        </placeholder>
+
+        <placeholder name="cntCaveCeilingWater">
+
+            <block name="caveAir" prob="0.3" />
+
+            <block name="hangingMoss" prob=".005" />
+            <block name="plantHangingIvy01" prob=".002" />
+            <block name="plantHangingIvy02" prob=".002" />
+
+        </placeholder>
+
         <!-- FOREST -->
-        <placeholder name="cntCaveFloorShallowWater_forest">
+        <placeholder name="cntCaveFloor_pine_forest">
         </placeholder>
 
-        <placeholder name="cntCaveFloorDeepWater_forest">
+        <placeholder name="cntCaveFloorFlat_pine_forest">
         </placeholder>
 
-        <placeholder name="cntCaveCeilingWater_forest">
+        <placeholder name="cntCaveCeiling_pine_forest">
         </placeholder>
 
-        <placeholder name="cntCaveFloor_forest">
+        <placeholder name="cntCaveFloorWater_pine_forest">
         </placeholder>
 
-        <placeholder name="cntCaveCeiling_forest">
+        <placeholder name="cntCaveFloorFlatWater_pine_forest">
         </placeholder>
 
-        <placeholder name="cntCaveWall_forest">
+        <placeholder name="cntCaveCeilingWater_pine_forest">
         </placeholder>
 
         <!-- BURNT FOREST -->
-        <placeholder name="cntCaveFloorShallowWater_burnt">
+        <placeholder name="cntCaveFloor_burnt_forest">
         </placeholder>
 
-        <placeholder name="cntCaveFloorDeepWater_burnt">
+        <placeholder name="cntCaveFloorFlat_burnt_forest">
         </placeholder>
 
-        <placeholder name="cntCaveCeilingWater_burnt">
+        <placeholder name="cntCaveCeiling_burnt_forest">
         </placeholder>
 
-        <placeholder name="cntCaveFloor_burnt">
+        <placeholder name="cntCaveFloorWater_burnt_forest">
         </placeholder>
 
-        <placeholder name="cntCaveCeiling_burnt">
+        <placeholder name="cntCaveFloorFlatWater_burnt_forest">
         </placeholder>
 
-        <placeholder name="cntCaveWall_burnt">
+        <placeholder name="cntCaveCeilingWater_burnt_forest">
         </placeholder>
 
 
         <!-- DESERT -->
-        <placeholder name="cntCaveFloorShallowWater_desert">
-        </placeholder>
-
-        <placeholder name="cntCaveFloorDeepWater_desert">
-        </placeholder>
-
-        <placeholder name="cntCaveCeilingWater_desert">
-        </placeholder>
-
         <placeholder name="cntCaveFloor_desert">
-            <block name="treeCactus04" prob=".001" />
-            <block name="treeCactus05" prob=".001" />
-            <block name="treeCactus06" prob=".001" />
-            <block name="plantedYuccaDead" prob=".001" />
+        </placeholder>
+
+        <placeholder name="cntCaveFloorFlat_desert">
         </placeholder>
 
         <placeholder name="cntCaveCeiling_desert">
         </placeholder>
 
-        <placeholder name="cntCaveWall_desert">
+        <placeholder name="cntCaveFloorWater_desert">
+        </placeholder>
+
+        <placeholder name="cntCaveFloorFlatWater_desert">
+        </placeholder>
+
+        <placeholder name="cntCaveCeilingWater_desert">
         </placeholder>
 
         <!-- SNOW -->
-        <placeholder name="cntCaveFloorShallowWater_snow">
-        </placeholder>
-
-        <placeholder name="cntCaveFloorDeepWater_snow">
-        </placeholder>
-
-        <placeholder name="cntCaveCeilingWater_snow">
-        </placeholder>
-
         <placeholder name="cntCaveFloor_snow">
-            <block name="treeSnowyDeadBush" prob=".001" />
-            <block name="treeSnowyGrassDiagonal" prob=".001" />
-            <block name="plantShrubSnow" prob=".001" />
+        </placeholder>
+
+        <placeholder name="cntCaveFloorFlat_snow">
         </placeholder>
 
         <placeholder name="cntCaveCeiling_snow">
         </placeholder>
 
-        <placeholder name="cntCaveWall_snow">
+        <placeholder name="cntCaveFloorWater_snow">
+        </placeholder>
+
+        <placeholder name="cntCaveFloorFlatWater_snow">
+        </placeholder>
+
+        <placeholder name="cntCaveCeilingWater_snow">
         </placeholder>
 
 
         <!-- WASTELAND -->
-
-        <placeholder name="cntCaveFloorShallowWater_wasteland">
-        </placeholder>
-
-        <placeholder name="cntCaveFloorDeepWater_wasteland">
-        </placeholder>
-
-        <placeholder name="cntCaveCeilingWater_wasteland">
-        </placeholder>
-
         <placeholder name="cntCaveFloor_wasteland">
+        </placeholder>
+
+        <placeholder name="cntCaveFloorFlat_wasteland">
         </placeholder>
 
         <placeholder name="cntCaveCeiling_wasteland">
         </placeholder>
 
-        <placeholder name="cntCaveWall_wasteland">
+        <placeholder name="cntCaveFloorWater_wasteland">
+        </placeholder>
+
+        <placeholder name="cntCaveFloorFlatWater_wasteland">
+        </placeholder>
+
+        <placeholder name="cntCaveCeilingWater_wasteland">
         </placeholder>
 
     </append>

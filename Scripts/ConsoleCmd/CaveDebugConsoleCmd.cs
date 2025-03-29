@@ -123,6 +123,23 @@ public class CaveDebugConsoleCmd : ConsoleCmdAbstract
         player.GodModeSpeedModifier = float.Parse(_params[1]);
     }
 
+    private static void MoonScaleCommand(List<string> _params)
+    {
+        if (_params.Count == 0)
+        {
+            Logging.Error($"Missing argument: 'scale' (float)");
+            return;
+        }
+
+        if (!float.TryParse(_params[1], out var scale))
+        {
+            Logging.Error($"Invalid argument: '{_params[1]}'");
+            return;
+        }
+
+        CaveConfig.moonLightScale = scale;
+    }
+
     public override void Execute(List<string> _params, CommandSenderInfo _senderInfo)
     {
         if (_params.Count == 0)
@@ -151,6 +168,10 @@ public class CaveDebugConsoleCmd : ConsoleCmdAbstract
 
             case "sgms":
                 SetGodModeSpeed(_params);
+                break;
+
+            case "moon":
+                MoonScaleCommand(_params);
                 break;
 
             default:
