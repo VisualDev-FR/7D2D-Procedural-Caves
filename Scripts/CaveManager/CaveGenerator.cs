@@ -220,8 +220,8 @@ public class CaveGenerator
         int worldY = worldPos.y;
         int worldZ = worldPos.z;
 
-        bool lowerIsCave = caveChunksProvider.IsCave(worldX, worldY - 1, worldZ);
-        bool upperIsCave = caveChunksProvider.IsCave(worldX, worldY + 1, worldZ);
+        bool lowerIsCave = caveChunksProvider.IsCaveBlock(worldX, worldY - 1, worldZ);
+        bool upperIsCave = caveChunksProvider.IsCaveBlock(worldX, worldY + 1, worldZ);
 
         bool isFloor = !lowerIsCave && upperIsCave;
         bool isCeiling = lowerIsCave && !upperIsCave;
@@ -310,7 +310,7 @@ public class CaveGenerator
         {
             for (int z = z0; z <= z1; z++)
             {
-                if (!caveChunksProvider.IsCave(x, y, z) || caveChunksProvider.IsCave(x, y - 1, z))
+                if (!caveChunksProvider.IsCaveBlock(x, y, z) || caveChunksProvider.IsCaveBlock(x, y - 1, z))
                 {
                     return false;
                 }
@@ -346,8 +346,8 @@ public class CaveGenerator
                 position.y = y;
                 position.z = z;
 
-                bool isAirBelow = caveChunksProvider.IsCave(x, y - 1, z);
-                bool isCaveBlock = caveChunksProvider.IsCave(x, y, z);
+                bool isAirBelow = caveChunksProvider.IsCaveBlock(x, y - 1, z);
+                bool isCaveBlock = caveChunksProvider.IsCaveBlock(x, y, z);
                 bool isAlreadyDecorated = decoratedPositions.Contains(position);
 
                 // Logging.Debug($"---- {x},{y},{z}: isAirBelow: {isAirBelow}, isCaveBlock: {isCaveBlock}, isAlreadyDecorated: {isAlreadyDecorated}");

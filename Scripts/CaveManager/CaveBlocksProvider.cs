@@ -138,7 +138,7 @@ public class CaveChunksProvider
         return GetCaveBlocks(chunkPos);
     }
 
-    public bool IsCave(int worldX, int worldY, int worldZ)
+    public bool IsCaveBlock(int worldX, int worldY, int worldZ)
     {
         var caveChunk = GetCaveChunk((short)worldX, (short)worldZ);
         var hashcode = HashCodeFromWorldPos(worldX, worldY, worldZ);
