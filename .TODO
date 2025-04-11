@@ -1,11 +1,10 @@
 0.0.x:
-    ✔ better way to determine if a player is in cave or not @done(25-04-11 16:20)
     ☐ make cave-light configurable from xml
     ☐ improve zombie spawning with ramsay's proposal
     ☐ bug: no way to craft lights over tier 1
     ☐ adapt fastniselite to remove cavenoise and waternoise files
+    ☐ see how filler pois are spawned ingame, to replace wildernessEntrancePlanner
     ☐ remove wilderness entrances planner
-    ☐ implement new zombies spawning system
     ☐ prvent players to create flaoting bases in caves
     ☐ identify tunnels with labels like for visited pois
     ☐ prevent screamers / horde spawning at surface when you are in caves
@@ -16,9 +15,10 @@
     ☐ make caveTerrainBlocks with different loots, according to the biome
     ☐ remove H_ChunkProviderGenerateWorld.init, we don't need to init from here
     ☐ prevent vultures to spawn in caves
-    ☐ fix markers in tonio_filler_26
-    ☐ see how filler pois are spawned ingame
 
+0.0.5:
+    ✔ better way to determine if a player is in cave or not @done(25-04-11 16:20)
+    ✔ fix markers in tonio_filler_26 @done(25-04-11 17:07)
 
 0.0.4:
     ✔ bug: EAIEatBlock not found @done(25-03-06 12:29)
