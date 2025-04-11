@@ -11,6 +11,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Changed
 - Check if the player is in cave instead of looking only if he's under terrain (affecting zombies spawn)
 
+### Fixed
+- cave-prefabs: fix yOffset on tonio_entrance_03
+- cave-prefabs: fix poi bounding size of tonio_filler_26 (marker issues)
+
 ## [0.0.4] - 2025-03-29
 
 ### Added
@@ -64,6 +68,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 
 [unreleased]: https://github.com/VisualDev-FR/7D2D-Procedural-Caves/compare/master...unreleased
+[0.0.5]: https://github.com/VisualDev-FR/7D2D-Procedural-Caves/compare/0.0.4...0.0.5
 [0.0.4]: https://github.com/VisualDev-FR/7D2D-Procedural-Caves/compare/0.0.3...0.0.4
 [0.0.3]: https://github.com/VisualDev-FR/7D2D-Procedural-Caves/compare/0.0.2...0.0.3
 [0.0.2]: https://github.com/VisualDev-FR/7D2D-Procedural-Caves/compare/0.0.1...0.0.2
