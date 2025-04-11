@@ -36,18 +36,14 @@ public class SpawnManagerBiomes_Update
         }
 
         var player = GetPlayerInSpawnArea(_spawnData);
-        if (player is null)
-        {
-            return false;
-        }
-
-        var playerPosition = new Vector3i(player.GetPosition());
-        if (playerPosition.y + CaveConfig.zombieSpawnMarginDeep > GameManager.Instance.World.GetTerrainHeight(playerPosition.x, playerPosition.z))
+        if (player is null || !RequirementIsInCave.IsInCave(player))
         {
             return true;
         }
 
+        var playerPosition = new Vector3i(player.GetPosition());
         var spawnPosition = CaveSpawnManager.GetSpawnPositionNearPlayer(playerPosition, CaveConfig.minSpawnDist);
+
         if (spawnPosition == Vector3.zero)
         {
             logger.Debug($"no spawn position found from {playerPosition}");

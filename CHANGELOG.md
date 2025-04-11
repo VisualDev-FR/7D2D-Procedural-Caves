@@ -6,7 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
-## [0.0.4] - 2024-03-29
+## [0.0.5] - 2025-05-01
+
+### Changed
+- Check if the player is in cave instead of looking only if he's under terrain (affecting zombies spawn)
+
+## [0.0.4] - 2025-03-29
 
 ### Added
 - Support for custom decoration in each biome through blockplaceholders.xml
@@ -21,7 +26,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - (cave-entities) Fix assembly reference to EAIEatBlock
 - (cave-lights)   Fix NullReferenceException if no Light component can be found on lightTransform (see [this commit](https://github.com/VisualDev-FR/7D2D-Powered-flashights/commit/6d8ef6e3e4012b3a6a105d4e05343658bd132ee6))
 
-## [0.0.3] - 2024-02-22
+## [0.0.3] - 2025-02-22
 
 ### Changed
 - (cavelights) remove custom progression to unlock items
@@ -29,7 +34,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Fixed
 - Fixed vanilla LootFromXml.cs to prevent crashing if a lootgroop is not found
 
-## [0.0.2] - 2024-02-21
+## [0.0.2] - 2025-02-21
 
 ## Added
 - Added 7D2D-mod-utils (shared library)
@@ -53,7 +58,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - (caveLights) Fixed blocked `modArmorNightVision` turning on
 
 
-## [0.0.1] - 2024-02-15
+## [0.0.1] - 2025-02-15
 
 - First release
 
