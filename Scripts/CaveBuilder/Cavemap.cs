@@ -5,168 +5,11 @@ using System.Collections.Generic;
 using WorldGenerationEngineFinal;
 
 
-public struct RLELayer
-{
-    public int rawData;
-
-    public byte Start
-    {
-        get => Bitfield.GetByte(rawData, 16);
-        set => Bitfield.SetByte(ref rawData, value, 16);
-    }
-
-    public byte End
-    {
-        get => Bitfield.GetByte(rawData, 8);
-        set => Bitfield.SetByte(ref rawData, value, 8);
-    }
-
-    public byte BlockRawData
-    {
-        get => Bitfield.GetByte(rawData, 0);
-        set => Bitfield.SetByte(ref rawData, value, 0);
-    }
-
-    public int Size => End - Start;
-
-    public static int Count(int hash)
-    {
-        var layer = new RLELayer(hash);
-        return layer.End - layer.Start;
-    }
-
-    public RLELayer(int start, int end, byte blockRawData)
-    {
-        rawData = (start << 16) | (end << 8) | blockRawData;
-    }
-
-    public RLELayer(IEnumerable<Vector3i> positions, byte blockRawData)
-    {
-        var start = int.MaxValue;
-        var end = int.MinValue;
-
-        foreach (var pos in positions)
-        {
-            start = Utils.FastMin(start, pos.y);
-            end = Utils.FastMax(end, pos.y);
-        }
-
-        rawData = (start << 16) | (end << 8) | blockRawData;
-    }
-
-    public RLELayer(int bitfield)
-    {
-        this.rawData = bitfield;
-    }
-
-    public static int GetHashCode(int start, int end, byte blockRawData)
-    {
-        return (start << 16) | (end << 8) | blockRawData;
-    }
-
-    public bool Contains(int y)
-    {
-        return y >= Start && y <= End;
-    }
-
-    public IEnumerable<CaveBlock> GetBlocks(int x, int z)
-    {
-        for (int y = Start; y <= End; y++)
-        {
-            yield return new CaveBlock(x, y, z) { rawData = BlockRawData };
-        }
-    }
-
-    public bool IsWater()
-    {
-        return (BlockRawData & 0b0000_0001) != 0;
-    }
-
-    public void SetWater(bool value)
-    {
-        BlockRawData = (byte)(value ? (BlockRawData | 0b0000_0001) : (BlockRawData & 0b1111_1110));
-    }
-
-    public void SetRope(bool value)
-    {
-        BlockRawData = (byte)(value ? (BlockRawData | 0b0000_1000) : (BlockRawData & 0b1111_0111));
-    }
-
-    public override int GetHashCode()
-    {
-        return rawData;
-    }
-
-    public static List<int> CompressLayers(IEnumerable<int> layers)
-    {
-        var layer = new RLELayer();
-        var values = new byte?[256];
-        byte minSet = 255;
-        byte maxSet = 0;
-
-        foreach (var layerHash in layers)
-        {
-            layer.rawData = layerHash;
-
-            minSet = minSet < layer.Start ? minSet : layer.Start;
-            maxSet = maxSet > layer.End ? maxSet : layer.End;
-
-            for (int i = layer.Start; i <= layer.End; i++)
-            {
-                if (values[i] is null)
-                {
-                    values[i] = layer.BlockRawData;
-                }
-                else if (values[i].Value != layer.BlockRawData)
-                {
-                    values[i] = (byte)(values[i].Value | layer.BlockRawData);
-                }
-            }
-        }
-
-        var result = new List<int>();
-
-        byte? previousData = values[minSet].Value;
-        int startY = minSet;
-
-        for (int i = minSet + 1; i <= maxSet; i++)
-        {
-            if (values[i] != previousData)
-            {
-                if (previousData.HasValue)
-                {
-                    result.Add(GetHashCode(startY, i - 1, previousData.Value));
-                }
-
-                startY = i;
-                previousData = values[i];
-            }
-        }
-
-        if (previousData.HasValue)
-        {
-            result.Add(GetHashCode(startY, maxSet, previousData.Value));
-        }
-
-        return result;
-    }
-
-    public bool AssertEquals(byte start, byte end, byte data)
-    {
-        CaveUtils.Assert(this.Start == start, $"start, value: '{this.Start}', expected: '{start}'");
-        CaveUtils.Assert(this.End == end, $"end, value: '{this.End}', expected: '{end}'");
-        CaveUtils.Assert(this.BlockRawData == data, $"data, value: '{this.BlockRawData}', expected: '{data}'");
-
-        return true;
-    }
-
-}
-
 public class CaveMap
 {
-    private readonly Dictionary<int, List<int>> caveblocks;
+    private readonly Dictionary<int, List<int>> rleLayers;
 
-    public int BlocksCount => caveblocks.Values.Sum(layers => layers.Sum(layerHash => RLELayer.Count(layerHash)));
+    public int BlocksCount => rleLayers.Values.Sum(layers => layers.Sum(layerHash => RLELayer.Count(layerHash)));
 
     public readonly int worldSize;
 
@@ -177,17 +20,17 @@ public class CaveMap
     public CaveMap(int worldSize)
     {
         this.worldSize = worldSize;
-        caveblocks = new Dictionary<int, List<int>>();
+        rleLayers = new Dictionary<int, List<int>>();
     }
 
     public void Cleanup()
     {
-        foreach (var list in caveblocks.Values)
+        foreach (var list in rleLayers.Values)
         {
             list.Clear();
         }
 
-        caveblocks.Clear();
+        rleLayers.Clear();
     }
 
     public void AddBlocks(IEnumerable<Vector3i> positions, byte rawData)
@@ -208,11 +51,11 @@ public class CaveMap
 
             CaveBlock.ZXFromHash(hashZX, out var x, out var z);
 
-            if (!caveblocks.ContainsKey(hashZX))
+            if (!rleLayers.ContainsKey(hashZX))
             {
                 lock (_lock)
                 {
-                    caveblocks[hashZX] = new List<int>();
+                    rleLayers[hashZX] = new List<int>();
                 }
             }
 
@@ -220,7 +63,7 @@ public class CaveMap
             {
                 lock (_lock)
                 {
-                    caveblocks[hashZX].Add(layerHash);
+                    rleLayers[hashZX].Add(layerHash);
                 }
             }
         }
@@ -261,12 +104,12 @@ public class CaveMap
     {
         var hashZX = CaveBlock.HashZX(position.x, position.z);
 
-        if (!caveblocks.ContainsKey(hashZX))
+        if (!rleLayers.ContainsKey(hashZX))
             return false;
 
         var layer = new RLELayer(0);
 
-        foreach (var layerHash in caveblocks[hashZX])
+        foreach (var layerHash in rleLayers[hashZX])
         {
             layer.rawData = layerHash;
 
@@ -283,12 +126,12 @@ public class CaveMap
     {
         var hashZX = CaveBlock.HashZX(position.x, position.z);
 
-        if (!caveblocks.ContainsKey(hashZX))
+        if (!rleLayers.ContainsKey(hashZX))
             return false;
 
         var layer = new RLELayer(0);
 
-        foreach (var layerHash in caveblocks[hashZX])
+        foreach (var layerHash in rleLayers[hashZX])
         {
             layer.rawData = layerHash;
 
@@ -307,7 +150,7 @@ public class CaveMap
 
         using (var multistream = new MultiStream(dirname, create: true))
         {
-            foreach (var entry in caveblocks)
+            foreach (var entry in rleLayers)
             {
                 CaveBlock.ZXFromHash(entry.Key, out var x, out var z);
 
@@ -459,7 +302,7 @@ public class CaveMap
     public void SetRope(Vector3i position)
     {
         var hashZX = CaveBlock.HashZX(position.x + 1, position.z);
-        var layers = caveblocks[hashZX];
+        var layers = rleLayers[hashZX];
         var layer = new RLELayer(0);
 
         for (int i = 0; i < layers.Count; i++)
@@ -478,7 +321,7 @@ public class CaveMap
         {
             var hashcode = group.Key;
             var waterLayer = new RLELayer(group, 1);
-            var layers = caveblocks[hashcode].ToList();
+            var layers = rleLayers[hashcode].ToList();
 
             for (int i = layers.Count - 1; i >= 0; i--)
             {
@@ -489,7 +332,7 @@ public class CaveMap
 
                 if (waterLayer.Start <= layer.Start && waterLayer.End >= layer.End)
                 {
-                    caveblocks[hashcode][i] = RLELayer.GetHashCode(
+                    rleLayers[hashcode][i] = RLELayer.GetHashCode(
                         layer.Start,
                         layer.End,
                         waterLayer.BlockRawData
@@ -497,15 +340,15 @@ public class CaveMap
                 }
                 else if (waterLayer.Start <= layer.Start && waterLayer.End >= layer.Start && waterLayer.End < layer.End)
                 {
-                    caveblocks[hashcode].RemoveAt(i);
+                    rleLayers[hashcode].RemoveAt(i);
 
-                    caveblocks[hashcode].Add(RLELayer.GetHashCode(
+                    rleLayers[hashcode].Add(RLELayer.GetHashCode(
                         layer.Start,
                         waterLayer.End,
                         waterLayer.BlockRawData
                     ));
 
-                    caveblocks[hashcode].Add(RLELayer.GetHashCode(
+                    rleLayers[hashcode].Add(RLELayer.GetHashCode(
                         waterLayer.End + 1,
                         layer.End,
                         layer.BlockRawData
@@ -517,7 +360,7 @@ public class CaveMap
 
     public IEnumerable<CaveBlock> GetBlocks()
     {
-        foreach (var entry in caveblocks)
+        foreach (var entry in rleLayers)
         {
             int hash = entry.Key;
 
