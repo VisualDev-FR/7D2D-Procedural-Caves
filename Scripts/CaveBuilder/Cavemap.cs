@@ -271,34 +271,6 @@ public class CaveMap
         }
     }
 
-    public HashSet<Vector3i> SetWater(CavePrefabManager cachedPrefabs, HashSet<CaveBlock> localMinimas)
-    {
-        // if (!CaveConfig.generateWater)
-        //     yield break;
-
-        int index = 0;
-        var result = new HashSet<Vector3i>();
-
-        foreach (var waterStart in localMinimas)
-        {
-            index++;
-
-            if (IsWater(waterStart.ToVector3i()))
-                continue;
-
-            var positions = ExpandWater(waterStart, cachedPrefabs);
-
-            result.UnionWith(positions);
-
-            if (positions.Count > 0)
-            {
-                SetWater(positions);
-            }
-        }
-
-        return result;
-    }
-
     public void SetRope(Vector3i position)
     {
         var hashZX = CaveBlock.HashZX(position.x + 1, position.z);
