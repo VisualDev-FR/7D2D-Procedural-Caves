@@ -301,8 +301,6 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
         blockValue = _bpResult.blockValue;
 
         var _density = blockValue.Block.shape.IsTerrain() ? MarchingCubes.DensityTerrain : MarchingCubes.DensityAir;
-        var _textureFull = holdingItemItemValue.Texture;
-
         var start = selection.m_selectionStartPoint;
         var end = selection.m_SelectionEndPoint;
 
