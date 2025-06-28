@@ -52,6 +52,11 @@
             <Private>False</Private>
         </Reference>
 
+        <Reference Include="mscorlib">
+            <HintPath>$(PATH_7D2D)\7DaysToDie_Data\Managed\mscorlib.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+
         <Reference Include="System">
             <HintPath>$(PATH_7D2D)\7DaysToDie_Data\Managed\System.dll</HintPath>
             <Private>False</Private>
@@ -87,8 +92,8 @@
             <Private>False</Private>
         </Reference>
 
-        <Reference Include="UnityEngine.CoreModule">
-            <HintPath>$(PATH_7D2D)\7DaysToDie_Data\Managed\mscorlib.dll</HintPath>
+        <Reference Include="UnityEngine.AnimationModule">
+            <HintPath>$(PATH_7D2D)\7DaysToDie_Data\Managed\UnityEngine.AnimationModule.dll</HintPath>
             <Private>False</Private>
         </Reference>
 
