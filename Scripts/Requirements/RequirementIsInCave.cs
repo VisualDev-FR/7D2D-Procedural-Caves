@@ -2,7 +2,7 @@ public class RequirementIsInCave : TargetedCompareRequirementBase
 {
     public override bool IsValid(MinEventParams _params)
     {
-        if (!ParamsValid(_params) || !(_params.Self is EntityPlayer player))
+        if (!base.IsValid(_params) || !(_params.Self is EntityPlayer player))
         {
             return false;
         }
