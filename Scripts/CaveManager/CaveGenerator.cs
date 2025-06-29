@@ -8,13 +8,13 @@ using UnityEngine;
 
 public class CaveGenerator
 {
-    public static CaveChunksProvider caveChunksProvider;
+    private static CaveChunksProvider caveChunksProvider;
 
-    public static Vector3i HalfWorldSize;
+    private static Vector3i HalfWorldSize;
 
     public static bool isEnabled = false;
 
-    public static int worldSize;
+    private static int worldSize;
 
     public static void Init()
     {

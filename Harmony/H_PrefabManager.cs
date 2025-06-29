@@ -53,7 +53,7 @@ public static class H_PrefabManager
 
             cavePrefabManager?.TryCacheCavePrefab(prefabData);
 
-            if (!prefabData.Tags.Test_AnySet(tagFilter) && !prefabData.Tags.Test_AllSet(tagWildernessCaveEntrance))
+            if (!prefabData.Tags.Test_AnySet(tagFilter))
             {
                 PrefabManager.prefabManagerData.AllPrefabDatas[location.Name.ToLower()] = prefabData;
             }
@@ -71,3 +71,15 @@ public static class H_PrefabManager
 
 }
 
+
+[HarmonyPatch(typeof(PrefabManager), "getScoreForPrefab")]
+public static class H_PrefabManager_getScoreForPrefab
+{
+    public static void Postfix(PrefabData prefab, Vector2i center, ref float __result)
+    {
+        if (prefab.Tags.Test_AllSet(CaveTags.tagCave))
+        {
+            __result *= CaveConfig.prefabScoreMultiplier;
+        }
+    }
+}

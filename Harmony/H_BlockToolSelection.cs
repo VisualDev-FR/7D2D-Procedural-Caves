@@ -122,8 +122,8 @@ public class BlockToolSelection_CheckKeys
         ItemStack itemStack = new ItemStack(blockValue.ToItemValue(), 99);
         if (blockValue.Block.GetAutoShapeType() != EAutoShapeType.Helper)
         {
-            long textureFull = GameManager.Instance.World.ChunkCache.GetTextureFull(_hitInfo.hit.blockPos);
-            itemStack.itemValue.Texture = textureFull;
+            var textureFull = GameManager.Instance.World.GetTextureFullArray(_hitInfo.hit.blockPos.x, _hitInfo.hit.blockPos.y, _hitInfo.hit.blockPos.z);
+            itemStack.itemValue.TextureFullArray = textureFull;
         }
         if (primaryPlayer.inventory.GetItemCount(itemStack.itemValue, _bConsiderTexture: true) == 0 && primaryPlayer.inventory.CanTakeItem(itemStack))
         {

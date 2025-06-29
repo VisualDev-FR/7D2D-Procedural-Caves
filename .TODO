@@ -1,15 +1,34 @@
 0.0.x:
-    ☐ better way to determine if a player is in cave or not
     ☐ make cave-light configurable from xml
-    ☐ isolate cave traders from other traders
     ☐ improve zombie spawning with ramsay's proposal
+    ☐ bug: no way to craft lights over tier 1
+    ☐ adapt fastniselite to remove cavenoise and waternoise files
+    ☐ see how filler pois are spawned ingame, to replace wildernessEntrancePlanner
+    ☐ remove wilderness entrances planner
+    ☐ prvent players to create flaoting bases in caves
+    ☐ identify tunnels with labels like for visited pois
+    ☐ prevent screamers / horde spawning at surface when you are in caves
+    ☐ add furious pois localizations
+    ☐ generate caves onto an existing world, check compatibility with terragon
+    ☐ implement several smaller caves networks option
+    ☐ add pre-made cave rooms
+    ☐ make caveTerrainBlocks with different loots, according to the biome
+    ☐ remove H_ChunkProviderGenerateWorld.init, we don't need to init from here
+    ☐ prevent vultures to spawn in caves
+    ☐ prevent natural entrances spawning on roads
+
+0.0.5:
+    ✔ better way to determine if a player is in cave or not @done(25-04-11 16:20)
+    ✔ fix markers in tonio_filler_26 @done(25-04-11 17:07)
 
 0.0.4:
     ✔ bug: EAIEatBlock not found @done(25-03-06 12:29)
     ✔ bug: NullReferenceException if no Light component can be found on lightTransform" @done(25-03-09 22:35)
-    ☐ bug: no way to craft lights over tier 1
 
-First release:
+0.0.3:
+        ✔ isolate cave traders from other traders @done(25-04-11 16:21)
+
+0.0.1:
     ✘ implement tunneling with code of toolTerrainModelder @cancelled(24-08-29 21:59)
     ✘ find a way to force rwg POIs choices @cancelled(24-11-02 23:24)
     ✔ debug cave prefab placements regarding surface prefabs @done(24-08-17 22:43)
