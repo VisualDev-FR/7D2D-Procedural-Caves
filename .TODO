@@ -15,6 +15,7 @@
     ☐ make caveTerrainBlocks with different loots, according to the biome
     ☐ remove H_ChunkProviderGenerateWorld.init, we don't need to init from here
     ☐ prevent vultures to spawn in caves
+    ☐ prevent natural entrances spawning on roads
 
 0.0.5:
     ✔ better way to determine if a player is in cave or not @done(25-04-11 16:20)

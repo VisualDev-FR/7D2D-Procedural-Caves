@@ -3,7 +3,7 @@ using WorldGenerationEngineFinal;
 
 public static class CaveConfig
 {
-    private static readonly ModConfig config = new ModConfig(version: 1, save: false);
+    private static readonly ModConfig config = new ModConfig(version: 2, save: false);
 
     public static float moonLightScale = config.GetFloat("moonLightScale");
 
@@ -25,8 +25,7 @@ public static class CaveConfig
 
     public static int maxTunnelRadius = 10;
 
-    // the min deep (from terrain height) to spawn cave zombies
-    public static int zombieSpawnMarginDeep = 5;
+    public static int zombieSpawnMarginDeep = config.GetInt("zombieSpawnMarginDeep");
 
     public static int minSpawnTicksBeforeEnemySpawn = config.GetInt("minSpawnTicksBeforeEnemySpawn");
 
@@ -37,6 +36,8 @@ public static class CaveConfig
     public static int minSpawnDist = config.GetInt("minSpawnDist");
 
     public static int minSpawnDistBloodMoon = config.GetInt("minSpawnDistBloodMoon");
+
+    public static float prefabScoreMultiplier = config.GetInt("prefabScoreMultiplier");
 
     // cave generation datas
     public static bool generateWater = false;

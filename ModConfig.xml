@@ -20,4 +20,11 @@
     <!-- same as 'minSpawnDist' but for bloodMoon zombies -->
     <property name="minSpawnDistBloodMoon" value="25" />
 
+    <!-- allow to give more chance for spawning cave prefabs in rwg (set to 1 to reset at vanilla state) -->
+    <property name="prefabScoreMultiplier" value="2" />
+
+    <!-- integer representing the min deep (from terrain height) to spawn cave zombies -->
+    <property name="zombieSpawnMarginDeep" value="5" />
+
+
 </modconfig>
