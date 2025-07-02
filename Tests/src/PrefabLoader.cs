@@ -18,7 +18,7 @@ public class PrefabLoader
         {
             var prefabData = NewPrefabData(location);
 
-            if (!prefabData.Tags.Test_AnySet(CaveConfig.tagCave) || !CavePrefabChecker.IsValid(prefabData))
+            if (!prefabData.Tags.Test_AnySet(CaveTags.tagCave) || !CavePrefabChecker.IsValid(prefabData))
             {
                 continue;
             }

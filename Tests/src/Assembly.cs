@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 
 
-public static class Log
+public class Log
 {
     public static void Out(object message)
     {

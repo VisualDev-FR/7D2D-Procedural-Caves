@@ -13,7 +13,7 @@ public class CmdRoom : CmdAbstract
     {
         var _ = SphereManager.spheres.Count;
 
-        var timer = CaveUtils.StartTimer();
+        var timer = ProfilingUtils.StartTimer();
         var seed = DateTime.Now.GetHashCode();
         var random = new Random(seed);
         var size = new Vector3i(50, 20, 50);

@@ -1,4 +1,5 @@
 using System.Linq;
+using System.Reflection;
 
 public static class Program
 {
@@ -16,10 +17,15 @@ public static class Program
         new CmdRoom(),
         new CmdSphere(),
         new CmdTunnel(),
+        new CmdLogging(),
     };
 
     public static void Main(string[] args)
     {
+        var assembly = Assembly.GetExecutingAssembly();
+        var harmony = new HarmonyLib.Harmony(assembly.GetName().ToString());
+        harmony.PatchAll(assembly);
+
         commands.Where(cmd => cmd.GetCommands()
             .Contains(args[0]))
             .First()

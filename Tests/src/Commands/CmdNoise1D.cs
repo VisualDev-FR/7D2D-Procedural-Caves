@@ -11,7 +11,7 @@ public class CmdNoise1D : CmdAbstract
 
     public override void Execute(List<string> args)
     {
-        var timer = CaveUtils.StartTimer();
+        var timer = ProfilingUtils.StartTimer();
 
         var rand = new System.Random();
         var curve = new Noise1D(rand, 20, 50, 100);
