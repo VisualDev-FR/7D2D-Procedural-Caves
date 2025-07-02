@@ -4,6 +4,20 @@ using System.IO;
 using System.Linq;
 
 
+public class PrefabClusterData
+{
+    public int yOffset { get; set; }
+
+    public string PrefabName { get; set; }
+
+    public string Md5Hash { get; set; }
+
+    public Vector3i Start { get; set; }
+
+    public Vector3i Size { get; set; }
+}
+
+
 // Light .tts file reader, to read prefab blocks datas from the world builder.
 // His purpose is to collect and clusterize non-terrain / underground blocks from prefabs
 // to create volumes where the caveBuilder is not allowed to generate tunnels
