@@ -87,6 +87,33 @@ public static class LootFromXml_ParseItemList
             {
                 lootEntry.lootstageCountMod = StringParsers.ParseFloat(_childNode.GetAttribute("loot_stage_count_mod"));
             }
+            if (_childNode.HasElements)
+            {
+                foreach (XElement item in _childNode.Elements())
+                {
+                    if (!(item.Name == "requirement"))
+                    {
+                        continue;
+                    }
+                    BaseLootEntryRequirement baseLootEntryRequirement = LootFromXml.ParseLootEntryRequirement(item);
+                    if (baseLootEntryRequirement != null)
+                    {
+                        if (lootEntry.Requirements == null)
+                        {
+                            lootEntry.Requirements = new List<BaseLootEntryRequirement>();
+                        }
+                        lootEntry.Requirements.Add(baseLootEntryRequirement);
+                    }
+                }
+            }
+            if (_childNode.HasAttribute("buffs"))
+            {
+                lootEntry.buffsToAdd = _childNode.GetAttribute("buffs").Split(',');
+            }
+            if (_childNode.HasAttribute("random_durability"))
+            {
+                lootEntry.randomDurability = StringParsers.ParseBool(_childNode.GetAttribute("random_durability"));
+            }
             _itemList.Add(lootEntry);
         }
 
