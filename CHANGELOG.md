@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [2.0.1] - 2025-07-12
+
+### Fixed
+- Fixed excessive high-tier loot spawning containers due to obsolete harmony patch.
+
 ## [2.0.0] - 2025-06-29
 
 ### Added
@@ -75,6 +80,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 
 [unreleased]: https://github.com/VisualDev-FR/7D2D-Procedural-Caves/compare/master...unreleased
+[2.0.1]: https://github.com/VisualDev-FR/7D2D-Procedural-Caves/compare/2.0.0...2.0.1
 [2.0.0]: https://github.com/VisualDev-FR/7D2D-Procedural-Caves/compare/0.0.4...2.0.0
 [0.0.4]: https://github.com/VisualDev-FR/7D2D-Procedural-Caves/compare/0.0.3...0.0.4
 [0.0.3]: https://github.com/VisualDev-FR/7D2D-Procedural-Caves/compare/0.0.2...0.0.3
