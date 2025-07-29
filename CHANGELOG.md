@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [2.1.0] - 2025-07-29
+
+### Added
+- Added russian localization (thanks https://github.com/mpustovoi !)
+
+### Changed
+- Improved cave spawning during bloodmoon when player is inside a cave prefab
+
+### Fixed
+- Fixed MethodNotFound Exception raised during bloodmoon
+
 ## [2.0.1] - 2025-07-12
 
 ### Fixed
@@ -81,6 +92,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 
 [unreleased]: https://github.com/VisualDev-FR/7D2D-Procedural-Caves/compare/master...unreleased
+[2.1.0]: https://github.com/VisualDev-FR/7D2D-Procedural-Caves/compare/2.0.1...2.1.0
 [2.0.1]: https://github.com/VisualDev-FR/7D2D-Procedural-Caves/compare/2.0.0...2.0.1
 [2.0.0]: https://github.com/VisualDev-FR/7D2D-Procedural-Caves/compare/0.0.4...2.0.0
 [0.0.4]: https://github.com/VisualDev-FR/7D2D-Procedural-Caves/compare/0.0.3...0.0.4
