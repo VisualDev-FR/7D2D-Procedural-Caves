@@ -10,7 +10,7 @@ public class CmdClusterize : CmdAbstract
 
     public override void Execute(List<string> args)
     {
-        var timer = CaveUtils.StartTimer();
+        var timer = ProfilingUtils.StartTimer();
 
         var prefabName = "army_camp_01";
         var path = $"C:/SteamLibrary/steamapps/common/7 Days To Die/Data/Prefabs/POIs/{prefabName}.tts";

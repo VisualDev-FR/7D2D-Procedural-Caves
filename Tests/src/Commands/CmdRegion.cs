@@ -16,7 +16,7 @@ public class CmdRegion : CmdAbstract
         {
             string filename = $"{dirname}/region_{i}.bin";
 
-            var timer = CaveUtils.StartTimer();
+            var timer = ProfilingUtils.StartTimer();
             var region = new CaveRegion(filename);
             var blocksCount = region.BlockCount;
 

@@ -10,6 +10,8 @@ public class CaveTags
 
     public static FastTags<TagGroup.Poi> tagUnderground = FastTags<TagGroup.Poi>.Parse("underground");
 
+    public static FastTags<TagGroup.Poi> tagCaveUnderground = FastTags<TagGroup.Poi>.Parse("cave,underground");
+
     public static FastTags<TagGroup.Poi> requiredCaveTags = FastTags<TagGroup.Poi>.CombineTags(tagCaveEntrance, tagUnderground);
 
     public static FastTags<TagGroup.Poi> tagCaveTrader = FastTags<TagGroup.Poi>.Parse("cave,underground,trader");

@@ -18,7 +18,7 @@ public class CmdCave : CmdAbstract
         int seed = 1337;
         int prefabCount = worldSize / 5;
 
-        var timer = CaveUtils.StartTimer();
+        var timer = ProfilingUtils.StartTimer();
         var prefabs = PrefabLoader.LoadPrefabs().Values.ToList();
         var cachedPrefabs = new CavePrefabManager(worldSize);
         var rand = new Random(seed);

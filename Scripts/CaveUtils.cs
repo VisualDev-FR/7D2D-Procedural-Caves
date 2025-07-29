@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 public static class CaveUtils
@@ -152,6 +153,21 @@ public static class CaveUtils
         }
 
         return points;
+    }
+
+    public static IEnumerable<BoundingBox> GetCaveMarkers(PrefabInstance prefabInstance)
+    {
+        if (prefabInstance == null)
+            yield break;
+
+        var markers = prefabInstance.prefab.POIMarkers
+            .Where(m => m.tags.Test_AnySet(CaveTags.tagCaveMarker))
+            .ToArray();
+
+        foreach (var marker in markers)
+        {
+            yield return new BoundingBox(marker.start + prefabInstance.boundingBoxPosition, marker.size);
+        }
     }
 
     public static bool OverLaps2D(Vector3i position1, Vector3i size1, Vector3i position2, Vector3i size2, int margin = 0)

@@ -49,13 +49,13 @@ public class CmdPath : CmdAbstract
 
         SphereManager.InitSpheres(5);
 
-        var timer = CaveUtils.StartTimer();
+        var timer = ProfilingUtils.StartTimer();
         var cavemap = new CaveMap(worldSize);
         var tunnel = new CaveTunnel(edge, cachedPrefabs, heightMap, worldSize, seed);
 
         cavemap.AddTunnel(tunnel);
 
-        Logging.Info($"{p1.position} -> {p2.position} | Astar dist: {tunnel.path.Count}, eucl dist: {CaveUtils.EuclidianDist(p1.position, p2.position)}, timer: {timer.ElapsedMilliseconds}ms");
+        Logging.Info($"{p1.position} -> {p2.position} | Astar dist: {tunnel.path.Count}, eucl dist: {FastMath.EuclidianDist(p1.position, p2.position)}, timer: {timer.ElapsedMilliseconds}ms");
 
         var voxels = new HashSet<Voxell>(){
             new Voxell(p1.position, p1.Size, WaveFrontMaterial.DarkGreen) { force = true },

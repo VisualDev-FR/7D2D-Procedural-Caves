@@ -17,7 +17,7 @@ public class CmdSphere : CmdAbstract
             int radius = i;
             int pos = i * radius * 3;
 
-            var timer = CaveUtils.StartTimer();
+            var timer = ProfilingUtils.StartTimer();
             var position = new Vector3i(pos, 20, 20);
             var caveBlock = new CaveBlock(position);
             var sphere = SphereManager.GetSphere(caveBlock.ToVector3i(), radius);

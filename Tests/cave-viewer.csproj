@@ -7,21 +7,25 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- Third party libs -->
     <PackageReference Include="Bumpkit" Version="1.0.2" />
     <PackageReference Include="System.Drawing.Common" Version="7.0.0" />
+
+    <!-- game assemblies -->
+    <Reference Include="$(PATH_7D2D)\Mods\0_TFP_Harmony\0Harmony.dll" />
     <Reference Include="$(PATH_7D2D)\7DaysToDie_Data\Managed\Assembly-CSharp.dll" />
-    <Reference Include="$(PATH_7D2D)\7DaysToDie_Data\Managed\UnityEngine.CoreModule.dll" />
     <Reference Include="$(PATH_7D2D)\7DaysToDie_Data\Managed\netstandard.dll" />
+
+    <!-- Unity modules -->
     <Reference Include="$(PATH_7D2D)\7DaysToDie_Data\Managed\UnityEngine.ImageConversionModule.dll" />
+    <Reference Include="$(PATH_7D2D)\7DaysToDie_Data\Managed\UnityEngine.CoreModule.dll" />
+
+    <!-- Third party mods -->
+    <Reference Include="$(PATH_7D2D)\mods\7D2D-mod-utils\mod-utils.dll" />
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\**\*.cs" />
-    <Compile Remove="..\**\obj\**\*" />
-    <Compile Remove="..\**\ignore\**\*" />
-    <Compile Remove="..\**\bin\**\*" />
-    <Compile Remove="..\**\Properties\**\*" />
-    <Compile Remove="..\Harmony\*.cs" />
+    <Compile Include="..\Scripts\**\*.cs" />
   </ItemGroup>
 
 </Project>

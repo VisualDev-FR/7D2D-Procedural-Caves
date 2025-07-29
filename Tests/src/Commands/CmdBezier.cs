@@ -11,7 +11,7 @@ public class CmdBezier : CmdAbstract
 
     public override void Execute(List<string> args)
     {
-        var timer = CaveUtils.StartTimer();
+        var timer = ProfilingUtils.StartTimer();
 
         var P0 = new Vector3i(0, 0, 0);
         var P1 = new Vector3i(20, 40, 20);
