@@ -14,9 +14,18 @@ public class RequirementIsInCave : TargetedCompareRequirementBase
 
     public static bool IsInCaveTunnel(EntityPlayer player, int radius = 2)
     {
-        if (player.prefab != null) return false;
+        if (player.prefab != null)
+            return false;
 
         return IsInCave(player, radius);
+    }
+
+    public static bool IsInCavePrefab(EntityPlayer player)
+    {
+        if (player.prefab == null)
+            return false;
+
+        return player.prefab.prefab.tags.Test_AnySet(CaveTags.tagCaveUnderground);
     }
 
     // Credits: https://github.com/FuriousRamsay

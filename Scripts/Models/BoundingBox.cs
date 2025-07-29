@@ -119,8 +119,6 @@ public class BoundingBox
         return size.z;
     }
 
-
-
     public override int GetHashCode()
     {
         return start.GetHashCode() + size.GetHashCode();

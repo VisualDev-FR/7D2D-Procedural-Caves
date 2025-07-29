@@ -1,3 +1,4 @@
+using System.Linq;
 using HarmonyLib;
 using UnityEngine;
 using static AIDirectorBloodMoonParty;
@@ -6,44 +7,64 @@ using static AIDirectorBloodMoonParty;
 [HarmonyPatch(typeof(AIDirectorBloodMoonParty), "SpawnZombie")]
 public class AIDirectorBloodMoonParty_SpawnZombie
 {
-    private static World world;
+    private static readonly Logging.Logger logger = Logging.CreateLogger<AIDirectorBloodMoonParty_SpawnZombie>();
 
-    private static EntityPlayer target;
+    private static readonly System.Random random = new System.Random();
 
-    private static AIDirectorBloodMoonParty Instance;
+    private static World World => GameManager.Instance.World;
+
+    private static EntityPlayer Target { get; set; }
+
+    private static AIDirectorBloodMoonParty Instance { get; set; }
 
     public static bool Prefix(ref AIDirectorBloodMoonParty __instance, World _world, EntityPlayer _target, Vector3 _focusPos, Vector3 _radiusV, ref bool __result)
     {
+        Instance = __instance;
+        Target = _target;
+
         if (!CaveGenerator.isEnabled || !CaveConfig.enableCaveBloodMoon)
             return true;
 
-        if (_target.position.y + CaveConfig.zombieSpawnMarginDeep > _world.GetHeight((int)_target.position.x, (int)_target.position.z))
-            return true;
+        if (RequirementIsInCave.IsInCavePrefab(_target))
+        {
+            __result = SpawnBloodMoonCaveZombie(GetSpawnPosNearPrefab(_target.prefab));
+            return false;
+        }
 
-        Instance = __instance;
-        world = _world;
-        target = _target;
+        if (RequirementIsInCave.IsInCave(_target))
+        {
+            __result = SpawnBloodMoonCaveZombie(GetSpawnPos(_target));
+            return false;
+        }
 
-        __result = SpawnBloodMoonCaveZombie();
-
-        return false;
+        return true;
     }
 
-    private static bool SpawnBloodMoonCaveZombie()
+    private static Vector3i GetSpawnPosNearPrefab(PrefabInstance prefabInstance)
     {
-        var logger = Logging.CreateLogger("CaveBloodMoonDirector");
-        var spawnPos = CaveSpawnManager.GetSpawnPositionNearPlayer(target.position, CaveConfig.minSpawnDistBloodMoon);
+        var markers = CaveUtils.GetCaveMarkers(prefabInstance).ToArray();
+        var marker = markers[random.Next(markers.Length)];
 
+        return CaveSpawnManager.GetSpawnPositionNearPlayer(marker.start + marker.size / 2, CaveConfig.minSpawnDist);
+    }
+
+    private static Vector3i GetSpawnPos(EntityPlayer player)
+    {
+        return CaveSpawnManager.GetSpawnPositionNearPlayer(player.position, CaveConfig.minSpawnDistBloodMoon);
+    }
+
+    private static bool SpawnBloodMoonCaveZombie(Vector3i spawnPos)
+    {
         if (spawnPos == Vector3i.zero)
         {
-            logger.Debug($"no spawn found from {target.position}");
+            logger.Debug($"no spawn found from {spawnPos}");
             return false;
         }
 
         int et = EntityGroups.GetRandomFromGroup(Instance.partySpawner.spawnGroupName, ref Instance.lastClassId);
 
         EntityEnemy entityEnemy = (EntityEnemy)EntityFactory.CreateEntity(et, spawnPos);
-        world.SpawnEntityInWorld(entityEnemy);
+        World.SpawnEntityInWorld(entityEnemy);
         entityEnemy.SetSpawnerSource(EnumSpawnerSource.Dynamic);
         entityEnemy.IsHordeZombie = true;
         entityEnemy.IsBloodMoon = true;
@@ -56,15 +77,15 @@ public class AIDirectorBloodMoonParty_SpawnZombie
             entityEnemy.lootDropProb *= GameStageDefinition.LootBonusScale;
         }
 
-        ManagedZombie managedZombie = new ManagedZombie(entityEnemy, target);
+        ManagedZombie managedZombie = new ManagedZombie(entityEnemy, Target);
         Instance.zombies.Add(managedZombie);
         Instance.SeekTarget(managedZombie);
         Instance.partySpawner.IncSpawnCount();
 
         AstarManager.Instance.AddLocation(spawnPos, 40);
-        var (day, hour, minute) = GameUtils.WorldTimeToElements(world.worldTime);
+        var (day, hour, minute) = GameUtils.WorldTimeToElements(World.worldTime);
 
-        logger.Info($"SpawnZombie grp {Instance.partySpawner}, cnt {Instance.zombies.Count}, {entityEnemy.EntityName}, loot {entityEnemy.lootDropProb}, at player {target.entityId}, day/time {day} {hour:D2}:{minute:D2}");
+        logger.Info($"SpawnZombie grp {Instance.partySpawner}, cnt {Instance.zombies.Count}, {entityEnemy.EntityName}, loot {entityEnemy.lootDropProb}, at player {Target.entityId}, day/time {day} {hour:D2}:{minute:D2}");
         return true;
     }
 }

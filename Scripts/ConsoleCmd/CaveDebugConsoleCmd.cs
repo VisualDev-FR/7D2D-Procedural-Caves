@@ -1,5 +1,6 @@
-using System;
 using System.Collections.Generic;
+using System.Linq;
+
 
 public class CaveDebugConsoleCmd : ConsoleCmdAbstract
 {
@@ -140,6 +141,27 @@ public class CaveDebugConsoleCmd : ConsoleCmdAbstract
         CaveConfig.moonLightScale = scale;
     }
 
+    private static void MarkerCommand(List<string> _params)
+    {
+        var prefabInstance = GameManager.Instance.World.GetPrimaryPlayer().prefab;
+
+        if (prefabInstance == null)
+        {
+            Logging.Warning($"Player is not inside a prefb");
+            return;
+        }
+
+        var markers = CaveUtils.GetCaveMarkers(prefabInstance).ToArray();
+
+        if (markers.Length == 0)
+            Logging.Warning($"No cave marker found in prefab '{prefabInstance.name}'");
+
+        foreach (var bb in markers)
+        {
+            BlockSelectionUtils.SelectBox(bb);
+        }
+    }
+
     public override void Execute(List<string> _params, CommandSenderInfo _senderInfo)
     {
         if (_params.Count == 0)
@@ -172,6 +194,10 @@ public class CaveDebugConsoleCmd : ConsoleCmdAbstract
 
             case "moon":
                 MoonScaleCommand(_params);
+                break;
+
+            case "marker":
+                MarkerCommand(_params);
                 break;
 
             default:
