@@ -18,6 +18,7 @@ public static class Program
         new CmdSphere(),
         new CmdTunnel(),
         new CmdLogging(),
+        new CmdDelaunay(),
     };
 
     public static void Main(string[] args)
