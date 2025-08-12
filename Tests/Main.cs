@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Reflection;
 
@@ -27,10 +28,18 @@ public static class Program
         var harmony = new HarmonyLib.Harmony(assembly.GetName().ToString());
         harmony.PatchAll(assembly);
 
-        commands.Where(cmd => cmd.GetCommands()
+        var command = commands.Where(cmd => cmd.GetCommands()
             .Contains(args[0]))
-            .First()
-            .Execute(args.ToList());
+            .FirstOrDefault();
+
+        if (command != null)
+        {
+            command.Execute(args.ToList());
+        }
+        else
+        {
+            Console.WriteLine($"Can't find command '{args[0]}'");
+        }
     }
 }
 
