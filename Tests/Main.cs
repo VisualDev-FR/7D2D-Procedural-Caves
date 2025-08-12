@@ -20,6 +20,7 @@ public static class Program
         new CmdTunnel(),
         new CmdLogging(),
         new CmdDelaunay(),
+        new CmdWorldGen(),
     };
 
     public static void Main(string[] args)
