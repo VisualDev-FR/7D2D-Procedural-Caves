@@ -31,6 +31,8 @@ public class CaveBuilder
 
     public readonly string caveTempDir = $"{GameIO.GetUserGameDataDir()}/temp";
 
+    public CaveBuilder() { }
+
     public CaveBuilder(WorldBuilder worldBuilder)
     {
         this.worldBuilder = worldBuilder;
@@ -96,6 +98,8 @@ public class CaveBuilder
 
         var timer = ProfilingUtils.StartTimer();
         var memoryBefore = GC.GetTotalMemory(true);
+
+        caveEntrancesPlanner.SpawnNaturalEntrances();
 
         yield return worldBuilder.SetMessage("Spawning cave prefabs...", _logToConsole: true);
 
