@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [2.1.1] - 2025-08-12
+
+### Fixed
+- Fixed zombies not spawning at all when setting `enableCaveSpawn` is false
+- Fixed calls to PrefabEditModeManager from the GameManager (v2.2b3 compatibility)
+
 ## [2.1.0] - 2025-07-29
 
 ### Added
@@ -92,6 +98,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 
 [unreleased]: https://github.com/VisualDev-FR/7D2D-Procedural-Caves/compare/master...unreleased
+[2.1.1]: https://github.com/VisualDev-FR/7D2D-Procedural-Caves/compare/2.1.0...2.1.1
 [2.1.0]: https://github.com/VisualDev-FR/7D2D-Procedural-Caves/compare/2.0.1...2.1.0
 [2.0.1]: https://github.com/VisualDev-FR/7D2D-Procedural-Caves/compare/2.0.0...2.0.1
 [2.0.0]: https://github.com/VisualDev-FR/7D2D-Procedural-Caves/compare/0.0.4...2.0.0
