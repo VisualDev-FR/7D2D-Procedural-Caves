@@ -531,7 +531,7 @@ public class CaveEditorConsoleCmd : ConsoleCmdAbstract
             }
         }
 
-        var loadedPrefabs = GameManager.Instance.prefabEditModeManager.loadedPrefabHeaders;
+        var loadedPrefabs = PrefabEditModeManager.Instance.loadedPrefabHeaders;
 
         loadedPrefabs[newLocation] = prefab;
         prefab.location = newLocation;
