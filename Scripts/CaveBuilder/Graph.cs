@@ -105,9 +105,9 @@ public class Graph
         return edge;
     }
 
-    private GraphEdge AddEdge(DelauneyPoint point1, DelauneyPoint point2)
+    private GraphEdge AddEdge(DelaunayPoint point1, DelaunayPoint point2)
     {
-        if (point1.Prefab == point2.Prefab)
+        if (point1.prefab == point2.prefab)
         {
             return null;
         }
@@ -453,14 +453,14 @@ public class Graph
 
     private void BuildDelauneyGraph(IEnumerable<CavePrefab> prefabs, int worldSize)
     {
-        var points = prefabs.SelectMany(prefab => prefab.DelauneyPoints());
-        var triangulator = new DelaunayTriangulator();
+        var points = prefabs.SelectMany(prefab => prefab.DelaunayPoints()).ToArray();
+        var positions = points.Select(p => p.position).ToArray();
 
-        foreach (var triangle in triangulator.BowyerWatson(points, worldSize, worldSize))
+        foreach (var triangle in DelaunayTriangulator.Triangulate(positions, worldSize))
         {
-            AddEdge(triangle.Vertices[0], triangle.Vertices[1]);
-            AddEdge(triangle.Vertices[0], triangle.Vertices[2]);
-            AddEdge(triangle.Vertices[1], triangle.Vertices[2]);
+            AddEdge(points[triangle.points[0]], points[triangle.points[1]]);
+            AddEdge(points[triangle.points[0]], points[triangle.points[2]]);
+            AddEdge(points[triangle.points[1]], points[triangle.points[2]]);
         }
     }
 

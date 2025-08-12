@@ -1,239 +1,282 @@
-// MIT License
+// ***********************************************************************
+//  https://github.com/godotengine/godot/blob/master/core/math/delaunay_2d.h
+//
+// ***********************************************************************
+//                         This file is part of:
+//                             GODOT ENGINE
+//                        https://godotengine.org
+// ***********************************************************************
+// Copyright (c) 2014-present Godot Engine contributors (see AUTHORS.md).
+// Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.
+//
+// Permission is hereby granted, free of charge, to any person obtaining
+// a copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so, subject to
+// the following conditions:
+//
+// The above copyright notice and this permission notice shall be
+// included in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+// IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+// CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+// TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+// SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+// ***********************************************************************
 
-// Copyright (c) 2018 Rafael Kübler da Silva
-// https://github.com/RafaelKuebler/DelaunayVoronoi/tree/master
-
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
-
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
-
-
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
-// TODO: see godot implementation of delaunay triangulation: https://github.com/godotengine/godot/blob/master/core/math/delaunay_2d.h
+
+public class DelaunayPoint
+{
+    public readonly Vector2 position;
+
+    public readonly CavePrefab prefab;
+
+    public readonly GraphNode node;
+
+    public DelaunayPoint(GraphNode node)
+    {
+        this.position = new Vector2(node.position.x, node.position.z);
+        this.prefab = node.prefab;
+        this.node = node;
+    }
+
+    public DelaunayPoint(int px, int pz)
+    {
+        this.position = new Vector2(px, pz);
+        this.prefab = null;
+        this.node = null;
+    }
+}
+
+
 public class DelaunayTriangulator
 {
-    public IEnumerable<DelauneyTriangle> BowyerWatson(IEnumerable<DelauneyPoint> points, int xMax, int yMax)
+    public class Triangle
     {
-        var point0 = new DelauneyPoint(0, 0, 0);
-        var point1 = new DelauneyPoint(0, 0, yMax);
-        var point2 = new DelauneyPoint(xMax, 0, yMax);
-        var point3 = new DelauneyPoint(xMax, 0, 0);
+        public int[] points = new int[3];
 
-        var tri1 = new DelauneyTriangle(point0, point1, point2);
-        var tri2 = new DelauneyTriangle(point0, point2, point3);
+        public Vector2 circum_center;
 
-        var triangles = new HashSet<DelauneyTriangle>() { tri1, tri2 };
+        public float circum_radius_squared;
 
-        foreach (var point in points)
+        public Triangle(int p_a, int p_b, int p_c)
         {
-            var badTriangles = FindBadTriangles(point, triangles);
-            var polygon = FindHoleBoundaries(badTriangles);
+            points[0] = p_a;
+            points[1] = p_b;
+            points[2] = p_c;
+        }
 
-            foreach (var triangle in badTriangles)
+        public IEnumerable<Edge> GetEdges()
+        {
+            yield return new Edge(points[0], points[1]);
+            yield return new Edge(points[0], points[2]);
+            yield return new Edge(points[1], points[2]);
+        }
+    }
+
+    public class Edge
+    {
+        public int[] points = new int[2];
+
+        public bool bad = false;
+
+        public Edge(int p_a, int p_b)
+        {
+            // Store indices in a sorted manner to avoid having to check both orientations later.
+            if (p_a > p_b)
             {
-                foreach (var vertex in triangle.Vertices)
+                points[0] = p_b;
+                points[1] = p_a;
+            }
+            else
+            {
+                points[0] = p_a;
+                points[1] = p_b;
+            }
+        }
+    }
+
+    public struct Rect2
+    {
+        public Vector2 position;
+
+        public Vector2 size;
+
+        public Rect2(Vector2 point, Vector2 size)
+        {
+            this.position = point;
+            this.size = size;
+        }
+
+        public void ExpandTo(Vector2 p_vector)
+        {
+            Vector2 begin = position;
+            Vector2 end = position + size;
+
+            if (p_vector.x < begin.x)
+                begin.x = p_vector.x;
+
+            if (p_vector.y < begin.y)
+                begin.y = p_vector.y;
+
+            if (p_vector.x > end.x)
+                end.x = p_vector.x;
+
+            if (p_vector.y > end.y)
+                end.y = p_vector.y;
+
+            position = begin;
+            size = end - begin;
+        }
+
+        public Vector2 GetCenter()
+        {
+            return new Vector2(
+                position.x + size.x / 2,
+                position.y + size.y / 2
+            );
+        }
+    }
+
+    private static Triangle CreateTriangle(List<Vector2> p_vertices, int p_a, int p_b, int p_c)
+    {
+        Triangle triangle = new Triangle(p_a, p_b, p_c);
+
+        // Get the values of the circumcircle and store them inside the triangle object.
+        Vector2 a = p_vertices[p_b] - p_vertices[p_a];
+        Vector2 b = p_vertices[p_c] - p_vertices[p_a];
+
+        Vector2 O = orthogonal(b * length_squared(a) - a * length_squared(b)) / (cross(a, b) * 2.0f);
+
+        triangle.circum_radius_squared = length_squared(O);
+        triangle.circum_center = O + p_vertices[p_a];
+
+        return triangle;
+    }
+
+    public static List<Triangle> Triangulate(Vector2[] p_points, int worldSize)
+    {
+        var points = new List<Vector2>(p_points);
+        var triangles = new List<Triangle>();
+        var point_count = p_points.Length;
+
+        if (point_count <= 2)
+            return triangles;
+
+        // Construct a bounding triangle around the rectangle.
+        points.Add(new Vector2(0, 0));
+        points.Add(new Vector2(0, worldSize));
+        points.Add(new Vector2(worldSize, 0));
+        points.Add(new Vector2(worldSize, worldSize));
+
+        var tri1 = CreateTriangle(points, point_count + 0, point_count + 1, point_count + 2);
+        var tri2 = CreateTriangle(points, point_count + 1, point_count + 2, point_count + 3);
+
+        triangles.Add(tri1);
+        triangles.Add(tri2);
+
+        for (int i = 0; i < point_count; i++)
+        {
+            var polygon = new List<Edge>();
+
+            // Save the edges of the triangles whose circumcircles contain the i-th vertex. Delete the triangles themselves.
+            for (int j = triangles.Count - 1; j >= 0; j--)
+            {
+                if (distance_squared_to(points[i], triangles[j].circum_center) < triangles[j].circum_radius_squared)
                 {
-                    vertex.AdjacentTriangles.Remove(triangle);
+                    polygon.Add(new Edge(triangles[j].points[0], triangles[j].points[1]));
+                    polygon.Add(new Edge(triangles[j].points[1], triangles[j].points[2]));
+                    polygon.Add(new Edge(triangles[j].points[2], triangles[j].points[0]));
+
+                    triangles.RemoveAt(j);
                 }
             }
-            triangles.RemoveWhere(t => badTriangles.Contains(t));
 
-            foreach (var edge in polygon)
+            // Create a triangle for every unique edge.
+            for (int j = 0; j < polygon.Count; j++)
             {
-                var triangle = new DelauneyTriangle(point, edge.Point1, edge.Point2);
+                if (polygon[j].bad)
+                    continue;
 
-                triangles.Add(triangle);
+                for (int k = j + 1; k < polygon.Count; k++)
+                {
+                    // Compare the edges.
+                    if (polygon[k].points[0] == polygon[j].points[0] && polygon[k].points[1] == polygon[j].points[1])
+                    {
+                        polygon[j].bad = true;
+                        polygon[k].bad = true;
+
+                        break; // Since no more than two triangles can share an edge, no more than two edges can share vertices.
+                    }
+                }
+
+                // Create triangles out of good edges.
+                if (!polygon[j].bad)
+                {
+                    triangles.Add(CreateTriangle(points, polygon[j].points[0], polygon[j].points[1], i));
+                }
             }
         }
 
-        triangles.RemoveWhere(triangle => triangle.Vertices.Any(vertice => vertice.node is null));
+        // Filter out the triangles containing vertices of the bounding triangle.
+        int preservedCount = 0;
+        for (int i = 0; i < triangles.Count; i++)
+        {
+            Triangle tri = triangles[i];
+
+            if (!(tri.points[0] >= point_count || tri.points[1] >= point_count || tri.points[2] >= point_count))
+            {
+                triangles[preservedCount] = tri;
+                preservedCount++;
+            }
+        }
+
+        // Delete the remaining extra triangles
+        while (triangles.Count > preservedCount)
+        {
+            triangles.RemoveAt(triangles.Count - 1);
+        }
 
         return triangles;
     }
 
-    private IEnumerable<DelauneyEdge> FindHoleBoundaries(HashSet<DelauneyTriangle> badTriangles)
+    public static float distance_squared_to(Vector2 p1, Vector2 p2)
     {
-        return badTriangles
-            .SelectMany(t => t.Edges)
-            .GroupBy(e => e)
-            .Where(e => e.Count() == 1)
-            .Select(e => e.First());
+        // https://github.com/godotengine/godot/blob/master/core/math/vector2.cpp#L76
+
+        var dx = p1.x - p2.x;
+        var dy = p1.y - p2.y;
+
+        return dx * dx + dy * dy;
+
     }
 
-    private HashSet<DelauneyTriangle> FindBadTriangles(DelauneyPoint point, HashSet<DelauneyTriangle> triangles)
+    public static float length_squared(Vector2 vec)
     {
-        return triangles
-            .Where(t => t.IsPointInsideCircumcircle(point))
-            .ToHashSet();
-    }
-}
+        // https://github.com/godotengine/godot/blob/master/core/math/vector2.cpp#L48
 
-public class DelauneyTriangle
-{
-    public DelauneyPoint[] Vertices { get; } = new DelauneyPoint[3];
-
-    public DelauneyEdge[] Edges { get; } = new DelauneyEdge[3];
-
-    public DelauneyPoint Circumcenter { get; private set; }
-
-    public double RadiusSquared;
-
-    public DelauneyTriangle(DelauneyPoint point1, DelauneyPoint point2, DelauneyPoint point3)
-    {
-        // In theory this shouldn't happen, but it was at one point so this at least makes sure we're getting a
-        // relatively easily-recognised error message, and provides a handy breakpoint for debugging.
-        if (point1 == point2 || point1 == point3 || point2 == point3)
-        {
-            throw new ArgumentException("Must be 3 distinct points");
-        }
-
-        if (!IsCounterClockwise(point1, point2, point3))
-        {
-            Vertices[0] = point1;
-            Vertices[1] = point3;
-            Vertices[2] = point2;
-        }
-        else
-        {
-            Vertices[0] = point1;
-            Vertices[1] = point2;
-            Vertices[2] = point3;
-        }
-
-        Vertices[0].AdjacentTriangles.Add(this);
-        Vertices[1].AdjacentTriangles.Add(this);
-        Vertices[2].AdjacentTriangles.Add(this);
-
-        Edges = new DelauneyEdge[]
-        {
-            new DelauneyEdge(Vertices[0], Vertices[1]),
-            new DelauneyEdge(Vertices[0], Vertices[2]),
-            new DelauneyEdge(Vertices[1], Vertices[2]),
-        };
-
-        UpdateCircumcircle();
+        return vec.x * vec.x + vec.y * vec.y;
     }
 
-    private void UpdateCircumcircle()
+    public static float cross(Vector2 p1, Vector2 p2)
     {
-        // https://codefound.wordpress.com/2013/02/21/how-to-compute-a-circumcircle/#more-58
-        // https://en.wikipedia.org/wiki/Circumscribed_circle
-        var p0 = Vertices[0];
-        var p1 = Vertices[1];
-        var p2 = Vertices[2];
-        var dA = p0.X * p0.X + p0.Z * p0.Z;
-        var dB = p1.X * p1.X + p1.Z * p1.Z;
-        var dC = p2.X * p2.X + p2.Z * p2.Z;
+        // https://github.com/godotengine/godot/blob/master/core/math/vector2.cpp#L92
 
-        var aux1 = dA * (p2.Z - p1.Z) + dB * (p0.Z - p2.Z) + dC * (p1.Z - p0.Z);
-        var aux2 = -(dA * (p2.X - p1.X) + dB * (p0.X - p2.X) + dC * (p1.X - p0.X));
-        var div = 2 * (p0.X * (p2.Z - p1.Z) + p1.X * (p0.Z - p2.Z) + p2.X * (p1.Z - p0.Z));
-
-        if (div == 0)
-        {
-            Logging.Info($"position: ({p0.Prefab.position}), ({p1.Prefab.position}), ({p2.Prefab.position})");
-            Logging.Info($"rotation: {p0.Prefab.rotation}, {p1.Prefab.rotation}, {p2.Prefab.rotation}");
-            Logging.Info($"ids: {p0.Prefab.id}, {p1.Prefab.id}, {p2.Prefab.id}");
-            Logging.Info($"natural: {p0.Prefab.isNaturalEntrance}, {p1.Prefab.isNaturalEntrance}, {p2.Prefab.isNaturalEntrance}");
-            Logging.Info($"name: {p0.Prefab.PrefabName}, {p1.Prefab.PrefabName}, {p2.Prefab.PrefabName}");
-            Logging.Info($"marker: {p0.position}, {p1.position}, {p2.position}");
-            throw new DivideByZeroException();
-        }
-
-        var center = new DelauneyPoint(aux1 / div, 0, aux2 / div);
-        Circumcenter = center;
-        RadiusSquared = (center.X - p0.X) * (center.X - p0.X) + (center.Z - p0.Z) * (center.Z - p0.Z);
+        return p1.x * p2.y - p1.y * p2.x;
     }
 
-    private bool IsCounterClockwise(DelauneyPoint point1, DelauneyPoint point2, DelauneyPoint point3)
+    public static Vector2 orthogonal(Vector2 vec)
     {
-        var result = (point2.X - point1.X) * (point3.Z - point1.Z) - (point3.X - point1.X) * (point2.Z - point1.Z);
-        return result > 0;
-    }
+        // https://github.com/godotengine/godot/blob/master/core/math/vector2.h#L171
 
-    public bool IsPointInsideCircumcircle(DelauneyPoint point)
-    {
-        var dx = point.X - Circumcenter.X;
-        var dz = point.Z - Circumcenter.Z;
-
-        var d_squared = dx * dx + dz * dz;
-
-        return d_squared < RadiusSquared;
-    }
-}
-
-
-public class DelauneyPoint
-{
-    public HashSet<DelauneyTriangle> AdjacentTriangles { get; } = new HashSet<DelauneyTriangle>();
-
-    public readonly Vector3 position;
-
-    public float X => position.x;
-
-    public float Z => position.z;
-
-    public GraphNode node;
-
-    public Prefab.Marker Marker => node.marker;
-
-    public CavePrefab Prefab => node.prefab;
-
-    public DelauneyPoint(GraphNode node)
-    {
-        this.node = node;
-        this.position = node.position.ToVector3();
-    }
-
-    public DelauneyPoint(float x, float y, float z)
-    {
-        position = new Vector3(x, y, z);
-    }
-
-}
-
-
-public class DelauneyEdge
-{
-    public DelauneyPoint Point1 { get; }
-    public DelauneyPoint Point2 { get; }
-
-    public DelauneyEdge(DelauneyPoint point1, DelauneyPoint point2)
-    {
-        Point1 = point1;
-        Point2 = point2;
-    }
-
-    public override bool Equals(object obj)
-    {
-        if (obj is DelauneyEdge other)
-        {
-            return other.GetHashCode() == GetHashCode();
-        }
-
-        return false;
-    }
-
-    public override int GetHashCode()
-    {
-        return Point1.GetHashCode() ^ Point2.GetHashCode();
+        return new Vector2(vec.y, -vec.x);
     }
 }

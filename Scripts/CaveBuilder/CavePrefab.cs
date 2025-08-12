@@ -394,7 +394,7 @@ public class CavePrefab
         return GetHashCode() == other.GetHashCode();
     }
 
-    public IEnumerable<DelauneyPoint> DelauneyPoints()
+    public IEnumerable<DelaunayPoint> DelaunayPoints()
     {
         if (nodes == null)
         {
@@ -404,7 +404,7 @@ public class CavePrefab
 
         foreach (var node in nodes)
         {
-            yield return new DelauneyPoint(node);
+            yield return new DelaunayPoint(node);
         }
     }
 
