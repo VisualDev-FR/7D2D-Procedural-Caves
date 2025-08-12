@@ -53,7 +53,7 @@ public class CmdGraph : CmdAbstract
                 DrawingUtils.DrawPrefabs(b, g, prefabManager.Prefabs);
             }
 
-            b.Save(@"graph.png", ImageFormat.Png);
+            b.Save(@"ignore/graph.png", ImageFormat.Png);
         }
     }
 
