@@ -16,7 +16,7 @@ public class CmdGraph : CmdAbstract
     {
         // var prefabs = PrefabLoader.LoadPrefabs().Values.ToList();
 
-        Random random = new Random(1337);
+        Random random = new Random();
 
         int worldSize = 1024 * 2;
         int prefabCounts = worldSize / 5;
