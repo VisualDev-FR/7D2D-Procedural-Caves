@@ -191,7 +191,7 @@ public static class WorldBuilder_GenerateData
 
     public static void SaveCaveMap()
     {
-        caveBuilder.SaveCaveMap();
+        caveBuilder.SaveCaveMap(worldBuilder);
     }
 
     public static void Cleanup()

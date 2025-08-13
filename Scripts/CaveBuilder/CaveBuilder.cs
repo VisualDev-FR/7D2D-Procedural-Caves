@@ -13,6 +13,8 @@ using Random = System.Random;
 
 public class CaveBuilder
 {
+    private static readonly Logging.Logger logger = Logging.CreateLogger<CaveBuilder>();
+
     private CaveMap cavemap;
 
     private WorldBuilder worldBuilder;
@@ -25,9 +27,8 @@ public class CaveBuilder
 
     private PrefabManager PrefabManager => worldBuilder.PrefabManager;
 
-    private int WorldSize => worldBuilder.WorldSize;
+    private int worldSize;
 
-    private readonly Logging.Logger logger = Logging.CreateLogger("CaveBuilder");
 
     public readonly string caveTempDir = $"{GameIO.GetUserGameDataDir()}/temp";
 
@@ -36,8 +37,9 @@ public class CaveBuilder
     public CaveBuilder(WorldBuilder worldBuilder)
     {
         this.worldBuilder = worldBuilder;
+        this.worldSize = worldBuilder.WorldSize;
 
-        cavemap = new CaveMap(worldBuilder.WorldSize);
+        cavemap = new CaveMap(worldSize);
         cavePrefabManager = new CavePrefabManager(worldBuilder);
         caveEntrancesPlanner = new CaveEntrancesPlanner(cavePrefabManager);
         heightMap = new RawHeightMap(worldBuilder);
@@ -99,14 +101,14 @@ public class CaveBuilder
         var timer = ProfilingUtils.StartTimer();
         var memoryBefore = GC.GetTotalMemory(true);
 
-        caveEntrancesPlanner.SpawnNaturalEntrances();
+        caveEntrancesPlanner.SpawnNaturalEntrances(worldBuilder);
 
         yield return worldBuilder.SetMessage("Spawning cave prefabs...", _logToConsole: true);
 
-        Random random = new Random(worldBuilder.Seed + worldBuilder.WorldSize);
+        Random random = new Random(worldBuilder.Seed + worldSize);
 
-        cavePrefabManager.AddUsedCavePrefabs(PrefabManager.UsedPrefabsWorld);
-        cavePrefabManager.SpawnUnderGroundPrefabs(worldBuilder.WorldSize / 5, random, heightMap);
+        cavePrefabManager.AddUsedCavePrefabs(PrefabManager.UsedPrefabsWorld, worldSize);
+        cavePrefabManager.SpawnUnderGroundPrefabs(worldSize / 5, random, heightMap);
         cavePrefabManager.SpawnCaveRooms(1000, random, heightMap);
         cavePrefabManager.AddSurfacePrefabs(PrefabManager.UsedPrefabsWorld);
 
@@ -114,7 +116,7 @@ public class CaveBuilder
 
         yield return worldBuilder.SetMessage("Setup cave network...", _logToConsole: true);
 
-        var caveGraph = new Graph(cavePrefabManager.Prefabs, worldBuilder.WorldSize);
+        var caveGraph = new Graph(cavePrefabManager.Prefabs, worldSize);
         var subLists = CaveUtils.SplitList(caveGraph.Edges.ToList(), 6);
         var localMinimas = new HashSet<CaveBlock>();
         var lockObject = new object();
@@ -142,7 +144,7 @@ public class CaveBuilder
                     var start = edge.node1;
                     var target = edge.node2;
 
-                    var tunnel = new CaveTunnel(edge, cavePrefabManager, heightMap, WorldSize, worldBuilder.Seed);
+                    var tunnel = new CaveTunnel(edge, cavePrefabManager, heightMap, worldSize, worldBuilder.Seed);
 
                     cavemap.AddTunnel(tunnel);
 
@@ -200,29 +202,27 @@ public class CaveBuilder
     {
         var timer = ProfilingUtils.StartTimer();
         var memoryBefore = GC.GetTotalMemory(true);
-        var prefabLoader = new PrefabLoader();
 
-        yield return prefabLoader.LoadPrefabs(worldDatas);
-
+        worldSize = worldDatas.size;
         cavemap = new CaveMap(worldDatas.size);
-        cavePrefabManager = new CavePrefabManager();
+        cavePrefabManager = new CavePrefabManager(worldDatas);
         caveEntrancesPlanner = new CaveEntrancesPlanner(cavePrefabManager);
-        heightMap = new RawHeightMap(worldDatas.dtmPath, worldDatas.size);
+        heightMap = worldDatas.heightMap;
 
         logger.Info("SpawnNatural entrances...");
         yield return null;
 
-        caveEntrancesPlanner.SpawnNaturalEntrances();
+        caveEntrancesPlanner.SpawnNaturalEntrances(worldDatas);
 
         Random random = new Random(worldDatas.seed + worldDatas.size);
 
         logger.Info("Add prefabs...");
         yield return null;
 
-        cavePrefabManager.AddUsedCavePrefabs(prefabLoader.allPrefabs);
+        cavePrefabManager.AddUsedCavePrefabs(worldDatas.prefabs, worldDatas.size);
         cavePrefabManager.SpawnUnderGroundPrefabs(worldDatas.size / 5, random, heightMap);
         cavePrefabManager.SpawnCaveRooms(1000, random, heightMap);
-        cavePrefabManager.AddSurfacePrefabs(prefabLoader.allPrefabs);
+        cavePrefabManager.AddSurfacePrefabs(worldDatas.prefabs);
     }
 
     private IEnumerator GenerateCavePreview(CaveMap caveMap)
@@ -234,8 +234,8 @@ public class CaveBuilder
         Color32 caveEntrancesColor = new Color32(255, 255, 0, 255);
         Color32 caveTunnelColor = new Color32(255, 0, 0, 64);
 
-        var pixels = Enumerable.Repeat(new Color32(0, 0, 0, 255), WorldSize * WorldSize).ToArray();
-        var HalfWorldSize = CaveUtils.HalfWorldSize(worldBuilder.WorldSize);
+        var pixels = Enumerable.Repeat(new Color32(0, 0, 0, 255), worldSize * worldSize).ToArray();
+        var HalfWorldSize = CaveUtils.HalfWorldSize(worldSize);
 
         foreach (PrefabDataInstance pdi in PrefabManager.UsedPrefabsWorld)
         {
@@ -260,7 +260,7 @@ public class CaveBuilder
 
             foreach (var point in CaveUtils.GetBoundingEdges(position, size))
             {
-                int index = point.x + point.z * WorldSize;
+                int index = point.x + point.z * worldSize;
                 pixels[index] = prefabColor;
             }
         }
@@ -278,7 +278,7 @@ public class CaveBuilder
 
             foreach (var point in CaveUtils.GetBoundingEdges(position, size))
             {
-                int index = point.x + point.z * WorldSize;
+                int index = point.x + point.z * worldSize;
                 pixels[index] = regularPrefabColor;
             }
         }
@@ -286,7 +286,7 @@ public class CaveBuilder
         foreach (CaveBlock caveblock in caveMap.GetBlocks())
         {
             var position = caveblock;
-            int index = position.x + position.z * WorldSize;
+            int index = position.x + position.z * worldSize;
             try
             {
                 caveTunnelColor.a = (byte)position.y;
@@ -294,11 +294,11 @@ public class CaveBuilder
             }
             catch (IndexOutOfRangeException)
             {
-                logger.Error($"IndexOutOfRangeException: index={index}, position={caveblock}, worldSize={WorldSize}");
+                logger.Error($"IndexOutOfRangeException: index={index}, position={caveblock}, worldSize={worldSize}");
             }
         }
 
-        var image = ImageConversion.EncodeArrayToPNG(pixels, GraphicsFormat.R8G8B8A8_UNorm, (uint)WorldSize, (uint)WorldSize, (uint)WorldSize * 4);
+        var image = ImageConversion.EncodeArrayToPNG(pixels, GraphicsFormat.R8G8B8A8_UNorm, (uint)worldSize, (uint)worldSize, (uint)worldSize * 4);
         var filename = $"{caveTempDir}/cavemap.png";
 
         if (!Directory.Exists(caveTempDir))
@@ -309,9 +309,14 @@ public class CaveBuilder
         yield return null;
     }
 
-    public void SaveCaveMap()
+    public void SaveCaveMap(WorldBuilder worldBuilder)
     {
         cavemap.Save($"{worldBuilder.WorldPath}/cavemap", worldBuilder.WorldSize);
+    }
+
+    public void SaveCaveMap(WorldDatas worldDatas)
+    {
+        cavemap.Save($"{worldDatas.location.FullPath}/cavemap", worldDatas.size);
     }
 
 }

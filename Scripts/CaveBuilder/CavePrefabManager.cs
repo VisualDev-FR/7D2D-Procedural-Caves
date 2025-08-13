@@ -18,6 +18,8 @@ public class CavePrefabManager
 
     public PrefabManager PrefabManager => worldBuilder.PrefabManager;
 
+    public List<PrefabDataInstance> UsedPrefabsWorld;
+
     public int worldSize;
 
     public int PrefabCount => Prefabs.Count;
@@ -34,17 +36,53 @@ public class CavePrefabManager
         .Where(prefab => prefab.isRoom)
         .Select(prefab => caveRooms[prefab.id]);
 
-    public CavePrefabManager() { }
-
     public CavePrefabManager(int worldSize)
     {
         this.worldSize = worldSize;
+        this.UsedPrefabsWorld = new List<PrefabDataInstance>();
+    }
+
+    public CavePrefabManager(WorldDatas worldDatas)
+    {
+        this.worldSize = worldDatas.size;
+        this.UsedPrefabsWorld = worldDatas.prefabs;
+
+        var timer = new MicroStopwatch(true);
+        var prefabLocations = PathAbstractions.PrefabsSearchPaths.GetAvailablePathsList(null, null, null, _ignoreDuplicateNames: true);
+
+        for (int i = 0; i < prefabLocations.Count; i++)
+        {
+            var prefabLocation = prefabLocations[i];
+
+            int prefabCount = prefabLocation.Folder.LastIndexOf("/Prefabs/");
+            if (prefabCount >= 0 && prefabLocation.Folder.Substring(prefabCount + 8, 5).EqualsCaseInsensitive("/test"))
+                continue;
+
+            PrefabData prefabData = PrefabData.LoadPrefabData(prefabLocation);
+
+            if (prefabData is null || prefabData.Tags.IsEmpty)
+            {
+                Logging.Warning("Could not load prefab data for " + prefabLocation.Name);
+                continue;
+            }
+
+            if (prefabData.Tags.Test_AllSet(CaveTags.tagCaveTrader))
+            {
+                Logging.Warning($"Skip underground trader '{prefabData.Name}'");
+                continue;
+            }
+
+            TryCacheCavePrefab(prefabData);
+        }
+
+        Logging.Info($"Loaded {allCavePrefabs.Count} Prefabs in {timer.ElapsedMilliseconds * 0.001f}");
     }
 
     public CavePrefabManager(WorldBuilder worldBuilder)
     {
         this.worldBuilder = worldBuilder;
-        worldSize = worldBuilder.WorldSize;
+        this.worldSize = worldBuilder.WorldSize;
+        this.UsedPrefabsWorld = worldBuilder.PrefabManager.UsedPrefabsWorld;
     }
 
     public void Cleanup()
@@ -131,6 +169,8 @@ public class CavePrefabManager
         );
 
         Prefabs.Add(prefab);
+
+        Logging.Debug($"Natural entrance added at {position}");
     }
 
     public bool IsNearSamePrefab(CavePrefab prefab, int minDist)
@@ -362,7 +402,7 @@ public class CavePrefabManager
 
     public List<PrefabDataInstance> GetPrefabsAbove(Vector3i position, Vector3i size)
     {
-        var prefabs = PrefabManager.UsedPrefabsWorld.Where(pdi =>
+        var prefabs = UsedPrefabsWorld.Where(pdi =>
             !pdi.prefab.Tags.Test_AnySet(CaveTags.tagUnderground)
             && CaveUtils.OverLaps2D(position, size, pdi.boundingBoxPosition, pdi.boundingBoxSize)
         );
@@ -454,7 +494,7 @@ public class CavePrefabManager
 
             return new PrefabDataInstance(
                 PrefabManager.PrefabInstanceId++,
-                position + worldBuilder.PrefabWorldOffset,
+                position - CaveUtils.HalfWorldSize(worldSize), // worldBuilder.PrefabWorldOffset,
                 (byte)rotation,
                 prefabData
             );
@@ -466,7 +506,7 @@ public class CavePrefabManager
     public void SpawnUnderGroundPrefabs(int count, Random rand, RawHeightMap heightMap)
     {
         var undergroundPrefabs = GetUndergroundPrefabs();
-        var HalfWorldSize = CaveUtils.HalfWorldSize(worldBuilder.WorldSize);
+        var HalfWorldSize = CaveUtils.HalfWorldSize(worldSize);
 
         CaveUtils.Assert(undergroundPrefabs.Count > 0, "No underground prefab was found in prefab manager.allPrefabDatas");
 
@@ -481,7 +521,7 @@ public class CavePrefabManager
             var cavePrefab = new CavePrefab(PrefabCount + 1, pdi, HalfWorldSize);
 
             AddPrefab(cavePrefab);
-            PrefabManager.AddUsedPrefabWorld(-1, pdi);
+            PrefabManager?.AddUsedPrefabWorld(-1, pdi);
 
             Logging.Info($"cave prefab '{cavePrefab.PrefabName}' added at {cavePrefab.position}");
         }
@@ -536,7 +576,7 @@ public class CavePrefabManager
 
                 AddPrefab(prefab);
 
-                Logging.Info($"Room added at '{position - CaveUtils.HalfWorldSize(worldBuilder.WorldSize)}', size: '{size}'");
+                Logging.Info($"Room added at '{position - CaveUtils.HalfWorldSize(worldSize)}', size: '{size}'");
                 break;
             }
         }
@@ -570,12 +610,12 @@ public class CavePrefabManager
     /// <summary>
     /// Gather the prefabs that have been added by the vanilla PrefabManager
     /// </summary>
-    public void AddUsedCavePrefabs(IEnumerable<PrefabDataInstance> prefabs)
+    public void AddUsedCavePrefabs(IEnumerable<PrefabDataInstance> prefabs, int worldSize)
     {
         var halfWorldSize = new Vector3i(
-            worldBuilder.WorldSize >> 1,
+            worldSize >> 1,
             0,
-            worldBuilder.WorldSize >> 1
+            worldSize >> 1
         );
 
         foreach (var pdi in prefabs)
