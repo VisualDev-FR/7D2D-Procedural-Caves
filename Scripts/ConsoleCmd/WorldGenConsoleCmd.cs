@@ -1,18 +1,12 @@
-using System;
+
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Xml.Linq;
-using System.Xml.XPath;
+using UnityEngine;
+
 
 public class WorldGenConsoleCmd : ConsoleCmdAbstract
 {
     private readonly DynamicPrefabDecorator dynamicPrefabDecorator = new DynamicPrefabDecorator();
-
-    public List<PrefabInstance> AllPrefabs => dynamicPrefabDecorator.allPrefabs;
 
     public override bool AllowedInMainMenu => true;
 
@@ -32,8 +26,7 @@ public class WorldGenConsoleCmd : ConsoleCmdAbstract
 
         if (worldName == "")
         {
-            Log.Error("World name is required.");
-            return;
+            worldName = "Old Honihebu County";
         }
 
         GameManager.Instance.StartCoroutine(GenerateWorld(worldName));
@@ -47,11 +40,7 @@ public class WorldGenConsoleCmd : ConsoleCmdAbstract
         worldDatas.Debug();
 
         yield return caveBuilder.GenerateCaveFromWorld(worldDatas);
-        yield return null;
-
-        Logging.Debug($"loaded prefabs: {AllPrefabs.Count}");
     }
 
-
-
 }
+

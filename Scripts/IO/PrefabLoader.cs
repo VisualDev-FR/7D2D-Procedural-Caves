@@ -1,35 +1,34 @@
-using System.Collections;
-using System.Collections.Generic;
 using System.IO;
 using System.Xml.Linq;
 using System.Xml.XPath;
+using System.Collections.Generic;
 
-public class PrefabLoader
+public static class PrefabLoader
 {
-    public readonly List<PrefabDataInstance> allPrefabs = new List<PrefabDataInstance>();
-
-    public IEnumerator LoadPrefabs(WorldDatas worldDatas)
+    public static IEnumerable<PrefabDataInstance> LoadPrefabs(string xmlPath)
     {
-        var xmlPath = worldDatas.prefabsPath;
-
         if (!File.Exists(xmlPath))
         {
             Logging.Warning($"prefab.xml not found: '{xmlPath}'");
-            yield break;
         }
 
         var document = XDocument.Parse(File.ReadAllText(xmlPath));
+        var prefabID = 0;
 
         foreach (XElement item in document.XPathSelectElements("//decoration"))
         {
-            yield return AddPrefab(item);
+            if (LoadPrefab(item, prefabID) is PrefabDataInstance pdi)
+            {
+                yield return pdi;
+                prefabID++;
+            }
         }
     }
 
-    private IEnumerator AddPrefab(XElement item)
+    private static PrefabDataInstance LoadPrefab(XElement item, int id)
     {
         if (!item.HasAttribute("name"))
-            yield break;
+            return null;
 
         string prefabName = item.GetAttribute("name");
 
@@ -43,11 +42,8 @@ public class PrefabLoader
 
         var location = PathAbstractions.PrefabsSearchPaths.GetLocation(prefabName);
         var prefabData = PrefabData.LoadPrefabData(location);
-        var pdi = new PrefabDataInstance(allPrefabs.Count, position, rotation, prefabData);
 
-        allPrefabs.Add(pdi);
-
-        yield return null;
+        return new PrefabDataInstance(id, position, rotation, prefabData);
     }
 
 }
