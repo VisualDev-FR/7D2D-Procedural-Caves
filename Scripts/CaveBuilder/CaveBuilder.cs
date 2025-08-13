@@ -105,10 +105,10 @@ public class CaveBuilder
 
         Random random = new Random(worldBuilder.Seed + worldBuilder.WorldSize);
 
-        cavePrefabManager.AddUsedCavePrefabs();
+        cavePrefabManager.AddUsedCavePrefabs(PrefabManager.UsedPrefabsWorld);
         cavePrefabManager.SpawnUnderGroundPrefabs(worldBuilder.WorldSize / 5, random, heightMap);
         cavePrefabManager.SpawnCaveRooms(1000, random, heightMap);
-        cavePrefabManager.AddSurfacePrefabs();
+        cavePrefabManager.AddSurfacePrefabs(PrefabManager.UsedPrefabsWorld);
 
         logger.Debug($"Prefab timer: {timer.ElapsedMilliseconds / 1000:F1}s");
 
@@ -194,6 +194,35 @@ public class CaveBuilder
         logger.Info($"{cavemap.BlocksCount:N0} cave blocks generated, timer: {timer.ElapsedMilliseconds / 1000:F1}s, memory used: {(GC.GetTotalMemory(true) - memoryBefore) / 1_048_576:N1}MB");
 
         yield break;
+    }
+
+    public IEnumerator GenerateCaveFromWorld(WorldDatas worldDatas)
+    {
+        var timer = ProfilingUtils.StartTimer();
+        var memoryBefore = GC.GetTotalMemory(true);
+        var prefabLoader = new PrefabLoader();
+
+        yield return prefabLoader.LoadPrefabs(worldDatas);
+
+        cavemap = new CaveMap(worldDatas.size);
+        cavePrefabManager = new CavePrefabManager();
+        caveEntrancesPlanner = new CaveEntrancesPlanner(cavePrefabManager);
+        heightMap = new RawHeightMap(worldDatas.dtmPath, worldDatas.size);
+
+        logger.Info("SpawnNatural entrances...");
+        yield return null;
+
+        caveEntrancesPlanner.SpawnNaturalEntrances();
+
+        Random random = new Random(worldDatas.seed + worldDatas.size);
+
+        logger.Info("Add prefabs...");
+        yield return null;
+
+        cavePrefabManager.AddUsedCavePrefabs(prefabLoader.allPrefabs);
+        cavePrefabManager.SpawnUnderGroundPrefabs(worldDatas.size / 5, random, heightMap);
+        cavePrefabManager.SpawnCaveRooms(1000, random, heightMap);
+        cavePrefabManager.AddSurfacePrefabs(prefabLoader.allPrefabs);
     }
 
     private IEnumerator GenerateCavePreview(CaveMap caveMap)

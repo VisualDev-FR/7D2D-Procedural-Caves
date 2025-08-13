@@ -34,6 +34,8 @@ public class CavePrefabManager
         .Where(prefab => prefab.isRoom)
         .Select(prefab => caveRooms[prefab.id]);
 
+    public CavePrefabManager() { }
+
     public CavePrefabManager(int worldSize)
     {
         this.worldSize = worldSize;
@@ -568,7 +570,7 @@ public class CavePrefabManager
     /// <summary>
     /// Gather the prefabs that have been added by the vanilla PrefabManager
     /// </summary>
-    public void AddUsedCavePrefabs()
+    public void AddUsedCavePrefabs(IEnumerable<PrefabDataInstance> prefabs)
     {
         var halfWorldSize = new Vector3i(
             worldBuilder.WorldSize >> 1,
@@ -576,7 +578,7 @@ public class CavePrefabManager
             worldBuilder.WorldSize >> 1
         );
 
-        foreach (var pdi in PrefabManager.UsedPrefabsWorld)
+        foreach (var pdi in prefabs)
         {
             if (pdi.prefab.Tags.Test_AnySet(CaveTags.tagCave))
             {
@@ -589,12 +591,12 @@ public class CavePrefabManager
     /// Gather all AABB of surface prefabs to store the zones
     /// where tunnels can't be dig
     /// </summary>
-    public void AddSurfacePrefabs()
+    public void AddSurfacePrefabs(IEnumerable<PrefabDataInstance> prefabs)
     {
         var prefabClusters = new Dictionary<string, List<BoundingBox>>();
         var halfWorldSize = CaveUtils.HalfWorldSize(worldSize);
 
-        foreach (var pdi in PrefabManager.UsedPrefabsWorld)
+        foreach (var pdi in prefabs)
         {
             if (pdi.prefab.Tags.Test_AnySet(CaveTags.tagCave))
                 continue;
