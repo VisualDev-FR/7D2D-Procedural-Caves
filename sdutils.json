@@ -1,6 +1,6 @@
 {
     "name": "TheDescent",
-    "csproj": "procedural-caves.csproj",
+    "csproj": "TheDescent/TheDescent.csproj",
     "include": [
         "ModInfo.xml",
         "ModConfig.xml",
