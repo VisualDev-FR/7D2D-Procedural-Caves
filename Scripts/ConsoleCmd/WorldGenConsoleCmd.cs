@@ -1,7 +1,6 @@
 
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 
 
 public class WorldGenConsoleCmd : ConsoleCmdAbstract
@@ -17,7 +16,7 @@ public class WorldGenConsoleCmd : ConsoleCmdAbstract
 
     public override string getDescription()
     {
-        return "";
+        return "Generates caves over an existing World";
     }
 
     public override void Execute(List<string> _params, CommandSenderInfo _senderInfo)

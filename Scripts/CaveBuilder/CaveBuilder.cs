@@ -223,6 +223,83 @@ public class CaveBuilder
         cavePrefabManager.SpawnUnderGroundPrefabs(worldDatas.size / 5, random, heightMap);
         cavePrefabManager.SpawnCaveRooms(1000, random, heightMap);
         cavePrefabManager.AddSurfacePrefabs(worldDatas.prefabs);
+
+        logger.Debug($"Prefab timer: {timer.ElapsedMilliseconds / 1000:F1}s");
+        logger.Debug("Setup cave network...");
+        yield return null;
+
+        var caveGraph = new Graph(cavePrefabManager.Prefabs, worldSize);
+        var subLists = CaveUtils.SplitList(caveGraph.Edges.ToList(), 6);
+        var localMinimas = new HashSet<CaveBlock>();
+        var lockObject = new object();
+        int index = 0;
+
+        logger.Debug($"Graph timer: {timer.ElapsedMilliseconds / 1000:F1}ms");
+        logger.Debug("Start tunneling threads...");
+        yield return null;
+
+        var threads = new List<Thread>() {
+            StartRoomsThread(cavePrefabManager),
+        };
+
+        foreach (var edgeList in subLists)
+        {
+            var thread = new Thread(() =>
+            {
+                foreach (GraphEdge edge in edgeList)
+                {
+                    string message = $"Cave tunneling: {100f * index++ / caveGraph.Edges.Count:F0}% ({index} / {caveGraph.Edges.Count})";
+
+                    var start = edge.node1;
+                    var target = edge.node2;
+
+                    var tunnel = new CaveTunnel(edge, cavePrefabManager, heightMap, worldSize, worldDatas.seed);
+
+                    cavemap.AddTunnel(tunnel);
+
+                    lock (lockObject)
+                    {
+                        localMinimas.UnionWith(tunnel.LocalMinimas);
+                    }
+                }
+            })
+            {
+                Priority = System.Threading.ThreadPriority.Highest
+            };
+
+            thread.Start();
+            threads.Add(thread);
+        }
+
+        while (true)
+        {
+            bool isThreadAlive = false;
+            foreach (var th in threads)
+            {
+                if (th.IsAlive)
+                {
+                    isThreadAlive = true;
+                    break;
+                }
+            }
+
+            if (!isThreadAlive)
+                break;
+        }
+
+        // yield return cavemap.SetWaterCoroutine(cavePrefabManager, worldBuilder, localMinimas);
+
+        SpawnNaturalEntrances();
+
+        // yield return GenerateCavePreview(cavemap);
+
+        logger.Info($"{cavemap.BlocksCount:N0} cave blocks generated, timer: {timer.ElapsedMilliseconds / 1000:F1}s, memory used: {(GC.GetTotalMemory(true) - memoryBefore) / 1_048_576:N1}MB");
+        logger.Info("Save cavemap...");
+        yield return null;
+
+        SaveCaveMap(worldDatas);
+
+        yield break;
     }
 
     private IEnumerator GenerateCavePreview(CaveMap caveMap)
