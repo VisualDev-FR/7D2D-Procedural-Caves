@@ -21,6 +21,8 @@ public class WorldGenConsoleCmd : ConsoleCmdAbstract
 
     public override void Execute(List<string> _params, CommandSenderInfo _senderInfo)
     {
+        Log.Out("[WorldGenConsoleCmd] cave generation started.");
+
         var worldName = string.Join(" ", _params);
 
         if (worldName == "")

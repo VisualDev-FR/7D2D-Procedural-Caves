@@ -11,9 +11,14 @@ public class RawHeightMap
 
     public readonly int worldSize;
 
+    public float MinHeight => heightMap.Min();
+
+    public float MaxHeight => heightMap.Max();
+
     public RawHeightMap(string dtmPath, int worldSize)
     {
-        heightMap = new NativeArray<float>(worldSize * worldSize, Allocator.Persistent);
+        this.worldSize = worldSize;
+        this.heightMap = new NativeArray<float>(worldSize * worldSize, Allocator.Persistent);
 
         var values = HeightMapUtils.LoadRAWToHeightData(dtmPath);
 
@@ -52,12 +57,15 @@ public class RawHeightMap
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public float GetHeight(int x, int z)
     {
-        if (x < 0 || z < 0 || x >= worldSize || z >= worldSize)
+        int index = x + z * worldSize;
+
+        if (index >= 0 && index < heightMap.Length)
         {
-            return 0;
+            return heightMap[index];
         }
 
-        return heightMap[x + z * worldSize];
+        Logging.Warning($"worldsize: {worldSize}, pos: [{x}, {z}]");
+        return 0;
     }
 
     public static void test_heightmap()

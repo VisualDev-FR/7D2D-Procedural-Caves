@@ -6,6 +6,8 @@ using WorldGenerationEngineFinal;
 
 public class CavePrefabManager
 {
+    private static readonly Logging.Logger logger = Logging.CreateLogger<CavePrefabManager>();
+
     private static readonly HashSet<CavePrefab> emptyPrefabsHashset = new HashSet<CavePrefab>();
 
     public readonly Dictionary<Vector2s, HashSet<CavePrefab>> groupedPrefabs = new Dictionary<Vector2s, HashSet<CavePrefab>>();
@@ -16,11 +18,11 @@ public class CavePrefabManager
 
     public WorldBuilder worldBuilder;
 
-    public PrefabManager PrefabManager => worldBuilder.PrefabManager;
-
     public List<PrefabDataInstance> UsedPrefabsWorld;
 
     public int worldSize;
+
+    public int PrefabInstanceId;
 
     public int PrefabCount => Prefabs.Count;
 
@@ -75,6 +77,8 @@ public class CavePrefabManager
             TryCacheCavePrefab(prefabData);
         }
 
+        PrefabInstanceId = UsedPrefabsWorld.Count + 1;
+
         Logging.Info($"Loaded {allCavePrefabs.Count} Prefabs in {timer.ElapsedMilliseconds * 0.001f}");
     }
 
@@ -83,6 +87,16 @@ public class CavePrefabManager
         this.worldBuilder = worldBuilder;
         this.worldSize = worldBuilder.WorldSize;
         this.UsedPrefabsWorld = worldBuilder.PrefabManager.UsedPrefabsWorld;
+    }
+
+    private int GetNewPrefabID()
+    {
+        if(worldBuilder != null)
+        {
+            return worldBuilder.PrefabManager.PrefabInstanceId++;
+        }
+
+        return PrefabInstanceId++;
     }
 
     public void Cleanup()
@@ -412,7 +426,7 @@ public class CavePrefabManager
 
     private int GetMinTerrainHeight(Vector3i position, Vector3i size, RawHeightMap heightMap)
     {
-        int minHeight = 1337;
+        int minHeight = int.MaxValue;
 
         for (int x = position.x; x < position.x + size.x; x++)
         {
@@ -477,7 +491,7 @@ public class CavePrefabManager
     {
         int maxPlacementAttempts = 20;
 
-        while (maxPlacementAttempts-- > 0)
+        for(int i = 0; i < maxPlacementAttempts; i++)
         {
             int rotation = rand.Next(4);
 
@@ -493,7 +507,7 @@ public class CavePrefabManager
             position.y = rand.Next(CaveConfig.bedRockMargin, minTerrainHeight - prefabData.size.y - CaveConfig.terrainMargin);
 
             return new PrefabDataInstance(
-                PrefabManager.PrefabInstanceId++,
+                GetNewPrefabID(),
                 position - CaveUtils.HalfWorldSize(worldSize), // worldBuilder.PrefabWorldOffset,
                 (byte)rotation,
                 prefabData
@@ -521,7 +535,7 @@ public class CavePrefabManager
             var cavePrefab = new CavePrefab(PrefabCount + 1, pdi, HalfWorldSize);
 
             AddPrefab(cavePrefab);
-            PrefabManager?.AddUsedPrefabWorld(-1, pdi);
+            worldBuilder?.PrefabManager?.AddUsedPrefabWorld(-1, pdi);
 
             Logging.Info($"cave prefab '{cavePrefab.PrefabName}' added at {cavePrefab.position}");
         }
@@ -537,9 +551,11 @@ public class CavePrefabManager
     /// <param name="heightMap"></param>
     public void SpawnCaveRooms(int count, Random rand, RawHeightMap heightMap)
     {
+        var roomSpawned = 0;
+
         for (int i = 0; i < count; i++)
         {
-            int maxTries = 5;
+            int maxTries = 20;
 
             for (int j = 0; j < maxTries; j++)
             {
@@ -576,10 +592,16 @@ public class CavePrefabManager
 
                 AddPrefab(prefab);
 
+                roomSpawned++;
+
                 Logging.Info($"Room added at '{position - CaveUtils.HalfWorldSize(worldSize)}', size: '{size}'");
                 break;
             }
         }
+
+        // TODO: allow cave generation without cave prefabs
+        // * just nodes underground + natural entrances, no cave room, no underground prefabs, pure tunnels
+        CaveUtils.Assert(roomSpawned > 0, "No cave room spawned");
     }
 
     public void TryCacheCavePrefab(PrefabData prefabData)

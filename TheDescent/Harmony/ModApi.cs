@@ -2,9 +2,8 @@ using System.Reflection;
 
 public class ModAPI : IModApi
 {
-    public void InitMod(Mod _modInstance)
+    public void InitMod(Mod mod)
     {
-        var harmony = new HarmonyLib.Harmony(_modInstance.Name);
-        harmony.PatchAll(Assembly.GetExecutingAssembly());
+        new HarmonyLib.Harmony(mod.Name).PatchAll(Assembly.GetExecutingAssembly());
     }
 }

@@ -25,16 +25,7 @@ public class Graph
 
         var timer = ProfilingUtils.StartTimer();
 
-        try
-        {
-            BuildDelauneyGraph(prefabs, worldSize);
-        }
-        catch (Exception e)
-        {
-            // TODO: handle this file path properly
-            // this.ToFile("ignore/graph.txt", prefabs.ToHashSet(), worldSize);
-            logger.Error($"Error: {e}");
-        }
+        BuildDelauneyGraph(prefabs, worldSize);
 
         logger.Info($"primary graph : edges: {Edges.Count}, nodes: {Nodes.Count}, timer: {timer.ElapsedMilliseconds:N0}ms");
 
@@ -455,6 +446,8 @@ public class Graph
     {
         var points = prefabs.SelectMany(prefab => prefab.DelaunayPoints()).ToArray();
         var positions = points.Select(p => p.position).ToArray();
+
+        CaveUtils.Assert(points.Length > 0, $"delaunay points: {points.Length}");
 
         foreach (var triangle in DelaunayTriangulator.Triangulate(positions, worldSize))
         {

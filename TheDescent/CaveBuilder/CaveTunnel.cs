@@ -171,8 +171,7 @@ public class CaveTunnel
 
         blocks.RemoveWhere(caveBlock =>
                 caveBlock.y <= CaveConfig.bedRockMargin
-            // TODO: check why the height map removes all blocks
-            // || (caveBlock.y + CaveConfig.terrainMargin) >= (int)heightMap.GetHeight(caveBlock.x, caveBlock.z)
+            || (caveBlock.y + CaveConfig.terrainMargin) >= (int)heightMap.GetHeight(caveBlock.x, caveBlock.z)
             || cachedPrefabs.IntersectWithPrefab(caveBlock.ToVector3i()));
     }
 

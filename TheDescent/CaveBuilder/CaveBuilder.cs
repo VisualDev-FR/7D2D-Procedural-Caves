@@ -224,6 +224,9 @@ public class CaveBuilder
         cavePrefabManager.SpawnCaveRooms(1000, random, heightMap);
         cavePrefabManager.AddSurfacePrefabs(worldDatas.prefabs);
 
+        CaveUtils.Assert(cavePrefabManager.Prefabs.Count > 0, "No cave prefab was added to the world");
+
+        logger.Debug($"{cavePrefabManager.Prefabs.Count} cave prefabs added to the world.");
         logger.Debug($"Prefab timer: {timer.ElapsedMilliseconds / 1000:F1}s");
         logger.Debug("Setup cave network...");
         yield return null;
@@ -299,6 +302,7 @@ public class CaveBuilder
 
         SaveCaveMap(worldDatas);
 
+        logger.Info("Cavemap generated successfully.");
         yield break;
     }
 
