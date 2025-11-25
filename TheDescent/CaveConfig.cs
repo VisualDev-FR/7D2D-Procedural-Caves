@@ -44,7 +44,7 @@ public static class CaveConfig
 
     public static bool generateCaves = false;
 
-    public static float terrainOffset = 50;
+    public static float terrainOffset = 80;
 
     public static WorldBuilder.GenerationSelections caveNetworks;
 
