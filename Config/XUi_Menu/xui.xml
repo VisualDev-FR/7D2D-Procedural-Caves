@@ -1,0 +1,9 @@
+<config>
+
+    <append xpath="/xui/ruleset[@name='default']">
+        <window_group name="caveEditor" defaultSelected="seedInput">
+            <window name="caveGeneration" />
+        </window_group>
+    </append>
+
+</config>

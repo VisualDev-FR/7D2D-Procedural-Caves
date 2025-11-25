@@ -26,3 +26,5 @@ nugget03,Amber nugget,Minerais d'Ambre,Янтарный самородок
 nugget04,Emerald nugget,Minerais d'Emeraude,Изумрудный самородок
 nugget05,Sapphire nugget,Minerais de Saphir,Сапфировый самородок
 the_caver_guide,The Caver's Guide,Le guide du spéléologue,Путеводитель спелеолога
+xuiCaveEditor,Cave Editor
+xuiGenerateCaves,Cave Generation

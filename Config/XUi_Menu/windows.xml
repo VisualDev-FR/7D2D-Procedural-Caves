@@ -39,4 +39,143 @@
 
     </insertAfter>
 
+
+    <append xpath="/windows/window[@name='editingTools']/grid[@name='buttons']">
+        <mainmenubutton name="btnCaveEditor" pivot="center" width="400" height="50" caption_key="xuiCaveEditor" />
+    </append>
+
+    <append xpath="/windows">
+        <window name="caveGeneration" anchor="CenterCenter" pos="-650,400" width="1300" height="780" controller="CaveGenerationWindowGroup, TheDescent" cursor_area="true">
+            <panel name="header" pos="-100,0" height="43" depth="1" width="1500" backgroundspritename="ui_game_panel_header" bordercolor="[black]" borderthickness="3">
+                <label name="windowheader" style="header.name" pos="9,-6" width="500" text_key="xuiGenerateCaves" />
+            </panel>
+
+            <rect pos="-100,-50" width="820" height="650" cursor_area="true">
+                <rect name="generationControls">
+                    <sprite name="border" depth="10" sprite="menu_empty3px" color="[black]" type="sliced" fillcenter="false" globalopacity="false" />
+                    <sprite name="backgroundMain" depth="0" sprite="menu_empty3px" color="[mediumGrey]" type="sliced" fillcenter="true" />
+                    <label text="warning" text_key="xuiRWGWarning" color="[red]" depth="1" pos="10,-615" style="hover" justify="left" pivot="topleft" />
+
+                    <rect pos="30,-40">
+                        <grid rows="14" cols="2" cell_width="380" cell_height="40" repeat_content="false" arrangement="vertical">
+                            <rect>
+                                <label text="Seed" depth="4" width="150" height="30" style="hover" tooltip_key="xuiWorldSeed" text_key="xuiWorldSeed" font_size="28" color="[white]" justify="right" pivot="topleft" />
+                                <textfield name="seedInput" depth="5" pos="189,0" width="132" height="32" pivot="topLeft" character_limit="20" />
+                            </rect>
+                            <rect>
+                                <label text="World Size" depth="4" width="150" height="30" style="hover" tooltip_key="xuiWorldSize" text_key="xuiWorldSize" font_size="28" color="[white]" justify="right" pivot="topleft" />
+                                <combobox name="WorldSize" depth="108" pos="155,0" width="200" height="32" type="ComboBoxList`1[System.Int32]" values="2048,3072,4096,5120,6144,7168,8192,9216,10240" value_wrap="false" />
+                            </rect>
+
+                            <rect>
+                                <sprite name="backgroundMain" depth="0" width="350" height="4" pos="6,-10" sprite="menu_empty3px" color="[black]" type="sliced" fillcenter="true" />
+                            </rect>
+
+                            <rect>
+                                <label text="Towns" depth="4" width="150" height="30" style="hover" tooltip_key="xuiGenTownsDesc" text_key="xuiGenTowns" font_size="28" color="[white]" justify="right" pivot="topleft" />
+                                <combobox name="Towns" depth="108" pos="155,0" width="200" height="32" localization_prefix="xuiWorldGeneration" type="ComboBoxEnum`1[WorldGenerationEngineFinal.WorldBuilder+GenerationSelections]" value_wrap="false" />
+                            </rect>
+
+                            <rect>
+                                <label text="Wilderness" depth="4" width="150" height="30" style="hover" tooltip_key="xuiGenWildernessDesc" text_key="xuiGenWilderness" font_size="28" color="[white]" justify="right" pivot="topleft" />
+                                <combobox name="Wilderness" depth="108" pos="155,0" width="200" height="32" localization_prefix="xuiWorldGeneration" type="ComboBoxEnum`1[WorldGenerationEngineFinal.WorldBuilder+GenerationSelections]" value_wrap="false" />
+                            </rect>
+
+                            <rect>
+                                <label text="Rivers" depth="4" width="150" height="30" style="hover" tooltip_key="xuiRiversDesc" text_key="xuiRivers" font_size="28" color="[white]" justify="right" pivot="topleft" />
+                                <combobox name="Rivers" depth="108" pos="155,0" width="200" height="32" localization_prefix="xuiWorldGeneration" type="ComboBoxEnum`1[WorldGenerationEngineFinal.WorldBuilder+GenerationSelections]" value_wrap="false" />
+                            </rect>
+
+                            <rect>
+                                <label text="Craters" depth="4" width="150" height="30" style="hover" tooltip_key="xuiCratersDesc" text_key="xuiCraters" font_size="28" color="[white]" justify="right" pivot="topleft" />
+                                <combobox name="Craters" depth="108" pos="155,0" width="200" height="32" localization_prefix="xuiWorldGeneration" type="ComboBoxEnum`1[WorldGenerationEngineFinal.WorldBuilder+GenerationSelections]" value_wrap="false" />
+                            </rect>
+
+                            <rect>
+                                <label text="Cracks" depth="4" width="150" height="30" style="hover" tooltip_key="xuiCracksDesc" text_key="xuiCracks" font_size="28" color="[white]" justify="right" pivot="topleft" />
+                                <combobox name="Cracks" depth="108" pos="155,0" width="200" height="32" localization_prefix="xuiWorldGeneration" type="ComboBoxEnum`1[WorldGenerationEngineFinal.WorldBuilder+GenerationSelections]" value_wrap="false" />
+                            </rect>
+
+                            <rect>
+                                <label text="Lakes" depth="4" width="150" height="30" style="hover" tooltip_key="xuiLakesDesc" text_key="xuiLakes" font_size="28" color="[white]" justify="right" pivot="topleft" />
+                                <combobox name="Lakes" depth="108" pos="155,0" width="200" height="32" localization_prefix="xuiWorldGeneration" type="ComboBoxEnum`1[WorldGenerationEngineFinal.WorldBuilder+GenerationSelections]" value_wrap="false" />
+                            </rect>
+
+                            <rect />
+                            <rect />
+                            <rect />
+                            <rect />
+                            <rect />
+
+                            <rect>
+                                <label text="Preview Quality" depth="4" width="150" height="30" style="hover" tooltip_key="xuiPreviewQuality" text_key="xuiPreviewQuality" font_size="28" color="[white]" justify="right" pivot="topleft" />
+                                <combobox name="PreviewQuality" depth="108" pos="155,0" width="200" height="32" type="ComboBoxEnum`1[XUiC_WorldGenerationWindowGroup+PreviewQuality]" localization_prefix="xuiAdvancedGenerationQuality" value_min="0" value_max="5" value="3" value_increment="1" value_wrap="false" />
+                            </rect>
+                            <rect />
+                            <rect>
+                                <sprite name="backgroundMain" depth="0" width="350" height="4" pos="6,-10" sprite="menu_empty3px" color="[black]" type="sliced" fillcenter="true" />
+                            </rect>
+
+                            <rect>
+                                <label text="Plains Weight" depth="4" width="150" height="30" style="hover" tooltip_key="xuiPlainsWeightDesc" text_key="xuiPlainsWeight" font_size="28" color="[white]" justify="right" pivot="topleft" />
+                                <combobox name="PlainsWeight" depth="108" pos="155,0" width="200" height="32" type="ComboBoxInt" value_min="0" value_max="10" value="5" value_increment="1" value_wrap="false" />
+                            </rect>
+
+                            <rect>
+                                <label text="Hills Weight" depth="4" width="150" height="30" style="hover" tooltip_key="xuiHillsWeightDesc" text_key="xuiHillsWeight" font_size="28" color="[white]" justify="right" pivot="topleft" />
+                                <combobox name="HillsWeight" depth="108" pos="155,0" width="200" height="32" type="ComboBoxInt" value_min="0" value_max="10" value="5" value_wrap="false" />
+                            </rect>
+
+                            <rect>
+                                <label text="Mountains Weight" depth="4" width="150" height="30" style="hover" tooltip_key="xuiMountainsWeightDesc" text_key="xuiMountainsWeight" font_size="28" color="[white]" justify="right" pivot="topleft" />
+                                <combobox name="MountainsWeight" depth="108" pos="155,0" width="200" height="32" type="ComboBoxInt" value_min="0" value_max="10" value="5" value_wrap="false" />
+                            </rect>
+
+                            <rect>
+                                <sprite name="backgroundMain" depth="0" width="320" height="4" pos="50,-10" sprite="menu_empty3px" color="[black]" type="sliced" fillcenter="true" />
+                            </rect>
+
+                            <rect>
+                                <label text="Biome Layout" depth="4" width="150" height="30" style="hover" tooltip_key="xuiBiomeLayoutDesc" text_key="xuiBiomeLayout" font_size="28" color="[white]" justify="right" pivot="topleft" />
+                                <combobox name="BiomeLayout" depth="108" pos="155,0" width="200" height="32" type="ComboBoxEnum`1[WorldGenerationEngineFinal.WorldBuilder+BiomeLayout]" localization_prefix="xuiRWG" value_wrap="false" />
+                            </rect>
+
+                            <grid name="biomes" rows="5" cols="1" pos="0,0" width="200" cell_width="200" cell_height="40" repeat_content="true" arrangement="vertical">
+                                <rwg_biome depth="4" />
+                            </grid>
+
+                        </grid>
+                    </rect>
+
+                </rect>
+            </rect>
+
+            <rect pos="750,-50" height="650" width="650">
+                <sprite depth="10" name="border" sprite="menu_empty3px" color="[black]" type="sliced" fillcenter="false" globalopacity="false" />
+                <sprite depth="0" name="backgroundMain" sprite="menu_empty3px" color="[darkGrey]" type="sliced" fillcenter="true" />
+                <texture depth="100" name="worldPreviewTex" material="Materials/Transparent Colored" pos="3,-3" size="647,647" globalopacity="false" on_press="true" on_drag="true" controller="WorldGenerationPreview" />
+            </rect>
+
+            <rect pos="-100, -720">
+                <simplebutton name="btnBack" depth="3" pos="0, 0" width="200" height="48" font_size="32" caption_key="xuiBack" upper_case="true" />
+            </rect>
+
+            <rect pos="390,-720">
+                <simplebutton name="generate" width="230" height="48" font_size="32" text="Generate World" text_key="xuiGenerateWorld" caption_key="xuiGenerateWorld" upper_case="true" />
+            </rect>
+
+            <rect pos="810, -720">
+                <simplebutton name="btnDataManagement" depth="3" pos="0, 0" width="230" height="48" font_size="32" caption_key="xuiDmManageSaves" upper_case="true" />
+            </rect>
+
+            <rect pos="1080,-720">
+                <simplebutton name="btnNewGame" enabled="{canNewGame}" width="230" height="48" font_size="32" text="New Gamee" text_key="xuiNewGame" caption_key="xuiNewGame" upper_case="true" />
+            </rect>
+
+            <rect name="dm_bar_enabled" visible="{showbar}">
+                <dm_data_bar pos="0, -800" width="1185" />
+            </rect>
+        </window>
+    </append>
+
 </configs>
