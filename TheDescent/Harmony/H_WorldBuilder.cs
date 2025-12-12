@@ -162,7 +162,7 @@ public static class WorldBuilder_GenerateData
         CaveUtils.SetField<WorldBuilder>(
             worldBuilder,
             "WaterHeight",
-            (int)ClampHeight(worldBuilder.WaterHeight)
+            (int)ClampHeight(worldBuilder.WaterHeight) - 1
         );
     }
 

@@ -110,6 +110,9 @@ public class CaveBuilder
         cavePrefabManager.AddUsedCavePrefabs(PrefabManager.UsedPrefabsWorld, worldSize);
         cavePrefabManager.SpawnUnderGroundPrefabs(worldSize / 5, random, heightMap);
         cavePrefabManager.SpawnCaveRooms(1000, random, heightMap);
+
+        yield return worldBuilder.SetMessage("Culterize surface prefabs...", _logToConsole: true);
+
         cavePrefabManager.AddSurfacePrefabs(PrefabManager.UsedPrefabsWorld);
 
         logger.Debug($"Prefab timer: {timer.ElapsedMilliseconds / 1000:F1}s");

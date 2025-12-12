@@ -11,7 +11,7 @@ public class WorldGenConsoleCmd : ConsoleCmdAbstract
 
     public override string[] getCommands()
     {
-        return new string[] { "worldgen" };
+        return new string[] { "worldgen", "cavegen" };
     }
 
     public override string getDescription()
@@ -27,7 +27,7 @@ public class WorldGenConsoleCmd : ConsoleCmdAbstract
 
         if (worldName == "")
         {
-            worldName = "Old Honihebu County";
+            worldName = "Pregen06k01";
         }
 
         GameManager.Instance.StartCoroutine(GenerateWorld(worldName));

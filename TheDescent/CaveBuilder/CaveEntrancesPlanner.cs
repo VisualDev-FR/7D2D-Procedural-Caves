@@ -64,6 +64,9 @@ public class CaveEntrancesPlanner
 
             if (terrainHeight < minDepth) continue;
 
+            if (CaveConfig.bedRockMargin > terrainHeight - minDepth)
+                continue;
+
             var entranceY = gameRandom.Next(CaveConfig.bedRockMargin, terrainHeight - minDepth);
             var entrancePosition = new Vector3i(center.x, entranceY, center.y);
 
