@@ -274,6 +274,12 @@ public class CaveMap
     public void SetRope(Vector3i position)
     {
         var hashZX = CaveBlock.HashZX(position.x + 1, position.z);
+
+        if (!rleLayers.ContainsKey(hashZX))
+        {
+            Logging.Error($"pos: [{position}], rleLayers: {rleLayers.Count}");
+        }
+
         var layers = rleLayers[hashZX];
         var layer = new RLELayer(0);
 

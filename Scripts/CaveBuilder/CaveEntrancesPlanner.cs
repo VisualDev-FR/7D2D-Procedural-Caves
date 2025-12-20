@@ -43,7 +43,7 @@ public class CaveEntrancesPlanner
             var entranceY = gameRandom.Next(CaveConfig.bedRockMargin, terrainHeight - minDepth);
             var entrancePosition = new Vector3i(center.x, entranceY, center.y);
 
-            if (WorldBuilder.GetWater(center.x, center.y) == 0)
+            if (WorldBuilder.data.GetWater(center.x, center.y) == 0)
             {
                 cavePrefabManager.AddNaturalEntrance(entrancePosition);
             }

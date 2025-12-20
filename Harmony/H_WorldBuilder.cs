@@ -1,6 +1,6 @@
-using System;
 using System.Collections;
 using HarmonyLib;
+using Unity.Collections;
 using WorldGenerationEngineFinal;
 
 
@@ -33,12 +33,12 @@ public static class WorldBuilder_GenerateData
 
         yield return worldBuilder.Init();
         yield return worldBuilder.SetMessage(string.Format(Localization.Get("xuiWorldGenerationGenerating"), worldBuilder.WorldName), _logToConsole: true);
-        yield return worldBuilder.generateTerrain();
+        yield return worldBuilder.GenerateTerrain();
 
         if (worldBuilder.IsCanceled)
             yield break;
 
-        worldBuilder.initStreetTiles();
+        worldBuilder.InitStreetTiles();
 
         caveBuilder = new CaveBuilder(worldBuilder);
 
@@ -58,7 +58,7 @@ public static class WorldBuilder_GenerateData
             worldBuilder.PrefabManager.ClearDisplayed();
         }
 
-        StoreHeightMaps(out float[] HeightMap, out float[] terrainDest, out float[] terrainWaterDest, out float[] waterDest);
+        StoreHeightMaps(out var HeightMap, out var waterDest);
         PatchHeightMaps();
 
         if (worldBuilder.Towns != 0)
@@ -66,7 +66,7 @@ public static class WorldBuilder_GenerateData
             yield return worldBuilder.TownPlanner.Plan(worldBuilder.thisWorldProperties, worldBuilder.Seed);
         }
 
-        ResetHeightMaps(HeightMap, terrainDest, terrainWaterDest, waterDest);
+        ResetHeightMaps(HeightMap, waterDest);
 
         yield return worldBuilder.GenerateTerrainLast();
 
@@ -121,7 +121,7 @@ public static class WorldBuilder_GenerateData
             }
         }
 
-		yield return GCUtils.UnloadAndCollectCo();
+        yield return GCUtils.UnloadAndCollectCo();
         yield return worldBuilder.SetMessage(Localization.Get("xuiRwgDrawRoads"), _logToConsole: true);
         yield return worldBuilder.DrawRoads(worldBuilder.roadDest);
 
@@ -134,12 +134,22 @@ public static class WorldBuilder_GenerateData
 
         yield return caveBuilder.GenerateCaveMap();
 
+        foreach (Path highwayPath in worldBuilder.highwayPaths)
+        {
+            highwayPath.Cleanup();
+        }
+
+        foreach (Path wildernessPath in worldBuilder.wildernessPaths)
+        {
+            wildernessPath.Cleanup();
+        }
+
         worldBuilder.highwayPaths.Clear();
         worldBuilder.wildernessPaths.Clear();
 
         yield return worldBuilder.FinalizeWater();
         yield return worldBuilder.SerializeData();
-		yield return GCUtils.UnloadAndCollectCo();
+        yield return GCUtils.UnloadAndCollectCo();
 
         Logging.Info("RWG final in {0}:{1:00}, r={2:x}", worldBuilder.totalMS.Elapsed.Minutes, worldBuilder.totalMS.Elapsed.Seconds, Rand.Instance.PeekSample());
 
@@ -162,41 +172,25 @@ public static class WorldBuilder_GenerateData
 
     private static void PatchHeightMaps()
     {
-        for (int i = 0; i < worldBuilder.HeightMap.Length; i++)
+        for (int i = 0; i < worldBuilder.data.HeightMap.Length; i++)
         {
-            worldBuilder.HeightMap[i] = ClampHeight(worldBuilder.HeightMap[i]);
+            worldBuilder.data.HeightMap[i] = ClampHeight(worldBuilder.data.HeightMap[i]);
         }
     }
 
-    private static void StoreHeightMaps(out float[] HeightMap, out float[] terrainDest, out float[] terrainWaterDest, out float[] waterDest)
+    private static void StoreHeightMaps(out NativeArray<float> HeightMap, out NativeArray<float> waterDest)
     {
-        var arraySizes = worldBuilder.HeightMap.Length;
+        HeightMap = new NativeArray<float>(worldBuilder.data.HeightMap.Length, Allocator.Persistent);
+        waterDest = new NativeArray<float>(worldBuilder.data.waterDest.Length, Allocator.Persistent);
 
-        HeightMap = new float[worldBuilder.HeightMap.Length];
-
-        // TODO: Try to remove those lines
-        waterDest = new float[worldBuilder.waterDest.Length];
-        terrainDest = new float[worldBuilder.terrainDest.Length];
-        terrainWaterDest = new float[worldBuilder.terrainWaterDest.Length];
-
-        Array.Copy(worldBuilder.HeightMap, HeightMap, arraySizes);
-
-        // TODO: Try to remove those lines
-        Array.Copy(worldBuilder.waterDest, waterDest, arraySizes);
-        Array.Copy(worldBuilder.terrainDest, terrainDest, arraySizes);
-        Array.Copy(worldBuilder.terrainWaterDest, terrainWaterDest, arraySizes);
+        worldBuilder.data.HeightMap.CopyTo(HeightMap);
+        worldBuilder.data.waterDest.CopyTo(waterDest);
     }
 
-    private static void ResetHeightMaps(float[] HeightMap, float[] terrainDest, float[] terrainWaterDest, float[] waterDest)
+    private static void ResetHeightMaps(NativeArray<float> HeightMap, NativeArray<float> waterDest)
     {
-        var arraySizes = worldBuilder.HeightMap.Length;
-
-        Array.Copy(HeightMap, worldBuilder.HeightMap, arraySizes);
-
-        // TODO: Try to remove those lines
-        Array.Copy(terrainDest, worldBuilder.terrainDest, arraySizes);
-        Array.Copy(terrainWaterDest, worldBuilder.terrainWaterDest, arraySizes);
-        Array.Copy(waterDest, worldBuilder.waterDest, arraySizes);
+        worldBuilder.data.HeightMap.CopyFrom(HeightMap);
+        worldBuilder.data.waterDest.CopyFrom(waterDest);
     }
 
     public static void SaveCaveMap()

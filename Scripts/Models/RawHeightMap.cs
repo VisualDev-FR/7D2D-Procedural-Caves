@@ -1,25 +1,29 @@
 using System.Linq;
 using System.Runtime.CompilerServices;
+using Unity.Collections;
 using WorldGenerationEngineFinal;
 
 public class RawHeightMap
 {
-    private readonly float[] heightMap;
+    private readonly NativeArray<float> heightMap;
 
     public readonly int worldSize;
 
     public RawHeightMap(WorldBuilder worldBuilder)
     {
-        heightMap = worldBuilder.HeightMap;
+        heightMap = worldBuilder.data.HeightMap;
         worldSize = worldBuilder.WorldSize;
     }
 
     public RawHeightMap(int _worldSize, float defaultHeight = 0)
     {
         worldSize = _worldSize;
-        heightMap = Enumerable
-            .Repeat(defaultHeight, worldSize * worldSize)
-            .ToArray();
+        heightMap = new NativeArray<float>(worldSize * worldSize, Allocator.Persistent);
+
+        for (int i = 0; i < heightMap.Length; i++)
+        {
+            heightMap[i] = defaultHeight;
+        }
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
