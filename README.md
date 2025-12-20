@@ -43,7 +43,7 @@ A standalone CLI runner is included to facilitate rapid iteration without the ov
 
 1.  **Clone & Navigate:**
     ```bash
-    git clone https://github.com/VisualDev-FR/7D2D-Procedural-Caves
+    git clone https://github.com/tmenant/7D2D-Procedural-Caves
     cd 7d2d-procedural-caves
     ```
 
