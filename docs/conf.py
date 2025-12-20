@@ -18,8 +18,8 @@
 # -- Project information -----------------------------------------------------
 
 project = "7D2D - The Descent"
-copyright = "2025, VisualDev-FR"
-author = "VisualDev"
+copyright = "2025, tmenant"
+author = "tmenant"
 
 
 # -- General configuration ---------------------------------------------------
